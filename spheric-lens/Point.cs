@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace SphericLens
+{
+    public class Point
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+
+        public Point() {
+            X = 0.0;
+            Y = 0.0;
+        }
+
+        public Point(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public static Point operator +(Point p, Vector v)
+        {
+            return new Point(p.X + v.X, p.Y + v.Y);
+        }
+
+        public static Point operator +(Vector v, Point p)
+        {
+            return p + v;
+        }
+
+    }
+}
