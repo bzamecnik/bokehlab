@@ -30,11 +30,9 @@
     {
         this.drawingPanel = new System.Windows.Forms.Panel();
         this.groupBox1 = new System.Windows.Forms.GroupBox();
-        this.rayDirectionYNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        this.rayDirectionXNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        this.rayOriginYNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        this.rayOriginXNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        this.label7 = new System.Windows.Forms.Label();
+        this.rayDirectionPhiNumericUpDown = new System.Windows.Forms.NumericUpDown();
+        this.rayOriginPhiNumericUpDown = new System.Windows.Forms.NumericUpDown();
+        this.rayOriginRadiusNumericUpDown = new System.Windows.Forms.NumericUpDown();
         this.sphereRadiusNumericUpDown = new System.Windows.Forms.NumericUpDown();
         this.label5 = new System.Windows.Forms.Label();
         this.label6 = new System.Windows.Forms.Label();
@@ -43,10 +41,9 @@
         this.label3 = new System.Windows.Forms.Label();
         this.label1 = new System.Windows.Forms.Label();
         this.groupBox1.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)(this.rayDirectionYNumericUpDown)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayDirectionXNumericUpDown)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginYNumericUpDown)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginXNumericUpDown)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumericUpDown)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.rayOriginPhiNumericUpDown)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.rayOriginRadiusNumericUpDown)).BeginInit();
         ((System.ComponentModel.ISupportInitialize)(this.sphereRadiusNumericUpDown)).BeginInit();
         this.SuspendLayout();
         // 
@@ -60,11 +57,9 @@
         // 
         // groupBox1
         // 
-        this.groupBox1.Controls.Add(this.rayDirectionYNumericUpDown);
-        this.groupBox1.Controls.Add(this.rayDirectionXNumericUpDown);
-        this.groupBox1.Controls.Add(this.rayOriginYNumericUpDown);
-        this.groupBox1.Controls.Add(this.rayOriginXNumericUpDown);
-        this.groupBox1.Controls.Add(this.label7);
+        this.groupBox1.Controls.Add(this.rayDirectionPhiNumericUpDown);
+        this.groupBox1.Controls.Add(this.rayOriginPhiNumericUpDown);
+        this.groupBox1.Controls.Add(this.rayOriginRadiusNumericUpDown);
         this.groupBox1.Controls.Add(this.sphereRadiusNumericUpDown);
         this.groupBox1.Controls.Add(this.label5);
         this.groupBox1.Controls.Add(this.label6);
@@ -79,90 +74,57 @@
         this.groupBox1.TabStop = false;
         this.groupBox1.Text = "Controls";
         // 
-        // rayDirectionYNumericUpDown
+        // rayDirectionPhiNumericUpDown
         // 
-        this.rayDirectionYNumericUpDown.DecimalPlaces = 1;
-        this.rayDirectionYNumericUpDown.Location = new System.Drawing.Point(76, 172);
-        this.rayDirectionYNumericUpDown.Maximum = new decimal(new int[] {
+        this.rayDirectionPhiNumericUpDown.DecimalPlaces = 2;
+        this.rayDirectionPhiNumericUpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+        this.rayDirectionPhiNumericUpDown.Location = new System.Drawing.Point(97, 146);
+        this.rayDirectionPhiNumericUpDown.Maximum = new decimal(new int[] {
+            628318,
+            0,
+            0,
+            327680});
+        this.rayDirectionPhiNumericUpDown.Name = "rayDirectionPhiNumericUpDown";
+        this.rayDirectionPhiNumericUpDown.Size = new System.Drawing.Size(89, 20);
+        this.rayDirectionPhiNumericUpDown.TabIndex = 2;
+        this.rayDirectionPhiNumericUpDown.ValueChanged += new System.EventHandler(this.rayDirectionPhiNumericUpDown_ValueChanged);
+        // 
+        // rayOriginPhiNumericUpDown
+        // 
+        this.rayOriginPhiNumericUpDown.DecimalPlaces = 2;
+        this.rayOriginPhiNumericUpDown.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+        this.rayOriginPhiNumericUpDown.Location = new System.Drawing.Point(97, 107);
+        this.rayOriginPhiNumericUpDown.Maximum = new decimal(new int[] {
+            628318,
+            0,
+            0,
+            327680});
+        this.rayOriginPhiNumericUpDown.Name = "rayOriginPhiNumericUpDown";
+        this.rayOriginPhiNumericUpDown.Size = new System.Drawing.Size(89, 20);
+        this.rayOriginPhiNumericUpDown.TabIndex = 2;
+        this.rayOriginPhiNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginPhiNumericUpDown_ValueChanged);
+        // 
+        // rayOriginRadiusNumericUpDown
+        // 
+        this.rayOriginRadiusNumericUpDown.DecimalPlaces = 1;
+        this.rayOriginRadiusNumericUpDown.Location = new System.Drawing.Point(97, 81);
+        this.rayOriginRadiusNumericUpDown.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
-        this.rayDirectionYNumericUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-        this.rayDirectionYNumericUpDown.Name = "rayDirectionYNumericUpDown";
-        this.rayDirectionYNumericUpDown.Size = new System.Drawing.Size(110, 20);
-        this.rayDirectionYNumericUpDown.TabIndex = 2;
-        this.rayDirectionYNumericUpDown.ValueChanged += new System.EventHandler(this.rayDirectionYNumericUpDown_ValueChanged);
-        // 
-        // rayDirectionXNumericUpDown
-        // 
-        this.rayDirectionXNumericUpDown.DecimalPlaces = 1;
-        this.rayDirectionXNumericUpDown.Location = new System.Drawing.Point(76, 146);
-        this.rayDirectionXNumericUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-        this.rayDirectionXNumericUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-        this.rayDirectionXNumericUpDown.Name = "rayDirectionXNumericUpDown";
-        this.rayDirectionXNumericUpDown.Size = new System.Drawing.Size(110, 20);
-        this.rayDirectionXNumericUpDown.TabIndex = 2;
-        this.rayDirectionXNumericUpDown.ValueChanged += new System.EventHandler(this.rayDirectionXNumericUpDown_ValueChanged);
-        // 
-        // rayOriginYNumericUpDown
-        // 
-        this.rayOriginYNumericUpDown.DecimalPlaces = 1;
-        this.rayOriginYNumericUpDown.Location = new System.Drawing.Point(76, 107);
-        this.rayOriginYNumericUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-        this.rayOriginYNumericUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-        this.rayOriginYNumericUpDown.Name = "rayOriginYNumericUpDown";
-        this.rayOriginYNumericUpDown.Size = new System.Drawing.Size(110, 20);
-        this.rayOriginYNumericUpDown.TabIndex = 2;
-        this.rayOriginYNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginYNumericUpDown_ValueChanged);
-        // 
-        // rayOriginXNumericUpDown
-        // 
-        this.rayOriginXNumericUpDown.DecimalPlaces = 1;
-        this.rayOriginXNumericUpDown.Location = new System.Drawing.Point(76, 81);
-        this.rayOriginXNumericUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-        this.rayOriginXNumericUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-        this.rayOriginXNumericUpDown.Name = "rayOriginXNumericUpDown";
-        this.rayOriginXNumericUpDown.Size = new System.Drawing.Size(110, 20);
-        this.rayOriginXNumericUpDown.TabIndex = 2;
-        this.rayOriginXNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginXNumericUpDown_ValueChanged);
-        // 
-        // label7
-        // 
-        this.label7.AutoSize = true;
-        this.label7.Location = new System.Drawing.Point(8, 174);
-        this.label7.Name = "label7";
-        this.label7.Size = new System.Drawing.Size(62, 13);
-        this.label7.TabIndex = 1;
-        this.label7.Text = "Direction Y:";
+        this.rayOriginRadiusNumericUpDown.Name = "rayOriginRadiusNumericUpDown";
+        this.rayOriginRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
+        this.rayOriginRadiusNumericUpDown.TabIndex = 2;
+        this.rayOriginRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginRadiusNumericUpDown_ValueChanged);
         // 
         // sphereRadiusNumericUpDown
         // 
@@ -172,43 +134,43 @@
             0,
             0,
             0});
-        this.sphereRadiusNumericUpDown.Location = new System.Drawing.Point(76, 41);
+        this.sphereRadiusNumericUpDown.Location = new System.Drawing.Point(97, 41);
         this.sphereRadiusNumericUpDown.Maximum = new decimal(new int[] {
             1000,
             0,
             0,
             0});
         this.sphereRadiusNumericUpDown.Name = "sphereRadiusNumericUpDown";
-        this.sphereRadiusNumericUpDown.Size = new System.Drawing.Size(110, 20);
+        this.sphereRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
         this.sphereRadiusNumericUpDown.TabIndex = 2;
         this.sphereRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.sphereRadiusNumericUpDown_ValueChanged);
         // 
         // label5
         // 
         this.label5.AutoSize = true;
-        this.label5.Location = new System.Drawing.Point(8, 148);
+        this.label5.Location = new System.Drawing.Point(7, 148);
         this.label5.Name = "label5";
-        this.label5.Size = new System.Drawing.Size(62, 13);
+        this.label5.Size = new System.Drawing.Size(70, 13);
         this.label5.TabIndex = 1;
-        this.label5.Text = "Direction X:";
+        this.label5.Text = "Direction Phi:";
         // 
         // label6
         // 
         this.label6.AutoSize = true;
         this.label6.Location = new System.Drawing.Point(8, 109);
         this.label6.Name = "label6";
-        this.label6.Size = new System.Drawing.Size(47, 13);
+        this.label6.Size = new System.Drawing.Size(55, 13);
         this.label6.TabIndex = 1;
-        this.label6.Text = "Origin Y:";
+        this.label6.Text = "Origin Phi:";
         // 
         // label4
         // 
         this.label4.AutoSize = true;
-        this.label4.Location = new System.Drawing.Point(8, 88);
+        this.label4.Location = new System.Drawing.Point(8, 83);
         this.label4.Name = "label4";
-        this.label4.Size = new System.Drawing.Size(47, 13);
+        this.label4.Size = new System.Drawing.Size(48, 13);
         this.label4.TabIndex = 1;
-        this.label4.Text = "Origin X:";
+        this.label4.Text = "Origin R:";
         // 
         // label2
         // 
@@ -252,10 +214,9 @@
         this.Text = "Lens";
         this.groupBox1.ResumeLayout(false);
         this.groupBox1.PerformLayout();
-        ((System.ComponentModel.ISupportInitialize)(this.rayDirectionYNumericUpDown)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayDirectionXNumericUpDown)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginYNumericUpDown)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginXNumericUpDown)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumericUpDown)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.rayOriginPhiNumericUpDown)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.rayOriginRadiusNumericUpDown)).EndInit();
         ((System.ComponentModel.ISupportInitialize)(this.sphereRadiusNumericUpDown)).EndInit();
         this.ResumeLayout(false);
 
@@ -270,13 +231,11 @@
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;
     private System.Windows.Forms.Label label1;
-    private System.Windows.Forms.NumericUpDown rayDirectionXNumericUpDown;
-    private System.Windows.Forms.NumericUpDown rayOriginXNumericUpDown;
+    private System.Windows.Forms.NumericUpDown rayDirectionPhiNumericUpDown;
+    private System.Windows.Forms.NumericUpDown rayOriginRadiusNumericUpDown;
     private System.Windows.Forms.NumericUpDown sphereRadiusNumericUpDown;
-    private System.Windows.Forms.NumericUpDown rayOriginYNumericUpDown;
+    private System.Windows.Forms.NumericUpDown rayOriginPhiNumericUpDown;
     private System.Windows.Forms.Label label6;
-    private System.Windows.Forms.NumericUpDown rayDirectionYNumericUpDown;
-    private System.Windows.Forms.Label label7;
 
   }
 }

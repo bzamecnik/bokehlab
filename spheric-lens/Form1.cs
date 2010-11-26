@@ -17,7 +17,7 @@ namespace SphericLensGUI
     {
       Bench = new SphericLens.OpticalBench();
       Bench.Sphere.Radius = 100.0;
-      Bench.Ray = new SphericLens.Ray(new SphericLens.Point(-20, 0), new SphericLens.Vector(10, 5));
+      Bench.Ray = new SphericLens.Ray(new SphericLens.Point(150, 0), new SphericLens.Vector(-20, 0));
       InitializeComponent();
       //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);
     }
@@ -51,7 +51,7 @@ namespace SphericLensGUI
             g.DrawLine(Pens.Brown, new Point(), SphericPointToFormsPoint(Bench.Intersection));
 
             // draw refracted ray
-            g.DrawLine(Pens.Yellow,
+            g.DrawLine(Pens.Tomato,
                 SphericPointToFormsPoint(Bench.RefractedRay.Origin),
                 SphericPointToFormsPoint(Bench.RefractedRay.Evaluate(100)));
 
@@ -90,27 +90,27 @@ namespace SphericLensGUI
           updateBench();
       }
 
-      private void rayOriginXNumericUpDown_ValueChanged(object sender, EventArgs e)
+      private void rayOriginRadiusNumericUpDown_ValueChanged(object sender, EventArgs e)
       {
-          Bench.Ray.Origin.X = (double)rayOriginXNumericUpDown.Value;
+          SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.Ray.Origin);
+          originAsVector.Radius = (double)rayOriginRadiusNumericUpDown.Value;
+          Bench.Ray.Origin.X = originAsVector.X;
+          Bench.Ray.Origin.Y = originAsVector.Y;
           updateBench();
       }
 
-      private void rayOriginYNumericUpDown_ValueChanged(object sender, EventArgs e)
+      private void rayOriginPhiNumericUpDown_ValueChanged(object sender, EventArgs e)
       {
-          Bench.Ray.Origin.Y = (double)rayOriginYNumericUpDown.Value;
+          SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.Ray.Origin);
+          originAsVector.Phi = (double)rayOriginPhiNumericUpDown.Value;
+          Bench.Ray.Origin.X = originAsVector.X;
+          Bench.Ray.Origin.Y = originAsVector.Y;
           updateBench();
       }
 
-      private void rayDirectionXNumericUpDown_ValueChanged(object sender, EventArgs e)
+      private void rayDirectionPhiNumericUpDown_ValueChanged(object sender, EventArgs e)
       {
-          Bench.Ray.Direction.X = (double)rayDirectionXNumericUpDown.Value;
-          updateBench();
-      }
-
-      private void rayDirectionYNumericUpDown_ValueChanged(object sender, EventArgs e)
-      {
-          Bench.Ray.Direction.Y = (double)rayDirectionYNumericUpDown.Value;
+          Bench.Ray.Direction.Phi = (double)rayDirectionPhiNumericUpDown.Value;
           updateBench();
       }
   }

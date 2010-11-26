@@ -59,7 +59,7 @@ namespace SphericLens
             {
                 Vector normal = -Vector.FromPoint(Intersection);
                 double eta = RefractiveIndexGlass / RefractiveIndexAir;
-                RefractedRay = new Ray(Intersection, Vector.refract(Ray.Direction, normal, eta));
+                RefractedRay = new Ray(Intersection, normal + Vector.refract(Ray.Direction, normal, eta));
             }
             else
             {

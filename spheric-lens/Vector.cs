@@ -7,12 +7,21 @@ namespace SphericLens
 {
     public class Vector
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        private double x;
+        public double X { get { return x; } set { x = value; ToPolar(); } }
+        private double y;
+        public double Y { get { return y; } set { y = value; ToPolar(); } }
+
+        private double phi;
+        public double Phi { get { return phi; } set { phi = value; FromPolar(); } }
+        private double radius;
+        public double Radius { get { return radius; } set { radius = value; FromPolar(); } }
 
         public Vector() {
             X = 0.0;
             Y = 0.0;
+            Phi = 0.0;
+            Radius = 0.0;
         }
 
         public Vector(double x, double y)
@@ -66,6 +75,22 @@ namespace SphericLens
             double cosBeta2 = 1.0 - eta * eta * (1.0 - cosAlpha * cosAlpha);
             Vector refracted = eta * incident + ((eta * cosAlpha - Math.Sqrt(Math.Abs(cosBeta2))) * normal);
             return (cosBeta2 > 0) ? refracted : -refracted;
+        }
+
+        private void ToPolar() {
+            double p = Math.Atan2(Y, X);
+            phi = (phi < 0.0) ? (phi + 2.0 * Math.PI) : phi;
+            radius = Math.Sqrt(Y * Y + X * X);
+        }
+
+        private void FromPolar()
+        {
+            x = radius * Math.Cos(phi);
+            y = radius * Math.Sin(phi);
+        }
+
+        public static Vector FromPolar(double phi, double radius) {
+            return new Vector(radius * Math.Cos(phi), radius * Math.Sin(phi));
         }
     }
 }
