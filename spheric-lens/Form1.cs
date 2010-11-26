@@ -34,10 +34,14 @@ namespace SphericLensGUI
 
         // draw X axis
         g.DrawLine(Pens.Black, -panelHalfWidth, 0, panelHalfWidth, 0);
-        
+
         // draw Y axis
         g.DrawLine(Pens.Black, 0, -panelHalfWidth, 0, panelHalfWidth);
 
+        PaintSphericBench(g);
+    }
+
+    private void PaintSphericBench(Graphics g) {
         // draw a circlular lens
         DrawCircle(g, Pens.Blue, new Point(), (float)Bench.Sphere.Radius);
 
