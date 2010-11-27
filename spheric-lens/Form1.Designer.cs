@@ -31,20 +31,10 @@
         this.drawingPanel = new System.Windows.Forms.Panel();
         this.groupBox1 = new System.Windows.Forms.GroupBox();
         this.rayDirectionPhiNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        this.rayOriginPhiNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        this.rayOriginRadiusNumericUpDown = new System.Windows.Forms.NumericUpDown();
-        this.sphereRadiusNumericUpDown = new System.Windows.Forms.NumericUpDown();
         this.label5 = new System.Windows.Forms.Label();
-        this.label6 = new System.Windows.Forms.Label();
-        this.label4 = new System.Windows.Forms.Label();
-        this.label2 = new System.Windows.Forms.Label();
         this.label3 = new System.Windows.Forms.Label();
-        this.label1 = new System.Windows.Forms.Label();
         this.groupBox1.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumericUpDown)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginPhiNumericUpDown)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginRadiusNumericUpDown)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.sphereRadiusNumericUpDown)).BeginInit();
         this.SuspendLayout();
         // 
         // drawingPanel
@@ -58,15 +48,8 @@
         // groupBox1
         // 
         this.groupBox1.Controls.Add(this.rayDirectionPhiNumericUpDown);
-        this.groupBox1.Controls.Add(this.rayOriginPhiNumericUpDown);
-        this.groupBox1.Controls.Add(this.rayOriginRadiusNumericUpDown);
-        this.groupBox1.Controls.Add(this.sphereRadiusNumericUpDown);
         this.groupBox1.Controls.Add(this.label5);
-        this.groupBox1.Controls.Add(this.label6);
-        this.groupBox1.Controls.Add(this.label4);
-        this.groupBox1.Controls.Add(this.label2);
         this.groupBox1.Controls.Add(this.label3);
-        this.groupBox1.Controls.Add(this.label1);
         this.groupBox1.Location = new System.Drawing.Point(598, 12);
         this.groupBox1.Name = "groupBox1";
         this.groupBox1.Size = new System.Drawing.Size(200, 422);
@@ -82,7 +65,7 @@
             0,
             0,
             131072});
-        this.rayDirectionPhiNumericUpDown.Location = new System.Drawing.Point(97, 146);
+        this.rayDirectionPhiNumericUpDown.Location = new System.Drawing.Point(96, 55);
         this.rayDirectionPhiNumericUpDown.Maximum = new decimal(new int[] {
             628318,
             0,
@@ -93,113 +76,24 @@
         this.rayDirectionPhiNumericUpDown.TabIndex = 2;
         this.rayDirectionPhiNumericUpDown.ValueChanged += new System.EventHandler(this.rayDirectionPhiNumericUpDown_ValueChanged);
         // 
-        // rayOriginPhiNumericUpDown
-        // 
-        this.rayOriginPhiNumericUpDown.DecimalPlaces = 2;
-        this.rayOriginPhiNumericUpDown.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-        this.rayOriginPhiNumericUpDown.Location = new System.Drawing.Point(97, 107);
-        this.rayOriginPhiNumericUpDown.Maximum = new decimal(new int[] {
-            628318,
-            0,
-            0,
-            327680});
-        this.rayOriginPhiNumericUpDown.Name = "rayOriginPhiNumericUpDown";
-        this.rayOriginPhiNumericUpDown.Size = new System.Drawing.Size(89, 20);
-        this.rayOriginPhiNumericUpDown.TabIndex = 2;
-        this.rayOriginPhiNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginPhiNumericUpDown_ValueChanged);
-        // 
-        // rayOriginRadiusNumericUpDown
-        // 
-        this.rayOriginRadiusNumericUpDown.DecimalPlaces = 1;
-        this.rayOriginRadiusNumericUpDown.Location = new System.Drawing.Point(97, 81);
-        this.rayOriginRadiusNumericUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-        this.rayOriginRadiusNumericUpDown.Name = "rayOriginRadiusNumericUpDown";
-        this.rayOriginRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
-        this.rayOriginRadiusNumericUpDown.TabIndex = 2;
-        this.rayOriginRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginRadiusNumericUpDown_ValueChanged);
-        // 
-        // sphereRadiusNumericUpDown
-        // 
-        this.sphereRadiusNumericUpDown.DecimalPlaces = 1;
-        this.sphereRadiusNumericUpDown.Increment = new decimal(new int[] {
-            2,
-            0,
-            0,
-            0});
-        this.sphereRadiusNumericUpDown.Location = new System.Drawing.Point(97, 41);
-        this.sphereRadiusNumericUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-        this.sphereRadiusNumericUpDown.Name = "sphereRadiusNumericUpDown";
-        this.sphereRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
-        this.sphereRadiusNumericUpDown.TabIndex = 2;
-        this.sphereRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.sphereRadiusNumericUpDown_ValueChanged);
-        // 
         // label5
         // 
         this.label5.AutoSize = true;
-        this.label5.Location = new System.Drawing.Point(7, 148);
+        this.label5.Location = new System.Drawing.Point(6, 57);
         this.label5.Name = "label5";
         this.label5.Size = new System.Drawing.Size(70, 13);
         this.label5.TabIndex = 1;
         this.label5.Text = "Direction Phi:";
         // 
-        // label6
-        // 
-        this.label6.AutoSize = true;
-        this.label6.Location = new System.Drawing.Point(8, 109);
-        this.label6.Name = "label6";
-        this.label6.Size = new System.Drawing.Size(55, 13);
-        this.label6.TabIndex = 1;
-        this.label6.Text = "Origin Phi:";
-        // 
-        // label4
-        // 
-        this.label4.AutoSize = true;
-        this.label4.Location = new System.Drawing.Point(8, 83);
-        this.label4.Name = "label4";
-        this.label4.Size = new System.Drawing.Size(48, 13);
-        this.label4.TabIndex = 1;
-        this.label4.Text = "Origin R:";
-        // 
-        // label2
-        // 
-        this.label2.AutoSize = true;
-        this.label2.Location = new System.Drawing.Point(8, 43);
-        this.label2.Name = "label2";
-        this.label2.Size = new System.Drawing.Size(43, 13);
-        this.label2.TabIndex = 1;
-        this.label2.Text = "Radius:";
-        // 
         // label3
         // 
         this.label3.AutoSize = true;
         this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-        this.label3.Location = new System.Drawing.Point(8, 63);
+        this.label3.Location = new System.Drawing.Point(6, 30);
         this.label3.Name = "label3";
         this.label3.Size = new System.Drawing.Size(33, 13);
         this.label3.TabIndex = 1;
         this.label3.Text = "Ray:";
-        // 
-        // label1
-        // 
-        this.label1.AutoSize = true;
-        this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-        this.label1.Location = new System.Drawing.Point(7, 20);
-        this.label1.Name = "label1";
-        this.label1.Size = new System.Drawing.Size(51, 13);
-        this.label1.TabIndex = 1;
-        this.label1.Text = "Sphere:";
         // 
         // Form1
         // 
@@ -215,9 +109,6 @@
         this.groupBox1.ResumeLayout(false);
         this.groupBox1.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumericUpDown)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginPhiNumericUpDown)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.rayOriginRadiusNumericUpDown)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.sphereRadiusNumericUpDown)).EndInit();
         this.ResumeLayout(false);
 
     }
@@ -227,15 +118,8 @@
     private System.Windows.Forms.Panel drawingPanel;
     private System.Windows.Forms.GroupBox groupBox1;
     private System.Windows.Forms.Label label5;
-    private System.Windows.Forms.Label label4;
-    private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label label3;
-    private System.Windows.Forms.Label label1;
     private System.Windows.Forms.NumericUpDown rayDirectionPhiNumericUpDown;
-    private System.Windows.Forms.NumericUpDown rayOriginRadiusNumericUpDown;
-    private System.Windows.Forms.NumericUpDown sphereRadiusNumericUpDown;
-    private System.Windows.Forms.NumericUpDown rayOriginPhiNumericUpDown;
-    private System.Windows.Forms.Label label6;
 
   }
 }

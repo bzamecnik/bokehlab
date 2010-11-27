@@ -7,64 +7,38 @@ namespace SphericLens
 {
     public class OpticalBench
     {
-        Ray ray = new Ray();
-        public Ray Ray
+        Vector direction = new Vector(0.0, -1.0);
+        public Vector Direction
         {
-            get { return ray; }
+            get { return direction; }
             set {
-                ray = value;
+                direction = value;
                 Update();
             }
         }
 
-        Sphere sphere = new Sphere();
-        public Sphere Sphere
-        {
-            get { return sphere; }
-            set
-            {
-                sphere = value;
-                Update();
-            }
-        }
-
-        public Point Intersection { get; private set; }
-        public bool RayIntersects { get; private set; }
-        public Ray RefractedRay { get; private set; }
+        public Vector RefractedDirection { get; private set; }
 
         public double RefractiveIndexGlass { get; set; }
         public double RefractiveIndexAir { get; set; }
 
         public OpticalBench()
         {
-            //RefractiveIndexGlass = 1.52; // crown glass
-            RefractiveIndexGlass = 2.0; // crown glass
+            RefractiveIndexGlass = 1.52; // crown glass
             RefractiveIndexAir = 1.00029;
+
+            RefractedDirection = direction;
         }
 
         public void Update() {
-            ComputeIntersection();
             ComputeRefractedRay();
-        }
-
-        private void ComputeIntersection() {
-            Point intersection;
-            RayIntersects = Sphere.IntersectRay(Ray, out intersection);
-            Intersection = intersection;
         }
 
         private void ComputeRefractedRay()
         {
-            if (RayIntersects)
-            {
-                Vector normal = -Vector.FromPoint(Intersection);
-                double eta = RefractiveIndexGlass / RefractiveIndexAir;
-                RefractedRay = new Ray(Intersection, normal + Vector.refract(Ray.Direction, normal, eta));
-            }
-            else
-            {
-                RefractedRay = new Ray();
-            }
+            Vector normal = new Vector(0.0, -100.0);
+            double eta = RefractiveIndexAir / RefractiveIndexGlass;
+            RefractedDirection = Vector.refract(Direction, normal, eta);
         }
     }
 }

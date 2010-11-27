@@ -17,11 +17,11 @@ namespace SphericLens
         private double radius;
         public double Radius { get { return radius; } set { radius = value; FromPolar(); } }
 
+        public double Length {get {return Radius;}}
+
         public Vector() {
             X = 0.0;
             Y = 0.0;
-            Phi = 0.0;
-            Radius = 0.0;
         }
 
         public Vector(double x, double y)
@@ -53,8 +53,17 @@ namespace SphericLens
             return new Vector(-v.X, -v.Y);
         }
 
+        public static Vector operator /(Vector v, double d)
+        {
+            return new Vector(v.X / d, v.Y / d);
+        }
+
         public static double Dot(Vector v1, Vector v2) {
             return v1.X * v2.X + v1.Y * v2.Y;
+        }
+
+        public Vector Normalize() {
+            return this / Length;
         }
 
         /// <summary>
@@ -71,10 +80,13 @@ namespace SphericLens
         {
             // alpha = incident angle (incident vector to normal)
             // beta = refracted angle (refracted vector to normal)
-            double cosAlpha = Dot(-incident, normal);
-            double cosBeta2 = 1.0 - eta * eta * (1.0 - cosAlpha * cosAlpha);
-            Vector refracted = eta * incident + ((eta * cosAlpha - Math.Sqrt(Math.Abs(cosBeta2))) * normal);
-            return (cosBeta2 > 0) ? refracted : -refracted;
+            double criticalAngle = (eta > 1.0) ? Math.PI + Math.Asin(1 / eta) : Math.Asin(eta);
+            double alpha = incident.Phi - normal.Phi;
+            //// not total internal reflection ? refract : reflect
+            double beta = (alpha > criticalAngle) ? Math.Asin(eta * Math.Sin(alpha)) : -alpha;
+            Vector refracted = normal;
+            refracted.Phi += beta;
+            return refracted;
         }
 
         private void ToPolar() {
