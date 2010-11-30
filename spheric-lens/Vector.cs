@@ -34,6 +34,11 @@ namespace SphericLens
             return new Vector(point.X, point.Y);
         }
 
+        public static Vector FromPolar(double phi, double radius)
+        {
+            return new Vector(radius * Math.Cos(phi), radius * Math.Sin(phi));
+        }
+
         public static Vector operator + (Vector p1, Vector p2) {
             return new Vector(p1.X + p2.X, p1.Y + p2.Y);
         }
@@ -45,7 +50,7 @@ namespace SphericLens
 
         public static Vector operator *(Vector v, double t)
         {
-            return v * t;
+            return t * v;
         }
 
         public static Vector operator -(Vector v)
@@ -63,35 +68,67 @@ namespace SphericLens
         }
 
         public Vector Normalize() {
-            return this / Length;
+            return Vector.FromPolar(Phi, 1.0);
         }
 
         /// <summary>
         /// Refract a ray on a border of different optical environments.
         /// </summary>
         /// <remarks>
-        /// Source optical environment's index of refraction is n_1.
-        /// Destinations's one is n_2.
-        /// A total internal reflection can occur.
+        /// In case of total internal reflection a zero vector is returned.
+        /// 
+        /// The code is based on the PBRT implementation.
         /// </remarks>
-        /// <param name="eta">the ratio of indices of refraction n_1 / n_2</param>
+        /// <param name="incident">incident vector in the world coordinates</param>
+        /// <param name="normal">normal vector pointing outside the surface</param>
+        /// <param name="etaI">index of refraction of the outer medium</param>
+        /// <param name="etaT">index of refraction of the inner medium</param>
         /// <returns></returns>
-        public static Vector refract(Vector incident, Vector normal, double eta)
+        public static Vector refract(Vector incident, Vector normal, double etaI, double etaT)
         {
+            Vector incidentNormalized = incident.Normalize();
+
+            // transform incident vector to the local coordinates with normal = (0, 1)
+            double transformToLocalPhi = 0.5 * Math.PI - normal.Phi;
+            incidentNormalized.Phi += transformToLocalPhi;
+
             // alpha = incident angle (incident vector to normal)
             // beta = refracted angle (refracted vector to normal)
-            double criticalAngle = (eta > 1.0) ? Math.PI + Math.Asin(1 / eta) : Math.Asin(eta);
-            double alpha = incident.Phi - normal.Phi;
-            //// not total internal reflection ? refract : reflect
-            double beta = (alpha > criticalAngle) ? Math.Asin(eta * Math.Sin(alpha)) : -alpha;
-            Vector refracted = normal;
-            refracted.Phi += beta;
+            double cosi = incidentNormalized.Y;
+            bool entering = cosi > 0.0;
+
+            // swap the indices of the ray is going from inside the surface
+            double ei = entering ? etaI : etaT;
+            double et = entering ? etaT : etaI;
+
+            double sini2 = Math.Max(0.0, 1.0 - incidentNormalized.Y * incidentNormalized.Y);
+            double eta = ei / et;
+            double sint2 = eta * eta * sini2;
+
+            // total internal reflection - return a dummy vector
+            if (sint2 >= 1.0)
+            {
+                return new Vector(0.0, 0.0);
+            }
+
+            // compute the refraction vector
+            double cost = Math.Sqrt(Math.Max(0.0, 1.0 - sint2));
+            if (entering)
+            {
+                cost = -cost;
+            }
+            double sintOverSini = eta;
+            Vector refracted = new Vector(sintOverSini * -incidentNormalized.X, cost);
+            
+            // transform back from the local coordinates
+            refracted.Phi -= transformToLocalPhi;
+            
             return refracted;
         }
 
         private void ToPolar() {
             double p = Math.Atan2(Y, X);
-            phi = (phi < 0.0) ? (phi + 2.0 * Math.PI) : phi;
+            phi = (p < 0.0) ? (p + 2.0 * Math.PI) : p;
             radius = Math.Sqrt(Y * Y + X * X);
         }
 
@@ -99,10 +136,6 @@ namespace SphericLens
         {
             x = radius * Math.Cos(phi);
             y = radius * Math.Sin(phi);
-        }
-
-        public static Vector FromPolar(double phi, double radius) {
-            return new Vector(radius * Math.Cos(phi), radius * Math.Sin(phi));
         }
     }
 }

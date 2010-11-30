@@ -30,6 +30,7 @@ namespace SphericLensGUI
         float panelHalfWidth = e.ClipRectangle.Width / 2.0f;
         float panelHalfHeight = e.ClipRectangle.Height / 2.0f;
         g.TranslateTransform(panelHalfWidth, panelHalfHeight);
+        g.ScaleTransform(1.0f, -1.0f);
 
         //// draw X axis
         //g.DrawLine(Pens.Black, -panelHalfWidth, 0, panelHalfWidth, 0);
@@ -52,8 +53,10 @@ namespace SphericLensGUI
         double eta = Bench.RefractiveIndexAir / Bench.RefractiveIndexGlass;
         double criticalAngle = (eta > 1.0) ? Math.PI + Math.Asin(1 / eta) : Math.Asin(eta);
         SphericLens.Vector criticalAngleVector = new SphericLens.Vector() { Phi = criticalAngle, Radius = radius };
-        Point criticalAnglePoint = SphericPointToFormsPoint(SphericLens.Point.FromVector(criticalAngleVector));
-        g.DrawLine(Pens.Brown, new Point(), criticalAnglePoint);
+        Point criticalAnglePoint = SphericPointToFormsPoint(SphericLens.Point.FromVector(-criticalAngleVector));
+        g.DrawLine(Pens.Red, new Point(), criticalAnglePoint);
+        criticalAnglePoint.X *= -1;
+        g.DrawLine(Pens.Red, new Point(), criticalAnglePoint);
 
         // draw the normal
         g.DrawLine(Pens.Brown, new Point(), new Point(0, radius));
@@ -62,7 +65,7 @@ namespace SphericLensGUI
         g.DrawLine(Pens.Green, new Point(), SphericPointToFormsPoint(SphericLens.Point.FromVector(Bench.Direction)));
 
         // draw the refracted ray
-        g.DrawLine(Pens.Tomato, new Point(), SphericPointToFormsPoint(SphericLens.Point.FromVector(Bench.RefractedDirection)));
+        g.DrawLine(Pens.Blue, new Point(), SphericPointToFormsPoint(SphericLens.Point.FromVector(Bench.RefractedDirection)));
     }
 
       private Point SphericPointToFormsPoint(SphericLens.Point point) {

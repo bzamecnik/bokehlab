@@ -36,9 +36,9 @@ namespace SphericLens
 
         private void ComputeRefractedRay()
         {
-            Vector normal = new Vector(0.0, -100.0);
-            double eta = RefractiveIndexAir / RefractiveIndexGlass;
-            RefractedDirection = Vector.refract(Direction, normal, eta);
+            Vector normal = new Vector(0.0, 100.0);
+            RefractedDirection = Vector.refract(Direction, normal, RefractiveIndexAir, RefractiveIndexGlass);
+            RefractedDirection *= Direction.Length;
         }
     }
 }
