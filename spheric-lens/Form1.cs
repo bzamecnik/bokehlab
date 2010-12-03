@@ -12,14 +12,14 @@ namespace SphericLensGUI
   public partial class Form1 : Form
   {
       public SphericLens.OpticalBench Bench;
+      double circleRadius = 100.0;
 
     public Form1 ()
     {
-      Bench = new SphericLens.OpticalBench();
-      Bench.Sphere.Radius = 100.0;
-      Bench.Ray = new SphericLens.Ray(new SphericLens.Point(150, 0), new SphericLens.Vector(-20, 0));
-      InitializeComponent();
-      //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);
+        Bench = new SphericLens.OpticalBench();
+        Bench.Direction = new SphericLens.Vector(0.0, circleRadius);
+        InitializeComponent();
+        //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);
     }
 
     private void drawingPanel_Paint(object sender, PaintEventArgs e)
@@ -31,42 +31,42 @@ namespace SphericLensGUI
         float panelHalfWidth = e.ClipRectangle.Width / 2.0f;
         float panelHalfHeight = e.ClipRectangle.Height / 2.0f;
         g.TranslateTransform(panelHalfWidth, panelHalfHeight);
+        g.ScaleTransform(1.0f, -1.0f);
 
-        // draw X axis
-        g.DrawLine(Pens.Black, -panelHalfWidth, 0, panelHalfWidth, 0);
+        //// draw X axis
+        //g.DrawLine(Pens.Black, -panelHalfWidth, 0, panelHalfWidth, 0);
 
-        // draw Y axis
-        g.DrawLine(Pens.Black, 0, -panelHalfWidth, 0, panelHalfWidth);
+        //// draw Y axis
+        //g.DrawLine(Pens.Black, 0, -panelHalfWidth, 0, panelHalfWidth);
 
-        PaintSphericBench(g);
+        PaintLinearBench(g);
     }
 
-    private void PaintSphericBench(Graphics g) {
-        // draw a circlular lens
-        DrawCircle(g, Pens.Blue, new Point(), (float)Bench.Sphere.Radius);
+    private void PaintLinearBench(Graphics g)
+    {
+        int radius = (int) circleRadius;
+        DrawCircle(g, Pens.Blue, new Point(), radius);
 
-        // draw a ray and possibly its intersection
-        if (Bench.RayIntersects)
-        {
-            Point intersection = SphericPointToFormsPoint(Bench.Intersection);
-            g.DrawLine(Pens.Green, SphericPointToFormsPoint(Bench.Ray.Origin), intersection);
+        // draw the optical border
+        g.DrawLine(new Pen(Color.Black, 4.0f), new Point(-radius, 0), new Point(radius, 0));
 
-            // draw normal
-            g.DrawLine(Pens.Brown, new Point(), SphericPointToFormsPoint(Bench.Intersection));
 
-            // draw refracted ray
-            g.DrawLine(Pens.Tomato,
-                SphericPointToFormsPoint(Bench.RefractedRay.Origin),
-                SphericPointToFormsPoint(Bench.RefractedRay.Evaluate(100)));
+        double eta = Bench.RefractiveIndexAir / Bench.RefractiveIndexGlass;
+        double criticalAngle = (eta > 1.0) ? Math.PI + Math.Asin(1 / eta) : Math.Asin(eta);
+        SphericLens.Vector criticalAngleVector = new SphericLens.Vector() { Phi = criticalAngle, Radius = radius };
+        Point criticalAnglePoint = SphericPointToFormsPoint(SphericLens.Point.FromVector(-criticalAngleVector));
+        g.DrawLine(Pens.Red, new Point(), criticalAnglePoint);
+        criticalAnglePoint.X *= -1;
+        g.DrawLine(Pens.Red, new Point(), criticalAnglePoint);
 
-            FillSquare(g, Brushes.Red, intersection, 5);
-        }
-        else
-        {
-            g.DrawLine(Pens.Orange,
-                SphericPointToFormsPoint(Bench.Ray.Origin),
-                SphericPointToFormsPoint(Bench.Ray.Evaluate(100)));
-        }
+        // draw the normal
+        g.DrawLine(Pens.Brown, new Point(), new Point(0, (int)Bench.Normal.Radius));
+
+        // draw the incomint ray
+        g.DrawLine(Pens.Green, new Point(), SphericPointToFormsPoint(SphericLens.Point.FromVector(Bench.Direction)));
+
+        // draw the refracted ray
+        g.DrawLine(Pens.Blue, new Point(), SphericPointToFormsPoint(SphericLens.Point.FromVector(Bench.RefractedDirection)));
     }
 
       private Point SphericPointToFormsPoint(SphericLens.Point point) {
@@ -87,34 +87,9 @@ namespace SphericLensGUI
           Bench.Update();
           drawingPanel.Invalidate();
       }
-
-      private void sphereRadiusNumericUpDown_ValueChanged(object sender, EventArgs e)
-      {
-          Bench.Sphere.Radius = (double)sphereRadiusNumericUpDown.Value;
-          updateBench();
-      }
-
-      private void rayOriginRadiusNumericUpDown_ValueChanged(object sender, EventArgs e)
-      {
-          SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.Ray.Origin);
-          originAsVector.Radius = (double)rayOriginRadiusNumericUpDown.Value;
-          Bench.Ray.Origin.X = originAsVector.X;
-          Bench.Ray.Origin.Y = originAsVector.Y;
-          updateBench();
-      }
-
-      private void rayOriginPhiNumericUpDown_ValueChanged(object sender, EventArgs e)
-      {
-          SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.Ray.Origin);
-          originAsVector.Phi = (double)rayOriginPhiNumericUpDown.Value;
-          Bench.Ray.Origin.X = originAsVector.X;
-          Bench.Ray.Origin.Y = originAsVector.Y;
-          updateBench();
-      }
-
       private void rayDirectionPhiNumericUpDown_ValueChanged(object sender, EventArgs e)
       {
-          Bench.Ray.Direction.Phi = (double)rayDirectionPhiNumericUpDown.Value;
+          Bench.Direction.Phi = (double)rayDirectionPhiNumericUpDown.Value;
           updateBench();
       }
   }

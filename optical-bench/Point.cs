@@ -21,6 +21,11 @@ namespace SphericLens
             Y = y;
         }
 
+        public static Point FromVector(Vector vector)
+        {
+            return new Point(vector.X, vector.Y);
+        }
+
         public static Point operator +(Point p, Vector v)
         {
             return new Point(p.X + v.X, p.Y + v.Y);
