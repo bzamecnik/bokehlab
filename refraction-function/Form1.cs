@@ -26,21 +26,28 @@ namespace refraction_function
 
         private void ComputeRefractionFunction()
         {
-            Rectangle imageSize = pictureBox1.ClientRectangle;
+            Rectangle imageSize = pictureBox2.ClientRectangle;
             Bitmap bitmap = new Bitmap(imageSize.Width, imageSize.Height);
-            double maxPhi = 2 * Math.PI;
+            Graphics g = Graphics.FromImage(bitmap);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            g.TranslateTransform(0.0f, imageSize.Height - 1);
+            g.ScaleTransform(1.0f, -1.0f);
+            double maxPhi = 2.0 * Math.PI;
             int steps = imageSize.Height;
-            for (int y = 0; y < imageSize.Height; y++)
+            float lastValue = 0.0f;
+            for (int x = 0; x < imageSize.Width; x++)
             {
-                double phi = maxPhi * y / (double) (steps + 1);
-                int intensity = (int) (255 * RefractionFunction(phi) / maxPhi);
-                Color color = Color.FromArgb(intensity, intensity, intensity);
-                for (int x = 0; x < imageSize.Width; x++)
-                {
-                    bitmap.SetPixel(x, y, color);
-                }
+                double phi = maxPhi * x / (double)(steps + 1);
+                float value = (float)(RefractionFunction(phi) / maxPhi);
+                float currentValue = imageSize.Height * value;
+                int intensity = (int)(255 * value);
+                Pen colorPen = new Pen(Color.FromArgb(intensity, intensity, intensity), 1.0f);
+                g.DrawLine(colorPen, x, 0.0f, x, currentValue);
+                g.DrawLine(Pens.Black, x - 1, lastValue, x, currentValue);
+                lastValue = currentValue;
             }
-            pictureBox1.Image = bitmap;
+            g.DrawLine(Pens.Black, imageSize.Width - 1, lastValue, imageSize.Width - 1, 0.0f);
+            pictureBox2.Image = bitmap;
         }
 
         private double RefractionFunction(double phi)
