@@ -22,12 +22,16 @@ namespace SphericLens
         public double RefractiveIndexGlass { get; set; }
         public double RefractiveIndexAir { get; set; }
 
+        public Vector Normal { get; private set; }
+
         public OpticalBench()
         {
             RefractiveIndexGlass = 1.52; // crown glass
             RefractiveIndexAir = 1.00029;
 
             RefractedDirection = direction;
+
+            Normal = new Vector(0.0, 100.0);
         }
 
         public void Update() {
@@ -36,8 +40,7 @@ namespace SphericLens
 
         private void ComputeRefractedRay()
         {
-            Vector normal = new Vector(0.0, 100.0);
-            RefractedDirection = Vector.refract(Direction, normal, RefractiveIndexAir, RefractiveIndexGlass);
+            RefractedDirection = Vector.refract(Direction, Normal, RefractiveIndexAir, RefractiveIndexGlass);
             RefractedDirection *= Direction.Length;
         }
     }

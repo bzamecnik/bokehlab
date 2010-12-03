@@ -12,11 +12,12 @@ namespace SphericLensGUI
   public partial class Form1 : Form
   {
       public SphericLens.OpticalBench Bench;
+      double circleRadius = 100.0;
 
     public Form1 ()
     {
         Bench = new SphericLens.OpticalBench();
-        Bench.Direction = new SphericLens.Vector(0.0, 100.0);
+        Bench.Direction = new SphericLens.Vector(0.0, circleRadius);
         InitializeComponent();
         //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);
     }
@@ -43,7 +44,7 @@ namespace SphericLensGUI
 
     private void PaintLinearBench(Graphics g)
     {
-        int radius = 100;
+        int radius = (int) circleRadius;
         DrawCircle(g, Pens.Blue, new Point(), radius);
 
         // draw the optical border
@@ -59,7 +60,7 @@ namespace SphericLensGUI
         g.DrawLine(Pens.Red, new Point(), criticalAnglePoint);
 
         // draw the normal
-        g.DrawLine(Pens.Brown, new Point(), new Point(0, radius));
+        g.DrawLine(Pens.Brown, new Point(), new Point(0, (int)Bench.Normal.Radius));
 
         // draw the incomint ray
         g.DrawLine(Pens.Green, new Point(), SphericPointToFormsPoint(SphericLens.Point.FromVector(Bench.Direction)));
