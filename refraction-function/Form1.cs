@@ -33,7 +33,7 @@ namespace refraction_function
             g.TranslateTransform(0.0f, imageSize.Height - 1);
             g.ScaleTransform(1.0f, -1.0f);
             double maxPhi = 2.0 * Math.PI;
-            int steps = imageSize.Height;
+            int steps = imageSize.Width;
             float lastValue = 0.0f;
             for (int x = 0; x < imageSize.Width; x++)
             {
@@ -46,7 +46,7 @@ namespace refraction_function
                 g.DrawLine(Pens.Black, x - 1, lastValue, x, currentValue);
                 lastValue = currentValue;
             }
-            g.DrawLine(Pens.Black, imageSize.Width - 1, lastValue, imageSize.Width - 1, 0.0f);
+            g.DrawLine(Pens.Black, imageSize.Width - 1, lastValue, imageSize.Width, 0.0f);
             pictureBox2.Image = bitmap;
         }
 
