@@ -105,24 +105,31 @@ namespace SphericLens
             double eta = ei / et;
             double sint2 = eta * eta * sini2;
 
-            // total internal reflection - return a dummy vector
-            if (sint2 >= 1.0)
+            Vector refracted;
+            if (sint2 < 1.0)
             {
-                return new Vector(0.0, 0.0);
+                // compute the refraction vector
+                double cost = Math.Sqrt(Math.Max(0.0, 1.0 - sint2));
+                if (entering)
+                {
+                    cost = -cost;
+                }
+                double sintOverSini = eta;
+                refracted = new Vector(sintOverSini * -incidentNormalized.X, cost);
+                // transform back from the local coordinates
+                refracted.Phi -= transformToLocalPhi;
             }
+            else
+            {
+                // total internal reflection
+                refracted = incident;
+                refracted.Phi += -normal.Phi;
+                refracted.phi *= -1.0;
+                refracted.Phi -= -normal.Phi;
 
-            // compute the refraction vector
-            double cost = Math.Sqrt(Math.Max(0.0, 1.0 - sint2));
-            if (entering)
-            {
-                cost = -cost;
+                // or posibly return a dummy vector
+                //return new Vector(0.0, 0.0);
             }
-            double sintOverSini = eta;
-            Vector refracted = new Vector(sintOverSini * -incidentNormalized.X, cost);
-            
-            // transform back from the local coordinates
-            refracted.Phi -= transformToLocalPhi;
-            
             return refracted;
         }
 
