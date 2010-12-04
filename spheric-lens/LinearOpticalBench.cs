@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SphericLens
 {
-    public class OpticalBench
+    public class LinearOpticalBench
     {
         Vector direction = new Vector(0.0, -1.0);
         public Vector Direction
@@ -24,7 +24,7 @@ namespace SphericLens
 
         public Vector Normal { get; private set; }
 
-        public OpticalBench()
+        public LinearOpticalBench()
         {
             RefractiveIndexGlass = 1.52; // crown glass
             RefractiveIndexAir = 1.00029;

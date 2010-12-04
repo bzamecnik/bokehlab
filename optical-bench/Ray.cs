@@ -8,7 +8,11 @@ namespace SphericLens
     public class Ray
     {
         public Point Origin { get; set; }
-        public Vector Direction { get; set; }
+        private Vector direction;
+        public Vector Direction {
+            get { return direction; }
+            set { direction = value; }
+        }
 
         public Ray() {
             Origin = new Point();

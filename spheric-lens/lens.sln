@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "optical-bench", "optical-bench.csproj", "{442DEBC1-20F4-493F-9941-4B74A040605C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "linear-optical-bench", "linear-optical-bench.csproj", "{442DEBC1-20F4-493F-9941-4B74A040605C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "library", "..\optical-bench\library.csproj", "{4140ED87-E733-4104-90ED-453DDF4E01E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "refraction-function", "..\refraction-function\refraction-function.csproj", "{208902E7-D7ED-4745-B871-96AA2E32549C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sphere-optical-bench", "..\sphere-optical-bench\sphere-optical-bench.csproj", "{06FB1DFF-D6A9-495F-828F-09CFD50C3ACB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +27,10 @@ Global
 		{208902E7-D7ED-4745-B871-96AA2E32549C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{208902E7-D7ED-4745-B871-96AA2E32549C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{208902E7-D7ED-4745-B871-96AA2E32549C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06FB1DFF-D6A9-495F-828F-09CFD50C3ACB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06FB1DFF-D6A9-495F-828F-09CFD50C3ACB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06FB1DFF-D6A9-495F-828F-09CFD50C3ACB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06FB1DFF-D6A9-495F-828F-09CFD50C3ACB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -19,15 +19,20 @@ namespace SphericLens
 
         public double Length {get {return Radius;}}
 
-        public Vector() {
-            X = 0.0;
-            Y = 0.0;
+        public Vector() 
+            : this(0.0, 0.0)
+        {
         }
 
         public Vector(double x, double y)
         {
             X = x;
             Y = y;
+        }
+
+        public Vector(Vector vector) 
+            : this(vector.X, vector.Y)
+        {
         }
 
         public static Vector FromPoint(Point point) {
@@ -122,7 +127,7 @@ namespace SphericLens
             else
             {
                 // total internal reflection
-                refracted = incident;
+                refracted = new Vector(incident);
                 refracted.Phi += -normal.Phi;
                 refracted.phi *= -1.0;
                 refracted.Phi -= -normal.Phi;

@@ -11,12 +11,12 @@ namespace SphericLensGUI
 {
   public partial class Form1 : Form
   {
-      public SphericLens.OpticalBench Bench;
+      public SphericLens.LinearOpticalBench Bench;
       double circleRadius = 100.0;
 
     public Form1 ()
     {
-        Bench = new SphericLens.OpticalBench();
+        Bench = new SphericLens.LinearOpticalBench();
         Bench.Direction = new SphericLens.Vector(0.0, circleRadius);
         InitializeComponent();
         //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);

@@ -84,6 +84,10 @@
       <Project>{4140ED87-E733-4104-90ED-453DDF4E01E0}</Project>
       <Name>library</Name>
     </ProjectReference>
+    <ProjectReference Include="..\spheric-lens\linear-optical-bench.csproj">
+      <Project>{442DEBC1-20F4-493F-9941-4B74A040605C}</Project>
+      <Name>linear-optical-bench</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
