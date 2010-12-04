@@ -10,15 +10,19 @@ namespace SphericLens
         public double X { get; set; }
         public double Y { get; set; }
 
-        public Point() {
-            X = 0.0;
-            Y = 0.0;
+        public Point() : this(0.0, 0.0)
+        {
         }
 
         public Point(double x, double y)
         {
             X = x;
             Y = y;
+        }
+
+        public Point(Point point)
+            : this(point.X, point.Y)
+        {
         }
 
         public static Point FromVector(Vector vector)

@@ -14,15 +14,20 @@ namespace SphericLens
             set { direction = value; }
         }
 
-        public Ray() {
-            Origin = new Point();
-            Direction = new Vector();
+        public Ray() :
+            this(new Point(), new Vector())
+        {
         }
 
         public Ray(Point origin, Vector direction)
         {
-            Origin = origin;
-            Direction = direction;
+            Origin = new Point(origin);
+            Direction = new Vector(direction);
+        }
+
+        public Ray(Ray ray)
+            : this(ray.Origin, ray.direction)
+        {
         }
 
         public Point Evaluate(double t)
