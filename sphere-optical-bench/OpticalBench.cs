@@ -18,12 +18,15 @@ namespace SphericLens
             }
         }
 
+        public double LensCenter { get; set; }
+
         public List<SphericalCap> Elements { get; set; }
 
         public List<IntersectionResult> IntersectionResults { get; private set; }
 
         public OpticalBench()
         {
+            LensCenter = 0.0;
             IntersectionResults = new List<IntersectionResult>();
             Elements = new List<SphericalCap>();
         }
@@ -38,6 +41,7 @@ namespace SphericLens
             };
 
             double lastRefractiveIndex = RefractiveIndices.AIR;
+            Vector translationFromLensCenter = new Vector(0.0, 0.0);
 
             int maxIntersections = Elements.Count;
             for (int i = 0; i < maxIntersections; i++)
@@ -47,25 +51,39 @@ namespace SphericLens
 
                 result.IncidentRay = new Ray(previousResult.OutgoingRay);
 
-                //ComputeIntersection();
+                Vector signedRadius = new Vector((element.Convex ? 1.0 : -1.0) * element.Radius, 0.0);
+
+                // compute intersection
 
                 Point intersection = null;
-                result.Intersected = element.IntersectRay(result.IncidentRay, out intersection);
+                Ray rayIncidentToElement = result.IncidentRay.Translate(translationFromLensCenter + signedRadius);
+                result.Intersected = element.IntersectRay(rayIncidentToElement, out intersection);
+                result.Normal = Vector.FromPoint(intersection);
+                intersection = intersection - (translationFromLensCenter + signedRadius);
                 if (!result.Intersected)
                 {
                     break;
                 }
                 result.Intersection = intersection;
 
-                //ComputeRefractedRay();
+                // compute refracted ray
 
-                Vector normal = Vector.FromPoint(result.Intersection);
-                Vector outgoingDirection = result.IncidentRay.Direction.Length * -Vector.refract(result.IncidentRay.Direction, -normal, lastRefractiveIndex, element.NextRefractiveIndex);
+                Vector outgoingDirection;
+                if (Math.Abs(lastRefractiveIndex - element.NextRefractiveIndex) > double.Epsilon)
+                {
+                    outgoingDirection = result.IncidentRay.Direction.Length * -Vector.refract(result.IncidentRay.Direction, -result.Normal, lastRefractiveIndex, element.NextRefractiveIndex);
+                }
+                else
+                {
+                    // there's no border between different media and thus no refraction
+                    outgoingDirection = result.IncidentRay.Direction;
+                }
                 result.OutgoingRay = new Ray(result.Intersection, outgoingDirection);
                 result.Refracted = true; // TODO: differ refraction and TIR
                 IntersectionResults.Add(result);
                 previousResult = result;
                 lastRefractiveIndex = element.NextRefractiveIndex;
+                translationFromLensCenter.X += element.DistanceToNext;
             }
         }
 
@@ -76,6 +94,7 @@ namespace SphericLens
             public bool Intersected { get; set; }
             public bool Refracted { get; set; }
             public bool Reflected { get; set; }
+            public Vector Normal { get; set; }
         }
     }
 }

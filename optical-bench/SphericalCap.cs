@@ -50,8 +50,14 @@ namespace SphericLens
         public double xMin;
         public double xMax;
 
+        /// <summary>
+        /// Distance from this element's apex to the next element's apex.
+        /// </summary>
+        public double DistanceToNext { get; set; }
+
         public SphericalCap()
         {
+            DistanceToNext = 0.0;
             radius = 1.0;
             aperture = 1.0;
             NextRefractiveIndex = RefractiveIndices.CROWN_GLASS;
