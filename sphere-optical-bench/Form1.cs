@@ -17,19 +17,52 @@ namespace SphericLensGUI
         {
             InitializeComponent();
             Bench = new SphericLens.OpticalBench();
-            Bench.SphericalCap.Convex = false;
-            Bench.SphericalCap.Radius = 100.0;
-            Bench.SphericalCap.Aperture = 80.0;
-            //Bench.SphericalCap.Convex = false;
+            Bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 150.0,
+                    Aperture = 120.0,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.CROWN_GLASS
+                }
+            );
+            Bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 100.0,
+                    Aperture = 80.0,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.AIR
+                }
+            );
+            Bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = false,
+                    Radius = 100.0,
+                    Aperture = 80.0,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.CROWN_GLASS
+                }
+            );
+            Bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = false,
+                    Radius = 150.0,
+                    Aperture = 120.0,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.AIR
+                }
+            );
+            //Bench.Elements.Convex = false;
             Bench.IncidentRay = new SphericLens.Ray(new SphericLens.Point(200, 20), new SphericLens.Vector(-20, 5));
             //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);
             rayDirectionPhiNumericUpDown.Value = (decimal)(Bench.IncidentRay.Direction.Phi % (2*Math.PI));
             SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.IncidentRay.Origin);
             rayOriginPhiNumericUpDown.Value = (decimal)originAsVector.Phi;
             rayOriginRadiusNumericUpDown.Value = (decimal)originAsVector.Radius;
-            sphericalCapRadiusNumericUpDown.Value = (decimal)Bench.SphericalCap.Radius;
-            sphericalCapApertureNumericUpDown.Value = (decimal)Bench.SphericalCap.Aperture;
-            sphericalCapConvexCheckBox.Checked = Bench.SphericalCap.Convex;
+            sphericalCapRadiusNumericUpDown.Value = (decimal)Bench.Elements[0].Radius;
+            sphericalCapApertureNumericUpDown.Value = (decimal)Bench.Elements[0].Aperture;
+            sphericalCapConvexCheckBox.Checked = Bench.Elements[0].Convex;
         }
 
         private void drawingPanel_Paint(object sender, PaintEventArgs e)
@@ -55,11 +88,14 @@ namespace SphericLensGUI
         private void PaintSphericBench(Graphics g)
         {
             // draw a circlular lens
-            //DrawCircle(g, Pens.Blue, new Point(), (float)Bench.SphericalCap.Radius);
+            //DrawCircle(g, Pens.Blue, new Point(), (float)Bench.Elements.Radius);
 
-            //g.TranslateTransform((float)Bench.SphericalCap.Radius, 0.0f);
-            DrawSphericalCap(g, Bench.SphericalCap);
-            //g.TranslateTransform((float)-Bench.SphericalCap.Radius, 0.0f);
+            //g.TranslateTransform((float)Bench.Elements.Radius, 0.0f);
+            foreach (SphericLens.SphericalCap element in Bench.Elements)
+            {
+                DrawSphericalCap(g, element);
+            }
+            //g.TranslateTransform((float)-Bench.Elements.Radius, 0.0f);
 
             SphericLens.Ray lastOutgoingRay = Bench.IncidentRay;
 
@@ -117,28 +153,28 @@ namespace SphericLensGUI
         private void sphericalCapRadiusNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
             double radius = (double)sphericalCapRadiusNumericUpDown.Value;
-            if (radius >= Bench.SphericalCap.Aperture)
+            if (radius >= Bench.Elements[0].Aperture)
             {
-                Bench.SphericalCap.Radius = radius;
+                Bench.Elements[0].Radius = radius;
                 updateBench();
             }
             else
             {
-                sphericalCapRadiusNumericUpDown.Value = (decimal)Bench.SphericalCap.Aperture;
+                sphericalCapRadiusNumericUpDown.Value = (decimal)Bench.Elements[0].Aperture;
             }
         }
 
         private void sphericalCapApertureNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
             double aperture = (double)sphericalCapApertureNumericUpDown.Value;
-            if (aperture <= Bench.SphericalCap.Radius)
+            if (aperture <= Bench.Elements[0].Radius)
             {
-                Bench.SphericalCap.Aperture = Math.Abs(aperture);
+                Bench.Elements[0].Aperture = Math.Abs(aperture);
                 updateBench();
             }
             else
             {
-                sphericalCapApertureNumericUpDown.Value = (decimal)Bench.SphericalCap.Radius;
+                sphericalCapApertureNumericUpDown.Value = (decimal)Bench.Elements[0].Radius;
             }
         }
 
@@ -168,7 +204,7 @@ namespace SphericLensGUI
 
         private void sphericalCapConvexCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            Bench.SphericalCap.Convex = sphericalCapConvexCheckBox.Checked;
+            Bench.Elements[0].Convex = sphericalCapConvexCheckBox.Checked;
             updateBench();
         }
     }

@@ -109,7 +109,7 @@
             327680});
             this.rayDirectionPhiNumericUpDown.Name = "rayDirectionPhiNumericUpDown";
             this.rayDirectionPhiNumericUpDown.Size = new System.Drawing.Size(89, 20);
-            this.rayDirectionPhiNumericUpDown.TabIndex = 2;
+            this.rayDirectionPhiNumericUpDown.TabIndex = 6;
             this.rayDirectionPhiNumericUpDown.ValueChanged += new System.EventHandler(this.rayDirectionPhiNumericUpDown_ValueChanged);
             // 
             // rayOriginPhiNumericUpDown
@@ -128,7 +128,7 @@
             327680});
             this.rayOriginPhiNumericUpDown.Name = "rayOriginPhiNumericUpDown";
             this.rayOriginPhiNumericUpDown.Size = new System.Drawing.Size(89, 20);
-            this.rayOriginPhiNumericUpDown.TabIndex = 2;
+            this.rayOriginPhiNumericUpDown.TabIndex = 5;
             this.rayOriginPhiNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginPhiNumericUpDown_ValueChanged);
             // 
             // rayOriginRadiusNumericUpDown
@@ -142,7 +142,7 @@
             0});
             this.rayOriginRadiusNumericUpDown.Name = "rayOriginRadiusNumericUpDown";
             this.rayOriginRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
-            this.rayOriginRadiusNumericUpDown.TabIndex = 2;
+            this.rayOriginRadiusNumericUpDown.TabIndex = 4;
             this.rayOriginRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginRadiusNumericUpDown_ValueChanged);
             // 
             // sphericalCapApertureNumericUpDown
@@ -190,7 +190,7 @@
             -2147483648});
             this.sphericalCapRadiusNumericUpDown.Name = "sphericalCapRadiusNumericUpDown";
             this.sphericalCapRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
-            this.sphericalCapRadiusNumericUpDown.TabIndex = 2;
+            this.sphericalCapRadiusNumericUpDown.TabIndex = 1;
             this.sphericalCapRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.sphericalCapRadiusNumericUpDown_ValueChanged);
             // 
             // label5

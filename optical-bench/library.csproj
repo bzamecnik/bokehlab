@@ -49,6 +49,7 @@
     <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ray.cs" />
+    <Compile Include="RefractiveIndices.cs" />
     <Compile Include="SphericalCap.cs" />
     <Compile Include="Vector.cs" />
   </ItemGroup>

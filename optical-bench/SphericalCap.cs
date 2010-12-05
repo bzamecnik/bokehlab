@@ -34,6 +34,8 @@ namespace SphericLens
         /// </summary>
         public double Aperture { get { return aperture; } set { aperture = Math.Min(value, Radius); Update(); } }
 
+        public double NextRefractiveIndex { get; set; }
+
         /// <summary>
         /// The distance from the aperture circle to the apex of the spherical cap.
         /// </summary>
@@ -52,6 +54,7 @@ namespace SphericLens
         {
             radius = 1.0;
             aperture = 1.0;
+            NextRefractiveIndex = RefractiveIndices.CROWN_GLASS;
             Update();
         }
 

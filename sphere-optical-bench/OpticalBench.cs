@@ -18,27 +18,14 @@ namespace SphericLens
             }
         }
 
-        SphericalCap sphericalSurface = new SphericalCap();
-        public SphericalCap SphericalCap
-        {
-            get { return sphericalSurface; }
-            set
-            {
-                sphericalSurface = value;
-                Update();
-            }
-        }
+        public List<SphericalCap> Elements { get; set; }
 
         public List<IntersectionResult> IntersectionResults { get; private set; }
 
-        public double RefractiveIndexGlass { get; set; }
-        public double RefractiveIndexAir { get; set; }
-
         public OpticalBench()
         {
-            RefractiveIndexGlass = 1.52; // crown glass
-            RefractiveIndexAir = 1.00029;
             IntersectionResults = new List<IntersectionResult>();
+            Elements = new List<SphericalCap>();
         }
 
         public void Update()
@@ -50,17 +37,20 @@ namespace SphericLens
                 OutgoingRay = new Ray(IncidentRay)
             };
 
-            const int maxIntersections = 2;
+            double lastRefractiveIndex = RefractiveIndices.AIR;
+
+            int maxIntersections = Elements.Count;
             for (int i = 0; i < maxIntersections; i++)
             {
                 IntersectionResult result = new IntersectionResult();
+                SphericalCap element = Elements[i];
 
                 result.IncidentRay = new Ray(previousResult.OutgoingRay);
 
                 //ComputeIntersection();
 
                 Point intersection = null;
-                result.Intersected = SphericalCap.IntersectRay(result.IncidentRay, out intersection);
+                result.Intersected = element.IntersectRay(result.IncidentRay, out intersection);
                 if (!result.Intersected)
                 {
                     break;
@@ -70,11 +60,12 @@ namespace SphericLens
                 //ComputeRefractedRay();
 
                 Vector normal = Vector.FromPoint(result.Intersection);
-                Vector outgoingDirection = result.IncidentRay.Direction.Length * -Vector.refract(result.IncidentRay.Direction, -normal, RefractiveIndexAir, RefractiveIndexGlass);
+                Vector outgoingDirection = result.IncidentRay.Direction.Length * -Vector.refract(result.IncidentRay.Direction, -normal, lastRefractiveIndex, element.NextRefractiveIndex);
                 result.OutgoingRay = new Ray(result.Intersection, outgoingDirection);
                 result.Refracted = true; // TODO: differ refraction and TIR
                 IntersectionResults.Add(result);
                 previousResult = result;
+                lastRefractiveIndex = element.NextRefractiveIndex;
             }
         }
 
