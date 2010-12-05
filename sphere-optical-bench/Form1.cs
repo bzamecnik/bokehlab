@@ -16,7 +16,7 @@ namespace SphericLensGUI
         public Form1()
         {
             InitializeComponent();
-            Bench = MakeBiconvexLens();
+            Bench = MakeDoubleGaussLens();
             //Bench.Elements.Convex = false;
             Bench.IncidentRay = new SphericLens.Ray(new SphericLens.Point(200, 20), new SphericLens.Vector(-20, 5));
             //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);
@@ -56,6 +56,120 @@ namespace SphericLensGUI
             return bench;
         }
 
+        private SphericLens.OpticalBench MakeDoubleGaussLens()
+        {
+            SphericLens.OpticalBench bench = new SphericLens.OpticalBench();
+            // bench.LensCenter = -100.0;
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 58.950,
+                    DistanceToNext = 7.520,
+                    NextRefractiveIndex = 1.670,
+                    Aperture = 50.4,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 169.660,
+                    DistanceToNext = 0.240,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.AIR,
+                    Aperture = 50.4,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 38.550,
+                    DistanceToNext = 8.050,
+                    NextRefractiveIndex = 1.670,
+                    Aperture = 46.0,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 81.540,
+                    DistanceToNext = 6.550,
+                    NextRefractiveIndex = 1.699,
+                    Aperture = 46.0,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 25.500,
+                    DistanceToNext = 11.410 + 9.0,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.AIR,
+                    Aperture = 36.0,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = false,
+                    Radius = 28.990,
+                    DistanceToNext = 2.360,
+                    NextRefractiveIndex = 1.603,
+                    Aperture = 34.0,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 81.540,
+                    DistanceToNext = 12.130,
+                    NextRefractiveIndex = 1.658,
+                    Aperture = 40.0,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = false,
+                    Radius = 40.770,
+                    DistanceToNext = 0.380,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.AIR,
+                    Aperture = 40.0,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = true,
+                    Radius = 874.130,
+                    DistanceToNext = 6.440,
+                    NextRefractiveIndex = 1.717,
+                    Aperture = 40.0,
+                }
+            );
+            bench.Elements.Add(
+                new SphericLens.SphericalCap()
+                {
+                    Convex = false,
+                    Radius = 79.460,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.AIR,
+                    Aperture = 40.0,
+                }
+            );
+            double scaleFactor = 3.0;
+            bool aperturesGivenAsDiameter = true;
+            foreach (SphericLens.SphericalCap element in bench.Elements)
+            {
+                element.Radius *= scaleFactor;
+                element.Aperture *= scaleFactor * (aperturesGivenAsDiameter ? 0.5 : 1.0);
+                element.DistanceToNext *= scaleFactor;
+            }
+            return bench;
+        }
+
         private void drawingPanel_Paint(object sender, PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -72,6 +186,9 @@ namespace SphericLensGUI
 
             // draw Y axis
             g.DrawLine(Pens.Black, 0, -panelHalfWidth, 0, panelHalfWidth);
+
+            //g.ScaleTransform(-1.0f, 1.0f);
+            //g.TranslateTransform(200.0f, 0.0f);
 
             PaintSphericBench(g);
         }
@@ -121,9 +238,10 @@ namespace SphericLensGUI
             float startAngle = (cap.Convex ? 360.0f : 180.0f) - angle;
             float sweepAngle = 2.0f * angle;
             g.DrawArc(Pens.Red, (float)-cap.Radius, (float)-cap.Radius, (float)(2 * cap.Radius), (float)(2 * cap.Radius), startAngle, sweepAngle);
-            float x = (float)((cap.Convex ? cap.Radius : -cap.Radius) - (cap.Convex ? cap.Thickness : -cap.Thickness));
-            float y = (float)cap.Aperture;
-            g.DrawLine(Pens.Black, x, -y, x, y);
+            
+            //float x = (float)((cap.Convex ? cap.Radius : -cap.Radius) - (cap.Convex ? cap.Thickness : -cap.Thickness));
+            //float y = (float)cap.Aperture;
+            //g.DrawLine(Pens.Black, x, -y, x, y);
         }
 
         private Point SphericPointToFormsPoint(SphericLens.Point point)
