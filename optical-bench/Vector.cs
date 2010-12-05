@@ -96,7 +96,7 @@ namespace SphericLens
         /// <returns></returns>
         public static Vector refract(Vector incident, Vector normal, double etaI, double etaT)
         {
-            Vector incidentNormalized = incident.Normalize();
+            Vector incidentNormalized = -incident.Normalize();
 
             // transform incident vector to the local coordinates with normal = (0, 1)
             double transformToLocalPhi = 0.5 * Math.PI - normal.Phi;
@@ -107,9 +107,11 @@ namespace SphericLens
             double cosi = incidentNormalized.Y;
             bool entering = cosi > 0.0;
 
-            // swap the indices of the ray is going from inside the surface
-            double ei = entering ? etaI : etaT;
-            double et = entering ? etaT : etaI;
+            //// swap the indices of the ray is going from inside the surface
+            //double ei = entering ? etaI : etaT;
+            //double et = entering ? etaT : etaI;
+            double ei = etaI;
+            double et = etaT;
 
             double sini2 = Math.Max(0.0, 1.0 - incidentNormalized.Y * incidentNormalized.Y);
             double eta = ei / et;
@@ -133,9 +135,9 @@ namespace SphericLens
             {
                 // total internal reflection
                 refracted = new Vector(incident);
-                refracted.Phi += -normal.Phi;
+                refracted.Phi += transformToLocalPhi;
                 refracted.phi *= -1.0;
-                refracted.Phi -= -normal.Phi;
+                refracted.Phi -= transformToLocalPhi;
 
                 // or posibly return a dummy vector
                 //return new Vector(0.0, 0.0);

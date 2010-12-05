@@ -71,7 +71,7 @@ namespace SphericLens
                 Vector outgoingDirection;
                 if (Math.Abs(lastRefractiveIndex - element.NextRefractiveIndex) > double.Epsilon)
                 {
-                    outgoingDirection = result.IncidentRay.Direction.Length * -Vector.refract(result.IncidentRay.Direction, -result.Normal, lastRefractiveIndex, element.NextRefractiveIndex);
+                    outgoingDirection = result.IncidentRay.Direction.Length * Vector.refract(result.IncidentRay.Direction, result.Normal, lastRefractiveIndex, element.NextRefractiveIndex);
                 }
                 else
                 {
