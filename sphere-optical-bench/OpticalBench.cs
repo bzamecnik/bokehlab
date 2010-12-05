@@ -18,23 +18,18 @@ namespace SphericLens
             }
         }
 
-        Sphere sphere = new Sphere();
-        public Sphere Sphere
+        SphericalCap sphericalSurface = new SphericalCap();
+        public SphericalCap SphericalCap
         {
-            get { return sphere; }
+            get { return sphericalSurface; }
             set
             {
-                sphere = value;
+                sphericalSurface = value;
                 Update();
             }
         }
 
-        //public List<IntersectionResult> IntersectionResults { get; private set; }
         public List<IntersectionResult> IntersectionResults { get; private set; }
-
-        //public Point Intersection { get; private set; }
-        //public bool RayIntersects { get; private set; }
-        //public Ray RefractedRay { get; private set; }
 
         public double RefractiveIndexGlass { get; set; }
         public double RefractiveIndexAir { get; set; }
@@ -65,7 +60,7 @@ namespace SphericLens
                 //ComputeIntersection();
 
                 Point intersection = null;
-                result.Intersected = Sphere.IntersectRay(result.IncidentRay, out intersection);
+                result.Intersected = SphericalCap.IntersectRay(result.IncidentRay, out intersection);
                 if (!result.Intersected)
                 {
                     break;
