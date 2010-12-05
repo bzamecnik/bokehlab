@@ -38,5 +38,10 @@ namespace SphericLens
             }
             return Origin + t * Direction;
         }
+
+        public Ray Translate(Vector translation)
+        {
+            return new Ray(Origin + translation, Direction);
+        }
     }
 }

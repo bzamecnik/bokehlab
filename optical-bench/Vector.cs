@@ -48,6 +48,11 @@ namespace SphericLens
             return new Vector(p1.X + p2.X, p1.Y + p2.Y);
         }
 
+        public static Vector operator -(Vector p1, Vector p2)
+        {
+            return new Vector(p1.X - p2.X, p1.Y - p2.Y);
+        }
+
         public static Vector operator *(double t, Vector v)
         {
             return new Vector(t * v.X, t * v.Y);
