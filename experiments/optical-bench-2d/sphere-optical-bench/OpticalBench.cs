@@ -20,7 +20,7 @@ namespace SphericLens
 
         public double LensCenter { get; set; }
 
-        public List<SphericalCap> Elements { get; set; }
+        public List<OpticalElement> Elements { get; set; }
 
         public List<IntersectionResult> IntersectionResults { get; private set; }
 
@@ -28,7 +28,7 @@ namespace SphericLens
         {
             LensCenter = 0.0;
             IntersectionResults = new List<IntersectionResult>();
-            Elements = new List<SphericalCap>();
+            Elements = new List<OpticalElement>();
         }
 
         public void Update()
@@ -47,19 +47,19 @@ namespace SphericLens
             for (int i = 0; i < maxIntersections; i++)
             {
                 IntersectionResult result = new IntersectionResult();
-                SphericalCap element = Elements[i];
+                OpticalElement element = Elements[i];
 
                 result.IncidentRay = new Ray(previousResult.OutgoingRay);
 
-                Vector signedRadius = new Vector((element.Convex ? 1.0 : -1.0) * element.Radius, 0.0);
+                Vector toLocal = element.TranslationToLocal();
 
                 // compute intersection
 
                 Point intersection = null;
-                Ray rayIncidentToElement = result.IncidentRay.Translate(translationFromLensCenter + signedRadius);
+                Ray rayIncidentToElement = result.IncidentRay.Translate(translationFromLensCenter + toLocal);
                 result.Intersected = element.IntersectRay(rayIncidentToElement, out intersection);
                 result.Normal = Vector.FromPoint(intersection);
-                intersection = intersection - (translationFromLensCenter + signedRadius);
+                intersection = intersection - (translationFromLensCenter + toLocal);
                 if (!result.Intersected)
                 {
                     break;

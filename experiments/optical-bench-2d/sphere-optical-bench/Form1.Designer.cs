@@ -30,20 +30,20 @@
         {
             this.drawingPanel = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.sphericalCapConvexCheckBox = new System.Windows.Forms.CheckBox();
             this.rayDirectionPhiNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.rayOriginPhiNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.rayOriginRadiusNumericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.sphericalCapApertureNumericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.sphericalCapRadiusNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.sphericalCapApertureNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.sphericalCapConvexCheckBox = new System.Windows.Forms.CheckBox();
+            this.sphericalCapRadiusNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginPhiNumericUpDown)).BeginInit();
@@ -82,16 +82,6 @@
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Controls";
-            // 
-            // sphericalCapConvexCheckBox
-            // 
-            this.sphericalCapConvexCheckBox.AutoSize = true;
-            this.sphericalCapConvexCheckBox.Location = new System.Drawing.Point(97, 95);
-            this.sphericalCapConvexCheckBox.Name = "sphericalCapConvexCheckBox";
-            this.sphericalCapConvexCheckBox.Size = new System.Drawing.Size(15, 14);
-            this.sphericalCapConvexCheckBox.TabIndex = 3;
-            this.sphericalCapConvexCheckBox.UseVisualStyleBackColor = true;
-            this.sphericalCapConvexCheckBox.CheckedChanged += new System.EventHandler(this.sphericalCapConvexCheckBox_CheckedChanged);
             // 
             // rayDirectionPhiNumericUpDown
             // 
@@ -145,54 +135,6 @@
             this.rayOriginRadiusNumericUpDown.TabIndex = 4;
             this.rayOriginRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.rayOriginRadiusNumericUpDown_ValueChanged);
             // 
-            // sphericalCapApertureNumericUpDown
-            // 
-            this.sphericalCapApertureNumericUpDown.DecimalPlaces = 1;
-            this.sphericalCapApertureNumericUpDown.Increment = new decimal(new int[] {
-            2,
-            0,
-            0,
-            0});
-            this.sphericalCapApertureNumericUpDown.Location = new System.Drawing.Point(97, 67);
-            this.sphericalCapApertureNumericUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.sphericalCapApertureNumericUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-            this.sphericalCapApertureNumericUpDown.Name = "sphericalCapApertureNumericUpDown";
-            this.sphericalCapApertureNumericUpDown.Size = new System.Drawing.Size(89, 20);
-            this.sphericalCapApertureNumericUpDown.TabIndex = 2;
-            this.sphericalCapApertureNumericUpDown.ValueChanged += new System.EventHandler(this.sphericalCapApertureNumericUpDown_ValueChanged);
-            // 
-            // sphericalCapRadiusNumericUpDown
-            // 
-            this.sphericalCapRadiusNumericUpDown.DecimalPlaces = 1;
-            this.sphericalCapRadiusNumericUpDown.Increment = new decimal(new int[] {
-            2,
-            0,
-            0,
-            0});
-            this.sphericalCapRadiusNumericUpDown.Location = new System.Drawing.Point(97, 41);
-            this.sphericalCapRadiusNumericUpDown.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.sphericalCapRadiusNumericUpDown.Minimum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            -2147483648});
-            this.sphericalCapRadiusNumericUpDown.Name = "sphericalCapRadiusNumericUpDown";
-            this.sphericalCapRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
-            this.sphericalCapRadiusNumericUpDown.TabIndex = 1;
-            this.sphericalCapRadiusNumericUpDown.ValueChanged += new System.EventHandler(this.sphericalCapRadiusNumericUpDown_ValueChanged);
-            // 
             // label5
             // 
             this.label5.AutoSize = true;
@@ -201,15 +143,6 @@
             this.label5.Size = new System.Drawing.Size(70, 13);
             this.label5.TabIndex = 1;
             this.label5.Text = "Direction Phi:";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 95);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(46, 13);
-            this.label8.TabIndex = 1;
-            this.label8.Text = "Convex:";
             // 
             // label6
             // 
@@ -267,6 +200,73 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "SphericalCap:";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(8, 95);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(46, 13);
+            this.label8.TabIndex = 1;
+            this.label8.Text = "Convex:";
+            // 
+            // sphericalCapApertureNumericUpDown
+            // 
+            this.sphericalCapApertureNumericUpDown.DecimalPlaces = 1;
+            this.sphericalCapApertureNumericUpDown.Enabled = false;
+            this.sphericalCapApertureNumericUpDown.Increment = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.sphericalCapApertureNumericUpDown.Location = new System.Drawing.Point(97, 67);
+            this.sphericalCapApertureNumericUpDown.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.sphericalCapApertureNumericUpDown.Minimum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            -2147483648});
+            this.sphericalCapApertureNumericUpDown.Name = "sphericalCapApertureNumericUpDown";
+            this.sphericalCapApertureNumericUpDown.Size = new System.Drawing.Size(89, 20);
+            this.sphericalCapApertureNumericUpDown.TabIndex = 2;
+            // 
+            // sphericalCapConvexCheckBox
+            // 
+            this.sphericalCapConvexCheckBox.AutoSize = true;
+            this.sphericalCapConvexCheckBox.Enabled = false;
+            this.sphericalCapConvexCheckBox.Location = new System.Drawing.Point(97, 95);
+            this.sphericalCapConvexCheckBox.Name = "sphericalCapConvexCheckBox";
+            this.sphericalCapConvexCheckBox.Size = new System.Drawing.Size(15, 14);
+            this.sphericalCapConvexCheckBox.TabIndex = 3;
+            this.sphericalCapConvexCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // sphericalCapRadiusNumericUpDown
+            // 
+            this.sphericalCapRadiusNumericUpDown.DecimalPlaces = 1;
+            this.sphericalCapRadiusNumericUpDown.Enabled = false;
+            this.sphericalCapRadiusNumericUpDown.Increment = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.sphericalCapRadiusNumericUpDown.Location = new System.Drawing.Point(97, 41);
+            this.sphericalCapRadiusNumericUpDown.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.sphericalCapRadiusNumericUpDown.Minimum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            -2147483648});
+            this.sphericalCapRadiusNumericUpDown.Name = "sphericalCapRadiusNumericUpDown";
+            this.sphericalCapRadiusNumericUpDown.Size = new System.Drawing.Size(89, 20);
+            this.sphericalCapRadiusNumericUpDown.TabIndex = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -300,13 +300,13 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown rayDirectionPhiNumericUpDown;
         private System.Windows.Forms.NumericUpDown rayOriginRadiusNumericUpDown;
-        private System.Windows.Forms.NumericUpDown sphericalCapRadiusNumericUpDown;
         private System.Windows.Forms.NumericUpDown rayOriginPhiNumericUpDown;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.CheckBox sphericalCapConvexCheckBox;
         private System.Windows.Forms.NumericUpDown sphericalCapApertureNumericUpDown;
+        private System.Windows.Forms.NumericUpDown sphericalCapRadiusNumericUpDown;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label7;
 
     }
 }

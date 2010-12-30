@@ -24,26 +24,21 @@ namespace SphericLensGUI
             SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.IncidentRay.Origin);
             rayOriginPhiNumericUpDown.Value = (decimal)originAsVector.Phi;
             rayOriginRadiusNumericUpDown.Value = (decimal)originAsVector.Radius;
-            sphericalCapRadiusNumericUpDown.Value = (decimal)Bench.Elements[0].Radius;
-            sphericalCapApertureNumericUpDown.Value = (decimal)Bench.Elements[0].Aperture;
-            sphericalCapConvexCheckBox.Checked = Bench.Elements[0].Convex;
         }
 
         private SphericLens.OpticalBench MakeBiconvexLens()
         {
             SphericLens.OpticalBench bench = new SphericLens.OpticalBench();
             // bench.LensCenter = -100.0;
-            bench.Elements.Add(
-                new SphericLens.SphericalCap()
+            SphericLens.SphericalCap element0 = new SphericLens.SphericalCap()
                 {
                     Convex = true,
                     Radius = 150.0,
                     Aperture = 100.0,
                     NextRefractiveIndex = SphericLens.RefractiveIndices.CROWN_GLASS,
-                    
-                }
-            );
-            bench.Elements[0].DistanceToNext = 2 * bench.Elements[0].Thickness;
+                };
+            bench.Elements.Add(element0);
+            element0.DistanceToNext = 2 * element0.Thickness;
             bench.Elements.Add(
                 new SphericLens.SphericalCap()
                 {
@@ -111,6 +106,14 @@ namespace SphericLensGUI
                 }
             );
             bench.Elements.Add(
+                new SphericLens.CircularStop()
+                {
+                    DistanceToNext = 9.0,
+                    NextRefractiveIndex = SphericLens.RefractiveIndices.AIR,
+                    Aperture = 34.2,
+                }
+            );
+            bench.Elements.Add(
                 new SphericLens.SphericalCap()
                 {
                     Convex = false,
@@ -161,10 +164,20 @@ namespace SphericLensGUI
             );
             double scaleFactor = 3.0;
             bool aperturesGivenAsDiameter = true;
-            foreach (SphericLens.SphericalCap element in bench.Elements)
+            foreach (SphericLens.OpticalElement element in bench.Elements)
             {
-                element.Radius *= scaleFactor;
-                element.Aperture *= scaleFactor * (aperturesGivenAsDiameter ? 0.5 : 1.0);
+                double apertureScaleFactor = scaleFactor * (aperturesGivenAsDiameter ? 0.5 : 1.0);
+                // TODO: hey, this is ugly!!!
+                if (element is SphericLens.SphericalCap)
+                {
+                    SphericLens.SphericalCap cap = element as SphericLens.SphericalCap;
+                    cap.Radius *= scaleFactor;
+                    cap.Aperture *= apertureScaleFactor;
+                } else if (element is SphericLens.CircularStop)
+                {
+                    SphericLens.CircularStop stop = element as SphericLens.CircularStop;
+                    stop.Aperture *= apertureScaleFactor;
+                }
                 element.DistanceToNext *= scaleFactor;
             }
             return bench;
@@ -265,34 +278,6 @@ namespace SphericLensGUI
             drawingPanel.Invalidate();
         }
 
-        private void sphericalCapRadiusNumericUpDown_ValueChanged(object sender, EventArgs e)
-        {
-            double radius = (double)sphericalCapRadiusNumericUpDown.Value;
-            if (radius >= Bench.Elements[0].Aperture)
-            {
-                Bench.Elements[0].Radius = radius;
-                updateBench();
-            }
-            else
-            {
-                sphericalCapRadiusNumericUpDown.Value = (decimal)Bench.Elements[0].Aperture;
-            }
-        }
-
-        private void sphericalCapApertureNumericUpDown_ValueChanged(object sender, EventArgs e)
-        {
-            double aperture = (double)sphericalCapApertureNumericUpDown.Value;
-            if (aperture <= Bench.Elements[0].Radius)
-            {
-                Bench.Elements[0].Aperture = Math.Abs(aperture);
-                updateBench();
-            }
-            else
-            {
-                sphericalCapApertureNumericUpDown.Value = (decimal)Bench.Elements[0].Radius;
-            }
-        }
-
         private void rayOriginRadiusNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
             SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.IncidentRay.Origin);
@@ -317,10 +302,5 @@ namespace SphericLensGUI
             updateBench();
         }
 
-        private void sphericalCapConvexCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            Bench.Elements[0].Convex = sphericalCapConvexCheckBox.Checked;
-            updateBench();
-        }
     }
 }

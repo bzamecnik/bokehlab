@@ -9,7 +9,7 @@ namespace SphericLens
     /// A single spherical cap surface.
     /// The front side is oriented in the positive direction of the optical axis.
     /// </summary>
-    public class SphericalCap
+    public class SphericalCap : OpticalElement
     {
         private double radius;
 
@@ -34,8 +34,6 @@ namespace SphericLens
         /// </summary>
         public double Aperture { get { return aperture; } set { aperture = Math.Min(value, Radius); Update(); } }
 
-        public double NextRefractiveIndex { get; set; }
-
         /// <summary>
         /// The distance from the aperture circle to the apex of the spherical cap.
         /// </summary>
@@ -50,10 +48,6 @@ namespace SphericLens
         public double xMin;
         public double xMax;
 
-        /// <summary>
-        /// Distance from this element's apex to the next element's apex.
-        /// </summary>
-        public double DistanceToNext { get; set; }
 
         public SphericalCap()
         {
@@ -64,7 +58,13 @@ namespace SphericLens
             Update();
         }
 
-        public bool IntersectRay(Ray ray, out Point intersection)
+        public override Vector TranslationToLocal()
+        {
+            Vector signedRadius = new Vector((Convex ? 1.0 : -1.0) * Radius, 0.0);
+            return signedRadius;
+        }
+
+        public override bool IntersectRay(Ray ray, out Point intersection)
         {
             intersection = new Point();
 
