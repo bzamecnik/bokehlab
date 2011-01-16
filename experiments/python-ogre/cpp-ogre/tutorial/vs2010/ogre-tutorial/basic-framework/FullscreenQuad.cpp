@@ -1,6 +1,6 @@
 /*
 -----------------------------------------------------------------------------
-Filename:    TutorialApplication.cpp
+Filename:    FullscreenQuad.cpp
 -----------------------------------------------------------------------------
 
 This source file is part of the
@@ -17,27 +17,30 @@ This source file is part of the
 
 #include "stdafx.h"
 
-#include "TutorialApplication.h"
+#include "FullscreenQuad.h"
 
 //-------------------------------------------------------------------------------------
-TutorialApplication::TutorialApplication(void)
+FullscreenQuad::FullscreenQuad(void)
 {
 }
 //-------------------------------------------------------------------------------------
-TutorialApplication::~TutorialApplication(void)
+FullscreenQuad::~FullscreenQuad(void)
 {
 }
 
 //-------------------------------------------------------------------------------------
-void TutorialApplication::createScene(void)
+void FullscreenQuad::createScene(void)
 {
-    // create your scene here :)
-    mSceneMgr->setSkyBox(true, "Examples/SpaceSkyBox");
- 
-	mSceneMgr->createLight("Light")->setPosition(75,75,75);
- 
-	Ogre::Entity* cubeEntity = mSceneMgr->createEntity("Cube", "ogrehead.mesh");
-	Ogre::SceneNode* cubeNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("CubeNode");
-	cubeNode->attachObject(cubeEntity);
+    // Create a full rectangle with stays even when the camera moves
+    // and fill it with a texture.
 
+    Ogre::Rectangle2D *screenEnt = new Ogre::Rectangle2D(true);
+    screenEnt->setCorners(-1.0f, 1.0f, 1.0f, -1.0f);
+    screenEnt->setBoundingBox(Ogre::AxisAlignedBox(
+        -100000.0f * Ogre::Vector3::UNIT_SCALE,
+        100000.0f * Ogre::Vector3::UNIT_SCALE));
+    screenEnt->setMaterial("Examples/Rockwall");
+
+    Ogre::SceneNode* screenNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("ScreenNode");
+    screenNode->attachObject(screenEnt);
 }
