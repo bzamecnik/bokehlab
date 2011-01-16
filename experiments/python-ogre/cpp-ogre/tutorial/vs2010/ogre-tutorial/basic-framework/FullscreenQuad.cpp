@@ -39,7 +39,8 @@ void FullscreenQuad::createScene(void)
     screenEnt->setBoundingBox(Ogre::AxisAlignedBox(
         -100000.0f * Ogre::Vector3::UNIT_SCALE,
         100000.0f * Ogre::Vector3::UNIT_SCALE));
-    screenEnt->setMaterial("Examples/Rockwall");
+    //screenEnt->setMaterial("Examples/Rockwall");
+    screenEnt->setMaterial("BokehLab/Plot2DFunction");
 
     Ogre::SceneNode* screenNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("ScreenNode");
     screenNode->attachObject(screenEnt);

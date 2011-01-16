@@ -63,6 +63,12 @@
     <PostBuildEvent>
       <Message>Copy EXE file to samples directory</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>xcopy /E /Y "$(ProjectDir)\media" "$(OGRE_HOME)\media"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Copy media files</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -88,6 +94,12 @@
     <PostBuildEvent>
       <Message>Copy EXE file to samples directory</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>xcopy /E /Y "$(ProjectDir)\media" "$(OGRE_HOME)\media"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Copy media files</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BaseApplication.h" />
