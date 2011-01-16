@@ -14,6 +14,9 @@ This source file is part of the
       http://www.ogre3d.org/tikiwiki/
 -----------------------------------------------------------------------------
 */
+
+#include "stdafx.h"
+
 #include "TutorialApplication.h"
 
 //-------------------------------------------------------------------------------------

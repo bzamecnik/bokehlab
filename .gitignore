@@ -32,3 +32,5 @@ _ReSharper*/
 Ogre.log
 *.opensdf
 *.sdf
+
+*.ipch

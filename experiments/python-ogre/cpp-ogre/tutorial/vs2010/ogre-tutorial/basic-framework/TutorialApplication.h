@@ -17,6 +17,8 @@ This source file is part of the
 #ifndef __TutorialApplication_h_
 #define __TutorialApplication_h_
 
+#include "stdafx.h"
+
 #include "BaseApplication.h"
 
 class TutorialApplication : public BaseApplication
