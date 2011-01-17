@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-#include "IntermediateTutorial7.h"
+#include "FullscreenQuad.h"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -18,7 +18,7 @@ extern "C" {
 #endif
     {
         // Create application object
-        IntermediateTutorial7 app;
+        FullscreenQuad app;
 
         try {
             app.go();

@@ -29,6 +29,11 @@ public:
 
 protected:
     virtual void createScene(void);
+    virtual bool FullscreenQuad::frameRenderingQueued(const Ogre::FrameEvent& evt);
+private:
+    Ogre::Rectangle2D* mScreenEnt;
+    Ogre::ColourValue colorParameter;
+    static Ogre::Vector4 colorToVector4(const Ogre::ColourValue& color);
 };
 
 #endif // #ifndef __FullscreenQuad_h_
