@@ -6,8 +6,6 @@ float4 checkerboard(float frequency, float x, float y)
   return float4(intensity, intensity, intensity, 0.0);
 }
 
-float 
-
 float4 Plot2DFunction_ps (float2 iTexCoord : TEXCOORD0) : COLOR
 {
   return checkerboard(4.0, iTexCoord[0], iTexCoord[1]);
