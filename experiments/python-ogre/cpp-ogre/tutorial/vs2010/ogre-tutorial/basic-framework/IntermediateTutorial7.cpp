@@ -47,8 +47,11 @@ void IntermediateTutorial7::createScene(void)
         Ogre::PF_R8G8B8, Ogre::TU_RENDERTARGET);
 
     Ogre::RenderTexture *renderTexture = rtt_texture->getBuffer()->getRenderTarget();
+    
  
     renderTexture->addViewport(mCamera);
+    // do not clear the buffer, let the new image be draw on top of the previous
+    //renderTexture->getViewport(0)->setClearEveryFrame(true, Ogre::FBT_DEPTH | Ogre::FBT_STENCIL);
     renderTexture->getViewport(0)->setClearEveryFrame(true);
     renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
     renderTexture->getViewport(0)->setOverlaysEnabled(false);
@@ -62,7 +65,7 @@ void IntermediateTutorial7::createScene(void)
 
     // draw the texture into a quad
     mMiniScreen = new Ogre::Rectangle2D(true);
-    mMiniScreen->setCorners(0.5f, -0.5f, 1.0f, -1.0f);
+    mMiniScreen->setCorners(0.5f, 1.0f, 1.0f, 0.5f);
     mMiniScreen->setBoundingBox(Ogre::AxisAlignedBox(
         -100000.0f * Ogre::Vector3::UNIT_SCALE,
         100000.0f * Ogre::Vector3::UNIT_SCALE));
