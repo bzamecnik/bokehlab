@@ -105,6 +105,8 @@
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="FullscreenQuad.h" />
     <ClInclude Include="IntermediateTutorial7.h" />
+    <ClInclude Include="MotionBlur.h" />
+    <ClInclude Include="MovingAverage.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TutorialApplication.h" />
   </ItemGroup>
@@ -113,6 +115,8 @@
     <ClCompile Include="FullscreenQuad.cpp" />
     <ClCompile Include="IntermediateTutorial7.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MotionBlur.cpp" />
+    <ClCompile Include="MovingAverage.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
