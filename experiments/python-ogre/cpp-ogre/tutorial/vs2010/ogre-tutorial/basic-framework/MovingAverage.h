@@ -13,13 +13,17 @@ public:
  
 protected:
     virtual void createScene(void);
+    virtual void createCamera(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
  
+    void setupCompositors(void);
+
 	Ogre::MovablePlane* mPlane;
 	Ogre::Entity* mPlaneEnt;
 	Ogre::SceneNode* mPlaneNode;
  
-    void setupCompositors(void);
+    Ogre::Real totalTime;
+    Ogre::Vector3 mLastCameraOffset;
 };
  
 #endif // #ifndef __MovingAverage_h_
