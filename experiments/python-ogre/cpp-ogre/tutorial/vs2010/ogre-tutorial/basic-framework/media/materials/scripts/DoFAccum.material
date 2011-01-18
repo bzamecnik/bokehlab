@@ -2,9 +2,9 @@
 
 fragment_program BokehLab/DoFAccum/Combine_fp cg
 {
-  source Combine_fp.cg
+  source DoFAccumCombine.cg
   profiles ps_2_0 arbfp1
-  entry_point Combine_fp
+  entry_point DoFAccumCombine_FP
 
 //  default_params
 //  {
@@ -28,8 +28,7 @@ material BokehLab/DoFAccum/Combine
 
       fragment_program_ref BokehLab/DoFAccum/Combine_fp
       {
-        //param named currentFrameWeight 1
-        param named blur 0.5
+        param_named currentFrameWeight float 0.1
       }
 
       vertex_program_ref Ogre/Compositor/StdQuad_Cg_vp

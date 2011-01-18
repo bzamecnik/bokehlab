@@ -7,7 +7,7 @@ MovingAverage::MovingAverage(void)
 {
     mLastCameraOffset = Ogre::Vector3::ZERO;
     totalTime = Ogre::Real(0.0);
-    currentFrameIndex = 1;
+    resetCurrentFrameIndex();
 }
 //-------------------------------------------------------------------------------------
 MovingAverage::~MovingAverage(void)
@@ -136,6 +136,40 @@ void MovingAverage::createCamera(void) {
     //mCameraMan->setStyle(OgreBites::CS_MANUAL);
 }
 
+bool MovingAverage::keyPressed( const OIS::KeyEvent &arg )
+{
+    resetCurrentFrameIndex();
+    return BaseApplication::keyPressed(arg);
+}
+
+bool MovingAverage::keyReleased( const OIS::KeyEvent &arg )
+{
+    resetCurrentFrameIndex();
+    return BaseApplication::keyReleased(arg);
+}
+
+bool MovingAverage::mouseMoved( const OIS::MouseEvent &arg )
+{
+    resetCurrentFrameIndex();
+    return BaseApplication::mouseMoved(arg);
+}
+
+bool MovingAverage::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
+{
+    resetCurrentFrameIndex();
+    return BaseApplication::mousePressed(arg, id);
+}
+
+bool MovingAverage::mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
+{
+    resetCurrentFrameIndex();
+    return BaseApplication::mouseReleased(arg, id);
+}
+
+void MovingAverage::resetCurrentFrameIndex() {
+    currentFrameIndex = 1;
+}
+
 bool MovingAverage::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
     // rotate the plane
@@ -200,8 +234,8 @@ void DoFAccumListener::notifyMaterialRender(Ogre::uint32 pass_id, Ogre::Material
     if(pass_id == 0xDEADBABE)
     {
         Ogre::Real currentFrameWeight = 1.0 / (Ogre::Real)movingAverageApp.getCurrentFrameIndex();
-        //fpParams->setNamedConstant("currentFrameWeight", Ogre::Vector4(currentFrameWeight, 0, 0, 0));
-        //fpParams->setNamedConstant("blur", Ogre::Vector4(1.0 - currentFrameWeight, 0, 0, 0));
-        fpParams->setNamedConstant("blur", Ogre::Vector4(0.9, 0, 0, 0));
+        fpParams->setNamedConstant("currentFrameWeight", Ogre::Vector4(currentFrameWeight, 0, 0, 0));
+        //fpParams->setNamedConstant("currentFrameWeight", Ogre::Vector4(0.1, 0, 0, 0));
     }
 }
+

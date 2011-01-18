@@ -18,9 +18,17 @@ protected:
     virtual void createScene(void);
     virtual void createCamera(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+    // OIS::KeyListener
+    virtual bool keyPressed( const OIS::KeyEvent &arg );
+    virtual bool keyReleased( const OIS::KeyEvent &arg );
+    // OIS::MouseListener
+    virtual bool mouseMoved( const OIS::MouseEvent &arg );
+    virtual bool mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id );
+    virtual bool mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id );
  
     void setupCompositors(void);
     void uniformSampleDisk(const Ogre::Vector2& randomNumbers, Ogre::Vector2* diskSamples);
+    void resetCurrentFrameIndex();
 
 	Ogre::MovablePlane* mPlane;
 	Ogre::Entity* mPlaneEnt;
