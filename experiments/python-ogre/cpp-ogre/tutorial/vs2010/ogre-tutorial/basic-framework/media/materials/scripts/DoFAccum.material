@@ -6,12 +6,12 @@ fragment_program BokehLab/DoFAccum/Combine_fp cg
   profiles ps_2_0 arbfp1
   entry_point Combine_fp
 
-  default_params
-  {
-    // TODO: this parameter should be a custom parameter computed as:
-		//   1 / currentFrameIndex
-    param_named blur float 0.85
-  }
+//  default_params
+//  {
+//    // TODO: this parameter should be a custom parameter computed as:
+//		//   1 / currentFrameIndex
+//    param_named blur float 0.85
+//  }
 }
 
 //
@@ -28,6 +28,8 @@ material BokehLab/DoFAccum/Combine
 
       fragment_program_ref BokehLab/DoFAccum/Combine_fp
       {
+        //param named currentFrameWeight 1
+        param named blur 0.5
       }
 
       vertex_program_ref Ogre/Compositor/StdQuad_Cg_vp

@@ -7,6 +7,7 @@ MovingAverage::MovingAverage(void)
 {
     mLastCameraOffset = Ogre::Vector3::ZERO;
     totalTime = Ogre::Real(0.0);
+    currentFrameIndex = 1;
 }
 //-------------------------------------------------------------------------------------
 MovingAverage::~MovingAverage(void)
@@ -42,7 +43,10 @@ void MovingAverage::createScene(void)
     
     Ogre::CompositorManager::getSingleton().addCompositor(mWindow->getViewport(0), "DoFAccum");
     Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), "DoFAccum", true);
-    
+
+    Ogre::CompositorInstance* compositor = Ogre::CompositorManager::getSingleton().getCompositorChain(
+        mWindow->getViewport(0))->getCompositor("DoFAccum");
+    compositor->addListener(new DoFAccumListener(*this));
 }
 
 void MovingAverage::setupCompositors(void) {
@@ -93,6 +97,7 @@ void MovingAverage::setupCompositors(void) {
             Ogre::CompositionPass *pass = tp->createPass();
 			pass->setType(Ogre::CompositionPass::PT_RENDERQUAD);
 			pass->setMaterialName("BokehLab/DoFAccum/Combine");
+            pass->setIdentifier(0xDEADBABE);
 			pass->setInput(0, "currentFrame");
 			pass->setInput(1, "movingAverage");
 		}
@@ -140,17 +145,55 @@ bool MovingAverage::frameRenderingQueued(const Ogre::FrameEvent& evt)
     totalTime += evt.timeSinceLastFrame;
 
     Ogre::Real lensRadius = 2.0;
-    Ogre::Real angle = totalTime * 10;
 
     // make offset in the XY plane in the camera space whose normal, -Z, is
     // the camera view direction
 
-    // TODO: the offset should be uniformly sampled from within the lens disk
-    // using concentric disk sampling
-
     mCamera->moveRelative(-mLastCameraOffset);
-    mLastCameraOffset = lensRadius * Ogre::Vector3(Ogre::Math::Sin(angle), Ogre::Math::Cos(angle), 0.0);
+
+    //Ogre::Real angle = totalTime * 10;
+    //Ogre::Vector2 offset = Ogre::Vector2(Ogre::Math::Sin(angle), Ogre::Math::Cos(angle));
+    Ogre::Vector2 offset;
+    Ogre::Vector2 randomSquareSamples(Ogre::Math::RangeRandom(0.0, 1.0), Ogre::Math::RangeRandom(0.0, 1.0));
+    // the offset is uniformly sampled from within the lens disk
+    // using concentric disk sampling
+    uniformSampleDisk(randomSquareSamples, &offset);
+    mLastCameraOffset = lensRadius * Ogre::Vector3(offset.x, offset.y, 0.0);
+    
     mCamera->moveRelative(mLastCameraOffset);
 
+    ++currentFrameIndex;
+
 	return BaseApplication::frameRenderingQueued(evt);
+}
+
+// Transforms uniform samples of unit square [0; 1] x [0; 1] to uniform samples
+// of a unit disk.
+//
+// randomNumbers two uniform random numbers from [0; 1] interval
+// diskSamples output parameter, assumed to be already allocated
+void MovingAverage::uniformSampleDisk(const Ogre::Vector2& randomNumbers, Ogre::Vector2* diskSamples) {
+    Ogre::Real radius = Ogre::Math::Sqrt(randomNumbers.x);
+    Ogre::Real theta = 2.0 * Ogre::Math::PI * randomNumbers.y;
+    diskSamples->x = radius * Ogre::Math::Cos(theta);
+    diskSamples->y = radius * Ogre::Math::Sin(theta);
+}
+
+void DoFAccumListener::notifyMaterialSetup(Ogre::uint32 pass_id, Ogre::MaterialPtr &mat)
+{
+    if(pass_id == 0xDEADBABE)
+    {
+        fpParams = mat->getTechnique(0)->getPass(0)->getFragmentProgramParameters();
+    }
+}
+
+void DoFAccumListener::notifyMaterialRender(Ogre::uint32 pass_id, Ogre::MaterialPtr &mat)
+{
+    if(pass_id == 0xDEADBABE)
+    {
+        Ogre::Real currentFrameWeight = 1.0 / (Ogre::Real)movingAverageApp.getCurrentFrameIndex();
+        //fpParams->setNamedConstant("currentFrameWeight", Ogre::Vector4(currentFrameWeight, 0, 0, 0));
+        //fpParams->setNamedConstant("blur", Ogre::Vector4(1.0 - currentFrameWeight, 0, 0, 0));
+        fpParams->setNamedConstant("blur", Ogre::Vector4(0.8, 0, 0, 0));
+    }
 }
