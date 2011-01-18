@@ -149,7 +149,14 @@ bool MovingAverage::frameRenderingQueued(const Ogre::FrameEvent& evt)
     // make offset in the XY plane in the camera space whose normal, -Z, is
     // the camera view direction
 
+    Ogre::Real focusDistance = 100.0;
+
+    // Point where the camera should be focused to.
+    // It's 2D projection should not change when the camera is pertubed.
+    Ogre::Vector3 focusPoint = mCamera->getPosition() + focusDistance * mCamera->getDirection();
+
     mCamera->moveRelative(-mLastCameraOffset);
+    mCamera->lookAt(focusPoint);
 
     //Ogre::Real angle = totalTime * 10;
     //Ogre::Vector2 offset = Ogre::Vector2(Ogre::Math::Sin(angle), Ogre::Math::Cos(angle));
@@ -161,6 +168,7 @@ bool MovingAverage::frameRenderingQueued(const Ogre::FrameEvent& evt)
     mLastCameraOffset = lensRadius * Ogre::Vector3(offset.x, offset.y, 0.0);
     
     mCamera->moveRelative(mLastCameraOffset);
+    mCamera->lookAt(focusPoint);
 
     ++currentFrameIndex;
 
@@ -194,6 +202,6 @@ void DoFAccumListener::notifyMaterialRender(Ogre::uint32 pass_id, Ogre::Material
         Ogre::Real currentFrameWeight = 1.0 / (Ogre::Real)movingAverageApp.getCurrentFrameIndex();
         //fpParams->setNamedConstant("currentFrameWeight", Ogre::Vector4(currentFrameWeight, 0, 0, 0));
         //fpParams->setNamedConstant("blur", Ogre::Vector4(1.0 - currentFrameWeight, 0, 0, 0));
-        fpParams->setNamedConstant("blur", Ogre::Vector4(0.8, 0, 0, 0));
+        fpParams->setNamedConstant("blur", Ogre::Vector4(0.9, 0, 0, 0));
     }
 }
