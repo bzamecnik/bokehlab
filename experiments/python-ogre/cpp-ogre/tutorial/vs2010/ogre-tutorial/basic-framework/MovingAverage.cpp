@@ -66,13 +66,13 @@ void MovingAverage::setupCompositors(void) {
 		Ogre::CompositionTechnique::TextureDefinition *def = t->createTextureDefinition("movingAverage");
 		def->width = 0;
 		def->height = 0;
-		def->formatList.push_back(Ogre::PF_R8G8B8);
+		def->formatList.push_back(Ogre::PF_FLOAT16_RGB);
 	}
 	{
 		Ogre::CompositionTechnique::TextureDefinition *def = t->createTextureDefinition("updatedMovingAverage");
 		def->width = 0;
 		def->height = 0;
-		def->formatList.push_back(Ogre::PF_R8G8B8);
+		def->formatList.push_back(Ogre::PF_FLOAT16_RGB);
 	}
 	/// Render scene
 	{
