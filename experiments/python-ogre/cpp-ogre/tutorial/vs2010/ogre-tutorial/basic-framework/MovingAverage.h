@@ -11,13 +11,15 @@ public:
     MovingAverage(void);
     virtual ~MovingAverage(void);
     unsigned int getCurrentFrameIndex() const {
-        return currentFrameIndex;
+        return mCurrentFrameIndex;
     }
+    Ogre::Vector2 getCurrentFrameOffset() const;
  
 protected:
     virtual void createScene(void);
     virtual void createCamera(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+    //virtual bool frameStarted(const Ogre::FrameEvent& evt);
     // OIS::KeyListener
     virtual bool keyPressed( const OIS::KeyEvent &arg );
     virtual bool keyReleased( const OIS::KeyEvent &arg );
@@ -35,10 +37,16 @@ protected:
 	Ogre::SceneNode* mPlaneNode;
  
     // index of the current frame since the scene and camera didn't change
-    unsigned int currentFrameIndex;
+    unsigned int mCurrentFrameIndex;
 
     Ogre::Real totalTime;
     Ogre::Vector3 mLastCameraOffset;
+
+    // offset of the image in the near plane due to camera position perturbation
+    Ogre::Vector2 mCurrentFrameOffset;
+
+    Ogre::Real mLensRadius;
+    Ogre::Real mFocusDistance;
 };
 
 class DoFAccumListener: public Ogre::CompositorInstance::Listener

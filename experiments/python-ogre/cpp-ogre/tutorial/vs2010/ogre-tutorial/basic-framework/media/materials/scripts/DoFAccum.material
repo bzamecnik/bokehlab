@@ -29,6 +29,7 @@ material BokehLab/DoFAccum/Combine
       fragment_program_ref BokehLab/DoFAccum/Combine_fp
       {
         param_named currentFrameWeight float 0.1
+        param_named offset float2 0.0 0.0
       }
 
       vertex_program_ref Ogre/Compositor/StdQuad_Cg_vp
@@ -38,7 +39,8 @@ material BokehLab/DoFAccum/Combine
       // current frame of the scene 
       texture_unit CurrentFrame
       {
-        tex_address_mode clamp
+        tex_address_mode border
+        tex_border_colour 0.0 0.0 0.0
         filtering linear linear none
         tex_coord_set 0
       }
@@ -46,7 +48,8 @@ material BokehLab/DoFAccum/Combine
       // accumulated moving average of the previous frames
       texture_unit MovingAverage
       {
-        tex_address_mode clamp
+        tex_address_mode border
+        tex_border_colour 0.0 0.0 0.0
         filtering linear linear none
         tex_coord_set 0
       }

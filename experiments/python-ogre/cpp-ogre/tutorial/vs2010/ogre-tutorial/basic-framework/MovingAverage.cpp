@@ -6,7 +6,9 @@
 MovingAverage::MovingAverage(void)
 {
     mLastCameraOffset = Ogre::Vector3::ZERO;
-    totalTime = Ogre::Real(0.0);
+    mCurrentFrameOffset = Ogre::Vector2::ZERO;
+    mLensRadius = 5.0;
+    mFocusDistance = 215.0;
     resetCurrentFrameIndex();
 }
 //-------------------------------------------------------------------------------------
@@ -66,7 +68,7 @@ void MovingAverage::setupCompositors(void) {
 		Ogre::CompositionTechnique::TextureDefinition *def = t->createTextureDefinition("movingAverage");
 		def->width = 0;
 		def->height = 0;
-		def->formatList.push_back(Ogre::PF_FLOAT16_RGB);
+        def->formatList.push_back(Ogre::PF_FLOAT16_RGB);
 	}
 	{
 		Ogre::CompositionTechnique::TextureDefinition *def = t->createTextureDefinition("updatedMovingAverage");
@@ -138,6 +140,20 @@ void MovingAverage::createCamera(void) {
 
 bool MovingAverage::keyPressed( const OIS::KeyEvent &arg )
 {
+    if (arg.key == OIS::KC_P) // increase lens aperture
+    {
+        mLensRadius += 0.5;
+    } else if (arg.key == OIS::KC_L) // decrease lens aperture
+    {
+        mLensRadius -= 0.5;
+        mLensRadius = (mLensRadius > 0.0) ? mLensRadius : 0.0;
+    } else if (arg.key == OIS::KC_O) // increase focus distance
+    {
+        mFocusDistance /= 0.9;
+    } else if (arg.key == OIS::KC_K) // decrease focus distance
+    {
+        mFocusDistance *= 0.9;
+    }
     resetCurrentFrameIndex();
     return BaseApplication::keyPressed(arg);
 }
@@ -167,46 +183,51 @@ bool MovingAverage::mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonI
 }
 
 void MovingAverage::resetCurrentFrameIndex() {
-    currentFrameIndex = 1;
+    mCurrentFrameIndex = 1;
+}
+
+Ogre::Vector2 MovingAverage::getCurrentFrameOffset() const {
+    Ogre::Real left, right, top, bottom;
+    mCamera->getFrustumExtents(left, right, top, bottom);
+    return Ogre::Vector2(
+        mCurrentFrameOffset.x / (right - left),
+        mCurrentFrameOffset.y / (top - bottom));
+
+    //Ogre::Vector3 offsetAtNearPlane(mCurrentFrameOffset.x, mCurrentFrameOffset.y, mCamera->getNearClipDistance());
+    //Ogre::Vector3 offsetInScreenSpace = mCamera->getProjectionMatrix() * offsetAtNearPlane;
+    //return Ogre::Vector2(offsetInScreenSpace.x, offsetInScreenSpace.y);
+
+    // return OgreBites::SdkTrayManager::sceneToScreen(mCamera, offsetAtNearPlane);
 }
 
 bool MovingAverage::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-    // rotate the plane
-	//mPlaneNode->yaw(Ogre::Radian(evt.timeSinceLastFrame));
 
-    // perturb the camera position
-    totalTime += evt.timeSinceLastFrame;
-
-    Ogre::Real lensRadius = 2.0;
 
     // make offset in the XY plane in the camera space whose normal, -Z, is
     // the camera view direction
 
-    Ogre::Real focusDistance = 100.0;
-
-    // Point where the camera should be focused to.
-    // It's 2D projection should not change when the camera is pertubed.
-    Ogre::Vector3 focusPoint = mCamera->getPosition() + focusDistance * mCamera->getDirection();
-
     mCamera->moveRelative(-mLastCameraOffset);
-    mCamera->lookAt(focusPoint);
 
-    //Ogre::Real angle = totalTime * 10;
-    //Ogre::Vector2 offset = Ogre::Vector2(Ogre::Math::Sin(angle), Ogre::Math::Cos(angle));
-    Ogre::Vector2 offset;
+    Ogre::Vector2 offset;    
     Ogre::Vector2 randomSquareSamples(Ogre::Math::RangeRandom(0.0, 1.0), Ogre::Math::RangeRandom(0.0, 1.0));
     // the offset is uniformly sampled from within the lens disk
-    // using concentric disk sampling
+    // using uniform disk sampling
     uniformSampleDisk(randomSquareSamples, &offset);
-    mLastCameraOffset = lensRadius * Ogre::Vector3(offset.x, offset.y, 0.0);
+
+    offset *= mLensRadius;
+    mLastCameraOffset = Ogre::Vector3(offset.x, offset.y, 0.0);
     
     mCamera->moveRelative(mLastCameraOffset);
-    mCamera->lookAt(focusPoint);
 
-    ++currentFrameIndex;
+    // the image in the near has to be translated based on the translation
+    // of the camera in the camera plane
+    // NOTE: the Y direction in the world space and in the texture space is swapped!
+    mCurrentFrameOffset = -(mCamera->getNearClipDistance() / mFocusDistance) * offset * Ogre::Vector2(1, -1);
 
-	return BaseApplication::frameRenderingQueued(evt);
+    ++mCurrentFrameIndex;
+
+    return BaseApplication::frameRenderingQueued(evt);
 }
 
 // Transforms uniform samples of unit square [0; 1] x [0; 1] to uniform samples
@@ -235,7 +256,8 @@ void DoFAccumListener::notifyMaterialRender(Ogre::uint32 pass_id, Ogre::Material
     {
         Ogre::Real currentFrameWeight = 1.0 / (Ogre::Real)movingAverageApp.getCurrentFrameIndex();
         fpParams->setNamedConstant("currentFrameWeight", Ogre::Vector4(currentFrameWeight, 0, 0, 0));
-        //fpParams->setNamedConstant("currentFrameWeight", Ogre::Vector4(0.1, 0, 0, 0));
+        Ogre::Vector2 currentFrameOffset = movingAverageApp.getCurrentFrameOffset();
+        fpParams->setNamedConstant("offset", Ogre::Vector4(currentFrameOffset.x, currentFrameOffset.y, 0, 0));
     }
 }
 
