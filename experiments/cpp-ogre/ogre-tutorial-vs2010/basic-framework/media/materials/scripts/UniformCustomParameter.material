@@ -1,0 +1,34 @@
+fragment_program BokehLab/UniformCustomParameterFP cg
+{
+	source UniformCustomParameter.cg
+	entry_point UniformCustomParameter_ps
+	profiles ps_2_0 arbfp1
+	
+	default_params
+  {
+    param_named_auto colorModulate custom 1        
+  }
+}
+
+material BokehLab/UniformCustomParameter
+{
+	technique
+	{
+
+		pass
+		{
+			cull_hardware none
+			cull_software none
+			depth_func always_pass
+
+			vertex_program_ref Ogre/Compositor/StdQuad_Tex2a_vp
+			{
+			}
+
+			fragment_program_ref BokehLab/UniformCustomParameterFP
+			{
+			}
+
+    }
+  }
+}

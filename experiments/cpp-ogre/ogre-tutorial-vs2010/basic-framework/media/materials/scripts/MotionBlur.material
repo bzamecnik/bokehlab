@@ -1,0 +1,95 @@
+// based on Ogre3D media\materials\scripts\MotionBlur.material
+
+fragment_program BokehLab/MotionBlur/Combine_fp cg
+{
+  source Combine_fp.cg
+  profiles ps_2_0 arbfp1
+  entry_point Combine_fp
+
+  default_params
+  {
+    param_named blur float 0.85
+  }
+}
+
+material BokehLab/MotionBlur/Combine
+{
+  technique
+  {
+    pass
+    {
+      depth_check off
+
+      fragment_program_ref BokehLab/MotionBlur/Combine_fp
+      {
+      }
+
+      vertex_program_ref Ogre/Compositor/StdQuad_Cg_vp
+      {
+      }
+
+      // current frame of the scene 
+      texture_unit Scene
+      {
+        tex_address_mode clamp
+        filtering linear linear none
+        tex_coord_set 0
+      }
+
+      // accumulated moving average of the previous frames
+      texture_unit MovingAverage
+      {
+        tex_address_mode clamp
+        filtering linear linear none
+        tex_coord_set 0
+      }
+    }
+  }
+}
+
+//
+// Update the Sum using the moving average computed for the current
+// frame. Just replace the output texture contents with the input texture's.
+//
+material BokehLab/MotionBlur/Copyback
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      depth_check off
+
+      texture_unit UpdatedSum
+      {
+        tex_address_mode clamp
+        filtering linear linear none
+        colour_op replace
+        tex_coord_set 0
+      }
+    }
+  }
+}
+
+//
+// Display the updated moving average. Again just send the input to the output.
+//
+material BokehLab/MotionBlur/Display
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      depth_check off
+
+      texture_unit Sum
+      {
+        tex_address_mode clamp
+        filtering linear linear none
+        colour_op replace
+        tex_coord_set 0
+      }
+    }
+  }
+}

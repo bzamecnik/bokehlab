@@ -1,0 +1,13 @@
+//sampler RT : register(s0);
+
+float4 checkerboard(float frequency, float x, float y)
+{
+	float intensity = (((int(floor(x * frequency)) + int(floor(y * frequency))) % 2) == 0) ? 1.0 : 0.0;;
+  return float4(intensity, intensity, intensity, 0.0);
+}
+
+float4 Plot2DFunction_ps (float2 iTexCoord : TEXCOORD0) : COLOR
+{
+  return checkerboard(4.0, iTexCoord[0], iTexCoord[1]);
+}
+
