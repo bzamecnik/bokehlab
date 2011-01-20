@@ -148,48 +148,56 @@ void MovingAverage::createCamera(void) {
     //mCameraMan->setStyle(OgreBites::CS_MANUAL);
 }
 
-bool MovingAverage::keyPressed( const OIS::KeyEvent &arg )
+bool MovingAverage::keyPressed( const OIS::KeyEvent &evt )
 {
-    if (arg.key == OIS::KC_P) // increase lens aperture
+    if (evt.key == OIS::KC_P) // increase lens aperture
     {
         mLensRadius += 0.5;
-    } else if (arg.key == OIS::KC_L) // decrease lens aperture
+    } else if (evt.key == OIS::KC_L) // decrease lens aperture
     {
         mLensRadius -= 0.5;
         mLensRadius = (mLensRadius > 0.0) ? mLensRadius : 0.0;
-    } else if (arg.key == OIS::KC_O) // increase focus distance
+    } else if (evt.key == OIS::KC_O) // increase focus distance
     {
         mFocusDistance /= 0.9;
-    } else if (arg.key == OIS::KC_K) // decrease focus distance
+    } else if (evt.key == OIS::KC_K) // decrease focus distance
     {
         mFocusDistance *= 0.9;
     }
     resetCurrentFrameIndex();
-    return BaseApplication::keyPressed(arg);
+    return BaseApplication::keyPressed(evt);
 }
 
-bool MovingAverage::keyReleased( const OIS::KeyEvent &arg )
+bool MovingAverage::keyReleased( const OIS::KeyEvent &evt )
 {
     resetCurrentFrameIndex();
-    return BaseApplication::keyReleased(arg);
+    return BaseApplication::keyReleased(evt);
 }
 
-bool MovingAverage::mouseMoved( const OIS::MouseEvent &arg )
+bool MovingAverage::mouseMoved( const OIS::MouseEvent &evt )
 {
+    if (evt.state.buttonDown(OIS::MB_Right)) {
+        mLensRadius += 0.5 * (evt.state.Z.rel / 120.0);
+        mLensRadius = (mLensRadius > 0.0) ? mLensRadius : 0.0;
+    } else if (evt.state.buttonDown(OIS::MB_Left)) {
+        mFocusDistance += 0.5 * (evt.state.Z.rel / 120.0);
+    } else {
+        mFocusDistance += 5 * (evt.state.Z.rel / 120.0);
+    }
     resetCurrentFrameIndex();
-    return BaseApplication::mouseMoved(arg);
+    return BaseApplication::mouseMoved(evt);
 }
 
-bool MovingAverage::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
+bool MovingAverage::mousePressed( const OIS::MouseEvent &evt, OIS::MouseButtonID id )
 {
     resetCurrentFrameIndex();
-    return BaseApplication::mousePressed(arg, id);
+    return BaseApplication::mousePressed(evt, id);
 }
 
-bool MovingAverage::mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id )
+bool MovingAverage::mouseReleased( const OIS::MouseEvent &evt, OIS::MouseButtonID id )
 {
     resetCurrentFrameIndex();
-    return BaseApplication::mouseReleased(arg, id);
+    return BaseApplication::mouseReleased(evt, id);
 }
 
 void MovingAverage::resetCurrentFrameIndex() {
