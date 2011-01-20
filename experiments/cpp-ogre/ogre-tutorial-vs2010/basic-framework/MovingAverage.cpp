@@ -8,7 +8,7 @@ MovingAverage::MovingAverage(void)
     mLastCameraOffset = Ogre::Vector3::ZERO;
     mCurrentFrameOffset = Ogre::Vector2::ZERO;
     mLensRadius = 5.0;
-    mFocusDistance = 215.0;
+    mFocusDistance = 170.0;
     resetCurrentFrameIndex();
 }
 //-------------------------------------------------------------------------------------
@@ -24,21 +24,29 @@ void MovingAverage::createScene(void)
 	Ogre::Light* light = mSceneMgr->createLight("MainLight");
 	light->setPosition(20, 80, 50);
 
-    //// create rotating grass plane
+    mSceneMgr->setSkyBox(true, "Examples/SpaceSkyBox");
+ 
+    for (int i = 0; i < 5; i++) {
+	    Ogre::Entity* ogreHead = mSceneMgr->createEntity("OgreHead" + i, "ogrehead.mesh");
+	    Ogre::SceneNode* ogreNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("OgreHead" + i, Ogre::Vector3( i * 100, 0, 0 ));
+	    ogreNode->attachObject(ogreHead);
+    }
 
-	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("PlaneMat", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	Ogre::TextureUnitState* tuisTexture = mat->getTechnique(0)->getPass(0)->createTextureUnitState("grass_1024.jpg");
- 
-	mPlane = new Ogre::MovablePlane("Plane");
-	mPlane->d = 0;
-	mPlane->normal = Ogre::Vector3::UNIT_Y;
- 
-	Ogre::MeshManager::getSingleton().createPlane("PlaneMesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, *mPlane, 120, 120, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
-	mPlaneEnt = mSceneMgr->createEntity("PlaneEntity", "PlaneMesh");
-	mPlaneEnt->setMaterialName("PlaneMat");
- 
-	mPlaneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	mPlaneNode->attachObject(mPlaneEnt);
+    //// create a grass plane
+
+	//Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("PlaneMat", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	//Ogre::TextureUnitState* tuisTexture = mat->getTechnique(0)->getPass(0)->createTextureUnitState("grass_1024.jpg");
+ //
+	//mPlane = new Ogre::MovablePlane("Plane");
+	//mPlane->d = 0;
+	//mPlane->normal = Ogre::Vector3::UNIT_Y;
+ //
+	//Ogre::MeshManager::getSingleton().createPlane("PlaneMesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, *mPlane, 120, 120, 1, 1, true, 1, 1, 1, Ogre::Vector3::UNIT_Z);
+	//mPlaneEnt = mSceneMgr->createEntity("PlaneEntity", "PlaneMesh");
+	//mPlaneEnt->setMaterialName("PlaneMat");
+ //
+	//mPlaneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	//mPlaneNode->attachObject(mPlaneEnt);
 
 
     setupCompositors();
@@ -68,13 +76,13 @@ void MovingAverage::setupCompositors(void) {
 		Ogre::CompositionTechnique::TextureDefinition *def = t->createTextureDefinition("movingAverage");
 		def->width = 0;
 		def->height = 0;
-        def->formatList.push_back(Ogre::PF_FLOAT16_RGB);
+        def->formatList.push_back(Ogre::PF_FLOAT32_RGB);
 	}
 	{
 		Ogre::CompositionTechnique::TextureDefinition *def = t->createTextureDefinition("updatedMovingAverage");
 		def->width = 0;
 		def->height = 0;
-		def->formatList.push_back(Ogre::PF_FLOAT16_RGB);
+		def->formatList.push_back(Ogre::PF_FLOAT32_RGB);
 	}
 	/// Render scene
 	{
@@ -132,8 +140,9 @@ void MovingAverage::setupCompositors(void) {
 void MovingAverage::createCamera(void) {
     BaseApplication::createCamera();
 
-    mCamera->setPosition(Ogre::Vector3(60, 200, 70));
-	mCamera->lookAt(0,0,0);
+    //mCamera->setPosition(Ogre::Vector3(60, 200, 70));
+    mCamera->setPosition(Ogre::Vector3(-70, 0, 60));
+	mCamera->lookAt(30,5,0);
 
     //mCameraMan->setStyle(OgreBites::CS_MANUAL);
 }
