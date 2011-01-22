@@ -10,6 +10,7 @@ MovingAverage::MovingAverage(void)
     mCurrentFrameOffset = Ogre::Vector2::ZERO;
     mLensRadius = 5.0;
     mFocusDistance = 170.0;
+    mDoFCompositorEnabled = false;
     resetCurrentFrameIndex();
 }
 //-------------------------------------------------------------------------------------
@@ -53,7 +54,7 @@ void MovingAverage::createScene(void)
     setupCompositors();
     
     Ogre::CompositorManager::getSingleton().addCompositor(mWindow->getViewport(0), "DoFAccum");
-    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), "DoFAccum", true);
+    toggleDoFCompositor();
 
     Ogre::CompositorInstance* compositor = Ogre::CompositorManager::getSingleton().getCompositorChain(
         mWindow->getViewport(0))->getCompositor("DoFAccum");
@@ -138,6 +139,12 @@ void MovingAverage::setupCompositors(void) {
 	}
 }
 
+void MovingAverage::toggleDoFCompositor() {
+    mDoFCompositorEnabled = !mDoFCompositorEnabled;
+    Ogre::CompositorManager::getSingleton().setCompositorEnabled(
+        mWindow->getViewport(0), "DoFAccum", mDoFCompositorEnabled);
+}
+
 void MovingAverage::createCamera(void) {
     BaseApplication::createCamera();
 
@@ -163,6 +170,8 @@ bool MovingAverage::keyPressed( const OIS::KeyEvent &evt )
     } else if (evt.key == OIS::KC_K) // decrease focus distance
     {
         mFocusDistance *= 0.9;
+    } else if (evt.key == OIS::KC_C) {
+        toggleDoFCompositor();
     }
     resetCurrentFrameIndex();
     return BaseApplication::keyPressed(evt);
@@ -214,28 +223,33 @@ Ogre::Vector2 MovingAverage::getCurrentFrameOffset() const {
 
 bool MovingAverage::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-    // make offset in the XY plane in the camera space whose normal, -Z, is
-    // the camera view direction
+    if (mDoFCompositorEnabled) {
+        // make offset in the XY plane in the camera space whose normal, -Z, is
+        // the camera view direction
 
-    mCamera->moveRelative(-mLastCameraOffset);
+        mCamera->moveRelative(-mLastCameraOffset);
 
-    Ogre::Vector2 offset;    
-    Ogre::Vector2 randomSquareSamples(Ogre::Math::RangeRandom(0.0, 1.0), Ogre::Math::RangeRandom(0.0, 1.0));
-    // the offset is uniformly sampled from within the lens disk
-    // using uniform disk sampling
-    uniformSampleDisk(randomSquareSamples, &offset);
+        Ogre::Vector2 offset;    
+        Ogre::Vector2 randomSquareSamples(Ogre::Math::RangeRandom(0.0, 1.0), Ogre::Math::RangeRandom(0.0, 1.0));
+        // the offset is uniformly sampled from within the lens disk
+        // using uniform disk sampling
+        uniformSampleDisk(randomSquareSamples, &offset);
 
-    offset *= mLensRadius;
-    mLastCameraOffset = Ogre::Vector3(offset.x, offset.y, 0.0);
+        offset *= mLensRadius;
+        mLastCameraOffset = Ogre::Vector3(offset.x, offset.y, 0.0);
     
-    mCamera->moveRelative(mLastCameraOffset);
+        mCamera->moveRelative(mLastCameraOffset);
 
-    // the image in the near has to be translated based on the translation
-    // of the camera in the camera plane
-    // NOTE: the Y direction in the world space and in the texture space is swapped!
-    mCurrentFrameOffset = -(mCamera->getNearClipDistance() / mFocusDistance) * offset * Ogre::Vector2(1, -1);
+        // the image in the near has to be translated based on the translation
+        // of the camera in the camera plane
+        // NOTE: the Y direction in the world space and in the texture space is swapped!
+        mCurrentFrameOffset = -(mCamera->getNearClipDistance() / mFocusDistance) * offset * Ogre::Vector2(1, -1);
 
-    ++mCurrentFrameIndex;
+        ++mCurrentFrameIndex;
+    } else if (mLastCameraOffset != Ogre::Vector3::ZERO) {
+        mCamera->moveRelative(-mLastCameraOffset);
+        mLastCameraOffset = Ogre::Vector3::ZERO;
+    }
 
     return BaseApplication::frameRenderingQueued(evt);
 }
