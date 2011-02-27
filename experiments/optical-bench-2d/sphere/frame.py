@@ -8,7 +8,7 @@ def drawFrameAxes(position, frame):
     visual.arrow(pos=position, axis=frame[2], shaftwidth=0.01,
         color=visual.color.red)
 
-def drawRayDirection(position, direction, color=visual.color.yellow):
+def drawRayDirection(position=(0,0,0), direction=(1,0,0), color=visual.color.yellow):
     return visual.arrow(pos=position, axis=direction, shaftwidth=0.025,
         color=color)
 
