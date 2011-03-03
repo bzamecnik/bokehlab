@@ -31,6 +31,7 @@ protected:
     void setupCompositors(void);
     void uniformSampleDisk(const Ogre::Vector2& randomNumbers, Ogre::Vector2* diskSamples);
     void resetCurrentFrameIndex();
+    void toggleDoFCompositor();
 
 	Ogre::MovablePlane* mPlane;
 	Ogre::Entity* mPlaneEnt;
@@ -47,6 +48,8 @@ protected:
 
     Ogre::Real mLensRadius;
     Ogre::Real mFocusDistance;
+
+    bool mDoFCompositorEnabled;
 };
 
 #endif // #ifndef __MovingAverage_h_
