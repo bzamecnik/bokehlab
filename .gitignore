@@ -28,3 +28,9 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 *.png
+*.pyc
+Ogre.log
+*.opensdf
+*.sdf
+
+*.ipch

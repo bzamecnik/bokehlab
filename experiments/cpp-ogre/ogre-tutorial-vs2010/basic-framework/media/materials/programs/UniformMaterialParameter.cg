@@ -1,0 +1,8 @@
+float4 UniformMaterialParameter_ps (
+	float2 iTexCoord : TEXCOORD0,
+	uniform float4 colorModulate
+) : COLOR
+{
+  return iTexCoord[0] * iTexCoord[1] * colorModulate;
+}
+

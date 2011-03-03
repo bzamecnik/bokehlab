@@ -1,0 +1,105 @@
+// based on Ogre3D media\materials\scripts\MotionBlur.material
+
+fragment_program BokehLab/DoFAccum/Combine_fp cg
+{
+  source DoFAccumCombine.cg
+  profiles ps_2_0 arbfp1
+  entry_point DoFAccumCombine_FP
+
+//  default_params
+//  {
+//    // TODO: this parameter should be a custom parameter computed as:
+//		//   1 / currentFrameIndex
+//    param_named blur float 0.85
+//  }
+}
+
+//
+// Compute updated moving average of the frames using previous frame's
+// MovingAverage and CurrentFrame and send the result to the output.
+//
+material BokehLab/DoFAccum/Combine
+{
+  technique
+  {
+    pass
+    {
+      depth_check off
+
+      fragment_program_ref BokehLab/DoFAccum/Combine_fp
+      {
+        param_named currentFrameWeight float 0.1
+        param_named offset float2 0.0 0.0
+      }
+
+      vertex_program_ref Ogre/Compositor/StdQuad_Cg_vp
+      {
+      }
+
+      // current frame of the scene 
+      texture_unit CurrentFrame
+      {
+        tex_address_mode border
+        tex_border_colour 0.0 0.0 0.0
+        filtering linear linear none
+        tex_coord_set 0
+      }
+
+      // accumulated moving average of the previous frames
+      texture_unit MovingAverage
+      {
+        tex_address_mode border
+        tex_border_colour 0.0 0.0 0.0
+        filtering linear linear none
+        tex_coord_set 0
+      }
+    }
+  }
+}
+
+//
+// Update the MovingAverage using the moving average computed for the current
+// frame. Just replace the output texture contents with the input texture's.
+//
+material BokehLab/DoFAccum/Copyback
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      depth_check off
+
+      texture_unit UpdatedMovingAverage
+      {
+        tex_address_mode clamp
+        filtering linear linear none
+        colour_op replace
+        tex_coord_set 0
+      }
+    }
+  }
+}
+
+//
+// Display the updated moving average. Again just send the input to the output.
+//
+material BokehLab/DoFAccum/Display
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      depth_check off
+
+      texture_unit MovingAverage
+      {
+        tex_address_mode clamp
+        filtering linear linear none
+        colour_op replace
+        tex_coord_set 0
+      }
+    }
+  }
+}
