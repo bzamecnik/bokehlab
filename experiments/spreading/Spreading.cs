@@ -35,16 +35,22 @@ namespace spreading
             // - use more color channels: RGB, RGBA
             // - directly access the image via LockBits and pointers
 
-            double[,] table = new double[width, height];
+            int bands = 3;
+            double[,,] table = new double[width, height, 3];
 
             // zero out the table
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    table[x, y] = 0;
+                    for (int band = 0; band < bands; band++)
+                    {
+                        table[x, y, band] = 0;
+                    }
                 }
             }
+
+            double[] intensities = new double[bands];
 
             // phase 1: distribute corners into the table
             for (int x = 0; x < width; x++)
@@ -54,21 +60,31 @@ namespace spreading
                     int radius = getBlurRadius(x, y);
                     double area = (radius * 2 + 1) * (radius * 2 + 1);
 
-                    double color = inputImage.GetPixel(x, y).GetBrightness();
-                    double cornerValue = color / area;
-                    // DEBUG:
-                    double boost = 2.0; //10.0;
-                    cornerValue *= boost;
-
                     int top = clamp(y - radius, 0, height - 1);
                     int bottom = clamp(y + radius, 0, height - 1);
                     int left = clamp(x - radius, 0, width - 1);
                     int right = clamp(x + radius, 0, width - 1);
 
-                    table[left, top] += cornerValue; // upper left
-                    table[right, top] -= cornerValue; // upper right
-                    table[left, bottom] -= cornerValue; // lower left
-                    table[right, bottom] += cornerValue; // lower right
+                    //double color = inputImage.GetPixel(x, y).GetBrightness();
+                    Color color = inputImage.GetPixel(x, y);
+                    
+                    intensities[0] = color.R / 255.0;
+                    intensities[1] = color.G / 255.0;
+                    intensities[2] = color.B / 255.0;
+
+                    for (int band = 0; band < bands; band++)
+                    {
+
+                        double cornerValue = intensities[band] / area;
+                        // DEBUG:
+                        double boost = 1.0; // 20.0;
+                        cornerValue *= boost;
+
+                        table[left, top, band] += cornerValue; // upper left
+                        table[right, top, band] -= cornerValue; // upper right
+                        table[left, bottom, band] -= cornerValue; // lower left
+                        table[right, bottom, band] += cornerValue; // lower right
+                    }
                 }
             }
 
@@ -91,7 +107,10 @@ namespace spreading
             {
                 for (int x = 1; x < width; x++)
                 {
-                    table[x, y] += table[x - 1, y];
+                    for (int band = 0; band < bands; band++)
+                    {
+                        table[x, y, band] += table[x - 1, y, band];
+                    }
                 }
             }
 
@@ -99,7 +118,10 @@ namespace spreading
             {
                 for (int y = 1; y < height; y++)
                 {
-                    table[x, y] += table[x, y - 1];
+                    for (int band = 0; band < bands; band++)
+                    {
+                        table[x, y, band] += table[x, y - 1, band];
+                    }
                 }
             }
 
@@ -107,8 +129,11 @@ namespace spreading
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int intensity = (int)(clamp(table[x, y] * 255.0, 0.0, 255.0));
-                    Color color = Color.FromArgb(intensity, intensity, intensity);
+                    for (int band = 0; band < bands; band++)
+                    {
+                        intensities[band] = clamp(table[x, y, band] * 255.0, 0.0, 255.0);
+                    }
+                    Color color = Color.FromArgb((int)intensities[0], (int)intensities[1], (int)intensities[2]);
                     outputImage.SetPixel(x, y, color);
                 }
             }
