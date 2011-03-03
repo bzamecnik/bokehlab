@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.IO;
 using System.IO.Compression;
+using System.Drawing.Imaging;
 
 namespace spreading
 {
@@ -32,8 +33,8 @@ namespace spreading
             if (width < 1 || height < 1) return null;
 
             // TODO:
-            // - use more color channels: RGB, RGBA
-            // - directly access the image via LockBits and pointers
+            // - add a normalization channel
+            // - fix situation with no blur
 
             int bands = 3;
             double[,,] table = new double[width, height, 3];
@@ -52,41 +53,48 @@ namespace spreading
 
             double[] intensities = new double[bands];
 
+
             // phase 1: distribute corners into the table
-            for (int x = 0; x < width; x++)
+            BitmapData inputData = inputImage.LockBits(
+                new Rectangle(0, 0, width, height),
+                ImageLockMode.ReadOnly, inputImage.PixelFormat);
+            unsafe
             {
                 for (int y = 0; y < height; y++)
                 {
-                    int radius = getBlurRadius(x, y);
-                    double area = (radius * 2 + 1) * (radius * 2 + 1);
-
-                    int top = clamp(y - radius, 0, height - 1);
-                    int bottom = clamp(y + radius, 0, height - 1);
-                    int left = clamp(x - radius, 0, width - 1);
-                    int right = clamp(x + radius, 0, width - 1);
-
-                    //double color = inputImage.GetPixel(x, y).GetBrightness();
-                    Color color = inputImage.GetPixel(x, y);
-                    
-                    intensities[0] = color.R / 255.0;
-                    intensities[1] = color.G / 255.0;
-                    intensities[2] = color.B / 255.0;
-
-                    for (int band = 0; band < bands; band++)
+                    byte* inputRow = (byte*)inputData.Scan0 + (y * inputData.Stride);
+                    for (int x = 0; x < width; x++)
                     {
+                        int radius = getBlurRadius(x, y);
+                        double area = (radius * 2 + 1) * (radius * 2 + 1);
 
-                        double cornerValue = intensities[band] / area;
-                        // DEBUG:
-                        double boost = 1.0; // 20.0;
-                        cornerValue *= boost;
+                        int top = clamp(y - radius, 0, height - 1);
+                        int bottom = clamp(y + radius, 0, height - 1);
+                        int left = clamp(x - radius, 0, width - 1);
+                        int right = clamp(x + radius, 0, width - 1);
 
-                        table[left, top, band] += cornerValue; // upper left
-                        table[right, top, band] -= cornerValue; // upper right
-                        table[left, bottom, band] -= cornerValue; // lower left
-                        table[right, bottom, band] += cornerValue; // lower right
+                        //double color = inputImage.GetPixel(x, y).GetBrightness();
+                        //Color color = inputImage.GetPixel(x, y);
+
+                        for (int band = 2; band >= 0; band--)
+                        {
+                            byte color = inputRow[x * 3 + band];
+                            double intensity = color / 255.0;
+
+                            double cornerValue = intensity / area;
+                            // DEBUG:
+                            double boost = 1.0; // 20.0;
+                            cornerValue *= boost;
+
+                            table[left, top, band] += cornerValue; // upper left
+                            table[right, top, band] -= cornerValue; // upper right
+                            table[left, bottom, band] -= cornerValue; // lower left
+                            table[right, bottom, band] += cornerValue; // lower right
+                        }
                     }
                 }
             }
+            inputImage.UnlockBits(inputData);
 
             //printTable(table);
 
@@ -125,18 +133,26 @@ namespace spreading
                 }
             }
 
-            for (int y = 0; y < height; y++)
+            BitmapData outputData = outputImage.LockBits(
+                new Rectangle(0, 0, width, height),
+                ImageLockMode.ReadOnly, outputImage.PixelFormat);
+            unsafe
             {
-                for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int band = 0; band < bands; band++)
+                    byte* outputRow = (byte*)outputData.Scan0 + (y * outputData.Stride);
+                    for (int x = 0; x < width; x++)
                     {
-                        intensities[band] = clamp(table[x, y, band] * 255.0, 0.0, 255.0);
+                        for (int band = 2; band >= 0; band--)
+                        {
+                            double color = clamp(table[x, y, band] * 255.0, 0.0, 255.0);
+                            outputRow[x * 3 + band] = (byte)color;
+                        }
+
                     }
-                    Color color = Color.FromArgb((int)intensities[0], (int)intensities[1], (int)intensities[2]);
-                    outputImage.SetPixel(x, y, color);
                 }
             }
+            outputImage.UnlockBits(outputData);
 
             table = null;
 
