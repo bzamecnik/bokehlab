@@ -11,8 +11,8 @@ def visualizeSphereParametrization():
     for i in range(0, thetaSampleCount + 1):
         for j in range(0, phiSampleCount + 1):
             spherical = SphericalCoords(
-                theta = i * thetaStep * math.pi,
-                phi = j * phiStep * 2 * math.pi)
+                theta = (i * thetaStep - 0.5) * math.pi,
+                phi = (j * phiStep) * 2 * math.pi)
             color = visual.color.hsv_to_rgb((j * phiStep, i * thetaStep, 1.0))
             points(pos=[spherical.toCartesian()], color=color)
     
