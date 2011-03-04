@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Drawing.Imaging;
 
 namespace spreading
 {
@@ -76,6 +77,11 @@ namespace spreading
     {
         if (inputImage == null) return;
         Cursor.Current = Cursors.WaitCursor;
+
+        if (inputImage.PixelFormat != PixelFormat.Format24bppRgb)
+        {
+            inputImage = inputImage.Clone(new Rectangle(0, 0, inputImage.Width, inputImage.Height), PixelFormat.Format24bppRgb);
+        }
 
         Stopwatch sw = new Stopwatch();
         sw.Start();

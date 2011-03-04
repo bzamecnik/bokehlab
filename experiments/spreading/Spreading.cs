@@ -34,7 +34,7 @@ namespace spreading
             if (outputImage == null)
             {
                 start = sw.ElapsedMilliseconds;
-                outputImage = new Bitmap(width, height, inputImage.PixelFormat);
+                outputImage = new Bitmap(width, height, PixelFormat.Format24bppRgb);
                 Console.WriteLine("Creating new Bitmap: {0} ms", sw.ElapsedMilliseconds - start);
             }
 
@@ -43,6 +43,9 @@ namespace spreading
             // TODO:
             // - add a normalization channel
             // - fix situation with no blur
+            // - fix spreading at borders - add some more area to the table
+            // - implement spreading HDR images
+            // - try single-dimensional table instead of multi-dimensional
 
             int bands = 3;
             start = sw.ElapsedMilliseconds;
@@ -94,13 +97,13 @@ namespace spreading
 
                         for (int band = 2; band >= 0; band--)
                         {
-                            byte color = inputRow[x * 3 + band];
+                            byte color = inputRow[x * bands + band];
                             double intensity = color * colorNormalizationFactor;
                             double cornerValue = intensity * areaInv;
 
                             // DEBUG:
                             //double boost = 1.0;// 20.0;
-                            //cornerValue *= boost;
+                            //cornerValue *= 20.0;
 
                             table[left, top, band] += cornerValue; // upper left
                             table[right, top, band] -= cornerValue; // upper right
@@ -123,8 +126,8 @@ namespace spreading
             //{
             //    for (int x = 0; x < width; x++)
             //    {
-            //        bool positive = table[x, y] > 0;
-            //        bool negative = table[x, y] < 0;
+            //        bool positive = table[x, y, 0] > 0;
+            //        bool negative = table[x, y, 0] < 0;
             //        Color color = Color.FromArgb(positive ? 255 : 0, negative ? 255 : 0, 0);
             //        outputImage.SetPixel(x, y, color);
             //    }
@@ -171,10 +174,11 @@ namespace spreading
                     byte* outputRow = (byte*)outputData.Scan0 + (y * outputData.Stride);
                     for (int x = 0; x < width; x++)
                     {
-                        for (int band = 2; band >= 0; band--)
+                        int index = x * bands;
+                        for (int band = bands - 1; band >= 0; band--)
                         {
                             double color = clamp(table[x, y, band] * 255.0, 0.0, 255.0);
-                            outputRow[x * 3 + band] = (byte)color;
+                            outputRow[index + band] = (byte)color;
                         }
 
                     }
@@ -185,6 +189,16 @@ namespace spreading
             start = sw.ElapsedMilliseconds;
             outputImage.UnlockBits(outputData);
             Console.WriteLine("Unlocking output image: {0} ms", sw.ElapsedMilliseconds - start);
+
+            //for (int y = 0; y < height; y++)
+            //{
+            //    for (int x = 0; x < width; x++)
+            //    {
+            //        int intensity = (int)clamp(table[x, y, 0] * 255.0, 0.0, 255.0);
+            //        Color color = Color.FromArgb(intensity, intensity, intensity);
+            //        outputImage.SetPixel(x, y, color);
+            //    }
+            //}
 
             sw.Stop();
             Console.WriteLine();
