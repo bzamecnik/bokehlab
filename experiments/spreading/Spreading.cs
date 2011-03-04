@@ -88,9 +88,9 @@ namespace spreading
                         //int radius = getBlurRadius(x, y);
 
                         int top = clamp(y - radius, 0, height - 1);
-                        int bottom = clamp(y + radius, 0, height - 1);
+                        int bottom = clamp(y + radius + 1, 0, height - 1);
                         int left = clamp(x - radius, 0, width - 1);
-                        int right = clamp(x + radius, 0, width - 1);
+                        int right = clamp(x + radius + 1, 0, width - 1);
 
                         //double color = inputImage.GetPixel(x, y).GetBrightness();
                         //Color color = inputImage.GetPixel(x, y);
