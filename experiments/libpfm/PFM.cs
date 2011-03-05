@@ -219,8 +219,7 @@ namespace libpfm
             {
                 scale = -scale;
             }
-            writer.Write(String.Format(CultureInfo.CreateSpecificCulture("en-US"), "{0}\n", scale));
-
+            writer.Write(String.Format(CultureInfo.CreateSpecificCulture("en-US"), "{0:F6}\n", scale));
             writer.Flush();
         }
 

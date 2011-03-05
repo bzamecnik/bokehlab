@@ -9,7 +9,36 @@ namespace pfmUtil
 {
     class Program
     {
-        public static void DisplayInfo(PFMImage image) {
+        private static void ReadAndWriteTestImage(string filename) {
+            Console.WriteLine("Writing a test image.");
+            PFMImage image = CreateTestImage();
+            DisplayInfo(image);
+            PrintImageContents(image);
+            image.SaveImage(filename);
+            Console.WriteLine();
+
+            Console.WriteLine("Reading a test image.");
+            PFMImage loadedImage = PFMImage.LoadImage(filename);
+            DisplayInfo(loadedImage);
+            PrintImageContents(loadedImage);
+        }
+
+        private static void ReadAndWriteExistingImage(string filename)
+        {
+            Console.WriteLine("Reading an existing image.");
+            PFMImage image = PFMImage.LoadImage(filename);
+            DisplayInfo(image);
+            Console.WriteLine();
+
+            Console.WriteLine("Writing a copy of an existing image.");
+            string copyFilename = filename + ".out";
+            image.SaveImage(copyFilename);
+            Console.WriteLine("Reading a copy of an existing image.");
+            PFMImage loadedImage = PFMImage.LoadImage(copyFilename);
+            DisplayInfo(loadedImage);
+        }
+
+        private static void DisplayInfo(PFMImage image) {
             Console.WriteLine("Portable float-map");
             Console.WriteLine("Pixel format: {0}", image.PixelFormat);
             Console.WriteLine("Width: {0}, height: {1}", image.Width, image.Height);
@@ -64,23 +93,8 @@ namespace pfmUtil
 
             try
             {
-                //PFMImage image = PFMImage.LoadImage(args[0]);
-                //DisplayInfo(image);
-                //string newImageFileName = filename + ".out";
-                //image.SaveImage(newImageFileName);
-                //DisplayInfo(PFMImage.LoadImage(newImageFileName));
-
-                Console.WriteLine("Writing test image.");
-                PFMImage image = CreateTestImage();
-                DisplayInfo(image);
-                PrintImageContents(image);
-                image.SaveImage(args[0]);
-                Console.WriteLine();
-
-                Console.WriteLine("Reading test image.");
-                PFMImage loadedImage = PFMImage.LoadImage(args[0]);
-                DisplayInfo(loadedImage);
-                PrintImageContents(loadedImage);
+                ReadAndWriteExistingImage(args[0]);
+                //ReadAndWriteATestImage(args[0]);
             }
             catch (OutOfMemoryException ex)
             {
