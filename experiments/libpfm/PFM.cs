@@ -252,7 +252,7 @@ namespace libpfm
 
         public Bitmap ToLdr()
         {
-            return ToLdr(1.5f, 0.0f);
+            return ToLdr(1.0f, 0.0f);
         }
 
         public Bitmap ToLdr(float scale, float shift)

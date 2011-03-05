@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Drawing;
 using System.Text;
 using System.IO;
 using System.IO.Compression;
-using System.Drawing.Imaging;
 using System.Diagnostics;
+using libpfm;
 using mathHelper;
 
 namespace spreading
@@ -20,12 +19,12 @@ namespace spreading
             BlurRadius = DEFAULT_BLUR_RADIUS;
         }
 
-        public Bitmap SpreadPSF(Bitmap inputImage, Bitmap outputImage)
+        public PFMImage SpreadPSF(PFMImage inputImage, PFMImage outputImage)
         {
             if (inputImage == null) return null;
 
-            int width = inputImage.Width;
-            int height = inputImage.Height;
+            uint width = inputImage.Width;
+            uint height = inputImage.Height;
 
             Stopwatch sw = new Stopwatch();
             sw.Reset();
@@ -35,7 +34,7 @@ namespace spreading
             if (outputImage == null)
             {
                 start = sw.ElapsedMilliseconds;
-                outputImage = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+                outputImage = new PFMImage(width, height, inputImage.PixelFormat);
                 Console.WriteLine("Creating new Bitmap: {0} ms", sw.ElapsedMilliseconds - start);
             }
 
@@ -50,8 +49,10 @@ namespace spreading
 
             int bands = 3;
             start = sw.ElapsedMilliseconds;
-            double[,,] table = new double[width, height, 3];
-            Console.WriteLine("Allocating float table[{1}][{2}][3]: {0} ms", sw.ElapsedMilliseconds - start, width, height);
+            // TODO: use a PFMImage instead
+            float[,,] table = new float[width, height, 3];
+            Console.WriteLine("Allocating float table[{1}][{2}][3]: {0} ms",
+                sw.ElapsedMilliseconds - start, width, height);
 
             // zero out the table
             start = sw.ElapsedMilliseconds;
@@ -69,42 +70,29 @@ namespace spreading
 
             // phase 1: distribute corners into the table
             start = sw.ElapsedMilliseconds;
-            BitmapData inputData = inputImage.LockBits(
-                new Rectangle(0, 0, width, height),
-                ImageLockMode.ReadOnly, inputImage.PixelFormat);
-            Console.WriteLine("Locking input image: {0} ms", sw.ElapsedMilliseconds - start);
-
-            start = sw.ElapsedMilliseconds;
-            unsafe
-            {
+            
                 int radius = BlurRadius;
-                double areaInv = 1.0 / ((radius * 2 + 1) * (radius * 2 + 1));
-                double colorNormalizationFactor = 1.0 / 255.0;
+                float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
 
                 for (int y = 0; y < height; y++)
                 {
-                    byte* inputRow = (byte*)inputData.Scan0 + (y * inputData.Stride);
+                    
                     for (int x = 0; x < width; x++)
                     {
                         //int radius = getBlurRadius(x, y);
 
-                        int top = MathHelper.clamp(y - radius, 0, height - 1);
-                        int bottom = MathHelper.clamp(y + radius + 1, 0, height - 1);
-                        int left = MathHelper.clamp(x - radius, 0, width - 1);
-                        int right = MathHelper.clamp(x + radius + 1, 0, width - 1);
+                        int top = (int)MathHelper.clamp(y - radius, 0, height - 1);
+                        int bottom = (int)MathHelper.clamp(y + radius + 1, 0, height - 1);
+                        int left = (int)MathHelper.clamp(x - radius, 0, width - 1);
+                        int right = (int)MathHelper.clamp(x + radius + 1, 0, width - 1);
 
-                        //double color = inputLdrImage.GetPixel(x, y).GetBrightness();
+                        //float color = inputLdrImage.GetPixel(x, y).GetBrightness();
                         //Color color = inputLdrImage.GetPixel(x, y);
 
                         for (int band = 2; band >= 0; band--)
                         {
-                            byte color = inputRow[x * bands + band];
-                            double intensity = color * colorNormalizationFactor;
-                            double cornerValue = intensity * areaInv;
-
-                            // DEBUG:
-                            //double boost = 1.0;// 20.0;
-                            //cornerValue *= 20.0;
+                            float intensity = inputImage.Image[x, y, band];
+                            float cornerValue = intensity * areaInv;
 
                             table[left, top, band] += cornerValue; // upper left
                             table[right, top, band] -= cornerValue; // upper right
@@ -113,12 +101,7 @@ namespace spreading
                         }
                     }
                 }
-            }
             Console.WriteLine("Phase 1, reading input image: {0} ms", sw.ElapsedMilliseconds - start);
-
-            start = sw.ElapsedMilliseconds;
-            inputImage.UnlockBits(inputData);
-            Console.WriteLine("Unlocking input image: {0} ms", sw.ElapsedMilliseconds - start);
 
             //printTable(table);
 
@@ -162,34 +145,18 @@ namespace spreading
             Console.WriteLine("Phase 2, vertical: {0} ms", sw.ElapsedMilliseconds - start);
 
             start = sw.ElapsedMilliseconds;
-            BitmapData outputData = outputImage.LockBits(
-                new Rectangle(0, 0, width, height),
-                ImageLockMode.ReadOnly, outputImage.PixelFormat);
-            Console.WriteLine("Locking output image: {0} ms", sw.ElapsedMilliseconds - start);
-
-            start = sw.ElapsedMilliseconds;
-            unsafe
+            for (int y = 0; y < height; y++)
             {
-                for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
                 {
-                    byte* outputRow = (byte*)outputData.Scan0 + (y * outputData.Stride);
-                    for (int x = 0; x < width; x++)
+                    for (int band = bands - 1; band >= 0; band--)
                     {
-                        int index = x * bands;
-                        for (int band = bands - 1; band >= 0; band--)
-                        {
-                            double color = MathHelper.clamp(table[x, y, band] * 255.0, 0.0, 255.0);
-                            outputRow[index + band] = (byte)color;
-                        }
-
+                        outputImage.Image[x, y, band] = table[x, y, band];
                     }
+
                 }
             }
             Console.WriteLine("Writing output image: {0} ms", sw.ElapsedMilliseconds - start);
-
-            start = sw.ElapsedMilliseconds;
-            outputImage.UnlockBits(outputData);
-            Console.WriteLine("Unlocking output image: {0} ms", sw.ElapsedMilliseconds - start);
 
             //for (int y = 0; y < height; y++)
             //{
@@ -213,7 +180,7 @@ namespace spreading
             return BlurRadius;
         }
 
-        private void printTable(double[,] table)
+        private void printTable(float[,] table)
         {
             int width = table.GetLength(0);
             int height = table.GetLength(1);
@@ -221,8 +188,8 @@ namespace spreading
             {
                 for (int y = 0; y < height; y++)
                 {
-                    double value = table[x, y];
-                    if (Math.Abs(value) > 0)
+                    float value = table[x, y];
+                    if (Math.Abs(value) > 0.0f)
                     {
                         Console.Write("{0}, ", value);
                     }

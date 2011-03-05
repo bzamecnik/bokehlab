@@ -52,7 +52,8 @@ namespace spreading
             inputHdrImage = PFMImage.FromLdr(inputLdrImage);
         }
       pictureBox1.Image = inputLdrImage;
-      
+
+      outputHdrImage = null;
       outputLdrImage = null;
     }
 
@@ -100,12 +101,13 @@ namespace spreading
         {
             BlurRadius = (int)blurRadiusNumeric.Value
         };
-        //outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage);
-        //outputLdrImage = outputHdrImage.ToLdr();
-        // stub:
-        outputHdrImage = inputHdrImage;
-        //outputLdrImage = inputLdrImage;
-        outputLdrImage = inputHdrImage.ToLdr();
+        outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage);
+        outputLdrImage = outputHdrImage.ToLdr();
+        
+        //// stub:
+        //outputHdrImage = inputHdrImage;
+        ////outputLdrImage = inputLdrImage;
+        //outputLdrImage = inputHdrImage.ToLdr();
 
         sw.Stop();
         labelElapsed.Text = String.Format("Elapsed time: {0:f}s", 1.0e-3 * sw.ElapsedMilliseconds);
