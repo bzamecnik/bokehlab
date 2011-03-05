@@ -7,37 +7,22 @@ namespace mathHelper
 {
     public class MathHelper
     {
-        // TODO: use generics
-
-        public static double clamp(double number, double min, double max)
+        public static T Clamp<T>(T number, T min, T max)
+            where T : System.IComparable<T>
         {
-            if (number < min) return min;
-            if (number > max) return max;
+            if (number.CompareTo(min) < 0) return min;
+            if (number.CompareTo(max) > 0) return max;
             return number;
         }
 
-        public static float clamp(float number, float min, float max)
+        public static double Clamp(double number)
         {
-            if (number < min) return min;
-            if (number > max) return max;
-            return number;
+            return Clamp(number, 0.0, 1.0);
         }
 
-        public static int clamp(int number, int min, int max)
+        public static float Clamp(float number)
         {
-            if (number < min) return min;
-            if (number > max) return max;
-            return number;
-        }
-
-        public static double clamp(double number)
-        {
-            return clamp(number, 0.0, 1.0);
-        }
-
-        public static float clamp(float number)
-        {
-            return clamp(number, 0.0f, 1.0f);
+            return Clamp(number, 0.0f, 1.0f);
         }
 
     }

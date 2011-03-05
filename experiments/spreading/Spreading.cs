@@ -41,13 +41,13 @@ namespace spreading
             if (width < 1 || height < 1) return null;
 
             // TODO:
-            // - add a normalization channel
-            // - fix situation with no blur
+            // - add a normalization channel (for non-uniform PSF size)
+            // *- fix situation with no blur
             // - fix spreading at borders - add some more area to the table
-            // - implement spreading HDR images - write PFM library
+            // *- implement spreading HDR images - write PFM library
             // - try single-dimensional table instead of multi-dimensional
 
-            int bands = 3;
+            uint bands = inputImage.ChannelsCount;
             start = sw.ElapsedMilliseconds;
             // TODO: use a PFMImage instead
             float[,,] table = new float[width, height, 3];
@@ -81,15 +81,15 @@ namespace spreading
                     {
                         //int radius = getBlurRadius(x, y);
 
-                        int top = (int)MathHelper.clamp(y - radius, 0, height - 1);
-                        int bottom = (int)MathHelper.clamp(y + radius + 1, 0, height - 1);
-                        int left = (int)MathHelper.clamp(x - radius, 0, width - 1);
-                        int right = (int)MathHelper.clamp(x + radius + 1, 0, width - 1);
+                        int top = MathHelper.Clamp<int>(y - radius, 0, (int)height - 1);
+                        int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)height - 1);
+                        int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)width - 1);
+                        int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)width - 1);
 
                         //float color = inputLdrImage.GetPixel(x, y).GetBrightness();
                         //Color color = inputLdrImage.GetPixel(x, y);
 
-                        for (int band = 2; band >= 0; band--)
+                        for (int band = 0; band < bands; band++)
                         {
                             float intensity = inputImage.Image[x, y, band];
                             float cornerValue = intensity * areaInv;
@@ -149,7 +149,7 @@ namespace spreading
             {
                 for (int x = 0; x < width; x++)
                 {
-                    for (int band = bands - 1; band >= 0; band--)
+                    for (int band = 0; band < bands; band++)
                     {
                         outputImage.Image[x, y, band] = table[x, y, band];
                     }
@@ -162,7 +162,7 @@ namespace spreading
             //{
             //    for (int x = 0; x < width; x++)
             //    {
-            //        int intensity = (int)MathHelper.clamp(table[x, y, 0] * 255.0, 0.0, 255.0);
+            //        int intensity = (int)MathHelper.Clamp(table[x, y, 0] * 255.0, 0.0, 255.0);
             //        Color color = Color.FromArgb(intensity, intensity, intensity);
             //        outputLdrImage.SetPixel(x, y, color);
             //    }

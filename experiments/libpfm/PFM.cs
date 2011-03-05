@@ -294,7 +294,7 @@ namespace libpfm
                             // from [min; max] to [0.0; 1.0]
                             intensity = (intensity + shift) * scale;
                             intensity = (intensity - minValue) * scaleRangeInv;
-                            outputRow[x * 3 + band] = (byte)MathHelper.clamp(intensity * 255.0f, 0.0f, 255.0f);
+                            outputRow[x * 3 + band] = (byte)MathHelper.Clamp(intensity * 255.0f, 0.0f, 255.0f);
                         }
                     }
                 }
