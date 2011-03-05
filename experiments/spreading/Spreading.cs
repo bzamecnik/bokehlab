@@ -44,7 +44,7 @@ namespace spreading
             // - add a normalization channel
             // - fix situation with no blur
             // - fix spreading at borders - add some more area to the table
-            // - implement spreading HDR images
+            // - implement spreading HDR images - write PFM library
             // - try single-dimensional table instead of multi-dimensional
 
             int bands = 3;
