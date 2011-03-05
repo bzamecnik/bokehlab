@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Drawing.Imaging;
 using System.Diagnostics;
+using mathHelper;
 
 namespace spreading
 {
@@ -87,13 +88,13 @@ namespace spreading
                     {
                         //int radius = getBlurRadius(x, y);
 
-                        int top = clamp(y - radius, 0, height - 1);
-                        int bottom = clamp(y + radius + 1, 0, height - 1);
-                        int left = clamp(x - radius, 0, width - 1);
-                        int right = clamp(x + radius + 1, 0, width - 1);
+                        int top = MathHelper.clamp(y - radius, 0, height - 1);
+                        int bottom = MathHelper.clamp(y + radius + 1, 0, height - 1);
+                        int left = MathHelper.clamp(x - radius, 0, width - 1);
+                        int right = MathHelper.clamp(x + radius + 1, 0, width - 1);
 
-                        //double color = inputImage.GetPixel(x, y).GetBrightness();
-                        //Color color = inputImage.GetPixel(x, y);
+                        //double color = inputLdrImage.GetPixel(x, y).GetBrightness();
+                        //Color color = inputLdrImage.GetPixel(x, y);
 
                         for (int band = 2; band >= 0; band--)
                         {
@@ -129,7 +130,7 @@ namespace spreading
             //        bool positive = table[x, y, 0] > 0;
             //        bool negative = table[x, y, 0] < 0;
             //        Color color = Color.FromArgb(positive ? 255 : 0, negative ? 255 : 0, 0);
-            //        outputImage.SetPixel(x, y, color);
+            //        outputLdrImage.SetPixel(x, y, color);
             //    }
             //}
 
@@ -177,7 +178,7 @@ namespace spreading
                         int index = x * bands;
                         for (int band = bands - 1; band >= 0; band--)
                         {
-                            double color = clamp(table[x, y, band] * 255.0, 0.0, 255.0);
+                            double color = MathHelper.clamp(table[x, y, band] * 255.0, 0.0, 255.0);
                             outputRow[index + band] = (byte)color;
                         }
 
@@ -194,9 +195,9 @@ namespace spreading
             //{
             //    for (int x = 0; x < width; x++)
             //    {
-            //        int intensity = (int)clamp(table[x, y, 0] * 255.0, 0.0, 255.0);
+            //        int intensity = (int)MathHelper.clamp(table[x, y, 0] * 255.0, 0.0, 255.0);
             //        Color color = Color.FromArgb(intensity, intensity, intensity);
-            //        outputImage.SetPixel(x, y, color);
+            //        outputLdrImage.SetPixel(x, y, color);
             //    }
             //}
 
@@ -210,25 +211,6 @@ namespace spreading
         private int getBlurRadius(int x, int y)
         {
             return BlurRadius;
-        }
-
-        private double clamp(double number, double min, double max)
-        {
-            if (number < min) return min;
-            if (number > max) return max;
-            return number;
-        }
-
-        private int clamp(int number, int min, int max)
-        {
-            if (number < min) return min;
-            if (number > max) return max;
-            return number;
-        }
-
-        private double clamp(double number)
-        {
-            return clamp(number, 0.0, 1.0);
         }
 
         private void printTable(double[,] table)

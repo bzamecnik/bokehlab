@@ -10,14 +10,14 @@ namespace pfmUtil
     class Program
     {
         private static void ReadAndWriteTestImage(string filename) {
-            Console.WriteLine("Writing a test image.");
+            Console.WriteLine("Writing a test hdrImage.");
             PFMImage image = CreateTestImage();
             DisplayInfo(image);
             PrintImageContents(image);
             image.SaveImage(filename);
             Console.WriteLine();
 
-            Console.WriteLine("Reading a test image.");
+            Console.WriteLine("Reading a test hdrImage.");
             PFMImage loadedImage = PFMImage.LoadImage(filename);
             DisplayInfo(loadedImage);
             PrintImageContents(loadedImage);
@@ -25,15 +25,15 @@ namespace pfmUtil
 
         private static void ReadAndWriteExistingImage(string filename)
         {
-            Console.WriteLine("Reading an existing image.");
+            Console.WriteLine("Reading an existing hdrImage.");
             PFMImage image = PFMImage.LoadImage(filename);
             DisplayInfo(image);
             Console.WriteLine();
 
-            Console.WriteLine("Writing a copy of an existing image.");
+            Console.WriteLine("Writing a copy of an existing hdrImage.");
             string copyFilename = filename + ".out";
             image.SaveImage(copyFilename);
-            Console.WriteLine("Reading a copy of an existing image.");
+            Console.WriteLine("Reading a copy of an existing hdrImage.");
             PFMImage loadedImage = PFMImage.LoadImage(copyFilename);
             DisplayInfo(loadedImage);
         }

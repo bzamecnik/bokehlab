@@ -4,12 +4,15 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Globalization;
+using System.Drawing;
+using System.Drawing.Imaging;
+using mathHelper;
 
 namespace libpfm
 {
     public class PFMImage
     {
-        public readonly float[, ,] Image;
+        public float[, ,] Image { get; private set; }
 
         public uint Width { get; private set; }
         public uint Height { get; private set; }
@@ -48,7 +51,7 @@ namespace libpfm
             // read the header
             PFMImage image = ReadHeader(fs);
 
-            // read the image data
+            // read the hdrImage data
             byte[] rawIntensity = new byte[FLOAT_BYTE_COUNT];
             for (int y = 0; y < image.Height; y++)
             {
@@ -84,7 +87,7 @@ namespace libpfm
             string token = ReadToken(fs);
             if ((token.Length != 2) || (token[0] != 'P'))
             {
-                throw new OutOfMemoryException("Bad header: image signature.");
+                throw new OutOfMemoryException("Bad header: hdrImage signature.");
             }
             PixelFormat pixelFormat;
             switch (token[1])
@@ -99,30 +102,30 @@ namespace libpfm
                     throw new OutOfMemoryException("Bad header: pixel format.");
             }
 
-            // image dimensions - width, height
+            // hdrImage dimensions - width, height
 
             token = ReadToken(fs);
 
             uint width;
             if (!uint.TryParse(token, out width))
             {
-                throw new OutOfMemoryException("Bad header: image width");
+                throw new OutOfMemoryException("Bad header: hdrImage width");
             }
             token = ReadToken(fs);
             uint height;
             if (!uint.TryParse(token, out height))
             {
-                throw new OutOfMemoryException("Bad header: image height");
+                throw new OutOfMemoryException("Bad header: hdrImage height");
             }
 
-            // image endianness and scale
+            // hdrImage endianness and scale
             token = ReadToken(fs);
             //reader.Dispose();
 
             float scale;
             if (!float.TryParse(token, NumberStyles.Float, CultureInfo.CreateSpecificCulture("en-US"), out scale))
             {
-                throw new OutOfMemoryException("Bad header: image endianness and scale");
+                throw new OutOfMemoryException("Bad header: hdrImage endianness and scale");
             }
 
             Endianness endianness = (scale < 0) ? Endianness.LittleEndian : Endianness.BigEndian;
@@ -166,7 +169,7 @@ namespace libpfm
             // write the header
             SaveHeader(fs, this);
 
-            // write the image data
+            // write the hdrImage data
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
@@ -210,10 +213,10 @@ namespace libpfm
             }
             writer.Write("{0}\n", signature);
 
-            // write image dimensions - width, height
+            // write hdrImage dimensions - width, height
             writer.Write("{0} {1}\n", image.Width, image.Height);
 
-            // write image scale and endianness
+            // write hdrImage scale and endianness
             float scale = image.Scale;
             if (image.Endianness == Endianness.LittleEndian)
             {
@@ -245,6 +248,96 @@ namespace libpfm
                 default:
                     throw new ArgumentException(String.Format("Unsupported pixel format: {0}", pixelFormat));
             }
+        }
+
+        public Bitmap ToLdr()
+        {
+            return ToLdr(1.5f, 0.0f);
+        }
+
+        public Bitmap ToLdr(float scale, float shift)
+        {
+            int width = (int)Width;
+            int height = (int)Height;
+            Bitmap outputImage = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            float minValue = float.MaxValue;
+            float maxValue = float.MinValue;
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    for (int band = 2; band >= 0; band--)
+                    {
+                        float value = Image[x, y, band];
+                        minValue = Math.Min(minValue, value);
+                        maxValue = Math.Max(maxValue, value);
+                    }
+                }
+            }
+
+            BitmapData outputData = outputImage.LockBits(new Rectangle(0, 0, width, height),
+               ImageLockMode.ReadOnly, outputImage.PixelFormat);
+            unsafe
+            {
+                float scaleRangeInv = 1.0f / (maxValue - minValue); // for tone-mapping
+                for (int y = 0; y < Height; y++)
+                {
+                    byte* outputRow = (byte*)outputData.Scan0 + (y * outputData.Stride);
+                    for (int x = 0; x < Width; x++)
+                    {
+                        for (int band = 2; band >= 0; band--)
+                        {
+                            // translate RGB input image to BGR output image
+                            float intensity = Image[x, y, 2 - band];
+                            // do a simple tone-mapping - linear scaling
+                            // from [min; max] to [0.0; 1.0]
+                            intensity = (intensity + shift) * scale;
+                            intensity = (intensity - minValue) * scaleRangeInv;
+                            outputRow[x * 3 + band] = (byte)MathHelper.clamp(intensity * 255.0f, 0.0f, 255.0f);
+                        }
+                    }
+                }
+            }
+            outputImage.UnlockBits(outputData);
+
+            return outputImage;
+        }
+
+        public static PFMImage FromLdr(System.Drawing.Bitmap ldrImage)
+        {
+            Bitmap inputImage = ldrImage;
+            int width = ldrImage.Width;
+            int height = ldrImage.Height;
+            if (ldrImage.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb) {
+                inputImage = ldrImage.Clone(new Rectangle(0, 0, width, height), System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            }
+            else if (ldrImage.PixelFormat != System.Drawing.Imaging.PixelFormat.Format24bppRgb)
+            {
+                throw new ArgumentException(String.Format("Unsupported input LDR hdrImage pixel format: {0}", ldrImage.PixelFormat));
+            }
+            PFMImage hdrImage = new PFMImage((uint)width, (uint)height, PixelFormat.RGB);
+
+            BitmapData inputData = inputImage.LockBits(new Rectangle(0, 0, width, height),
+               ImageLockMode.ReadOnly, inputImage.PixelFormat);
+            float conversionFactor = 1 / 255.0f;
+            unsafe
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    byte* inputRow = (byte*)inputData.Scan0 + (y * inputData.Stride);
+                    for (int x = 0; x < width; x++)
+                    {
+                        for (int band = 2; band >= 0; band--)
+                        {
+                            // translate BGR input image to RGB output image
+                            hdrImage.Image[x, y, 2 - band] = inputRow[x * 3 + band] * conversionFactor;
+                        }
+                    }
+                }
+            }
+            inputImage.UnlockBits(inputData);
+            return hdrImage;
         }
     }
 
