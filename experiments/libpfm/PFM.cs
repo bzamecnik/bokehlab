@@ -252,10 +252,10 @@ namespace libpfm
 
         public Bitmap ToLdr()
         {
-            return ToLdr(1.0f, 0.0f);
+            return ToLdr(false, 1.0f, 0.0f);
         }
 
-        public Bitmap ToLdr(float scale, float shift)
+        public Bitmap ToLdr(bool tonemappingEnabled, float scale, float shift)
         {
             int width = (int)Width;
             int height = (int)Height;
@@ -263,15 +263,18 @@ namespace libpfm
 
             float minValue = float.MaxValue;
             float maxValue = float.MinValue;
-            for (int y = 0; y < Height; y++)
+            if (tonemappingEnabled)
             {
-                for (int x = 0; x < Width; x++)
+                for (int y = 0; y < Height; y++)
                 {
-                    for (int band = 2; band >= 0; band--)
+                    for (int x = 0; x < Width; x++)
                     {
-                        float value = Image[x, y, band];
-                        minValue = Math.Min(minValue, value);
-                        maxValue = Math.Max(maxValue, value);
+                        for (int band = 2; band >= 0; band--)
+                        {
+                            float value = Image[x, y, band];
+                            minValue = Math.Min(minValue, value);
+                            maxValue = Math.Max(maxValue, value);
+                        }
                     }
                 }
             }
@@ -290,10 +293,13 @@ namespace libpfm
                         {
                             // translate RGB input image to BGR output image
                             float intensity = Image[x, y, 2 - band];
-                            // do a simple tone-mapping - linear scaling
-                            // from [min; max] to [0.0; 1.0]
-                            intensity = (intensity + shift) * scale;
-                            intensity = (intensity - minValue) * scaleRangeInv;
+                            if (tonemappingEnabled)
+                            {
+                                // do a simple tone-mapping - linear scaling
+                                // from [min; max] to [0.0; 1.0]
+                                intensity = (intensity + shift) * scale;
+                                intensity = (intensity - minValue) * scaleRangeInv;
+                            }
                             outputRow[x * 3 + band] = (byte)MathHelper.Clamp(intensity * 255.0f, 0.0f, 255.0f);
                         }
                     }
