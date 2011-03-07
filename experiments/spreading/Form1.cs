@@ -8,13 +8,18 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Drawing.Imaging;
+using libpfm;
 
 namespace spreading
 {
   public partial class Form1 : Form
   {
-    protected Bitmap inputImage = null;
-    protected Bitmap outputImage = null;
+    protected Bitmap inputLdrImage = null;
+    protected Bitmap outputLdrImage = null;
+
+    protected PFMImage inputHdrImage = null;
+    protected PFMImage outputHdrImage = null;
 
     public Form1 ()
     {
@@ -26,21 +31,30 @@ namespace spreading
       OpenFileDialog ofd = new OpenFileDialog();
 
       ofd.Title = "Open Image File";
-      ofd.Filter = "Bitmap Files|*.bmp" +
+      ofd.Filter = "PNG Files|*.png" +
+          "|PFM Files|*.pfm" +
+          "|Bitmap Files|*.bmp" +
           "|Gif Files|*.gif" +
           "|JPEG Files|*.jpg" +
-          "|PNG Files|*.png" +
           "|TIFF Files|*.tif" +
-          "|All image types|*.bmp;*.gif;*.jpg;*.png;*.tif";
+          "|All Image types|*.png;*.pfm;*.bmp;*.gif;*.jpg;*.tif";
 
-      ofd.FilterIndex = 6;
+      ofd.FilterIndex = 7;
       ofd.FileName = "";
       if ( ofd.ShowDialog() != DialogResult.OK )
         return;
 
-      pictureBox1.Image =
-      inputImage  = (Bitmap)Image.FromFile( ofd.FileName );
-      outputImage = null;
+        if (ofd.FileName.EndsWith(".pfm")) {
+            inputHdrImage = PFMImage.LoadImage(ofd.FileName);
+            inputLdrImage = inputHdrImage.ToLdr();
+        } else {
+            inputLdrImage = (Bitmap)Image.FromFile(ofd.FileName);
+            inputHdrImage = PFMImage.FromLdr(inputLdrImage);
+        }
+      pictureBox1.Image = inputLdrImage;
+
+      outputHdrImage = null;
+      outputLdrImage = null;
     }
 
     private void buttonRecode_Click ( object sender, EventArgs e )
@@ -48,21 +62,26 @@ namespace spreading
         filterImage();
     }
 
-    
-
     private void buttonSave_Click ( object sender, EventArgs e )
     {
-      if ( outputImage == null ) return;
+        if ((outputLdrImage == null) || (outputHdrImage == null)) return;
 
       SaveFileDialog sfd = new SaveFileDialog();
-      sfd.Title = "Save PNG file";
-      sfd.Filter = "PNG Files|*.png";
+      sfd.Title = "Save PNG/PFM file";
+      sfd.Filter = "PNG Files|*.png|PFM Files|*.pfm";
       sfd.AddExtension = true;
       sfd.FileName = "";
       if ( sfd.ShowDialog() != DialogResult.OK )
         return;
 
-      outputImage.Save( sfd.FileName, System.Drawing.Imaging.ImageFormat.Png );
+      if (sfd.FileName.EndsWith(".pfm"))
+      {
+          outputHdrImage.SaveImage(sfd.FileName);
+      }
+      else
+      {
+          outputLdrImage.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
+      }
     }
 
     private void blurRadiusNumeric_ValueChanged(object sender, EventArgs e)
@@ -70,11 +89,9 @@ namespace spreading
         filterImage();
     }
 
-
-
     private void filterImage()
     {
-        if (inputImage == null) return;
+        if ((inputLdrImage == null) || (inputLdrImage == null)) return;
         Cursor.Current = Cursors.WaitCursor;
 
         Stopwatch sw = new Stopwatch();
@@ -84,19 +101,25 @@ namespace spreading
         {
             BlurRadius = (int)blurRadiusNumeric.Value
         };
-        outputImage = filter.SpreadPSF(inputImage, outputImage);
+        outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage);
+        outputLdrImage = outputHdrImage.ToLdr();
+        
+        //// stub:
+        //outputHdrImage = inputHdrImage;
+        ////outputLdrImage = inputLdrImage;
+        //outputLdrImage = inputHdrImage.ToLdr();
 
         sw.Stop();
         labelElapsed.Text = String.Format("Elapsed time: {0:f}s", 1.0e-3 * sw.ElapsedMilliseconds);
 
-        if (outputImage != null)
+        if (outputLdrImage != null)
         {
-            pictureBox1.Image = outputImage;
+            pictureBox1.Image = outputLdrImage;
         }
         else
         {
             pictureBox1.Image = null;
-            outputImage = null;
+            outputLdrImage = null;
         }
 
         Cursor.Current = Cursors.Default;
