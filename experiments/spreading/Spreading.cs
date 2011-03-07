@@ -15,7 +15,8 @@ namespace spreading
         public static readonly int DEFAULT_BLUR_RADIUS = 1;
         public int BlurRadius { get; set; }
 
-        public RectangleSpreadingFilter() {
+        public RectangleSpreadingFilter()
+        {
             BlurRadius = DEFAULT_BLUR_RADIUS;
         }
 
@@ -73,37 +74,40 @@ namespace spreading
 
             // phase 1: distribute corners into the table
             start = sw.ElapsedMilliseconds;
-            
-                int radius = BlurRadius;
-                float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
 
-                for (int y = 0; y < height; y++)
+            //int radius = BlurRadius;
+            //float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
+
+            float widthInv = 1.0f / (float)width;
+            float heightInv = 1.0f / (float)height;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
                 {
-                    
-                    for (int x = 0; x < width; x++)
+                    int radius = getBlurRadius(x * widthInv, y * heightInv);
+                    float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
+
+                    int top = MathHelper.Clamp<int>(y - radius, 0, (int)tableHeight - 1);
+                    int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)tableHeight - 1);
+                    int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)tableWidth - 1);
+                    int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)tableWidth - 1);
+
+                    //float color = inputLdrImage.GetPixel(x, y).GetBrightness();
+                    //Color color = inputLdrImage.GetPixel(x, y);
+
+                    for (int band = 0; band < bands; band++)
                     {
-                        //int radius = getBlurRadius(x, y);
+                        float intensity = inputImage.Image[x, y, band];
+                        float cornerValue = intensity * areaInv;
 
-                        int top = MathHelper.Clamp<int>(y - radius, 0, (int)tableHeight - 1);
-                        int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)tableHeight - 1);
-                        int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)tableWidth - 1);
-                        int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)tableWidth - 1);
-
-                        //float color = inputLdrImage.GetPixel(x, y).GetBrightness();
-                        //Color color = inputLdrImage.GetPixel(x, y);
-
-                        for (int band = 0; band < bands; band++)
-                        {
-                            float intensity = inputImage.Image[x, y, band];
-                            float cornerValue = intensity * areaInv;
-
-                            table[left, top, band] += cornerValue; // upper left
-                            table[right, top, band] -= cornerValue; // upper right
-                            table[left, bottom, band] -= cornerValue; // lower left
-                            table[right, bottom, band] += cornerValue; // lower right
-                        }
+                        table[left, top, band] += cornerValue; // upper left
+                        table[right, top, band] -= cornerValue; // upper right
+                        table[left, bottom, band] -= cornerValue; // lower left
+                        table[right, bottom, band] += cornerValue; // lower right
                     }
                 }
+            }
             Console.WriteLine("Phase 1, reading input image: {0} ms", sw.ElapsedMilliseconds - start);
 
             //printTable(table);
@@ -178,9 +182,20 @@ namespace spreading
             return outputImage;
         }
 
-        private int getBlurRadius(int x, int y)
+        //private int getBlurRadius(int x, int y)
+        //{
+        //    return BlurRadius;
+        //}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x">normalized [0.0; 1.0]</param>
+        /// <param name="y">normalized [0.0; 1.0]</param>
+        /// <returns></returns>
+        private int getBlurRadius(float x, float y)
         {
-            return BlurRadius;
+            return (int)(BlurRadius * Math.Abs(2 * y - 1));
         }
 
         private void printTable(float[,] table)
