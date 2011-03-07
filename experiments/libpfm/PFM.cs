@@ -12,6 +12,9 @@ namespace libpfm
 {
     public class PFMImage
     {
+        // TODO:
+        // - try single-dimensional table instead of multi-dimensional
+        //   - can it be any faster at the cost of worse usage?
         public float[, ,] Image { get; private set; }
 
         public uint Width { get; private set; }

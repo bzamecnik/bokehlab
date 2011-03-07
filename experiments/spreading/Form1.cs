@@ -11,6 +11,10 @@ using System.IO;
 using System.Drawing.Imaging;
 using libpfm;
 
+// TODO:
+// - add controls for selecting the blur source (depth map, procedure, constant, ...)
+// - add controls for selecting the image to show (input, depth-map, output)
+
 namespace spreading
 {
   public partial class Form1 : Form
@@ -21,9 +25,12 @@ namespace spreading
     protected PFMImage inputHdrImage = null;
     protected PFMImage outputHdrImage = null;
 
+    protected PFMImage depthMap = null;
+
     public Form1 ()
     {
       InitializeComponent();
+      blurRadiusNumeric.Value = RectangleSpreadingFilter.DEFAULT_BLUR_RADIUS;
     }
 
     private void buttonLoad_Click ( object sender, EventArgs e )
@@ -57,18 +64,47 @@ namespace spreading
       outputLdrImage = null;
     }
 
-    private void buttonRecode_Click ( object sender, EventArgs e )
+    private void loadDepthMapButton_Click(object sender, EventArgs e)
     {
-        filterImage();
+        OpenFileDialog ofd = new OpenFileDialog();
+
+        ofd.Title = "Open depth map";
+        ofd.Filter = "PNG Files|*.png" +
+            "|PFM Files|*.pfm" +
+            "|Bitmap Files|*.bmp" +
+            "|Gif Files|*.gif" +
+            "|JPEG Files|*.jpg" +
+            "|TIFF Files|*.tif" +
+            "|All Image types|*.png;*.pfm;*.bmp;*.gif;*.jpg;*.tif";
+
+        ofd.FilterIndex = 7;
+        ofd.FileName = "";
+        if (ofd.ShowDialog() != DialogResult.OK)
+            return;
+
+        if (ofd.FileName.EndsWith(".pfm"))
+        {
+            depthMap = PFMImage.LoadImage(ofd.FileName);
+        }
+        else
+        {
+            depthMap = PFMImage.FromLdr((Bitmap)Image.FromFile(ofd.FileName));
+        }
     }
 
     private void buttonSave_Click ( object sender, EventArgs e )
     {
-        if ((outputLdrImage == null) || (outputHdrImage == null)) return;
+        PFMImage hdrImageToSave = outputHdrImage;
+        Bitmap ldrImageToSave = outputLdrImage;
+        if ((outputLdrImage == null) || (outputHdrImage == null))
+        {
+            hdrImageToSave = inputHdrImage;
+            ldrImageToSave = inputLdrImage;
+        }
 
       SaveFileDialog sfd = new SaveFileDialog();
-      sfd.Title = "Save PNG/PFM file";
-      sfd.Filter = "PNG Files|*.png|PFM Files|*.pfm";
+      sfd.Title = "Save output file";
+      sfd.Filter = "JPEG Files|*.jpg|PNG Files|*.png|PFM Files|*.pfm";
       sfd.AddExtension = true;
       sfd.FileName = "";
       if ( sfd.ShowDialog() != DialogResult.OK )
@@ -76,12 +112,21 @@ namespace spreading
 
       if (sfd.FileName.EndsWith(".pfm"))
       {
-          outputHdrImage.SaveImage(sfd.FileName);
+          hdrImageToSave.SaveImage(sfd.FileName);
       }
-      else
+      else if (sfd.FileName.EndsWith(".png"))
       {
-          outputLdrImage.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
+          ldrImageToSave.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
       }
+      else if (sfd.FileName.EndsWith(".jpg"))
+      {
+          ldrImageToSave.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Jpeg);
+      }
+    }
+
+    private void buttonRecode_Click(object sender, EventArgs e)
+    {
+        filterImage();
     }
 
     private void blurRadiusNumeric_ValueChanged(object sender, EventArgs e)
@@ -101,13 +146,15 @@ namespace spreading
         {
             MaxBlurRadius = (int)blurRadiusNumeric.Value
         };
-        outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage);
-        outputLdrImage = outputHdrImage.ToLdr();
-        
-        //// stub:
-        //outputHdrImage = inputHdrImage;
-        ////outputLdrImage = inputLdrImage;
-        //outputLdrImage = inputHdrImage.ToLdr();
+        try
+        {
+            outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage, depthMap);
+            outputLdrImage = outputHdrImage.ToLdr();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message + "\n" + ex.StackTrace, "Error");
+        }
 
         sw.Stop();
         labelElapsed.Text = String.Format("Elapsed time: {0:f}s", 1.0e-3 * sw.ElapsedMilliseconds);

@@ -33,10 +33,11 @@
         this.buttonSave = new System.Windows.Forms.Button();
         this.buttonRecode = new System.Windows.Forms.Button();
         this.labelElapsed = new System.Windows.Forms.Label();
-        this.buttonLoad = new System.Windows.Forms.Button();
+        this.loadImageButton = new System.Windows.Forms.Button();
         this.blurRadiusNumeric = new System.Windows.Forms.NumericUpDown();
         this.label1 = new System.Windows.Forms.Label();
         this.imageTypeComboBox = new System.Windows.Forms.ComboBox();
+        this.loadDepthmapButton = new System.Windows.Forms.Button();
         this.panel1.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
         ((System.ComponentModel.ISupportInitialize)(this.blurRadiusNumeric)).BeginInit();
@@ -78,7 +79,7 @@
         // buttonRecode
         // 
         this.buttonRecode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-        this.buttonRecode.Location = new System.Drawing.Point(140, 439);
+        this.buttonRecode.Location = new System.Drawing.Point(245, 439);
         this.buttonRecode.Name = "buttonRecode";
         this.buttonRecode.Size = new System.Drawing.Size(97, 23);
         this.buttonRecode.TabIndex = 2;
@@ -90,27 +91,27 @@
         // 
         this.labelElapsed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
         this.labelElapsed.AutoSize = true;
-        this.labelElapsed.Location = new System.Drawing.Point(435, 445);
+        this.labelElapsed.Location = new System.Drawing.Point(540, 445);
         this.labelElapsed.Name = "labelElapsed";
         this.labelElapsed.Size = new System.Drawing.Size(48, 13);
         this.labelElapsed.TabIndex = 8;
         this.labelElapsed.Text = "Elapsed:";
         // 
-        // buttonLoad
+        // loadImageButton
         // 
-        this.buttonLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-        this.buttonLoad.Location = new System.Drawing.Point(13, 439);
-        this.buttonLoad.Name = "buttonLoad";
-        this.buttonLoad.Size = new System.Drawing.Size(110, 23);
-        this.buttonLoad.TabIndex = 1;
-        this.buttonLoad.Text = "Load image";
-        this.buttonLoad.UseVisualStyleBackColor = true;
-        this.buttonLoad.Click += new System.EventHandler(this.buttonLoad_Click);
+        this.loadImageButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+        this.loadImageButton.Location = new System.Drawing.Point(13, 439);
+        this.loadImageButton.Name = "loadImageButton";
+        this.loadImageButton.Size = new System.Drawing.Size(110, 23);
+        this.loadImageButton.TabIndex = 1;
+        this.loadImageButton.Text = "Load image";
+        this.loadImageButton.UseVisualStyleBackColor = true;
+        this.loadImageButton.Click += new System.EventHandler(this.buttonLoad_Click);
         // 
         // blurRadiusNumeric
         // 
         this.blurRadiusNumeric.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-        this.blurRadiusNumeric.Location = new System.Drawing.Point(309, 442);
+        this.blurRadiusNumeric.Location = new System.Drawing.Point(414, 442);
         this.blurRadiusNumeric.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -130,7 +131,7 @@
         // 
         this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
         this.label1.AutoSize = true;
-        this.label1.Location = new System.Drawing.Point(244, 445);
+        this.label1.Location = new System.Drawing.Point(349, 445);
         this.label1.Name = "label1";
         this.label1.Size = new System.Drawing.Size(59, 13);
         this.label1.TabIndex = 10;
@@ -151,6 +152,17 @@
         this.imageTypeComboBox.Visible = false;
         this.imageTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.imageTypeComboBox_SelectedIndexChanged);
         // 
+        // loadDepthmapButton
+        // 
+        this.loadDepthmapButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+        this.loadDepthmapButton.Location = new System.Drawing.Point(129, 439);
+        this.loadDepthmapButton.Name = "loadDepthmapButton";
+        this.loadDepthmapButton.Size = new System.Drawing.Size(110, 23);
+        this.loadDepthmapButton.TabIndex = 1;
+        this.loadDepthmapButton.Text = "Load depth-map";
+        this.loadDepthmapButton.UseVisualStyleBackColor = true;
+        this.loadDepthmapButton.Click += new System.EventHandler(this.loadDepthMapButton_Click);
+        // 
         // Form1
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -159,7 +171,8 @@
         this.Controls.Add(this.imageTypeComboBox);
         this.Controls.Add(this.label1);
         this.Controls.Add(this.blurRadiusNumeric);
-        this.Controls.Add(this.buttonLoad);
+        this.Controls.Add(this.loadDepthmapButton);
+        this.Controls.Add(this.loadImageButton);
         this.Controls.Add(this.labelElapsed);
         this.Controls.Add(this.buttonRecode);
         this.Controls.Add(this.buttonSave);
@@ -183,10 +196,11 @@
     private System.Windows.Forms.Button buttonSave;
     private System.Windows.Forms.Button buttonRecode;
     private System.Windows.Forms.Label labelElapsed;
-    private System.Windows.Forms.Button buttonLoad;
+    private System.Windows.Forms.Button loadImageButton;
     private System.Windows.Forms.NumericUpDown blurRadiusNumeric;
     private System.Windows.Forms.Label label1;
     private System.Windows.Forms.ComboBox imageTypeComboBox;
+    private System.Windows.Forms.Button loadDepthmapButton;
   }
 }
 

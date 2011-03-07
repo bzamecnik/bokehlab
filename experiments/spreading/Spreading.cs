@@ -8,6 +8,13 @@ using System.Diagnostics;
 using libpfm;
 using mathHelper;
 
+// TODO:
+// - implement non-integer PSF size - interpolation between two integer PSFs
+// - shouldn't the table be of the same size as the input image?
+//   - now it seems it has to be larger by 1px
+// - should the spreading table and normalization channel be squashed into
+//   one image for better locality?
+
 namespace spreading
 {
     class RectangleSpreadingFilter
@@ -34,27 +41,18 @@ namespace spreading
 
             if (width < 1 || height < 1) return null;
 
+            if ((depthMap != null) && ((depthMap.Width != width) ||(depthMap.Height != height))) {
+                throw new ArgumentException(String.Format(
+                    "Depth map must have the same dimensions as the input image"
+                    + " {0}x{1}, but it's size was {2}x{3}.", width, height, depthMap.Width, depthMap.Height));
+            }
+
             if (outputImage == null)
             {
                 outputImage = new PFMImage(width, height, inputImage.PixelFormat);
             }
 
-            // TODO:
-            // *- support a PSF of a non-uniform size
-            // *- add a normalization channel (for non-uniform PSF size)
-            // *- fix situation with no blur
-            // x- fix spreading at borders - add some more area to the table
-            //    *- fixed by normalization
-            // *- implement spreading HDR images - write PFM library
-            // - try single-dimensional table instead of multi-dimensional
-            // - shouldn't the table be of the same size as the input image?
-            //   - now it seems it has to be larger by 1px
-            // - implment non-integer PSF size - interpolation between two integer PSFs
-
             PFMImage spreadingTable = new PFMImage(width + 1, height + 1, inputImage.PixelFormat);
-
-            // TODO: the spreading table and normalization channel could be squashed into
-            // one image for better locality
             PFMImage normalizationTable = new PFMImage(width + 1, height + 1, PixelFormat.Greyscale);
 
             // initialize the spreading table to 0.0 and the normalization channel to 1.0
@@ -207,6 +205,7 @@ namespace spreading
             {
                 blur = new ProceduralBlur((int)width, (int)height, MaxBlurRadius);
             }
+            //new ConstantBlur(MaxBlurRadius);
             return blur;
         }
     }
@@ -251,6 +250,21 @@ namespace spreading
             //float xNorm = x * widthInv;
             float yNorm = y * heightInv;
             return MaxPSFRadius * Math.Abs(2 * yNorm - 1);
+        }
+    }
+
+    class ConstantBlur : Blur
+    {
+        float PSFRadius { get; set; }
+
+        public ConstantBlur(int psfRadius)
+        {
+            PSFRadius = psfRadius;
+        }
+
+        public float GetPSFRadius(int x, int y)
+        {
+            return PSFRadius;
         }
     }
 }
