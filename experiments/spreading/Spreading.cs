@@ -48,6 +48,8 @@ namespace spreading
             // x- fix spreading at borders - add some more area to the table
             // *- implement spreading HDR images - write PFM library
             // - try single-dimensional table instead of multi-dimensional
+            // - shouldn't the table be of the same size as the input image?
+            // - implment non-integer PSF size - interpolation between two integer PSFs
 
             uint bands = inputImage.ChannelsCount;
 
@@ -58,7 +60,7 @@ namespace spreading
 
             // TODO: the spreading table and normalization channel could be squashed into
             // one image for better locality
-            PFMImage normalizationTable = new PFMImage(width + 1, height + 1, inputImage.PixelFormat);
+            PFMImage normalizationTable = new PFMImage(width + 1, height + 1, PixelFormat.Greyscale);
 
             // initialize the spreading table to 0.0 and the normalization channel to 1.0
             start = sw.ElapsedMilliseconds;
@@ -69,8 +71,8 @@ namespace spreading
                     for (int band = 0; band < bands; band++)
                     {
                         spreadingTable.Image[x, y, band] = 0;
-                        normalizationTable.Image[x, y, band] = 0;
                     }
+                    normalizationTable.Image[x, y, 0] = 0;
                 }
             }
             Console.WriteLine("Zeroing table: {0} ms", sw.ElapsedMilliseconds - start);
@@ -102,14 +104,12 @@ namespace spreading
                         spreadingTable.Image[right, top, band] -= cornerValue; // upper right
                         spreadingTable.Image[left, bottom, band] -= cornerValue; // lower left
                         spreadingTable.Image[right, bottom, band] += cornerValue; // lower right
-
-                        // Note: intensity for the normalization is 1.0
-
-                        normalizationTable.Image[left, top, band] += areaInv; // upper left
-                        normalizationTable.Image[right, top, band] -= areaInv; // upper right
-                        normalizationTable.Image[left, bottom, band] -= areaInv; // lower left
-                        normalizationTable.Image[right, bottom, band] += areaInv; // lower right
                     }
+                    // Note: intensity for the normalization is 1.0
+                    normalizationTable.Image[left, top, 0] += areaInv; // upper left
+                    normalizationTable.Image[right, top, 0] -= areaInv; // upper right
+                    normalizationTable.Image[left, bottom, 0] -= areaInv; // lower left
+                    normalizationTable.Image[right, bottom, 0] += areaInv; // lower right
                 }
             }
             Console.WriteLine("Phase 1, reading input image: {0} ms", sw.ElapsedMilliseconds - start);
@@ -123,8 +123,8 @@ namespace spreading
                     for (int band = 0; band < bands; band++)
                     {
                         spreadingTable.Image[x, y, band] += spreadingTable.Image[x - 1, y, band];
-                        normalizationTable.Image[x, y, band] += normalizationTable.Image[x - 1, y, band];
                     }
+                    normalizationTable.Image[x, y, 0] += normalizationTable.Image[x - 1, y, 0];
                 }
             }
             Console.WriteLine("Phase 2, horizontal: {0} ms", sw.ElapsedMilliseconds - start);
@@ -137,8 +137,8 @@ namespace spreading
                     for (int band = 0; band < bands; band++)
                     {
                         spreadingTable.Image[x, y, band] += spreadingTable.Image[x, y - 1, band];
-                        normalizationTable.Image[x, y, band] += normalizationTable.Image[x, y - 1, band];
                     }
+                    normalizationTable.Image[x, y, 0] += normalizationTable.Image[x, y - 1, 0];
                 }
             }
             Console.WriteLine("Phase 2, vertical: {0} ms", sw.ElapsedMilliseconds - start);
@@ -148,9 +148,12 @@ namespace spreading
             {
                 for (int x = 0; x < width; x++)
                 {
+                    float normalization = 1 / normalizationTable.Image[x, y, 0];
                     for (int band = 0; band < bands; band++)
                     {
-                        outputImage.Image[x, y, band] = spreadingTable.Image[x, y, band] / normalizationTable.Image[x, y, band];
+                        outputImage.Image[x, y, band] = spreadingTable.Image[x, y, band] * normalization;
+                        //outputImage.Image[x, y, band] = spreadingTable.Image[x, y, band];
+                        //outputImage.Image[x, y, band] = normalization;
                     }
 
                 }
