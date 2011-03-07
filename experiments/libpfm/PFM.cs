@@ -252,7 +252,7 @@ namespace libpfm
 
         public Bitmap ToLdr()
         {
-            return ToLdr(false, 1.0f, 0.0f);
+            return ToLdr(true, 1.0f, 0.0f);
         }
 
         public Bitmap ToLdr(bool tonemappingEnabled, float scale, float shift)
@@ -293,11 +293,11 @@ namespace libpfm
                         {
                             // translate RGB input image to BGR output image
                             float intensity = Image[x, y, 2 - band];
+                            intensity = (intensity + shift) * scale;
                             if (tonemappingEnabled)
                             {
                                 // do a simple tone-mapping - linear scaling
                                 // from [min; max] to [0.0; 1.0]
-                                intensity = (intensity + shift) * scale;
                                 intensity = (intensity - minValue) * scaleRangeInv;
                             }
                             outputRow[x * 3 + band] = (byte)MathHelper.Clamp(intensity * 255.0f, 0.0f, 255.0f);

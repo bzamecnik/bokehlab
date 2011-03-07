@@ -41,24 +41,27 @@ namespace spreading
             if (width < 1 || height < 1) return null;
 
             // TODO:
+            // - support a PSF of a non-uniform size
             // - add a normalization channel (for non-uniform PSF size)
             // *- fix situation with no blur
-            // - fix spreading at borders - add some more area to the table
+            // x- fix spreading at borders - add some more area to the table
             // *- implement spreading HDR images - write PFM library
             // - try single-dimensional table instead of multi-dimensional
 
             uint bands = inputImage.ChannelsCount;
             start = sw.ElapsedMilliseconds;
             // TODO: use a PFMImage instead
-            float[,,] table = new float[width, height, 3];
+            int tableWidth = (int)width + 1;
+            int tableHeight = (int)height + 1;
+            float[, ,] table = new float[tableWidth, tableHeight, 3];
             Console.WriteLine("Allocating float table[{1}][{2}][3]: {0} ms",
-                sw.ElapsedMilliseconds - start, width, height);
+                sw.ElapsedMilliseconds - start, tableWidth, tableHeight);
 
             // zero out the table
             start = sw.ElapsedMilliseconds;
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < tableWidth; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < tableHeight; y++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
@@ -81,10 +84,10 @@ namespace spreading
                     {
                         //int radius = getBlurRadius(x, y);
 
-                        int top = MathHelper.Clamp<int>(y - radius, 0, (int)height - 1);
-                        int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)height - 1);
-                        int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)width - 1);
-                        int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)width - 1);
+                        int top = MathHelper.Clamp<int>(y - radius, 0, (int)tableHeight - 1);
+                        int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)tableHeight - 1);
+                        int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)tableWidth - 1);
+                        int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)tableWidth - 1);
 
                         //float color = inputLdrImage.GetPixel(x, y).GetBrightness();
                         //Color color = inputLdrImage.GetPixel(x, y);
@@ -119,9 +122,9 @@ namespace spreading
 
             // phase 2: accumulate the corners into rectangles
             start = sw.ElapsedMilliseconds;
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < tableHeight; y++)
             {
-                for (int x = 1; x < width; x++)
+                for (int x = 1; x < tableWidth; x++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
@@ -132,9 +135,9 @@ namespace spreading
             Console.WriteLine("Phase 2, horizontal: {0} ms", sw.ElapsedMilliseconds - start);
 
             start = sw.ElapsedMilliseconds;
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < tableWidth; x++)
             {
-                for (int y = 1; y < height; y++)
+                for (int y = 1; y < tableHeight; y++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
