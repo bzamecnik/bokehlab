@@ -99,7 +99,7 @@ namespace spreading
 
         RectangleSpreadingFilter filter = new RectangleSpreadingFilter()
         {
-            BlurRadius = (int)blurRadiusNumeric.Value
+            MaxBlurRadius = (int)blurRadiusNumeric.Value
         };
         outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage);
         outputLdrImage = outputHdrImage.ToLdr();
