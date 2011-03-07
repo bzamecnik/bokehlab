@@ -56,7 +56,11 @@ namespace spreading
             Console.WriteLine("Allocating float table[{1}][{2}][3]: {0} ms",
                 sw.ElapsedMilliseconds - start, width + 1, height + 1);
 
-            // zero out the table
+            // TODO: the spreading table and normalization channel could be squashed into
+            // one image for better locality
+            PFMImage normalizationTable = new PFMImage(width + 1, height + 1, inputImage.PixelFormat);
+
+            // initialize the spreading table to 0.0 and the normalization channel to 1.0
             start = sw.ElapsedMilliseconds;
             for (int x = 0; x < spreadingTable.Width; x++)
             {
@@ -65,6 +69,7 @@ namespace spreading
                     for (int band = 0; band < bands; band++)
                     {
                         spreadingTable.Image[x, y, band] = 0;
+                        normalizationTable.Image[x, y, band] = 0;
                     }
                 }
             }
@@ -97,6 +102,13 @@ namespace spreading
                         spreadingTable.Image[right, top, band] -= cornerValue; // upper right
                         spreadingTable.Image[left, bottom, band] -= cornerValue; // lower left
                         spreadingTable.Image[right, bottom, band] += cornerValue; // lower right
+
+                        // Note: intensity for the normalization is 1.0
+
+                        normalizationTable.Image[left, top, band] += areaInv; // upper left
+                        normalizationTable.Image[right, top, band] -= areaInv; // upper right
+                        normalizationTable.Image[left, bottom, band] -= areaInv; // lower left
+                        normalizationTable.Image[right, bottom, band] += areaInv; // lower right
                     }
                 }
             }
@@ -111,6 +123,7 @@ namespace spreading
                     for (int band = 0; band < bands; band++)
                     {
                         spreadingTable.Image[x, y, band] += spreadingTable.Image[x - 1, y, band];
+                        normalizationTable.Image[x, y, band] += normalizationTable.Image[x - 1, y, band];
                     }
                 }
             }
@@ -124,6 +137,7 @@ namespace spreading
                     for (int band = 0; band < bands; band++)
                     {
                         spreadingTable.Image[x, y, band] += spreadingTable.Image[x, y - 1, band];
+                        normalizationTable.Image[x, y, band] += normalizationTable.Image[x, y - 1, band];
                     }
                 }
             }
@@ -136,7 +150,7 @@ namespace spreading
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        outputImage.Image[x, y, band] = spreadingTable.Image[x, y, band];
+                        outputImage.Image[x, y, band] = spreadingTable.Image[x, y, band] / normalizationTable.Image[x, y, band];
                     }
 
                 }
@@ -156,7 +170,8 @@ namespace spreading
             sw.Stop();
             Console.WriteLine();
 
-            spreadingTable = null;
+            // TODO: dispose the spreadingTable and normalizationTable
+
             return outputImage;
         }
 
