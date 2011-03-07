@@ -42,7 +42,7 @@ namespace spreading
             if (width < 1 || height < 1) return null;
 
             // TODO:
-            // - support a PSF of a non-uniform size
+            // *- support a PSF of a non-uniform size
             // - add a normalization channel (for non-uniform PSF size)
             // *- fix situation with no blur
             // x- fix spreading at borders - add some more area to the table
@@ -50,23 +50,21 @@ namespace spreading
             // - try single-dimensional table instead of multi-dimensional
 
             uint bands = inputImage.ChannelsCount;
+
             start = sw.ElapsedMilliseconds;
-            // TODO: use a PFMImage instead
-            int tableWidth = (int)width + 1;
-            int tableHeight = (int)height + 1;
-            float[, ,] table = new float[tableWidth, tableHeight, 3];
+            PFMImage spreadingTable = new PFMImage(width + 1, height + 1, inputImage.PixelFormat);
             Console.WriteLine("Allocating float table[{1}][{2}][3]: {0} ms",
-                sw.ElapsedMilliseconds - start, tableWidth, tableHeight);
+                sw.ElapsedMilliseconds - start, width + 1, height + 1);
 
             // zero out the table
             start = sw.ElapsedMilliseconds;
-            for (int x = 0; x < tableWidth; x++)
+            for (int x = 0; x < spreadingTable.Width; x++)
             {
-                for (int y = 0; y < tableHeight; y++)
+                for (int y = 0; y < spreadingTable.Height; y++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        table[x, y, band] = 0;
+                        spreadingTable.Image[x, y, band] = 0;
                     }
                 }
             }
@@ -74,9 +72,6 @@ namespace spreading
 
             // phase 1: distribute corners into the table
             start = sw.ElapsedMilliseconds;
-
-            //int radius = BlurRadius;
-            //float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
 
             float widthInv = 1.0f / (float)width;
             float heightInv = 1.0f / (float)height;
@@ -88,64 +83,47 @@ namespace spreading
                     int radius = getBlurRadius(x * widthInv, y * heightInv);
                     float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
 
-                    int top = MathHelper.Clamp<int>(y - radius, 0, (int)tableHeight - 1);
-                    int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)tableHeight - 1);
-                    int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)tableWidth - 1);
-                    int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)tableWidth - 1);
-
-                    //float color = inputLdrImage.GetPixel(x, y).GetBrightness();
-                    //Color color = inputLdrImage.GetPixel(x, y);
+                    int top = MathHelper.Clamp<int>(y - radius, 0, (int)spreadingTable.Height - 1);
+                    int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)spreadingTable.Height - 1);
+                    int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)spreadingTable.Width - 1);
+                    int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)spreadingTable.Width - 1);
 
                     for (int band = 0; band < bands; band++)
                     {
                         float intensity = inputImage.Image[x, y, band];
                         float cornerValue = intensity * areaInv;
 
-                        table[left, top, band] += cornerValue; // upper left
-                        table[right, top, band] -= cornerValue; // upper right
-                        table[left, bottom, band] -= cornerValue; // lower left
-                        table[right, bottom, band] += cornerValue; // lower right
+                        spreadingTable.Image[left, top, band] += cornerValue; // upper left
+                        spreadingTable.Image[right, top, band] -= cornerValue; // upper right
+                        spreadingTable.Image[left, bottom, band] -= cornerValue; // lower left
+                        spreadingTable.Image[right, bottom, band] += cornerValue; // lower right
                     }
                 }
             }
             Console.WriteLine("Phase 1, reading input image: {0} ms", sw.ElapsedMilliseconds - start);
 
-            //printTable(table);
-
-            //// draw the corners
-            //for (int y = 0; y < height; y++)
-            //{
-            //    for (int x = 0; x < width; x++)
-            //    {
-            //        bool positive = table[x, y, 0] > 0;
-            //        bool negative = table[x, y, 0] < 0;
-            //        Color color = Color.FromArgb(positive ? 255 : 0, negative ? 255 : 0, 0);
-            //        outputLdrImage.SetPixel(x, y, color);
-            //    }
-            //}
-
             // phase 2: accumulate the corners into rectangles
             start = sw.ElapsedMilliseconds;
-            for (int y = 0; y < tableHeight; y++)
+            for (int y = 0; y < spreadingTable.Height; y++)
             {
-                for (int x = 1; x < tableWidth; x++)
+                for (int x = 1; x < spreadingTable.Width; x++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        table[x, y, band] += table[x - 1, y, band];
+                        spreadingTable.Image[x, y, band] += spreadingTable.Image[x - 1, y, band];
                     }
                 }
             }
             Console.WriteLine("Phase 2, horizontal: {0} ms", sw.ElapsedMilliseconds - start);
 
             start = sw.ElapsedMilliseconds;
-            for (int x = 0; x < tableWidth; x++)
+            for (int x = 0; x < spreadingTable.Width; x++)
             {
-                for (int y = 1; y < tableHeight; y++)
+                for (int y = 1; y < spreadingTable.Height; y++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        table[x, y, band] += table[x, y - 1, band];
+                        spreadingTable.Image[x, y, band] += spreadingTable.Image[x, y - 1, band];
                     }
                 }
             }
@@ -158,7 +136,7 @@ namespace spreading
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        outputImage.Image[x, y, band] = table[x, y, band];
+                        outputImage.Image[x, y, band] = spreadingTable.Image[x, y, band];
                     }
 
                 }
@@ -169,7 +147,7 @@ namespace spreading
             //{
             //    for (int x = 0; x < width; x++)
             //    {
-            //        int intensity = (int)MathHelper.Clamp(table[x, y, 0] * 255.0, 0.0, 255.0);
+            //        int intensity = (int)MathHelper.Clamp(spreadingTable.Image[x, y, 0] * 255.0, 0.0, 255.0);
             //        Color color = Color.FromArgb(intensity, intensity, intensity);
             //        outputLdrImage.SetPixel(x, y, color);
             //    }
@@ -178,7 +156,7 @@ namespace spreading
             sw.Stop();
             Console.WriteLine();
 
-            table = null;
+            spreadingTable = null;
             return outputImage;
         }
 
