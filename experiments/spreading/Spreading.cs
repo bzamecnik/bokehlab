@@ -8,166 +8,67 @@ using System.Diagnostics;
 using libpfm;
 using mathHelper;
 
+// TODO:
+// - implement non-integer PSF size - interpolation between two integer PSFs
+// - shouldn't the table be of the same size as the input image?
+//   - now it seems it has to be larger by 1px
+// - should the spreading table and normalization channel be squashed into
+//   one image for better locality?
+
 namespace spreading
 {
     class RectangleSpreadingFilter
     {
-        public static readonly int DEFAULT_BLUR_RADIUS = 1;
-        public int BlurRadius { get; set; }
+        public static readonly int DEFAULT_BLUR_RADIUS = 25;
+        public int MaxBlurRadius { get; set; }
 
         public RectangleSpreadingFilter()
         {
-            BlurRadius = DEFAULT_BLUR_RADIUS;
+            MaxBlurRadius = DEFAULT_BLUR_RADIUS;
         }
 
         public PFMImage SpreadPSF(PFMImage inputImage, PFMImage outputImage)
+        {
+            return SpreadPSF(inputImage, outputImage, null);
+        }
+
+        public PFMImage SpreadPSF(PFMImage inputImage, PFMImage outputImage, PFMImage depthMap)
         {
             if (inputImage == null) return null;
 
             uint width = inputImage.Width;
             uint height = inputImage.Height;
 
-            Stopwatch sw = new Stopwatch();
-            sw.Reset();
-            sw.Start();
-            long start = 0;
+            if (width < 1 || height < 1) return null;
+
+            if ((depthMap != null) && ((depthMap.Width != width) || (depthMap.Height != height)))
+            {
+                throw new ArgumentException(String.Format(
+                    "Depth map must have the same dimensions as the input image"
+                    + " {0}x{1}, but it's size was {2}x{3}.", width, height, depthMap.Width, depthMap.Height));
+            }
 
             if (outputImage == null)
             {
-                start = sw.ElapsedMilliseconds;
                 outputImage = new PFMImage(width, height, inputImage.PixelFormat);
-                Console.WriteLine("Creating new Bitmap: {0} ms", sw.ElapsedMilliseconds - start);
             }
 
-            if (width < 1 || height < 1) return null;
-
-            // TODO:
-            // *- support a PSF of a non-uniform size
-            // - add a normalization channel (for non-uniform PSF size)
-            // *- fix situation with no blur
-            // x- fix spreading at borders - add some more area to the table
-            // *- implement spreading HDR images - write PFM library
-            // - try single-dimensional table instead of multi-dimensional
-
-            uint bands = inputImage.ChannelsCount;
-
-            start = sw.ElapsedMilliseconds;
             PFMImage spreadingTable = new PFMImage(width + 1, height + 1, inputImage.PixelFormat);
-            Console.WriteLine("Allocating float table[{1}][{2}][3]: {0} ms",
-                sw.ElapsedMilliseconds - start, width + 1, height + 1);
-
-            // TODO: the spreading table and normalization channel could be squashed into
-            // one image for better locality
-            PFMImage normalizationTable = new PFMImage(width + 1, height + 1, inputImage.PixelFormat);
+            PFMImage normalizationTable = new PFMImage(width + 1, height + 1, PixelFormat.Greyscale);
 
             // initialize the spreading table to 0.0 and the normalization channel to 1.0
-            start = sw.ElapsedMilliseconds;
-            for (int x = 0; x < spreadingTable.Width; x++)
-            {
-                for (int y = 0; y < spreadingTable.Height; y++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        spreadingTable.Image[x, y, band] = 0;
-                        normalizationTable.Image[x, y, band] = 0;
-                    }
-                }
-            }
-            Console.WriteLine("Zeroing table: {0} ms", sw.ElapsedMilliseconds - start);
+            InitializeTables(spreadingTable, normalizationTable);
+
+            Blur blur = CreateBlurFunction(depthMap, width, height);
 
             // phase 1: distribute corners into the table
-            start = sw.ElapsedMilliseconds;
-
-            float widthInv = 1.0f / (float)width;
-            float heightInv = 1.0f / (float)height;
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int radius = getBlurRadius(x * widthInv, y * heightInv);
-                    float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
-
-                    int top = MathHelper.Clamp<int>(y - radius, 0, (int)spreadingTable.Height - 1);
-                    int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, (int)spreadingTable.Height - 1);
-                    int left = (int)MathHelper.Clamp<int>(x - radius, 0, (int)spreadingTable.Width - 1);
-                    int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, (int)spreadingTable.Width - 1);
-
-                    for (int band = 0; band < bands; band++)
-                    {
-                        float intensity = inputImage.Image[x, y, band];
-                        float cornerValue = intensity * areaInv;
-
-                        spreadingTable.Image[left, top, band] += cornerValue; // upper left
-                        spreadingTable.Image[right, top, band] -= cornerValue; // upper right
-                        spreadingTable.Image[left, bottom, band] -= cornerValue; // lower left
-                        spreadingTable.Image[right, bottom, band] += cornerValue; // lower right
-
-                        // Note: intensity for the normalization is 1.0
-
-                        normalizationTable.Image[left, top, band] += areaInv; // upper left
-                        normalizationTable.Image[right, top, band] -= areaInv; // upper right
-                        normalizationTable.Image[left, bottom, band] -= areaInv; // lower left
-                        normalizationTable.Image[right, bottom, band] += areaInv; // lower right
-                    }
-                }
-            }
-            Console.WriteLine("Phase 1, reading input image: {0} ms", sw.ElapsedMilliseconds - start);
+            Spread(inputImage, spreadingTable, normalizationTable, blur);
 
             // phase 2: accumulate the corners into rectangles
-            start = sw.ElapsedMilliseconds;
-            for (int y = 0; y < spreadingTable.Height; y++)
-            {
-                for (int x = 1; x < spreadingTable.Width; x++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        spreadingTable.Image[x, y, band] += spreadingTable.Image[x - 1, y, band];
-                        normalizationTable.Image[x, y, band] += normalizationTable.Image[x - 1, y, band];
-                    }
-                }
-            }
-            Console.WriteLine("Phase 2, horizontal: {0} ms", sw.ElapsedMilliseconds - start);
+            Integrate(spreadingTable, normalizationTable);
 
-            start = sw.ElapsedMilliseconds;
-            for (int x = 0; x < spreadingTable.Width; x++)
-            {
-                for (int y = 1; y < spreadingTable.Height; y++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        spreadingTable.Image[x, y, band] += spreadingTable.Image[x, y - 1, band];
-                        normalizationTable.Image[x, y, band] += normalizationTable.Image[x, y - 1, band];
-                    }
-                }
-            }
-            Console.WriteLine("Phase 2, vertical: {0} ms", sw.ElapsedMilliseconds - start);
+            Normalize(spreadingTable, normalizationTable, outputImage);
 
-            start = sw.ElapsedMilliseconds;
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        outputImage.Image[x, y, band] = spreadingTable.Image[x, y, band] / normalizationTable.Image[x, y, band];
-                    }
-
-                }
-            }
-            Console.WriteLine("Writing output image: {0} ms", sw.ElapsedMilliseconds - start);
-
-            //for (int y = 0; y < height; y++)
-            //{
-            //    for (int x = 0; x < width; x++)
-            //    {
-            //        int intensity = (int)MathHelper.Clamp(spreadingTable.Image[x, y, 0] * 255.0, 0.0, 255.0);
-            //        Color color = Color.FromArgb(intensity, intensity, intensity);
-            //        outputLdrImage.SetPixel(x, y, color);
-            //    }
-            //}
-
-            sw.Stop();
             Console.WriteLine();
 
             // TODO: dispose the spreadingTable and normalizationTable
@@ -175,42 +76,223 @@ namespace spreading
             return outputImage;
         }
 
-        //private int getBlurRadius(int x, int y)
-        //{
-        //    return BlurRadius;
-        //}
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="x">normalized [0.0; 1.0]</param>
-        /// <param name="y">normalized [0.0; 1.0]</param>
-        /// <returns></returns>
-        private int getBlurRadius(float x, float y)
+        private static void InitializeTables(PFMImage spreadingTable, PFMImage normalizationTable)
         {
-            return (int)(BlurRadius * Math.Abs(2 * y - 1));
+            Stopwatch sw = new Stopwatch();
+            sw.Reset();
+            sw.Start();
+
+            uint bands = spreadingTable.ChannelsCount;
+            // NOTE: the following properties are stored as an optimization
+            float[, ,] spreadingImage = spreadingTable.Image;
+            float[, ,] normalizationImage = normalizationTable.Image;
+            int tableWidth = (int)spreadingTable.Width;
+            int tableHeight = (int)spreadingTable.Height;
+
+            for (int x = 0; x < tableWidth; x++)
+            {
+                for (int y = 0; y < tableHeight; y++)
+                {
+                    for (int band = 0; band < bands; band++)
+                    {
+                        spreadingImage[x, y, band] = 0;
+                    }
+                    normalizationImage[x, y, 0] = 0;
+                }
+            }
+            Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
         }
 
-        private void printTable(float[,] table)
+        private static void Spread(PFMImage inputImage, PFMImage spreadingTable, PFMImage normalizationTable, Blur blur)
         {
-            int width = table.GetLength(0);
-            int height = table.GetLength(1);
-            for (int x = 0; x < width; x++)
+            Stopwatch sw = new Stopwatch();
+            sw.Reset();
+            sw.Start();
+
+            uint bands = inputImage.ChannelsCount;
+            uint width = inputImage.Width;
+            uint height = inputImage.Height;
+
+            float[, ,] origImage = inputImage.Image;
+            float[, ,] spreadingImage = spreadingTable.Image;
+            float[, ,] normalizationImage = normalizationTable.Image;
+
+            int tableWidth = (int)spreadingTable.Width;
+            int tableHeight = (int)spreadingTable.Height;
+
+            for (int y = 0; y < height; y++)
             {
-                for (int y = 0; y < height; y++)
+                for (int x = 0; x < width; x++)
                 {
-                    float value = table[x, y];
-                    if (Math.Abs(value) > 0.0f)
+                    int radius = (int)blur.GetPSFRadius(x, y);
+                    float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
+
+                    int top = MathHelper.Clamp<int>(y - radius, 0, tableHeight - 1);
+                    int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, tableHeight - 1);
+                    int left = (int)MathHelper.Clamp<int>(x - radius, 0, tableWidth - 1);
+                    int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, tableWidth - 1);
+
+                    for (int band = 0; band < bands; band++)
                     {
-                        Console.Write("{0}, ", value);
+                        float cornerValue = origImage[x, y, band] * areaInv;
+                        PutCorners(spreadingImage, top, bottom, left, right, band, cornerValue);
                     }
-                    else
+                    // Note: intensity for the normalization is 1.0
+                    PutCorners(normalizationImage, top, bottom, left, right, 0, areaInv);
+                }
+            }
+            Console.WriteLine("Phase 1, spreading: {0} ms", sw.ElapsedMilliseconds);
+        }
+
+        private static void PutCorners(float[, ,] table, int top, int bottom, int left, int right, int band, float value)
+        {
+            table[left, top, band] += value;
+            table[right, top, band] -= value;
+            table[left, bottom, band] -= value;
+            table[right, bottom, band] += value;
+        }
+
+        private static void Integrate(PFMImage spreadingTable, PFMImage normalizationTable)
+        {
+            long start = 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Reset();
+            sw.Start();
+
+            uint bands = spreadingTable.ChannelsCount;
+            float[, ,] spreadingImage = spreadingTable.Image;
+            float[, ,] normalizationImage = normalizationTable.Image;
+            int tableWidth = (int)spreadingTable.Width;
+            int tableHeight = (int)spreadingTable.Height;
+
+            for (int y = 0; y < tableHeight; y++)
+            {
+                for (int x = 1; x < tableWidth; x++)
+                {
+                    for (int band = 0; band < bands; band++)
                     {
-                        Console.Write(" , ", value);
+                        spreadingImage[x, y, band] += spreadingImage[x - 1, y, band];
+                    }
+                    normalizationImage[x, y, 0] += normalizationImage[x - 1, y, 0];
+                }
+            }
+            Console.WriteLine("Phase 2, horizontal integration: {0} ms", sw.ElapsedMilliseconds);
+
+            start = sw.ElapsedMilliseconds;
+            for (int x = 0; x < tableWidth; x++)
+            {
+                for (int y = 1; y < tableHeight; y++)
+                {
+                    for (int band = 0; band < bands; band++)
+                    {
+                        spreadingImage[x, y, band] += spreadingImage[x, y - 1, band];
+                    }
+                    normalizationImage[x, y, 0] += normalizationImage[x, y - 1, 0];
+                }
+            }
+            Console.WriteLine("Phase 2, vertical intergration: {0} ms", sw.ElapsedMilliseconds - start);
+        }
+
+        private static void Normalize(PFMImage spreadingTable, PFMImage normalizationTable, PFMImage outputImage)
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Reset();
+            sw.Start();
+
+            uint bands = outputImage.ChannelsCount;
+            float[, ,] image = outputImage.Image;
+            float[, ,] spreadingImage = spreadingTable.Image;
+            float[, ,] normalizationImage = normalizationTable.Image;
+            int width = (int)outputImage.Width;
+            int height = (int)outputImage.Height;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float normalization = 1 / normalizationImage[x, y, 0];
+                    for (int band = 0; band < bands; band++)
+                    {
+                        image[x, y, band] = spreadingImage[x, y, band] * normalization;
                     }
                 }
-                Console.WriteLine();
             }
+            Console.WriteLine("Normalizing to output image: {0} ms", sw.ElapsedMilliseconds);
+        }
+
+        private Blur CreateBlurFunction(PFMImage depthMap, uint width, uint height)
+        {
+            Blur blur;
+            if (depthMap != null)
+            {
+                blur = new DepthMapBlur(depthMap, MaxBlurRadius);
+            }
+            else
+            {
+                blur = new ProceduralBlur((int)width, (int)height, MaxBlurRadius);
+            }
+            //new ConstantBlur(MaxBlurRadius);
+            return blur;
+        }
+    }
+
+    interface Blur
+    {
+        float GetPSFRadius(int x, int y);
+    }
+
+    class DepthMapBlur : Blur
+    {
+        PFMImage DepthMap { get; set; }
+        float MaxPSFRadius { get; set; }
+
+        public DepthMapBlur(PFMImage depthMap, int maxPSFRadius)
+        {
+            DepthMap = depthMap;
+            MaxPSFRadius = maxPSFRadius;
+        }
+
+        public float GetPSFRadius(int x, int y)
+        {
+            return DepthMap.Image[x, y, 0] * MaxPSFRadius;
+        }
+    }
+
+    class ProceduralBlur : Blur
+    {
+        float MaxPSFRadius { get; set; }
+
+        float widthInv;
+        float heightInv;
+
+        public ProceduralBlur(int width, int height, int maxPSFRadius)
+        {
+            widthInv = 1.0f / (float)width;
+            heightInv = 1.0f / (float)height;
+            MaxPSFRadius = maxPSFRadius;
+        }
+
+        public float GetPSFRadius(int x, int y)
+        {
+            // coordinates normalized to [0.0; 1.0]
+            //float xNorm = x * widthInv;
+            float yNorm = y * heightInv;
+            return MaxPSFRadius * Math.Abs(2 * yNorm - 1);
+        }
+    }
+
+    class ConstantBlur : Blur
+    {
+        float PSFRadius { get; set; }
+
+        public ConstantBlur(int psfRadius)
+        {
+            PSFRadius = psfRadius;
+        }
+
+        public float GetPSFRadius(int x, int y)
+        {
+            return PSFRadius;
         }
     }
 }

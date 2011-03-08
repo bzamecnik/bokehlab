@@ -12,6 +12,9 @@ namespace libpfm
 {
     public class PFMImage
     {
+        // TODO:
+        // - try single-dimensional table instead of multi-dimensional
+        //   - can it be any faster at the cost of worse usage?
         public float[, ,] Image { get; private set; }
 
         public uint Width { get; private set; }
@@ -252,14 +255,18 @@ namespace libpfm
 
         public Bitmap ToLdr()
         {
-            return ToLdr(true, 1.0f, 0.0f);
+            return ToLdr(false, 1.0f, 0.0f);
         }
 
         public Bitmap ToLdr(bool tonemappingEnabled, float scale, float shift)
         {
             int width = (int)Width;
             int height = (int)Height;
+            
             Bitmap outputImage = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            int bands = (int)ChannelsCount;
+            int maxBand = bands - 1;
 
             float minValue = float.MaxValue;
             float maxValue = float.MinValue;
@@ -269,7 +276,7 @@ namespace libpfm
                 {
                     for (int x = 0; x < Width; x++)
                     {
-                        for (int band = 2; band >= 0; band--)
+                        for (int band = maxBand; band >= 0; band--)
                         {
                             float value = Image[x, y, band];
                             minValue = Math.Min(minValue, value);
@@ -283,6 +290,7 @@ namespace libpfm
                ImageLockMode.ReadOnly, outputImage.PixelFormat);
             unsafe
             {
+                bool isGreyscale = (PixelFormat == PixelFormat.Greyscale);
                 float scaleRangeInv = 1.0f / (maxValue - minValue); // for tone-mapping
                 for (int y = 0; y < Height; y++)
                 {
@@ -291,8 +299,9 @@ namespace libpfm
                     {
                         for (int band = 2; band >= 0; band--)
                         {
+                            int hdrBand = (isGreyscale) ? 0 : maxBand - band;
                             // translate RGB input image to BGR output image
-                            float intensity = Image[x, y, 2 - band];
+                            float intensity = Image[x, y, hdrBand];
                             intensity = (intensity + shift) * scale;
                             if (tonemappingEnabled)
                             {
@@ -315,29 +324,42 @@ namespace libpfm
             Bitmap inputImage = ldrImage;
             int width = ldrImage.Width;
             int height = ldrImage.Height;
-            if (ldrImage.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb) {
-                inputImage = ldrImage.Clone(new Rectangle(0, 0, width, height), System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            PixelFormat pixelFormat;
+            switch (ldrImage.PixelFormat) {
+                case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
+                    inputImage = ldrImage.Clone(new Rectangle(0, 0, width, height), System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    pixelFormat = PixelFormat.RGB;
+                    break;
+                case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
+                    pixelFormat = PixelFormat.RGB;
+                    break;
+                case System.Drawing.Imaging.PixelFormat.Format8bppIndexed:
+                    pixelFormat = PixelFormat.Greyscale;
+                    break;
+                default:
+                    throw new ArgumentException(String.Format("Unsupported input LDR image pixel format: {0}", ldrImage.PixelFormat));
             }
-            else if (ldrImage.PixelFormat != System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-            {
-                throw new ArgumentException(String.Format("Unsupported input LDR hdrImage pixel format: {0}", ldrImage.PixelFormat));
-            }
-            PFMImage hdrImage = new PFMImage((uint)width, (uint)height, PixelFormat.RGB);
+            
+            PFMImage hdrImage = new PFMImage((uint)width, (uint)height, pixelFormat);
 
             BitmapData inputData = inputImage.LockBits(new Rectangle(0, 0, width, height),
                ImageLockMode.ReadOnly, inputImage.PixelFormat);
             float conversionFactor = 1 / 255.0f;
             unsafe
             {
+                bool isGreyscale = (hdrImage.PixelFormat == PixelFormat.Greyscale);
+                int bands = (int)hdrImage.ChannelsCount;
+                int maxBand = bands - 1;
                 for (int y = 0; y < height; y++)
                 {
                     byte* inputRow = (byte*)inputData.Scan0 + (y * inputData.Stride);
                     for (int x = 0; x < width; x++)
                     {
-                        for (int band = 2; band >= 0; band--)
+                        for (int band = maxBand; band >= 0; band--)
                         {
-                            // translate BGR input image to RGB output image
-                            hdrImage.Image[x, y, 2 - band] = inputRow[x * 3 + band] * conversionFactor;
+                            int hdrBand = (isGreyscale) ? 0 : maxBand - band;
+                            // translate BGR input image to RGB output image in case of a RGB input image
+                            hdrImage.Image[x, y, hdrBand] = inputRow[x * bands + band] * conversionFactor;
                         }
                     }
                 }
