@@ -31,6 +31,7 @@ namespace spreading
     {
       InitializeComponent();
       blurRadiusNumeric.Value = RectangleSpreadingFilter.DEFAULT_BLUR_RADIUS;
+      imageTypeComboBox.SelectedIndex = 0;
     }
 
     private void buttonLoad_Click ( object sender, EventArgs e )
@@ -62,6 +63,8 @@ namespace spreading
 
       outputHdrImage = null;
       outputLdrImage = null;
+
+      imageSizeLabel.Text = String.Format("{0}x{1}", inputHdrImage.Width, inputHdrImage.Height);
     }
 
     private void loadDepthMapButton_Click(object sender, EventArgs e)
@@ -174,7 +177,31 @@ namespace spreading
 
     private void imageTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
+        // TODO: use enum
+        switch (imageTypeComboBox.SelectedItem.ToString())
+        {
+            case "Original":
+                pictureBox1.Image = inputLdrImage;
+                break;
+            case "Filtered":
+                pictureBox1.Image = outputLdrImage;
+                break;
+            case "Depth map":
+                pictureBox1.Image = (depthMap != null) ? depthMap.ToLdr() : null;
+                break;
+        }
+    }
 
+    private void imageSizeOrigButton_Click(object sender, EventArgs e)
+    {
+        pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+        pictureBox1.Dock = DockStyle.None;
+    }
+
+    private void imageSizeStretchButton_Click(object sender, EventArgs e)
+    {
+        pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+        pictureBox1.Dock = DockStyle.Fill;
     }
   }
 }
