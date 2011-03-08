@@ -13,7 +13,6 @@ using libpfm;
 
 // TODO:
 // - add controls for selecting the blur source (depth map, procedure, constant, ...)
-// - add controls for selecting the image to show (input, depth-map, output)
 
 namespace spreading
 {
@@ -181,7 +180,9 @@ namespace spreading
             };
             try
             {
-                outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage, depthMap);
+                outputHdrImage = filter.FilterImage(inputHdrImage, outputHdrImage, depthMap);
+                ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr());
+                pictureBox1.Image = outputLdrImage;
             }
             catch (Exception ex)
             {
@@ -190,9 +191,6 @@ namespace spreading
 
             sw.Stop();
             labelElapsed.Text = String.Format("Elapsed time: {0:f}s", 1.0e-3 * sw.ElapsedMilliseconds);
-
-            ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr());
-            pictureBox1.Image = outputLdrImage;
 
             Cursor.Current = Cursors.Default;
         }

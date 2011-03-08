@@ -9,11 +9,13 @@ using libpfm;
 using mathHelper;
 
 // TODO:
-// - implement non-integer PSF size - interpolation between two integer PSFs
 // - shouldn't the table be of the same size as the input image?
 //   - now it seems it has to be larger by 1px
 // - should the spreading table and normalization channel be squashed into
 //   one image for better locality?
+// - implement better PSFs:
+//   - perimeter spreading
+//   - polynomial spreading
 
 namespace spreading
 {
@@ -27,12 +29,12 @@ namespace spreading
             MaxBlurRadius = DEFAULT_BLUR_RADIUS;
         }
 
-        public PFMImage SpreadPSF(PFMImage inputImage, PFMImage outputImage)
+        public PFMImage FilterImage(PFMImage inputImage, PFMImage outputImage)
         {
-            return SpreadPSF(inputImage, outputImage, null);
+            return FilterImage(inputImage, outputImage, null);
         }
 
-        public PFMImage SpreadPSF(PFMImage inputImage, PFMImage outputImage, PFMImage depthMap)
+        public PFMImage FilterImage(PFMImage inputImage, PFMImage outputImage, PFMImage depthMap)
         {
             if (inputImage == null) return null;
 
@@ -127,24 +129,40 @@ namespace spreading
             {
                 for (int x = 0; x < width; x++)
                 {
-                    int radius = (int)blur.GetPSFRadius(x, y);
-                    float areaInv = 1.0f / ((radius * 2 + 1) * (radius * 2 + 1));
+                    float radius = blur.GetPSFRadius(x, y);
 
-                    int top = MathHelper.Clamp<int>(y - radius, 0, tableHeight - 1);
-                    int bottom = (int)MathHelper.Clamp<int>(y + radius + 1, 0, tableHeight - 1);
-                    int left = (int)MathHelper.Clamp<int>(x - radius, 0, tableWidth - 1);
-                    int right = (int)MathHelper.Clamp<int>(x + radius + 1, 0, tableWidth - 1);
+                    // spread PSFs of a non-integer radius using two weighted
+                    // PSFs of integer size close to the original radius
+                    int smallerRadius = (int)radius;
+                    int biggerRadius = smallerRadius + 1;
+                    float weight = biggerRadius - radius;
 
-                    for (int band = 0; band < bands; band++)
-                    {
-                        float cornerValue = origImage[x, y, band] * areaInv;
-                        PutCorners(spreadingImage, top, bottom, left, right, band, cornerValue);
-                    }
-                    // Note: intensity for the normalization is 1.0
-                    PutCorners(normalizationImage, top, bottom, left, right, 0, areaInv);
+                    //SpreadPSF(x, y, smallerRadius, 1.0f, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
+
+                    SpreadPSF(x, y, smallerRadius, weight, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
+                    SpreadPSF(x, y, biggerRadius, 1 - weight, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
                 }
             }
             //Console.WriteLine("Phase 1, spreading: {0} ms", sw.ElapsedMilliseconds);
+        }
+
+        private static void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)
+        {
+            float psfSide = radius * 2 + 1; // side of a square PSF
+            float areaInv = weight / (psfSide * psfSide);
+
+            int top = MathHelper.Clamp<int>(y - radius, 0, tableHeight - 1);
+            int bottom = MathHelper.Clamp<int>(y + radius + 1, 0, tableHeight - 1);
+            int left = MathHelper.Clamp<int>(x - radius, 0, tableWidth - 1);
+            int right = MathHelper.Clamp<int>(x + radius + 1, 0, tableWidth - 1);
+
+            for (int band = 0; band < bands; band++)
+            {
+                float cornerValue = origImage[x, y, band] * areaInv;
+                PutCorners(spreadingImage, top, bottom, left, right, band, cornerValue);
+            }
+            // Note: intensity for the normalization is 1.0
+            PutCorners(normalizationImage, top, bottom, left, right, 0, areaInv);
         }
 
         private static void PutCorners(float[, ,] table, int top, int bottom, int left, int right, int band, float value)
