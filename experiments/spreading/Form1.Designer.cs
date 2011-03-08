@@ -29,7 +29,7 @@
     private void InitializeComponent ()
     {
         this.buttonSave = new System.Windows.Forms.Button();
-        this.buttonRecode = new System.Windows.Forms.Button();
+        this.buttonFilter = new System.Windows.Forms.Button();
         this.labelElapsed = new System.Windows.Forms.Label();
         this.loadImageButton = new System.Windows.Forms.Button();
         this.blurRadiusNumeric = new System.Windows.Forms.NumericUpDown();
@@ -39,11 +39,12 @@
         this.imageSizeOrigbutton = new System.Windows.Forms.Button();
         this.imageSizeStretchButton = new System.Windows.Forms.Button();
         this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+        this.imageSizeLabel = new System.Windows.Forms.Label();
+        this.label3 = new System.Windows.Forms.Label();
         this.label2 = new System.Windows.Forms.Label();
         this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
         this.pictureBox1 = new System.Windows.Forms.PictureBox();
-        this.label3 = new System.Windows.Forms.Label();
-        this.imageSizeLabel = new System.Windows.Forms.Label();
+        this.clearDepthmapButton = new System.Windows.Forms.Button();
         ((System.ComponentModel.ISupportInitialize)(this.blurRadiusNumeric)).BeginInit();
         this.splitContainer1.Panel1.SuspendLayout();
         this.splitContainer1.Panel2.SuspendLayout();
@@ -54,7 +55,7 @@
         // 
         // buttonSave
         // 
-        this.buttonSave.Location = new System.Drawing.Point(2, 170);
+        this.buttonSave.Location = new System.Drawing.Point(2, 199);
         this.buttonSave.Name = "buttonSave";
         this.buttonSave.Size = new System.Drawing.Size(145, 23);
         this.buttonSave.TabIndex = 4;
@@ -62,20 +63,20 @@
         this.buttonSave.UseVisualStyleBackColor = true;
         this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
         // 
-        // buttonRecode
+        // buttonFilter
         // 
-        this.buttonRecode.Location = new System.Drawing.Point(3, 123);
-        this.buttonRecode.Name = "buttonRecode";
-        this.buttonRecode.Size = new System.Drawing.Size(144, 23);
-        this.buttonRecode.TabIndex = 2;
-        this.buttonRecode.Text = "Filter";
-        this.buttonRecode.UseVisualStyleBackColor = true;
-        this.buttonRecode.Click += new System.EventHandler(this.buttonRecode_Click);
+        this.buttonFilter.Location = new System.Drawing.Point(3, 152);
+        this.buttonFilter.Name = "buttonFilter";
+        this.buttonFilter.Size = new System.Drawing.Size(144, 23);
+        this.buttonFilter.TabIndex = 2;
+        this.buttonFilter.Text = "Filter";
+        this.buttonFilter.UseVisualStyleBackColor = true;
+        this.buttonFilter.Click += new System.EventHandler(this.buttonFilter_Click);
         // 
         // labelElapsed
         // 
         this.labelElapsed.AutoSize = true;
-        this.labelElapsed.Location = new System.Drawing.Point(3, 149);
+        this.labelElapsed.Location = new System.Drawing.Point(3, 178);
         this.labelElapsed.Name = "labelElapsed";
         this.labelElapsed.Size = new System.Drawing.Size(70, 13);
         this.labelElapsed.TabIndex = 8;
@@ -126,7 +127,7 @@
             "Original",
             "Filtered",
             "Depth map"});
-        this.imageTypeComboBox.Location = new System.Drawing.Point(3, 249);
+        this.imageTypeComboBox.Location = new System.Drawing.Point(3, 278);
         this.imageTypeComboBox.Name = "imageTypeComboBox";
         this.imageTypeComboBox.Size = new System.Drawing.Size(144, 21);
         this.imageTypeComboBox.TabIndex = 11;
@@ -138,7 +139,7 @@
         this.loadDepthmapButton.Name = "loadDepthmapButton";
         this.loadDepthmapButton.Size = new System.Drawing.Size(144, 23);
         this.loadDepthmapButton.TabIndex = 1;
-        this.loadDepthmapButton.Text = "Load depth-map";
+        this.loadDepthmapButton.Text = "Load depth map";
         this.loadDepthmapButton.UseVisualStyleBackColor = true;
         this.loadDepthmapButton.Click += new System.EventHandler(this.loadDepthMapButton_Click);
         // 
@@ -188,8 +189,9 @@
         this.splitContainer1.Panel1.Controls.Add(this.loadImageButton);
         this.splitContainer1.Panel1.Controls.Add(this.buttonSave);
         this.splitContainer1.Panel1.Controls.Add(this.blurRadiusNumeric);
+        this.splitContainer1.Panel1.Controls.Add(this.clearDepthmapButton);
         this.splitContainer1.Panel1.Controls.Add(this.loadDepthmapButton);
-        this.splitContainer1.Panel1.Controls.Add(this.buttonRecode);
+        this.splitContainer1.Panel1.Controls.Add(this.buttonFilter);
         this.splitContainer1.Panel1.Controls.Add(this.label1);
         this.splitContainer1.Panel1.Controls.Add(this.imageTypeComboBox);
         this.splitContainer1.Panel1.Controls.Add(this.labelElapsed);
@@ -202,10 +204,27 @@
         this.splitContainer1.SplitterDistance = 150;
         this.splitContainer1.TabIndex = 15;
         // 
+        // imageSizeLabel
+        // 
+        this.imageSizeLabel.AutoSize = true;
+        this.imageSizeLabel.Location = new System.Drawing.Point(69, 29);
+        this.imageSizeLabel.Name = "imageSizeLabel";
+        this.imageSizeLabel.Size = new System.Drawing.Size(0, 13);
+        this.imageSizeLabel.TabIndex = 16;
+        // 
+        // label3
+        // 
+        this.label3.AutoSize = true;
+        this.label3.Location = new System.Drawing.Point(3, 29);
+        this.label3.Name = "label3";
+        this.label3.Size = new System.Drawing.Size(60, 13);
+        this.label3.TabIndex = 16;
+        this.label3.Text = "Image size:";
+        // 
         // label2
         // 
         this.label2.AutoSize = true;
-        this.label2.Location = new System.Drawing.Point(3, 233);
+        this.label2.Location = new System.Drawing.Point(3, 262);
         this.label2.Name = "label2";
         this.label2.Size = new System.Drawing.Size(75, 13);
         this.label2.TabIndex = 15;
@@ -222,7 +241,7 @@
         this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
         this.tableLayoutPanel1.Controls.Add(this.imageSizeStretchButton, 1, 0);
         this.tableLayoutPanel1.Controls.Add(this.imageSizeOrigbutton, 0, 0);
-        this.tableLayoutPanel1.Location = new System.Drawing.Point(2, 276);
+        this.tableLayoutPanel1.Location = new System.Drawing.Point(2, 305);
         this.tableLayoutPanel1.Name = "tableLayoutPanel1";
         this.tableLayoutPanel1.RowCount = 1;
         this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -239,22 +258,15 @@
         this.pictureBox1.TabIndex = 2;
         this.pictureBox1.TabStop = false;
         // 
-        // label3
+        // clearDepthmapButton
         // 
-        this.label3.AutoSize = true;
-        this.label3.Location = new System.Drawing.Point(3, 29);
-        this.label3.Name = "label3";
-        this.label3.Size = new System.Drawing.Size(60, 13);
-        this.label3.TabIndex = 16;
-        this.label3.Text = "Image size:";
-        // 
-        // imageSizeLabel
-        // 
-        this.imageSizeLabel.AutoSize = true;
-        this.imageSizeLabel.Location = new System.Drawing.Point(69, 29);
-        this.imageSizeLabel.Name = "imageSizeLabel";
-        this.imageSizeLabel.Size = new System.Drawing.Size(0, 13);
-        this.imageSizeLabel.TabIndex = 16;
+        this.clearDepthmapButton.Location = new System.Drawing.Point(4, 123);
+        this.clearDepthmapButton.Name = "clearDepthmapButton";
+        this.clearDepthmapButton.Size = new System.Drawing.Size(144, 23);
+        this.clearDepthmapButton.TabIndex = 1;
+        this.clearDepthmapButton.Text = "Clear depth map";
+        this.clearDepthmapButton.UseVisualStyleBackColor = true;
+        this.clearDepthmapButton.Click += new System.EventHandler(this.clearDepthmapButton_Click);
         // 
         // Form1
         // 
@@ -265,6 +277,7 @@
         this.MinimumSize = new System.Drawing.Size(200, 200);
         this.Name = "Form1";
         this.Text = "Fast rectangle spreading";
+        this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
         ((System.ComponentModel.ISupportInitialize)(this.blurRadiusNumeric)).EndInit();
         this.splitContainer1.Panel1.ResumeLayout(false);
         this.splitContainer1.Panel1.PerformLayout();
@@ -280,7 +293,7 @@
     #endregion
 
     private System.Windows.Forms.Button buttonSave;
-    private System.Windows.Forms.Button buttonRecode;
+    private System.Windows.Forms.Button buttonFilter;
     private System.Windows.Forms.Label labelElapsed;
     private System.Windows.Forms.Button loadImageButton;
     private System.Windows.Forms.NumericUpDown blurRadiusNumeric;
@@ -295,6 +308,7 @@
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Label imageSizeLabel;
     private System.Windows.Forms.Label label3;
+    private System.Windows.Forms.Button clearDepthmapButton;
   }
 }
 

@@ -59,6 +59,7 @@ namespace spreading
             // initialize the spreading table to 0.0 and the normalization channel to 1.0
             InitializeTables(spreadingTable, normalizationTable);
 
+            //Blur blur = new ConstantBlur(MaxBlurRadius);
             Blur blur = CreateBlurFunction(depthMap, width, height);
 
             // phase 1: distribute corners into the table
@@ -72,15 +73,17 @@ namespace spreading
             Console.WriteLine();
 
             // TODO: dispose the spreadingTable and normalizationTable
+            spreadingTable.Dispose();
+            normalizationTable.Dispose();
 
             return outputImage;
         }
 
         private static void InitializeTables(PFMImage spreadingTable, PFMImage normalizationTable)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Reset();
-            sw.Start();
+            //Stopwatch sw = new Stopwatch();
+            //sw.Reset();
+            //sw.Start();
 
             uint bands = spreadingTable.ChannelsCount;
             // NOTE: the following properties are stored as an optimization
@@ -100,14 +103,14 @@ namespace spreading
                     normalizationImage[x, y, 0] = 0;
                 }
             }
-            Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
+            //Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
         }
 
         private static void Spread(PFMImage inputImage, PFMImage spreadingTable, PFMImage normalizationTable, Blur blur)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Reset();
-            sw.Start();
+            //Stopwatch sw = new Stopwatch();
+            //sw.Reset();
+            //sw.Start();
 
             uint bands = inputImage.ChannelsCount;
             uint width = inputImage.Width;
@@ -141,7 +144,7 @@ namespace spreading
                     PutCorners(normalizationImage, top, bottom, left, right, 0, areaInv);
                 }
             }
-            Console.WriteLine("Phase 1, spreading: {0} ms", sw.ElapsedMilliseconds);
+            //Console.WriteLine("Phase 1, spreading: {0} ms", sw.ElapsedMilliseconds);
         }
 
         private static void PutCorners(float[, ,] table, int top, int bottom, int left, int right, int band, float value)
@@ -154,10 +157,10 @@ namespace spreading
 
         private static void Integrate(PFMImage spreadingTable, PFMImage normalizationTable)
         {
-            long start = 0;
-            Stopwatch sw = new Stopwatch();
-            sw.Reset();
-            sw.Start();
+            //long start = 0;
+            //Stopwatch sw = new Stopwatch();
+            //sw.Reset();
+            //sw.Start();
 
             uint bands = spreadingTable.ChannelsCount;
             float[, ,] spreadingImage = spreadingTable.Image;
@@ -176,9 +179,9 @@ namespace spreading
                     normalizationImage[x, y, 0] += normalizationImage[x - 1, y, 0];
                 }
             }
-            Console.WriteLine("Phase 2, horizontal integration: {0} ms", sw.ElapsedMilliseconds);
+            //Console.WriteLine("Phase 2, horizontal integration: {0} ms", sw.ElapsedMilliseconds);
 
-            start = sw.ElapsedMilliseconds;
+            //start = sw.ElapsedMilliseconds;
             for (int x = 0; x < tableWidth; x++)
             {
                 for (int y = 1; y < tableHeight; y++)
@@ -190,14 +193,14 @@ namespace spreading
                     normalizationImage[x, y, 0] += normalizationImage[x, y - 1, 0];
                 }
             }
-            Console.WriteLine("Phase 2, vertical intergration: {0} ms", sw.ElapsedMilliseconds - start);
+            //Console.WriteLine("Phase 2, vertical intergration: {0} ms", sw.ElapsedMilliseconds - start);
         }
 
         private static void Normalize(PFMImage spreadingTable, PFMImage normalizationTable, PFMImage outputImage)
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Reset();
-            sw.Start();
+            //Stopwatch sw = new Stopwatch();
+            //sw.Reset();
+            //sw.Start();
 
             uint bands = outputImage.ChannelsCount;
             float[, ,] image = outputImage.Image;
@@ -217,7 +220,7 @@ namespace spreading
                     }
                 }
             }
-            Console.WriteLine("Normalizing to output image: {0} ms", sw.ElapsedMilliseconds);
+            //Console.WriteLine("Normalizing to output image: {0} ms", sw.ElapsedMilliseconds);
         }
 
         private Blur CreateBlurFunction(PFMImage depthMap, uint width, uint height)

@@ -196,6 +196,10 @@ namespace libpfm
             fs.Close();
         }
 
+        public void Dispose() {
+            Image = null;
+        }
+
         private static void SaveHeader(FileStream fs, PFMImage image)
         {
             StreamWriter writer = new StreamWriter(fs);

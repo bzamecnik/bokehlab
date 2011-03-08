@@ -54,20 +54,41 @@ namespace spreading
 
             if (ofd.FileName.EndsWith(".pfm"))
             {
+                if (inputHdrImage != null)
+                {
+                    inputHdrImage.Dispose();
+                }
                 inputHdrImage = PFMImage.LoadImage(ofd.FileName);
-                inputLdrImage = inputHdrImage.ToLdr();
+                ReplaceLdrImage(ref inputLdrImage, inputHdrImage.ToLdr());
             }
             else
             {
-                inputLdrImage = (Bitmap)Image.FromFile(ofd.FileName);
+                ReplaceLdrImage(ref inputLdrImage, (Bitmap)Image.FromFile(ofd.FileName));
+                if (inputHdrImage != null)
+                {
+                    inputHdrImage.Dispose();
+                }
                 inputHdrImage = PFMImage.FromLdr(inputLdrImage);
             }
             pictureBox1.Image = inputLdrImage;
 
+            if (outputHdrImage != null)
+            {
+                outputHdrImage.Dispose();
+            }
             outputHdrImage = null;
-            outputLdrImage = null;
+            ReplaceLdrImage(ref outputLdrImage, null);
 
             imageSizeLabel.Text = String.Format("{0}x{1}", inputHdrImage.Width, inputHdrImage.Height);
+        }
+
+        private void ReplaceLdrImage(ref Bitmap existingImage, Bitmap newImage)
+        {
+            if (existingImage != null)
+            {
+                existingImage.Dispose();
+            }
+            existingImage = newImage;
         }
 
         private void loadDepthMapButton_Click(object sender, EventArgs e)
@@ -88,13 +109,19 @@ namespace spreading
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
+            if (depthMap != null)
+            {
+                depthMap.Dispose();
+            }
             if (ofd.FileName.EndsWith(".pfm"))
             {
                 depthMap = PFMImage.LoadImage(ofd.FileName);
             }
             else
             {
-                depthMap = PFMImage.FromLdr((Bitmap)Image.FromFile(ofd.FileName));
+                Bitmap depthMapLdr = (Bitmap)Image.FromFile(ofd.FileName);
+                depthMap = PFMImage.FromLdr(depthMapLdr);
+                depthMapLdr.Dispose();
             }
         }
 
@@ -130,7 +157,7 @@ namespace spreading
             }
         }
 
-        private void buttonRecode_Click(object sender, EventArgs e)
+        private void buttonFilter_Click(object sender, EventArgs e)
         {
             filterImage();
         }
@@ -155,7 +182,6 @@ namespace spreading
             try
             {
                 outputHdrImage = filter.SpreadPSF(inputHdrImage, outputHdrImage, depthMap);
-                outputLdrImage = outputHdrImage.ToLdr();
             }
             catch (Exception ex)
             {
@@ -165,15 +191,8 @@ namespace spreading
             sw.Stop();
             labelElapsed.Text = String.Format("Elapsed time: {0:f}s", 1.0e-3 * sw.ElapsedMilliseconds);
 
-            if (outputLdrImage != null)
-            {
-                pictureBox1.Image = outputLdrImage;
-            }
-            else
-            {
-                pictureBox1.Image = null;
-                outputLdrImage = null;
-            }
+            ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr());
+            pictureBox1.Image = outputLdrImage;
 
             Cursor.Current = Cursors.Default;
         }
@@ -205,6 +224,38 @@ namespace spreading
         {
             pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
             pictureBox1.Dock = DockStyle.Fill;
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (inputLdrImage != null)
+            {
+                inputLdrImage.Dispose();
+                inputLdrImage = null;
+            }
+            if (outputLdrImage != null)
+            {
+                outputLdrImage.Dispose();
+                outputLdrImage = null;
+            }
+            if (pictureBox1.Image != null)
+            {
+                pictureBox1.Image.Dispose();
+            }
+        }
+
+        private void clearDepthmapButton_Click(object sender, EventArgs e)
+        {
+            if (depthMap != null)
+            {
+                depthMap.Dispose();
+                depthMap = null;
+            }
+            if (imageTypeComboBox.SelectedItem.ToString() == "Depth map")
+            {
+                pictureBox1.Image.Dispose();
+                pictureBox1.Image = null;
+            }
         }
     }
 }
