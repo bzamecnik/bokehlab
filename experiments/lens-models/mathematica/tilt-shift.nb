@@ -1,0 +1,1147 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     50650,       1138]
+NotebookOptionsPosition[     49869,       1108]
+NotebookOutlinePosition[     50236,       1124]
+CellTagsIndexPosition[     50193,       1121]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"sensorRadius", " ", "=", " ", "3"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"lensRadius", " ", "=", " ", "2"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"lineRadius", " ", "=", " ", "50"}], ";"}]}], "Input",
+ CellChangeTimes->{{3.509429568867806*^9, 3.5094295837356567`*^9}, {
+  3.5094312772811265`*^9, 3.5094312783111854`*^9}, {3.5094374200296926`*^9, 
+  3.509437427055559*^9}, {3.5094386746046085`*^9, 3.509438675485228*^9}, {
+  3.5094387313181677`*^9, 3.509438738009826*^9}, {3.5094388067611895`*^9, 
+  3.509438808214842*^9}, {3.5094396385809736`*^9, 3.5094396389943852`*^9}, {
+  3.509730858231983*^9, 3.5097308704707117`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"getFocalPlaneDistance", "[", 
+   RowBox[{"focalLength_", ",", "sensorDistance_"}], " ", "]"}], " ", ":=", 
+  " ", 
+  RowBox[{"sensorDistance", "*", 
+   RowBox[{"focalLength", "/", 
+    RowBox[{"(", 
+     RowBox[{"focalLength", " ", "+", " ", "sensorDistance"}], 
+     ")"}]}]}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"getScheimpflugLineX", "[", 
+   RowBox[{
+   "sensorDistance_", ",", " ", "sensorTilt_", ",", " ", "sensorShift_"}], 
+   "]"}], " ", ":=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"sensorShift", " ", "-", " ", 
+     RowBox[{"sensorDistance", " ", "/", " ", 
+      RowBox[{"Tan", "[", "sensorTilt", "]"}]}]}], ",", "0"}], 
+   "}"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"getHingeLineX", "[", 
+   RowBox[{"focalLength_", ",", " ", "sensorTilt_"}], "]"}], " ", ":=", " ", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"focalLength", " ", "/", " ", 
+     RowBox[{"Tan", "[", "sensorTilt", "]"}]}], ",", " ", "focalLength"}], 
+   "}"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"getRotationLineX", "[", 
+     RowBox[{
+     "focalDistance_", ",", " ", "scheimpflugPoint_", ",", " ", 
+      "hingePoint_"}], "]"}], " ", ":=", "\[IndentingNewLine]", 
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", "direction", "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"direction", " ", "=", " ", 
+        RowBox[{"hingePoint", " ", "-", " ", "scheimpflugPoint"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"scheimpflugPoint", "[", 
+           RowBox[{"[", "1", "]"}], "]"}], " ", "+", " ", 
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"direction", "[", 
+              RowBox[{"[", "1", "]"}], "]"}], " ", "/", " ", 
+             RowBox[{"direction", "[", 
+              RowBox[{"[", "2", "]"}], "]"}]}], ")"}], 
+           RowBox[{"(", 
+            RowBox[{"focalDistance", " ", "-", " ", 
+             RowBox[{"scheimpflugPoint", "[", 
+              RowBox[{"[", "2", "]"}], "]"}]}], ")"}]}]}], ",", 
+         "focalDistance"}], "}"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"thinLensTransform", "[", "f_", "]"}], " ", ":=", " ", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"f", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "f", ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "f", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "1", ",", 
+         RowBox[{"-", "f"}]}], "}"}]}], "}"}]}], ";"}], 
+   "*)"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"thinLensTransform", "[", "f_", "]"}], " ", ":=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "1", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", 
+       RowBox[{
+        RowBox[{"-", "1"}], "/", "f"}], ",", "1"}], "}"}]}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"fromHomogeneous", "[", "vector4_", "]"}], " ", ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"xyz", ",", "w"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"xyz", " ", "=", " ", 
+       RowBox[{"vector4", "[", 
+        RowBox[{"[", 
+         RowBox[{"1", ";;", "3"}], "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"w", "=", " ", 
+       RowBox[{"vector4", "[", 
+        RowBox[{"[", "4", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"w", " ", "\[NotEqual]", " ", "0"}], ",", " ", 
+        RowBox[{"xyz", "/", "w"}], ",", " ", "xyz"}], "]"}]}]}], 
+    "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"getXZ", "[", "vector4_", " ", "]"}], " ", ":=", 
+   RowBox[{"Part", "[", 
+    RowBox[{"vector4", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"1", ",", "3"}], "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"addFocalLengthSign", "[", 
+    RowBox[{"f_", ",", "z_"}], "]"}], " ", ":=", 
+   RowBox[{
+    RowBox[{"Sign", "[", "z", "]"}], "*", "f"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"thinLensXZ", "[", 
+    RowBox[{"point_", ",", " ", "f_"}], "]"}], ":=", "\[IndentingNewLine]", 
+   RowBox[{"getXZ", "[", 
+    RowBox[{"fromHomogeneous", "[", 
+     RowBox[{
+      RowBox[{"thinLensTransform", "[", 
+       RowBox[{"addFocalLengthSign", "[", 
+        RowBox[{"f", ",", 
+         RowBox[{"point", "[", 
+          RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "]"}], ".", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"point", "[", 
+         RowBox[{"[", "1", "]"}], "]"}], ",", "0", ",", 
+        RowBox[{"point", "[", 
+         RowBox[{"[", "2", "]"}], "]"}], ",", "1"}], "}"}]}], "]"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"thinLens", "[", 
+    RowBox[{"point_", ",", " ", "f_"}], "]"}], ":=", "\[IndentingNewLine]", 
+   RowBox[{"fromHomogeneous", "[", 
+    RowBox[{
+     RowBox[{"thinLensTransform", "[", 
+      RowBox[{"addFocalLengthSign", "[", 
+       RowBox[{"f", ",", 
+        RowBox[{"point", "[", 
+         RowBox[{"[", "3", "]"}], "]"}]}], "]"}], "]"}], ".", "point"}], 
+    "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.5094383839336605`*^9, 3.5094384338753934`*^9}, {
+   3.509438503341401*^9, 3.509438523740394*^9}, {3.509438856445524*^9, 
+   3.509438906052867*^9}, {3.5094390367298465`*^9, 3.5094390643313804`*^9}, {
+   3.5094391214081497`*^9, 3.5094391558065557`*^9}, {3.509439207079692*^9, 
+   3.5094392092683725`*^9}, {3.509443278993513*^9, 3.509443293744903*^9}, {
+   3.509444117441561*^9, 3.509444136042495*^9}, {3.509444166680892*^9, 
+   3.509444220325759*^9}, {3.5094442607872*^9, 3.5094442948364906`*^9}, {
+   3.5094443482482834`*^9, 3.509444395636094*^9}, {3.5094445272332983`*^9, 
+   3.5094445375931015`*^9}, {3.5097302239577074`*^9, 
+   3.5097303320696025`*^9}, {3.509730710823258*^9, 3.5097307115096593`*^9}, {
+   3.50973081969514*^9, 3.5097308408180175`*^9}, {3.5098168306991153`*^9, 
+   3.50981683445833*^9}, {3.509816876635742*^9, 3.509816877418787*^9}, {
+   3.509816917540082*^9, 3.5098169187541513`*^9}, {3.509817112076209*^9, 
+   3.5098171151943874`*^9}, {3.509817248860032*^9, 3.5098172490510435`*^9}, {
+   3.50982252912914*^9, 3.5098225302055416`*^9}, {3.510074967307918*^9, 
+   3.5100749890291605`*^9}, {3.5100751983301315`*^9, 3.510075219309332*^9}, 
+   3.5100752523352203`*^9, {3.510075461827203*^9, 3.5100754722918015`*^9}, {
+   3.5100756145909405`*^9, 3.5100756176031127`*^9}, {3.5100756920803723`*^9, 
+   3.51007574571844*^9}, {3.510075814035348*^9, 3.510075827740132*^9}, 
+   3.510080213210966*^9, {3.510080279499758*^9, 3.5100803068953247`*^9}, {
+   3.5100818186237907`*^9, 3.5100818205659018`*^9}, 3.510082299709307*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "scheimpflugPoint", ",", "hingePoint", ",", "rotationPoint", ",", 
+       "focalPlaneCenter", ",", "focalPlaneDir", ",", "focalDistance", ",", 
+       "sensorCenter", ",", "sensorRight", ",", "sensorLeft", ",", 
+       "transformedSensorCenter", ",", "transformedSensorRight", ",", 
+       "transformedSensorLeft"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"focalDistance", "=", 
+       RowBox[{"getFocalPlaneDistance", "[", 
+        RowBox[{"sensorDistance", ",", 
+         RowBox[{"-", "focalLength"}]}], "]"}]}], ";", 
+      RowBox[{"scheimpflugPoint", "=", 
+       RowBox[{"getScheimpflugLineX", "[", 
+        RowBox[{"sensorDistance", ",", "sensorTilt", ",", "sensorShift"}], 
+        "]"}]}], ";", 
+      RowBox[{"hingePoint", "=", 
+       RowBox[{"getHingeLineX", "[", 
+        RowBox[{
+         RowBox[{"-", "focalLength"}], ",", "sensorTilt"}], "]"}]}], ";", 
+      RowBox[{"rotationPoint", "=", 
+       RowBox[{"getRotationLineX", "[", 
+        RowBox[{"focalDistance", ",", "scheimpflugPoint", ",", "hingePoint"}],
+         "]"}]}], ";", 
+      RowBox[{"focalPlaneCenter", "=", 
+       FractionBox[
+        RowBox[{"scheimpflugPoint", "+", "hingePoint"}], "2"]}], ";", 
+      RowBox[{"focalPlaneDir", "=", 
+       RowBox[{"Normalize", "[", 
+        RowBox[{"hingePoint", "-", "scheimpflugPoint"}], "]"}]}], ";", 
+      RowBox[{"sensorCenter", "=", 
+       RowBox[{"{", 
+        RowBox[{"sensorShift", ",", "sensorDistance"}], "}"}]}], ";", 
+      RowBox[{"sensorRight", "=", 
+       RowBox[{
+        RowBox[{"RotationTransform", "[", 
+         RowBox[{"sensorTilt", ",", "sensorCenter"}], "]"}], "[", 
+        RowBox[{"sensorCenter", "+", 
+         RowBox[{"{", 
+          RowBox[{"sensorRadius", ",", "0"}], "}"}]}], "]"}]}], ";", 
+      RowBox[{"sensorLeft", "=", 
+       RowBox[{
+        RowBox[{"2", " ", "sensorCenter"}], "-", "sensorRight"}]}], ";", 
+      RowBox[{"transformedSensorCenter", "=", 
+       RowBox[{"thinLensXZ", "[", 
+        RowBox[{"sensorCenter", ",", "focalLength"}], "]"}]}], ";", 
+      RowBox[{"transformedSensorRight", "=", 
+       RowBox[{"thinLensXZ", "[", 
+        RowBox[{"sensorRight", ",", "focalLength"}], "]"}]}], ";", 
+      RowBox[{"transformedSensorLeft", "=", 
+       RowBox[{"thinLensXZ", "[", 
+        RowBox[{"sensorLeft", ",", "focalLength"}], "]"}]}], ";", 
+      RowBox[{"Graphics", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"PointSize", "[", "Large", "]"}], ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Line", "[", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"-", "lineRadius"}], ",", 
+                 RowBox[{"-", "focalLength"}]}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"lineRadius", ",", 
+                 RowBox[{"-", "focalLength"}]}], "}"}]}], "}"}], "]"}], ",", 
+            "\"\<Focal length\>\""}], "]"}], ",", 
+          RowBox[{"Darker", "[", "Green", "]"}], ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Line", "[", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"-", "lineRadius"}], ",", "focalDistance"}], "}"}], 
+               ",", 
+               RowBox[{"{", 
+                RowBox[{"lineRadius", ",", "focalDistance"}], "}"}]}], "}"}], 
+             "]"}], ",", "\"\<Focal plane with no tilt\>\""}], "]"}], ",", 
+          "Black", ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Translate", "[", 
+             RowBox[{
+              RowBox[{"Rotate", "[", 
+               RowBox[{
+                RowBox[{"Line", "[", 
+                 RowBox[{"{", 
+                  RowBox[{
+                   RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"-", "lineRadius"}], ",", "0"}], "}"}], ",", 
+                   RowBox[{"{", 
+                    RowBox[{"lineRadius", ",", "0"}], "}"}]}], "}"}], "]"}], 
+                ",", "sensorTilt"}], "]"}], ",", "sensorCenter"}], "]"}], 
+            ",", "\"\<Sensor plane\>\""}], "]"}], ",", "Gray", ",", 
+          RowBox[{"Line", "[", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"-", "lineRadius"}], ",", "sensorDistance"}], "}"}], 
+             ",", 
+             RowBox[{"{", 
+              RowBox[{"lineRadius", ",", "sensorDistance"}], "}"}]}], "}"}], 
+           "]"}], ",", "Green", ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Line", "[", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"focalPlaneCenter", "-", 
+                RowBox[{"lineRadius", " ", "focalPlaneDir"}]}], ",", 
+               RowBox[{"focalPlaneCenter", "+", 
+                RowBox[{"lineRadius", " ", "focalPlaneDir"}]}]}], "}"}], 
+             "]"}], ",", "\"\<Focal plane\>\""}], "]"}], ",", "Thick", ",", 
+          "Brown", ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Line", "[", 
+             RowBox[{"{", 
+              RowBox[{
+              "transformedSensorRight", ",", "transformedSensorLeft"}], "}"}],
+              "]"}], ",", "\"\<Image of the sensor\>\""}], "]"}], ",", 
+          "Orange", ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Translate", "[", 
+             RowBox[{
+              RowBox[{"Rotate", "[", 
+               RowBox[{
+                RowBox[{"Line", "[", 
+                 RowBox[{"{", 
+                  RowBox[{
+                   RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"-", "sensorRadius"}], ",", "0"}], "}"}], ",", 
+                   RowBox[{"{", 
+                    RowBox[{"sensorRadius", ",", "0"}], "}"}]}], "}"}], "]"}],
+                 ",", "sensorTilt"}], "]"}], ",", "sensorCenter"}], "]"}], 
+            ",", "\"\<Sensor\>\""}], "]"}], ",", "Blue", ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Line", "[", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"-", "lensRadius"}], ",", "0"}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"lensRadius", ",", "0"}], "}"}]}], "}"}], "]"}], ",", 
+            "\"\<Lens\>\""}], "]"}], ",", "Red", ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Point", "[", 
+             RowBox[{"{", "scheimpflugPoint", "}"}], "]"}], ",", 
+            "\"\<Intersection with Scheimpflug line\>\""}], "]"}], ",", "Red",
+           ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Point", "[", 
+             RowBox[{"{", "hingePoint", "}"}], "]"}], ",", 
+            "\"\<Intersection with hinge line\>\""}], "]"}], ",", "Black", 
+          ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Point", "[", 
+             RowBox[{"{", "rotationPoint", "}"}], "]"}], ",", 
+            "\"\<Axis of rotation of the focal plane\>\""}], "]"}], ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Point", "[", 
+             RowBox[{"{", "sensorCenter", "}"}], "]"}], ",", 
+            "\"\<Axis of rotation of the sensor plane\>\""}], "]"}], ",", 
+          "Thin", ",", "Brown", ",", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Arrow", "[", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{"0", ",", 
+                 RowBox[{"-", "10"}]}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"0", ",", "10"}], "}"}]}], "}"}], "]"}], ",", 
+            "\"\<Optical axis\>\""}], "]"}], ",", "Gray", ",", 
+          RowBox[{"Arrow", "[", 
+           RowBox[{"{", 
+            RowBox[{"sensorCenter", ",", "transformedSensorCenter"}], "}"}], 
+           "]"}], ",", "Blue", ",", 
+          RowBox[{"Point", "[", "transformedSensorCenter", "]"}], ",", "Gray",
+           ",", 
+          RowBox[{"Arrow", "[", 
+           RowBox[{"{", 
+            RowBox[{"sensorRight", ",", "transformedSensorRight"}], "}"}], 
+           "]"}], ",", 
+          RowBox[{"Arrow", "[", 
+           RowBox[{"{", 
+            RowBox[{"sensorLeft", ",", "transformedSensorLeft"}], "}"}], 
+           "]"}]}], "}"}], ",", 
+        RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+        RowBox[{"AxesLabel", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"\"\<x\>\"", ",", "\"\<z\>\""}], "}"}]}], ",", 
+        RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+        RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", 
+        RowBox[{"PlotRangeClipping", "\[Rule]", "True"}], ",", 
+        RowBox[{"PlotRange", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"-", "10"}], ",", "10"}], "}"}]}], "}"}]}]}], " ", 
+       RowBox[{"(*", 
+        RowBox[{",", 
+         RowBox[{"ImageSize", "\[Rule]", "Large"}]}], "*)"}], "]"}]}]}], 
+    "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"sensorTilt", ",", 
+       FractionBox["\[Pi]", "4"], ",", "\"\<sensor tilt (XZ)\>\""}], "}"}], 
+     ",", 
+     RowBox[{"-", 
+      FractionBox["\[Pi]", "2"]}], ",", 
+     FractionBox["\[Pi]", "2"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"sensorShift", ",", "1", ",", "\"\<sensor shift (X)\>\""}], 
+      "}"}], ",", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "sensorDistance", ",", "5", ",", "\"\<sensor distance (Z)\>\""}], "}"}],
+      ",", 
+     RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"focalLength", ",", "2", ",", "\"\<focal length (Z)\>\""}], 
+      "}"}], ",", "0.1", ",", "10"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.5094295893169756`*^9, 3.509429699817296*^9}, {
+   3.5094312026390305`*^9, 3.5094312238225174`*^9}, {3.509431275610031*^9, 
+   3.509431286288642*^9}, {3.5094313972639894`*^9, 3.509431415513033*^9}, {
+   3.509436891326566*^9, 3.509436944277023*^9}, {3.5094369788799653`*^9, 
+   3.5094370267705936`*^9}, {3.509437175836753*^9, 3.509437190934724*^9}, {
+   3.509437233925197*^9, 3.509437260783003*^9}, 3.5094372922038417`*^9, {
+   3.509437337409562*^9, 3.509437385666186*^9}, {3.5094374392808094`*^9, 
+   3.509437456842903*^9}, {3.509437528320673*^9, 3.5094376297969446`*^9}, {
+   3.509437681787967*^9, 3.5094378872528615`*^9}, {3.5094379923651257`*^9, 
+   3.5094379974473*^9}, {3.509438449062951*^9, 3.509438472615262*^9}, {
+   3.5094385389177523`*^9, 3.509438562272669*^9}, 3.5094386021681895`*^9, {
+   3.5094386613006763`*^9, 3.5094386644426146`*^9}, {3.5094387017524357`*^9, 
+   3.5094387144757147`*^9}, {3.5094387482289963`*^9, 
+   3.5094387838433237`*^9}, {3.509438915980025*^9, 3.5094390504882317`*^9}, {
+   3.5094391638712444`*^9, 3.5094391904310637`*^9}, {3.5094392204650555`*^9, 
+   3.5094393201352615`*^9}, {3.5094394300304885`*^9, 3.509439554706729*^9}, {
+   3.5094395874547806`*^9, 3.5094396072281475`*^9}, {3.509439713843442*^9, 
+   3.5094397351330547`*^9}, {3.509439769075136*^9, 3.5094398487250104`*^9}, {
+   3.5094399178174105`*^9, 3.50943996057347*^9}, {3.5094400522574453`*^9, 
+   3.509440248170182*^9}, {3.5094414710683613`*^9, 3.509441503451397*^9}, {
+   3.5094418302466717`*^9, 3.509441839583619*^9}, {3.5094423211647387`*^9, 
+   3.509442332440956*^9}, {3.5094423990017114`*^9, 3.509442430381716*^9}, {
+   3.5094424744680448`*^9, 3.5094424935961466`*^9}, {3.5094425289205008`*^9, 
+   3.509442531617405*^9}, {3.5094425898432875`*^9, 3.5094427039031196`*^9}, {
+   3.5094427424282217`*^9, 3.50944277569573*^9}, {3.5094428223093596`*^9, 
+   3.5094428999719515`*^9}, {3.5094429549793105`*^9, 
+   3.5094432577143316`*^9}, {3.5094433118916297`*^9, 3.5094433148969393`*^9}, 
+   3.509443349717295*^9, {3.509444410036223*^9, 3.509444488941684*^9}, {
+   3.50972283577968*^9, 3.509722840270643*^9}, {3.5097229007679186`*^9, 
+   3.5097229103765063`*^9}, {3.5097272291235447`*^9, 
+   3.5097273159658303`*^9}, {3.5097274171313267`*^9, 3.509727426348892*^9}, {
+   3.5097276813940215`*^9, 3.509727707457847*^9}, {3.5097296716432*^9, 
+   3.5097296771968093`*^9}, {3.509729708275513*^9, 3.5097297167906237`*^9}, {
+   3.5097303456733828`*^9, 3.509730376027877*^9}, {3.509730619811993*^9, 
+   3.509730669721461*^9}, {3.5097307672374496`*^9, 3.5097307876616755`*^9}, {
+   3.5097308291970744`*^9, 3.509730850979705*^9}, {3.5097310763265867`*^9, 
+   3.509731138100705*^9}, {3.5097312503183002`*^9, 3.5097312507707005`*^9}, {
+   3.509731305972246*^9, 3.509731306175047*^9}, {3.5097323652912493`*^9, 
+   3.509732366289651*^9}, {3.509817045636409*^9, 3.5098170683117056`*^9}, 
+   3.509817135258535*^9, {3.509817288736313*^9, 3.5098173847668056`*^9}, {
+   3.5098233289018974`*^9, 3.5098234346545496`*^9}, {3.509823803539815*^9, 
+   3.509823965710721*^9}, {3.509824282822657*^9, 3.5098242957193365`*^9}, {
+   3.5098243451422076`*^9, 3.5098244101227283`*^9}, {3.509824611710222*^9, 
+   3.5098247756194677`*^9}, {3.5098249337463017`*^9, 
+   3.5098249817972155`*^9}, {3.5098252785006084`*^9, 
+   3.5098252940787473`*^9}, {3.509825453647064*^9, 3.509825457879478*^9}, 
+   3.509825583275247*^9, {3.5098258122424192`*^9, 3.5098258138960223`*^9}, {
+   3.5098259172518015`*^9, 3.5098259463926277`*^9}, {3.5098643742511764`*^9, 
+   3.5098643763768106`*^9}, {3.509869964966565*^9, 3.5098700450561237`*^9}, {
+   3.509870129287332*^9, 3.509870150698109*^9}, {3.5098702307149825`*^9, 
+   3.509870254603478*^9}, {3.50987239792247*^9, 3.509872536202177*^9}, {
+   3.509872568417053*^9, 3.5098726078336334`*^9}, {3.5098747198000975`*^9, 
+   3.509874725143403*^9}, {3.509874781549629*^9, 3.5098747833857346`*^9}, {
+   3.509874814416509*^9, 3.5098749492812233`*^9}, {3.50987532511572*^9, 
+   3.509875356115493*^9}, 3.509907556848669*^9, {3.509907604885417*^9, 
+   3.5099076087756395`*^9}, {3.5099092898687925`*^9, 3.509909294440054*^9}, {
+   3.510070544381941*^9, 3.510070558722761*^9}, {3.510072182664645*^9, 
+   3.5100722432451105`*^9}, {3.5100739260053587`*^9, 
+   3.5100739289085245`*^9}, {3.5100741157692127`*^9, 
+   3.5100741181413484`*^9}, {3.510074163461941*^9, 3.510074167603177*^9}, {
+   3.510074390623934*^9, 3.5100743924440374`*^9}, {3.5100744328173466`*^9, 
+   3.51007445000733*^9}, {3.510074790989833*^9, 3.510074796724161*^9}, {
+   3.5100749560012712`*^9, 3.510074957441354*^9}, {3.510075004796062*^9, 
+   3.5100750124244986`*^9}, {3.5100751801820936`*^9, 
+   3.5100751818321877`*^9}, {3.5100752279648266`*^9, 
+   3.5100752318080463`*^9}, {3.510075686601059*^9, 3.510075705390134*^9}, {
+   3.5100778181309757`*^9, 3.5100778619294806`*^9}, 3.510078341785927*^9, 
+   3.510080264974927*^9, {3.510080388795009*^9, 3.510080395441389*^9}, {
+   3.5100804507845545`*^9, 3.5100804516256027`*^9}, {3.5100818284043503`*^9, 
+   3.5100818314505243`*^9}, {3.5100823033885174`*^9, 
+   3.5100823051886206`*^9}, {3.5100827268007355`*^9, 3.5100827405215206`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`focalLength$$ = 
+    2, $CellContext`sensorDistance$$ = 5, $CellContext`sensorShift$$ = 
+    1, $CellContext`sensorTilt$$ = 0.6031857894892405, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`sensorTilt$$], Rational[1, 4] Pi, 
+       "sensor tilt (XZ)"}, Rational[-1, 2] Pi, Rational[1, 2] Pi}, {{
+       Hold[$CellContext`sensorShift$$], 1, "sensor shift (X)"}, -5, 5}, {{
+       Hold[$CellContext`sensorDistance$$], 5, "sensor distance (Z)"}, -10, 
+      10}, {{
+       Hold[$CellContext`focalLength$$], 2, "focal length (Z)"}, 0.1, 10}}, 
+    Typeset`size$$ = {360., {178., 182.}}, Typeset`update$$ = 0, 
+    Typeset`initDone$$, Typeset`skipInitDone$$ = 
+    True, $CellContext`sensorTilt$1912$$ = 
+    0, $CellContext`sensorShift$1913$$ = 
+    0, $CellContext`sensorDistance$1914$$ = 
+    0, $CellContext`focalLength$1915$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`focalLength$$ = 
+        2, $CellContext`sensorDistance$$ = 5, $CellContext`sensorShift$$ = 
+        1, $CellContext`sensorTilt$$ = Rational[1, 4] Pi}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`sensorTilt$$, $CellContext`sensorTilt$1912$$, 0], 
+        Hold[$CellContext`sensorShift$$, $CellContext`sensorShift$1913$$, 0], 
+        Hold[$CellContext`sensorDistance$$, \
+$CellContext`sensorDistance$1914$$, 0], 
+        Hold[$CellContext`focalLength$$, $CellContext`focalLength$1915$$, 0]},
+       "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> 
+      Module[{$CellContext`scheimpflugPoint$, $CellContext`hingePoint$, \
+$CellContext`rotationPoint$, $CellContext`focalPlaneCenter$, \
+$CellContext`focalPlaneDir$, $CellContext`focalDistance$, \
+$CellContext`sensorCenter$, $CellContext`sensorRight$, \
+$CellContext`sensorLeft$, $CellContext`transformedSensorCenter$, \
+$CellContext`transformedSensorRight$, $CellContext`transformedSensorLeft$}, \
+$CellContext`focalDistance$ = \
+$CellContext`getFocalPlaneDistance[$CellContext`sensorDistance$$, \
+-$CellContext`focalLength$$]; $CellContext`scheimpflugPoint$ = \
+$CellContext`getScheimpflugLineX[$CellContext`sensorDistance$$, \
+$CellContext`sensorTilt$$, $CellContext`sensorShift$$]; \
+$CellContext`hingePoint$ = \
+$CellContext`getHingeLineX[-$CellContext`focalLength$$, \
+$CellContext`sensorTilt$$]; $CellContext`rotationPoint$ = \
+$CellContext`getRotationLineX[$CellContext`focalDistance$, \
+$CellContext`scheimpflugPoint$, $CellContext`hingePoint$]; \
+$CellContext`focalPlaneCenter$ = ($CellContext`scheimpflugPoint$ + \
+$CellContext`hingePoint$)/2; $CellContext`focalPlaneDir$ = 
+         Normalize[$CellContext`hingePoint$ - $CellContext`scheimpflugPoint$]; \
+$CellContext`sensorCenter$ = {$CellContext`sensorShift$$, \
+$CellContext`sensorDistance$$}; $CellContext`sensorRight$ = 
+         RotationTransform[$CellContext`sensorTilt$$, \
+$CellContext`sensorCenter$][$CellContext`sensorCenter$ + \
+{$CellContext`sensorRadius, 0}]; $CellContext`sensorLeft$ = 
+         2 $CellContext`sensorCenter$ - $CellContext`sensorRight$; \
+$CellContext`transformedSensorCenter$ = \
+$CellContext`thinLensXZ[$CellContext`sensorCenter$, \
+$CellContext`focalLength$$]; $CellContext`transformedSensorRight$ = \
+$CellContext`thinLensXZ[$CellContext`sensorRight$, \
+$CellContext`focalLength$$]; $CellContext`transformedSensorLeft$ = \
+$CellContext`thinLensXZ[$CellContext`sensorLeft$, $CellContext`focalLength$$]; 
+        Graphics[{
+           PointSize[Large], 
+           Tooltip[
+            
+            Line[{{-$CellContext`lineRadius, -$CellContext`focalLength$$}, \
+{$CellContext`lineRadius, -$CellContext`focalLength$$}}], "Focal length"], 
+           Darker[Green], 
+           Tooltip[
+            
+            Line[{{-$CellContext`lineRadius, $CellContext`focalDistance$}, \
+{$CellContext`lineRadius, $CellContext`focalDistance$}}], 
+            "Focal plane with no tilt"], Black, 
+           Tooltip[
+            Translate[
+             Rotate[
+              
+              Line[{{-$CellContext`lineRadius, 0}, {$CellContext`lineRadius, 
+                 0}}], $CellContext`sensorTilt$$], \
+$CellContext`sensorCenter$], "Sensor plane"], Gray, 
+           
+           Line[{{-$CellContext`lineRadius, $CellContext`sensorDistance$$}, \
+{$CellContext`lineRadius, $CellContext`sensorDistance$$}}], Green, 
+           Tooltip[
+            
+            Line[{$CellContext`focalPlaneCenter$ - $CellContext`lineRadius \
+$CellContext`focalPlaneDir$, $CellContext`focalPlaneCenter$ + \
+$CellContext`lineRadius $CellContext`focalPlaneDir$}], "Focal plane"], Thick, 
+           Brown, 
+           Tooltip[
+            
+            Line[{$CellContext`transformedSensorRight$, \
+$CellContext`transformedSensorLeft$}], "Image of the sensor"], Orange, 
+           Tooltip[
+            Translate[
+             Rotate[
+              
+              Line[{{-$CellContext`sensorRadius, 
+                 0}, {$CellContext`sensorRadius, 
+                 0}}], $CellContext`sensorTilt$$], \
+$CellContext`sensorCenter$], "Sensor"], Blue, 
+           Tooltip[
+            
+            Line[{{-$CellContext`lensRadius, 0}, {$CellContext`lensRadius, 
+               0}}], "Lens"], Red, 
+           Tooltip[
+            Point[{$CellContext`scheimpflugPoint$}], 
+            "Intersection with Scheimpflug line"], Red, 
+           Tooltip[
+            Point[{$CellContext`hingePoint$}], 
+            "Intersection with hinge line"], Black, 
+           Tooltip[
+            Point[{$CellContext`rotationPoint$}], 
+            "Axis of rotation of the focal plane"], 
+           Tooltip[
+            Point[{$CellContext`sensorCenter$}], 
+            "Axis of rotation of the sensor plane"], Thin, Brown, 
+           Tooltip[
+            Arrow[{{0, -10}, {0, 10}}], "Optical axis"], Gray, 
+           
+           Arrow[{$CellContext`sensorCenter$, \
+$CellContext`transformedSensorCenter$}], Blue, 
+           Point[$CellContext`transformedSensorCenter$], Gray, 
+           
+           Arrow[{$CellContext`sensorRight$, \
+$CellContext`transformedSensorRight$}], 
+           
+           Arrow[{$CellContext`sensorLeft$, \
+$CellContext`transformedSensorLeft$}]}, Axes -> True, AxesLabel -> {"x", "z"},
+           Frame -> True, FrameTicks -> Automatic, PlotRangeClipping -> True, 
+          PlotRange -> {{-10, 10}, {-10, 10}}]], 
+      "Specifications" :> {{{$CellContext`sensorTilt$$, Rational[1, 4] Pi, 
+          "sensor tilt (XZ)"}, Rational[-1, 2] Pi, Rational[1, 2] 
+         Pi}, {{$CellContext`sensorShift$$, 1, "sensor shift (X)"}, -5, 
+         5}, {{$CellContext`sensorDistance$$, 5, "sensor distance (Z)"}, -10, 
+         10}, {{$CellContext`focalLength$$, 2, "focal length (Z)"}, 0.1, 10}},
+       "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{409., {265., 270.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{
+  3.5098258145668235`*^9, {3.5098259182814035`*^9, 3.5098259469698286`*^9}, 
+   3.5098261184304314`*^9, 3.5098643770476117`*^9, {3.5098644306693077`*^9, 
+   3.5098644387969217`*^9}, 3.509864512451295*^9, 3.5098649821476235`*^9, 
+   3.509870071934971*^9, 3.509870151355319*^9, 3.509872401182876*^9, {
+   3.509872503453538*^9, 3.509872536716978*^9}, {3.5098725698210554`*^9, 
+   3.509872608488835*^9}, 3.509874106488437*^9, 3.509874725589429*^9, 
+   3.5098747838337603`*^9, 3.5098748196638093`*^9, {3.509874940784737*^9, 
+   3.5098749507933097`*^9}, {3.509875300052286*^9, 3.509875356331505*^9}, 
+   3.509875638627651*^9, 3.5099076093396716`*^9, 3.5099093081528378`*^9, {
+   3.5100705181804423`*^9, 3.510070526862939*^9}, 3.5100705592477913`*^9, 
+   3.5100706882641706`*^9, 3.510071769399008*^9, {3.5100719662932696`*^9, 
+   3.510071977415906*^9}, {3.510072187625929*^9, 3.510072244179164*^9}, {
+   3.510073017104373*^9, 3.5100730289860525`*^9}, 3.510073122397395*^9, 
+   3.510073414061077*^9, {3.5100738983867793`*^9, 3.510073941222229*^9}, {
+   3.5100741187403827`*^9, 3.5100741290839744`*^9}, 3.510074168314218*^9, {
+   3.5100743843175726`*^9, 3.5100743973903203`*^9}, {3.5100744373926086`*^9, 
+   3.510074459079849*^9}, 3.5100748054026575`*^9, {3.5100749391673083`*^9, 
+   3.510075012995531*^9}, {3.510075186541457*^9, 3.5100752283488483`*^9}, {
+   3.510075466046444*^9, 3.510075474617934*^9}, {3.5100756215803404`*^9, 
+   3.51007562542756*^9}, {3.510075687276098*^9, 3.51007572333716*^9}, 
+   3.5100758216977863`*^9, {3.510077819971081*^9, 3.5100778625165143`*^9}, {
+   3.5100783383617315`*^9, 3.5100783422499533`*^9}, 3.5100802198023434`*^9, 
+   3.5100802654629555`*^9, {3.5100803891860313`*^9, 3.510080396012422*^9}, 
+   3.5100804520586276`*^9, {3.510081823233054*^9, 3.510081832126563*^9}, 
+   3.5100823057036505`*^9, 3.510082656160695*^9, {3.5100827300179195`*^9, 
+   3.510082741284564*^9}}]
+}, Open  ]],
+
+Cell["\<\
+Observations:
+- with changing focal length the focal plane rotates around the Scheimpflug \
+point
+- with changing sensor distance or shift the focal plane rotates around the \
+hinge point
+- with changning sensor tilt the focal plane rotates around the point where \
+the tilted focal intersects the original untilted focal plane
+- alignment of the focal plane with the optical axis direction is not an \
+imposibility
+- it seems that the focus plane can be obtained simply by projecting the \
+sensor boundary points through the lens center
+
+Hypotheses:
+- the point T where the tilted focal intersects the original untilted focal \
+plane might be related to the conjugate point of the center of sensor rotation
+  - it seems the point T is the intersection of the line connecting the \
+sensor center and the lens center and the untilted focal plane\
+\>", "Text",
+ CellChangeTimes->{{3.50972755660046*^9, 3.5097276285553255`*^9}, {
+   3.5097279387376533`*^9, 3.5097279536592646`*^9}, {3.50972798612352*^9, 
+   3.5097280255059385`*^9}, 3.5097307466057043`*^9, {3.509731478970726*^9, 
+   3.5097315176159177`*^9}, {3.509817495139119*^9, 3.5098175253158445`*^9}, {
+   3.509823566393612*^9, 3.5098236750691767`*^9}, {3.5098823276716595`*^9, 
+   3.5098823643056445`*^9}, {3.50988240982689*^9, 3.5098824105967145`*^9}}],
+
+Cell["\<\
+TODO:
+- generalize to 3D
+  - lines -> planes
+  - points -> lines
+  - tilt and shift in both X and Y coordinates
+- create and publish a demonstration to Wolfram site\
+\>", "Text",
+ CellChangeTimes->{{3.509730922575291*^9, 3.5097309667666264`*^9}, {
+  3.5097310113672004`*^9, 3.509731030987203*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"sourcePoint", ",", " ", "targetPoint"}], "}"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"sourcePoint", "=", 
+       RowBox[{"{", 
+        RowBox[{"x", ",", " ", "z"}], "}"}]}], ";", "\[IndentingNewLine]", 
+      " ", 
+      RowBox[{"targetPoint", "=", " ", 
+       RowBox[{"thinLensXZ", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"x", ",", "z"}], "}"}], ",", "focalLength"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"Graphics", "[", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"{", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"Arrow", "[", 
+           RowBox[{"{", 
+            RowBox[{"sourcePoint", ",", "targetPoint"}], "}"}], "]"}], ",", 
+          "\[IndentingNewLine]", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Line", "[", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"-", "lineRadius"}], ",", "focalLength"}], "}"}], 
+               ",", 
+               RowBox[{"{", 
+                RowBox[{"lineRadius", ",", "focalLength"}], "}"}]}], "}"}], 
+             "]"}], ",", "\"\<Focal length\>\""}], "]"}], ",", 
+          "\[IndentingNewLine]", 
+          RowBox[{"Tooltip", "[", 
+           RowBox[{
+            RowBox[{"Line", "[", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"-", "lineRadius"}], ",", 
+                 RowBox[{"-", "focalLength"}]}], "}"}], ",", 
+               RowBox[{"{", 
+                RowBox[{"lineRadius", ",", 
+                 RowBox[{"-", "focalLength"}]}], "}"}]}], "}"}], "]"}], ",", 
+            "\"\<Focal length\>\""}], "]"}]}], "\[IndentingNewLine]", "}"}], 
+        ",", "\[IndentingNewLine]", 
+        RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+        RowBox[{"AxesLabel", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"\"\<x\>\"", ",", "\"\<z\>\""}], "}"}]}], ",", 
+        RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+        RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", " ", 
+        "\[IndentingNewLine]", 
+        RowBox[{"PlotRangeClipping", "\[Rule]", "True"}], ",", 
+        RowBox[{"PlotRange", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"-", "10"}], ",", "10"}], "}"}]}], "}"}]}]}], 
+       "\[IndentingNewLine]", "]"}]}]}], "\[IndentingNewLine]", "]"}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"x", ",", " ", 
+       RowBox[{"-", "4"}], ",", " ", "\"\<source point (X)\>\""}], "}"}], ",",
+      " ", 
+     RowBox[{"-", "10"}], ",", " ", "10"}], "}"}], ",", "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"z", ",", " ", "7", ",", " ", "\"\<source point (Z)\>\""}], 
+      "}"}], ",", " ", 
+     RowBox[{"-", "10"}], ",", " ", "10"}], "}"}], ",", "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+      "focalLength", ",", " ", "2", ",", " ", "\"\<focal length (Z)\>\""}], 
+      "}"}], ",", " ", "0.1", ",", " ", "10"}], "}"}]}], 
+  "\[IndentingNewLine]", "]"}]], "Input",
+ CellChangeTimes->{{3.5098227824736595`*^9, 3.509822958938833*^9}, {
+   3.509822999458959*^9, 3.509823012667238*^9}, 3.5098230635162373`*^9, {
+   3.50982310965937*^9, 3.5098231994717474`*^9}, {3.5098744779652653`*^9, 
+   3.50987448941792*^9}, {3.509909296927196*^9, 3.509909316384309*^9}, {
+   3.5100707025059853`*^9, 3.510070711278487*^9}, {3.510072278137106*^9, 
+   3.5100722816313057`*^9}, 3.5100747370257463`*^9, 3.5100803663187237`*^9}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`focalLength$$ = 
+    2, $CellContext`x$$ = -5.7, $CellContext`z$$ = 5.300000000000001, 
+    Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`x$$], -4, "source point (X)"}, -10, 10}, {{
+       Hold[$CellContext`z$$], 7, "source point (Z)"}, -10, 10}, {{
+       Hold[$CellContext`focalLength$$], 2, "focal length (Z)"}, 0.1, 10}}, 
+    Typeset`size$$ = {360., {178., 182.}}, Typeset`update$$ = 0, 
+    Typeset`initDone$$, Typeset`skipInitDone$$ = 
+    True, $CellContext`x$68157$$ = 0, $CellContext`z$68158$$ = 
+    0, $CellContext`focalLength$68159$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`focalLength$$ = 
+        2, $CellContext`x$$ = -4, $CellContext`z$$ = 7}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`x$$, $CellContext`x$68157$$, 0], 
+        Hold[$CellContext`z$$, $CellContext`z$68158$$, 0], 
+        Hold[$CellContext`focalLength$$, $CellContext`focalLength$68159$$, 
+         0]}, "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> 
+      Module[{$CellContext`sourcePoint$, $CellContext`targetPoint$}, \
+$CellContext`sourcePoint$ = {$CellContext`x$$, $CellContext`z$$}; \
+$CellContext`targetPoint$ = $CellContext`thinLensXZ[{$CellContext`x$$, \
+$CellContext`z$$}, $CellContext`focalLength$$]; Graphics[{
+           Arrow[{$CellContext`sourcePoint$, $CellContext`targetPoint$}], 
+           Tooltip[
+            
+            Line[{{-$CellContext`lineRadius, $CellContext`focalLength$$}, \
+{$CellContext`lineRadius, $CellContext`focalLength$$}}], "Focal length"], 
+           Tooltip[
+            
+            Line[{{-$CellContext`lineRadius, -$CellContext`focalLength$$}, \
+{$CellContext`lineRadius, -$CellContext`focalLength$$}}], "Focal length"]}, 
+          Axes -> True, AxesLabel -> {"x", "z"}, Frame -> True, FrameTicks -> 
+          Automatic, PlotRangeClipping -> True, 
+          PlotRange -> {{-10, 10}, {-10, 10}}]], 
+      "Specifications" :> {{{$CellContext`x$$, -4, "source point (X)"}, -10, 
+         10}, {{$CellContext`z$$, 7, "source point (Z)"}, -10, 
+         10}, {{$CellContext`focalLength$$, 2, "focal length (Z)"}, 0.1, 10}},
+       "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{409., {251., 256.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.5098229286121464`*^9, 3.5098229594536343`*^9}, {
+   3.5098230003481607`*^9, 3.5098230041389675`*^9}, 3.5098230640340605`*^9, {
+   3.509823110938572*^9, 3.5098231613896313`*^9}, 3.509823199731762*^9, 
+   3.509825988591013*^9, 3.509826114296424*^9, 3.509874450756709*^9, {
+   3.509874483890604*^9, 3.5098744899109488`*^9}, 3.5098745317503414`*^9, {
+   3.50990931186005*^9, 3.5099093166393237`*^9}, {3.5100706950585594`*^9, 
+   3.5100707122005396`*^9}, 3.510071367767036*^9, {3.5100722698626328`*^9, 
+   3.510072282275343*^9}, 3.510073239554096*^9, 3.5100734177152863`*^9, {
+   3.5100747202787886`*^9, 3.5100747382438164`*^9}, 3.510080336739032*^9, 
+   3.510080367076767*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"(*", 
+  RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"Module", "[", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+       "square", ",", "sensorTransform", ",", "sensorPoints", ",", 
+        "focusPlanePoints"}], "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"sensorTransform", " ", "=", 
+        RowBox[{"Composition", "[", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"TranslationTransform", "[", 
+           RowBox[{"{", 
+            RowBox[{"0", ",", "0", ",", "sensorDistance"}], "}"}], "]"}], ",",
+           "\[IndentingNewLine]", 
+          RowBox[{"RotationTransform", "[", 
+           RowBox[{"sensorTiltBeta", ",", " ", 
+            RowBox[{"{", 
+             RowBox[{"0", ",", "1", ",", "0"}], "}"}]}], "]"}], ",", 
+          "\[IndentingNewLine]", 
+          RowBox[{"RotationTransform", "[", 
+           RowBox[{"sensorTiltAlpha", ",", " ", 
+            RowBox[{"{", 
+             RowBox[{"1", ",", "0", ",", "0"}], "}"}]}], "]"}], ",", 
+          "\[IndentingNewLine]", 
+          RowBox[{"ScalingTransform", "[", 
+           RowBox[{"2", "*", "sensorRadius", "*", " ", 
+            RowBox[{"{", 
+             RowBox[{"1", ",", "1", ",", "0"}], "}"}]}], "]"}]}], "]"}]}], 
+       ";", "\[IndentingNewLine]", 
+       RowBox[{"square", " ", "=", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"-", "1"}], ",", "1", ",", "0"}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"1", ",", "1", ",", "0"}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{"1", ",", 
+            RowBox[{"-", "1"}], ",", "0"}], "}"}], ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"-", "1"}], ",", 
+            RowBox[{"-", "1"}], ",", "0"}], "}"}]}], "}"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"sensorPoints", " ", "=", 
+        RowBox[{"sensorTransform", "[", "square", "]"}]}], ";", 
+       "\[IndentingNewLine]", 
+       RowBox[{"focusPlanePoints", "=", 
+        RowBox[{
+         RowBox[{"Function", "[", 
+          RowBox[{"point", ",", 
+           RowBox[{"thinLens", "[", 
+            RowBox[{"point", ",", "focalLength"}], "]"}]}], "]"}], "/@", " ", 
+         "sensorPoints"}]}], ";", "\[IndentingNewLine]", 
+       RowBox[{"Graphics3D", "[", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"{", "\[IndentingNewLine]", 
+          RowBox[{
+           RowBox[{"Polygon", "[", "sensorPoints", "]"}], ",", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Polygon", "[", "focusPlanePoints", "]"}], ",", 
+           "\[IndentingNewLine]", 
+           RowBox[{"Opacity", "[", "0.1", "]"}], ",", "\[IndentingNewLine]", 
+           RowBox[{"Scale", "[", 
+            RowBox[{
+             RowBox[{"Polygon", "[", "square", "]"}], ",", "10"}], "]"}], 
+           ","}], "\[IndentingNewLine]", "}"}], ",", "\[IndentingNewLine]", 
+         RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+         RowBox[{"AxesLabel", "\[Rule]", 
+          RowBox[{"{", 
+           RowBox[{"\"\<x\>\"", ",", "\"\<y\>\"", ",", "\"\<z\>\""}], "}"}]}],
+          ",", 
+         RowBox[{"PlotRange", "\[Rule]", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", " ", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"-", "10"}], ",", "10"}], "}"}]}], "}"}]}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"ImageSize", "\[Rule]", "Large"}]}], "\[IndentingNewLine]", 
+        "]"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"sensorTiltAlpha", ",", " ", 
+        RowBox[{"0", "*", 
+         RowBox[{
+          RowBox[{"-", "\[Pi]"}], "/", "8"}]}], ",", " ", 
+        "\"\<sensor tilt (\[Alpha])\>\""}], "}"}], ",", " ", 
+      RowBox[{
+       RowBox[{"-", "\[Pi]"}], "/", "2"}], ",", " ", 
+      RowBox[{"\[Pi]", "/", "2"}]}], "}"}], ",", "\[IndentingNewLine]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"sensorTiltBeta", ",", " ", 
+        RowBox[{"0", "*", 
+         RowBox[{
+          RowBox[{"-", "\[Pi]"}], "/", "8"}]}], ",", " ", 
+        "\"\<sensor tilt (\[Beta])\>\""}], "}"}], ",", " ", 
+      RowBox[{
+       RowBox[{"-", "\[Pi]"}], "/", "2"}], ",", " ", 
+      RowBox[{"\[Pi]", "/", "2"}]}], "}"}], ",", "\[IndentingNewLine]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+       "sensorDistance", ",", " ", "7", ",", " ", 
+        "\"\<sensor distance (Z)\>\""}], "}"}], ",", " ", "0", ",", " ", 
+      "10"}], "}"}], ",", "\[IndentingNewLine]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+       "focalLength", ",", " ", "3", ",", " ", "\"\<focal length (Z)\>\""}], 
+       "}"}], ",", "0.1", ",", "10"}], "}"}]}], "\[IndentingNewLine]", "]"}], 
+  "*)"}]], "Input",
+ CellChangeTimes->{{3.5098824361563377`*^9, 3.509882444349901*^9}, {
+   3.5098824757716227`*^9, 3.509882495149608*^9}, {3.509882584260072*^9, 
+   3.509882687635889*^9}, {3.5098827690566454`*^9, 3.5098827790921235`*^9}, {
+   3.509882986543989*^9, 3.5098831054743714`*^9}, {3.5098831406512313`*^9, 
+   3.5098831526008244`*^9}, {3.5098832580194063`*^9, 
+   3.5098833147725687`*^9}, {3.509883410397278*^9, 3.5098834878090963`*^9}, {
+   3.509883600043009*^9, 3.509883640269515*^9}, {3.5099076677310114`*^9, 
+   3.509907696004628*^9}, {3.50990772767444*^9, 3.5099077743701105`*^9}, {
+   3.5099079506151915`*^9, 3.5099079709433537`*^9}, {3.509908122147002*^9, 
+   3.5099081567659826`*^9}, {3.509908323149499*^9, 3.5099083687591076`*^9}, {
+   3.509908400654932*^9, 3.509908552996646*^9}, {3.509908596421129*^9, 
+   3.509908828138383*^9}, {3.5099088807803936`*^9, 3.5099089045997562`*^9}, {
+   3.509909204795926*^9, 3.509909213446421*^9}, 3.509909396492891*^9, {
+   3.5099095032459965`*^9, 3.509909554438925*^9}, {3.5100707530788774`*^9, 
+   3.5100707657496023`*^9}, 3.510070838138743*^9, {3.510070874692834*^9, 
+   3.510070895290012*^9}, {3.5100709285839157`*^9, 3.5100709489560814`*^9}, {
+   3.5100710321618404`*^9, 3.5100710345129747`*^9}, {3.5100731367142143`*^9, 
+   3.5100731412664747`*^9}, {3.5100731884381723`*^9, 3.510073221564067*^9}, {
+   3.510080981073886*^9, 3.510080984061056*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fromHomogeneous", "[", 
+   RowBox[{
+    RowBox[{"thinLensTransform", "[", 
+     RowBox[{"-", "2"}], "]"}], ".", 
+    RowBox[{"{", 
+     RowBox[{"1", ",", "0", ",", "5", ",", "1"}], "}"}]}], "]"}], " ", "//", 
+  " ", "N"}]], "Input",
+ CellChangeTimes->{{3.510080908924759*^9, 3.5100809092037745`*^9}, {
+  3.5100810032521544`*^9, 3.5100810056982937`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"-", "0.2857142857142857`"}], ",", "0.`", ",", 
+   RowBox[{"-", "1.4285714285714286`"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.510080717617817*^9, 3.5100809095837965`*^9, {3.5100810012440395`*^9, 
+   3.5100810058823047`*^9}}]
+}, Open  ]]
+},
+WindowSize->{821, 964},
+WindowMargins->{{Automatic, 111}, {Automatic, 12}},
+ShowSelection->True,
+FrontEndVersion->"8.0 for Microsoft Windows (64-bit) (November 13, 2010)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 688, 12, 72, "Input"],
+Cell[1248, 34, 7220, 178, 512, "Input"],
+Cell[CellGroupData[{
+Cell[8493, 216, 15400, 326, 867, "Input"],
+Cell[23896, 544, 9475, 180, 552, "Output"]
+}, Open  ]],
+Cell[33386, 727, 1317, 24, 191, "Text"],
+Cell[34706, 753, 307, 9, 119, "Text"],
+Cell[CellGroupData[{
+Cell[35038, 766, 3949, 98, 372, "Input"],
+Cell[38990, 866, 3716, 67, 524, "Output"]
+}, Open  ]],
+Cell[42721, 936, 6434, 146, 512, "Input"],
+Cell[CellGroupData[{
+Cell[49180, 1086, 388, 10, 31, "Input"],
+Cell[49571, 1098, 282, 7, 30, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

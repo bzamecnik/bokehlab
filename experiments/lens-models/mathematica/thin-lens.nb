@@ -1,0 +1,1381 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     55609,       1372]
+NotebookOptionsPosition[     53903,       1311]
+NotebookOutlinePosition[     54267,       1327]
+CellTagsIndexPosition[     54224,       1324]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"perspectiveTransform", "[", "f_", "]"}], " ", ":=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "1", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", 
+       RowBox[{
+        RowBox[{"-", "1"}], "/", "f"}], ",", "0"}], "}"}]}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"MatrixForm", "[", 
+  RowBox[{"perspectiveTransform", "[", "f", "]"}], "]"}]}], "Input",
+ CellChangeTimes->{{3.5093557684454927`*^9, 3.509355896782833*^9}, {
+   3.5093733074101257`*^9, 3.509373318345745*^9}, {3.5100682519858236`*^9, 
+   3.51006825279887*^9}, 3.510068791099659*^9, {3.510069723263976*^9, 
+   3.5100697473103514`*^9}, {3.510072587718813*^9, 3.510072625513975*^9}, {
+   3.5100729302464046`*^9, 3.5100729314874754`*^9}, 3.5100815013596444`*^9, 
+   3.5100816392085285`*^9}],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"1", "0", "0", "0"},
+     {"0", "1", "0", "0"},
+     {"0", "0", "1", "0"},
+     {"0", "0", 
+      RowBox[{"-", 
+       FractionBox["1", "f"]}], "0"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{3.5100729326375413`*^9, 3.5100815018456717`*^9, 
+  3.5100823958908086`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "Thin lens transform. Focal length of the lens is denoted by symbol ",
+ StyleBox["f",
+  FontSlant->"Italic"],
+ " ",
+ "."
+}], "Text",
+ CellChangeTimes->{{3.5093562554073453`*^9, 3.5093562789826937`*^9}, {
+  3.5093563151907644`*^9, 3.509356324118275*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"thinLensTransform", "[", "f_", "]"}], " ", ":=", " ", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"-", "f"}], ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", 
+         RowBox[{"-", "f"}], ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", 
+         RowBox[{"-", "f"}], ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", 
+         RowBox[{"-", "1"}], ",", 
+         RowBox[{"-", "f"}]}], "}"}]}], "}"}]}], ";"}], "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"thinLensTransform", "[", "f_", "]"}], " ", ":=", " ", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "1", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", 
+         RowBox[{
+          RowBox[{"-", "1"}], "/", "f"}], ",", "1"}], "}"}]}], "}"}]}], ";"}],
+    "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"MatrixForm", "[", 
+      RowBox[{"thinLensTransform", "[", "f", "]"}], "]"}], ",", 
+     RowBox[{"MatrixForm", "[", 
+      RowBox[{"Inverse", "[", 
+       RowBox[{"thinLensTransform", "[", "f", "]"}], "]"}], "]"}]}], 
+    "}"}]}]}]], "Input",
+ CellChangeTimes->{{3.509355952941045*^9, 3.5093559699970207`*^9}, {
+   3.509357409695367*^9, 3.5093574110054417`*^9}, 3.509874569801518*^9, 
+   3.5100688169271364`*^9, {3.5100689344798603`*^9, 3.5100689421823006`*^9}, {
+   3.5100723618038917`*^9, 3.5100723641030235`*^9}, {3.5100727899223785`*^9, 
+   3.5100727913354597`*^9}, {3.5100728577592583`*^9, 3.5100729244930754`*^9}, 
+   3.510072961950218*^9, 3.51007364593034*^9, {3.5100744874064693`*^9, 
+   3.510074489541591*^9}, {3.5100748954628086`*^9, 3.510074896740882*^9}, {
+   3.510078370753584*^9, 3.5100783954909987`*^9}, {3.510078457240531*^9, 
+   3.51007847104932*^9}, {3.510079230742772*^9, 3.5100793140865393`*^9}, {
+   3.5100817058673415`*^9, 3.510081754607129*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {"1", "0", "0", "0"},
+       {"0", "1", "0", "0"},
+       {"0", "0", "1", "0"},
+       {"0", "0", 
+        RowBox[{"-", 
+         FractionBox["1", "f"]}], "1"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]], ",", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {"1", "0", "0", "0"},
+       {"0", "1", "0", "0"},
+       {"0", "0", "1", "0"},
+       {"0", "0", 
+        FractionBox["1", "f"], "1"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}], "}"}]], "Output",
+ CellChangeTimes->{3.5100826786359806`*^9}]
+}, Open  ]],
+
+Cell[TextData[{
+ "We generate a ray from a point on sensor {xi, yi, zs, 1} directed to a \
+sampled point on the lens aperture {xa, ya, 0, 1}. Then we transform this \
+input direction by the thin lens transform matrix with focal length ",
+ StyleBox["f ",
+  FontSlant->"Italic"],
+ "to get the conjugate point. The output ray starts in the  sampled point on \
+the lens aperture {xa, ya, 0, 1} and is direction towards the conjugate \
+point.\n\nIt seems that the matrix ",
+ Cell[BoxData[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"1", "0", "0", "0"},
+     {"0", "1", "0", "0"},
+     {"0", "0", "1", "0"},
+     {"0", "0", 
+      FractionBox["1", "f"], 
+      RowBox[{"-", "1"}]}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}]],
+  CellChangeTimes->{{3.5100805818360505`*^9, 3.510080592583665*^9}, 
+    3.5100814713749294`*^9, {3.5100817064543753`*^9, 3.51008175496515*^9}, 
+    3.51008192175969*^9}],
+ " suggested in literature doesn\[CloseCurlyQuote]t work well. However, the \
+matrix ",
+ Cell[BoxData[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"1", "0", "0", "0"},
+     {"0", "1", "0", "0"},
+     {"0", "0", "1", "0"},
+     {"0", "0", 
+      RowBox[{"-", 
+       FractionBox["1", "f"]}], "1"}
+    },
+    GridBoxAlignment->{
+     "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+      "RowsIndexed" -> {}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}]],
+  CellChangeTimes->{{3.5100805818360505`*^9, 3.510080592583665*^9}, 
+    3.5100814713749294`*^9, {3.5100817064543753`*^9, 3.51008175496515*^9}, 
+    3.51008192175969*^9}],
+ " behaves well. The sign of the provided focal length f needs to be the same \
+as the sign of the z component of the source point coordinates."
+}], "Text",
+ CellChangeTimes->{{3.5093561756057806`*^9, 3.509356214772021*^9}, {
+  3.509356341465267*^9, 3.5093564477823486`*^9}, {3.509357709302503*^9, 
+  3.5093577949584026`*^9}, {3.5100821689478283`*^9, 3.5100822928089123`*^9}}],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"addFocalLengthSign", "[", 
+    RowBox[{"f_", ",", "z_"}], "]"}], " ", ":=", 
+   RowBox[{
+    RowBox[{"Sign", "[", "z", "]"}], "*", "f"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"fromHomogeneous", "[", "vector4_", "]"}], " ", ":=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"xyz", ",", "w"}], "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"xyz", " ", "=", " ", 
+       RowBox[{"vector4", "[", 
+        RowBox[{"[", 
+         RowBox[{"1", ";;", "3"}], "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"w", "=", " ", 
+       RowBox[{"vector4", "[", 
+        RowBox[{"[", "4", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"If", "[", 
+       RowBox[{
+        RowBox[{"w", " ", "\[NotEqual]", " ", "0"}], ",", " ", 
+        RowBox[{"xyz", "/", "w"}], ",", " ", "xyz"}], "]"}]}]}], 
+    "\[IndentingNewLine]", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"getXZ", "[", "vector4_", " ", "]"}], " ", ":=", 
+   RowBox[{"Part", "[", 
+    RowBox[{"vector4", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"1", ",", "3"}], "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"thinLens", "[", 
+    RowBox[{"point_", ",", " ", "f_"}], "]"}], ":=", "\[IndentingNewLine]", 
+   RowBox[{"getXZ", "[", 
+    RowBox[{"fromHomogeneous", "[", 
+     RowBox[{
+      RowBox[{"thinLensTransform", "[", 
+       RowBox[{"addFocalLengthSign", "[", 
+        RowBox[{"f", ",", 
+         RowBox[{"point", "[", 
+          RowBox[{"[", "3", "]"}], "]"}]}], "]"}], "]"}], ".", "point"}], 
+     "]"}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"perspective", "[", 
+    RowBox[{"point_", ",", " ", "f_"}], "]"}], ":=", 
+   RowBox[{"getXZ", "[", 
+    RowBox[{"fromHomogeneous", "[", 
+     RowBox[{
+      RowBox[{"perspectiveTransform", "[", 
+       RowBox[{"addFocalLengthSign", "[", 
+        RowBox[{"f", ",", 
+         RowBox[{"point", "[", 
+          RowBox[{"[", "3", "]"}], "]"}]}], "]"}], "]"}], ".", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"point", "[", 
+         RowBox[{"[", "1", "]"}], "]"}], ",", "0", ",", 
+        RowBox[{"point", "[", 
+         RowBox[{"[", "3", "]"}], "]"}], ",", "1"}], "}"}]}], "]"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"uniformSampleLensX", "[", 
+   RowBox[{"apertureRadius_", ",", "count_", ",", " ", "func_"}], "]"}], ":=", 
+  RowBox[{"Flatten", "[", 
+   RowBox[{"Table", "[", 
+    RowBox[{"func", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"lensX", ",", " ", 
+       RowBox[{"-", "apertureRadius"}], ",", " ", "apertureRadius", ",", " ", 
+       RowBox[{"2", "*", 
+        RowBox[{"apertureRadius", "/", 
+         RowBox[{"(", 
+          RowBox[{"count", "-", "1"}], ")"}]}]}]}], "}"}]}], "]"}], 
+   "]"}]}]}], "Input",
+ CellChangeTimes->{{3.509356454717745*^9, 3.509356496646143*^9}, {
+   3.5093566487718444`*^9, 3.509356666762873*^9}, {3.509356698210672*^9, 
+   3.509356709226302*^9}, {3.509356813685277*^9, 3.5093568254859514`*^9}, {
+   3.509356865829259*^9, 3.509356998826866*^9}, {3.5093571197967854`*^9, 
+   3.5093571225149407`*^9}, {3.50935747409805*^9, 3.5093575207207165`*^9}, {
+   3.5093575630811396`*^9, 3.509357590416703*^9}, {3.5093579273999777`*^9, 
+   3.50935795313945*^9}, {3.509358029136797*^9, 3.5093580535961957`*^9}, {
+   3.509358089480248*^9, 3.509358096758664*^9}, 3.5093581586422043`*^9, {
+   3.5100723837951493`*^9, 3.510072448244836*^9}, {3.510072628797163*^9, 
+   3.5100726519254856`*^9}, {3.5100727098747997`*^9, 3.5100727163111687`*^9}, 
+   3.510073664534404*^9, 3.5100740280231943`*^9, 3.510074548908987*^9, 
+   3.5100745899353333`*^9, 3.510074637986082*^9, 3.5100780599748087`*^9, 
+   3.510078189347208*^9, 3.5100782356428556`*^9, 3.5100784875642653`*^9, {
+   3.5100786505145855`*^9, 3.5100786556228776`*^9}, 3.5100787197925477`*^9, {
+   3.5100788646328325`*^9, 3.510078868407048*^9}, {3.51007914171268*^9, 
+   3.510079143320772*^9}, {3.5100794590748324`*^9, 3.5100795025973215`*^9}, 
+   3.5100795677420473`*^9, 3.510079695128334*^9, {3.51008012130571*^9, 
+   3.510080132270337*^9}, {3.5100812161853333`*^9, 3.5100812190975*^9}, {
+   3.5100819527354617`*^9, 3.5100819551976023`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"makeThinLensGraphics", "[", 
+    RowBox[{
+    "transform_", ",", "focalLength_", ",", " ", "apertureRadius_", ",", " ", 
+     "rayCount_", ",", " ", "x_", ",", " ", "z_"}], "]"}], ":=", 
+   "\[IndentingNewLine]", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"input", ",", " ", "output", ",", " ", "y"}], "}"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"y", " ", "=", " ", "0"}], ";", "\[IndentingNewLine]", 
+      RowBox[{"input", " ", "=", 
+       RowBox[{"getXZ", "[", 
+        RowBox[{"{", 
+         RowBox[{"x", ",", "y", ",", "z", ",", "1"}], "}"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"output", " ", "=", " ", 
+       RowBox[{"transform", "[", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"x", ",", "y", ",", "z", ",", "1"}], "}"}], ",", 
+         "focalLength"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"Graphics", "[", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"Join", "[", 
+         RowBox[{
+          RowBox[{"uniformSampleLensX", "[", 
+           RowBox[{"apertureRadius", ",", " ", "rayCount", ",", 
+            RowBox[{"{", "\[IndentingNewLine]", 
+             RowBox[{"Gray", ",", 
+              RowBox[{"Arrow", "[", 
+               RowBox[{"{", 
+                RowBox[{"input", ",", 
+                 RowBox[{"{", 
+                  RowBox[{"lensX", ",", "0"}], "}"}]}], "}"}], "]"}], ",", 
+              "\[IndentingNewLine]", "Gray", ",", " ", 
+              RowBox[{"Arrow", "[", 
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{"lensX", ",", "0"}], "}"}], ",", "output"}], "}"}], 
+               "]"}], ",", "\[IndentingNewLine]", "Green", ",", " ", 
+              RowBox[{"Arrow", "[", 
+               RowBox[{"{", 
+                RowBox[{"input", ",", "output"}], "}"}], "]"}], ",", 
+              "\[IndentingNewLine]", "Red", ",", 
+              RowBox[{"Point", "[", 
+               RowBox[{"{", 
+                RowBox[{"lensX", ",", "0"}], "}"}], "]"}]}], "}"}]}], 
+           "\[IndentingNewLine]", "]"}], ",", "\[IndentingNewLine]", 
+          RowBox[{"{", 
+           RowBox[{"Blue", ",", " ", 
+            RowBox[{"Point", "[", "input", "]"}], ",", "Orange", ",", " ", 
+            RowBox[{"Point", "[", "output", "]"}], ",", "\[IndentingNewLine]",
+             "Gray", ",", "\[IndentingNewLine]", 
+            RowBox[{"Tooltip", "[", 
+             RowBox[{
+              RowBox[{"Line", "[", 
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{
+                   RowBox[{"-", "10"}], ",", " ", 
+                   RowBox[{"-", "focalLength"}]}], "}"}], ",", 
+                 RowBox[{"{", 
+                  RowBox[{"10", ",", " ", 
+                   RowBox[{"-", "focalLength"}]}], "}"}]}], "}"}], "]"}], ",",
+               " ", "\"\<Focal length in object space\>\""}], "]"}], ",", 
+            "\[IndentingNewLine]", "Blue", ",", "\[IndentingNewLine]", 
+            RowBox[{"Tooltip", "[", 
+             RowBox[{
+              RowBox[{"Line", "[", 
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{
+                   RowBox[{"-", "10"}], ",", " ", "focalLength"}], "}"}], ",", 
+                 RowBox[{"{", 
+                  RowBox[{"10", ",", " ", "focalLength"}], "}"}]}], "}"}], 
+               "]"}], ",", " ", 
+              "\"\<Sensor at focal length in image space\>\""}], "]"}]}], 
+           "\[IndentingNewLine]", "}"}]}], "]"}], ",", "\[IndentingNewLine]", 
+        RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+        RowBox[{"AxesLabel", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"\"\<x\>\"", ",", "\"\<z\>\""}], "}"}]}], ",", 
+        RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+        RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", " ", 
+        RowBox[{"PlotRangeClipping", "\[Rule]", "True"}], ",", 
+        RowBox[{"PlotRange", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"-", "10"}], ",", "10"}], "}"}]}], "}"}]}]}], "]"}]}]}], 
+    "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"makeThinLensGraphics", "[", 
+    RowBox[{
+    "transform", ",", "focalLength", ",", " ", "apertureRadius", ",", " ", 
+     "rayCount", ",", " ", "x", ",", " ", "z"}], "]"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"x", ",", " ", "1"}], "}"}], ",", " ", 
+     RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"z", ",", " ", "5"}], "}"}], ",", " ", 
+     RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"focalLength", ",", " ", "2"}], "}"}], ",", "0", ",", "10"}], 
+    "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"apertureRadius", ",", " ", "5"}], "}"}], ",", " ", "0.1", ",", 
+     " ", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"rayCount", ",", " ", "7"}], "}"}], ",", " ", "2", ",", " ", 
+     "10", ",", " ", "1"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"transform", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"thinLens", ",", "perspective"}], "}"}]}], "}"}]}], 
+  "]"}]}], "Input",
+ CellChangeTimes->{{3.509369255421215*^9, 3.5093694263139896`*^9}, {
+   3.509369632372775*^9, 3.509369744888211*^9}, {3.50936988299411*^9, 
+   3.5093698856102595`*^9}, {3.5093699378262463`*^9, 3.509369945338676*^9}, {
+   3.5093699966276093`*^9, 3.5093701995712175`*^9}, {3.509370239778517*^9, 
+   3.50937026447993*^9}, {3.5093703988546157`*^9, 3.5093704380318565`*^9}, {
+   3.5093704853965654`*^9, 3.5093705044686565`*^9}, {3.5093705909486027`*^9, 
+   3.50937059177265*^9}, {3.5093706450606976`*^9, 3.5093706808937473`*^9}, {
+   3.509370745591448*^9, 3.509370779093364*^9}, {3.5093710429278164`*^9, 
+   3.5093711043323283`*^9}, {3.509371248558953*^9, 3.509371274159417*^9}, {
+   3.509371335834729*^9, 3.5093713575449705`*^9}, {3.509372030807621*^9, 
+   3.509372145763584*^9}, {3.50937235662123*^9, 3.509372442750157*^9}, {
+   3.509372518196472*^9, 3.509372518827508*^9}, {3.5093725629610324`*^9, 
+   3.509372646419806*^9}, {3.509372833995672*^9, 3.5093729470961084`*^9}, {
+   3.50937329530025*^9, 3.5093732963298516`*^9}, {3.509373399159392*^9, 
+   3.509373459550227*^9}, {3.509376793855995*^9, 3.5093768053496523`*^9}, {
+   3.5093781258034086`*^9, 3.5093781401552296`*^9}, {3.5093910275420074`*^9, 
+   3.5093910290240107`*^9}, {3.5093911365252423`*^9, 3.509391143139654*^9}, {
+   3.509391222326538*^9, 3.5093912249716897`*^9}, {3.509391291749189*^9, 
+   3.509391293131268*^9}, {3.5094302631650867`*^9, 3.509430280996106*^9}, {
+   3.5094303784234133`*^9, 3.509430412684066*^9}, {3.510069800736407*^9, 
+   3.510069841862759*^9}, {3.510069975573407*^9, 3.5100700126805296`*^9}, {
+   3.5100701363996058`*^9, 3.51007014259496*^9}, {3.510070188245571*^9, 
+   3.510070216412182*^9}, {3.510072579424339*^9, 3.5100725841936116`*^9}, {
+   3.5100726653082514`*^9, 3.5100726733217096`*^9}, {3.510072751440178*^9, 
+   3.5100727576795344`*^9}, 3.510074628149519*^9, 3.510078499050922*^9, {
+   3.510078763833067*^9, 3.510078764776121*^9}, {3.5100798223076077`*^9, 
+   3.5100798275709095`*^9}, {3.5100806194822035`*^9, 3.510080623802451*^9}, {
+   3.5100808859864473`*^9, 3.510080887019506*^9}, 3.5100812352654247`*^9, 
+   3.51008129235769*^9, {3.510081746280653*^9, 3.510081748371773*^9}, 
+   3.5100817936533623`*^9, 3.510081937730603*^9, {3.510082037804327*^9, 
+   3.510082038763382*^9}, {3.510082671753587*^9, 3.5100826729826574`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`apertureRadius$$ = 
+    5, $CellContext`focalLength$$ = 5.24, $CellContext`rayCount$$ = 
+    7, $CellContext`transform$$ = $CellContext`thinLens, $CellContext`x$$ = 
+    2.25, $CellContext`z$$ = 5.65, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`x$$], 1}, -10, 10}, {{
+       Hold[$CellContext`z$$], 5}, -10, 10}, {{
+       Hold[$CellContext`focalLength$$], 2}, 0, 10}, {{
+       Hold[$CellContext`apertureRadius$$], 5}, 0.1, 10}, {{
+       Hold[$CellContext`rayCount$$], 7}, 2, 10, 1}, {
+      Hold[$CellContext`transform$$], {$CellContext`thinLens, \
+$CellContext`perspective}}}, Typeset`size$$ = {360., {178., 182.}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = 
+    True, $CellContext`x$1515$$ = 0, $CellContext`z$1516$$ = 
+    0, $CellContext`focalLength$1517$$ = 
+    0, $CellContext`apertureRadius$1518$$ = 0, $CellContext`rayCount$1519$$ = 
+    0, $CellContext`transform$1520$$ = False}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`apertureRadius$$ = 
+        5, $CellContext`focalLength$$ = 2, $CellContext`rayCount$$ = 
+        7, $CellContext`transform$$ = $CellContext`thinLens, $CellContext`x$$ = 
+        1, $CellContext`z$$ = 5}, "ControllerVariables" :> {
+        Hold[$CellContext`x$$, $CellContext`x$1515$$, 0], 
+        Hold[$CellContext`z$$, $CellContext`z$1516$$, 0], 
+        Hold[$CellContext`focalLength$$, $CellContext`focalLength$1517$$, 0], 
+        Hold[$CellContext`apertureRadius$$, \
+$CellContext`apertureRadius$1518$$, 0], 
+        Hold[$CellContext`rayCount$$, $CellContext`rayCount$1519$$, 0], 
+        Hold[$CellContext`transform$$, $CellContext`transform$1520$$, False]},
+       "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> $CellContext`makeThinLensGraphics[$CellContext`transform$$, \
+$CellContext`focalLength$$, $CellContext`apertureRadius$$, \
+$CellContext`rayCount$$, $CellContext`x$$, $CellContext`z$$], 
+      "Specifications" :> {{{$CellContext`x$$, 1}, -10, 
+         10}, {{$CellContext`z$$, 5}, -10, 
+         10}, {{$CellContext`focalLength$$, 2}, 0, 
+         10}, {{$CellContext`apertureRadius$$, 5}, 0.1, 
+         10}, {{$CellContext`rayCount$$, 7}, 2, 10, 
+         1}, {$CellContext`transform$$, {$CellContext`thinLens, \
+$CellContext`perspective}}}, "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{409., {290., 295.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{
+  3.51008240465631*^9, {3.510082673418682*^9, 3.510082684940341*^9}}]
+}, Open  ]],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`apertureRadius$$ = 
+    4.97, $CellContext`focalLength$$ = 1.58, $CellContext`rayCount$$ = 
+    7, $CellContext`transform$$ = $CellContext`thinLens, $CellContext`x$$ = 
+    1.3000000000000007`, $CellContext`z$$ = -2.0001, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`x$$], 1}, -10, 10}, {{
+       Hold[$CellContext`z$$], 5}, -10, 10}, {{
+       Hold[$CellContext`focalLength$$], 2}, 0, 10}, {{
+       Hold[$CellContext`apertureRadius$$], 5}, 0.1, 10}, {{
+       Hold[$CellContext`rayCount$$], 7}, 2, 10, 1}, {
+      Hold[$CellContext`transform$$], {$CellContext`thinLens, \
+$CellContext`perspective}}}, Typeset`size$$ = {360., {178., 182.}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = 
+    True, $CellContext`x$86091$$ = 0, $CellContext`z$86092$$ = 
+    0, $CellContext`focalLength$86093$$ = 
+    0, $CellContext`apertureRadius$86094$$ = 
+    0, $CellContext`rayCount$86095$$ = 0, $CellContext`transform$86096$$ = 
+    False}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`apertureRadius$$ = 
+        5, $CellContext`focalLength$$ = 2, $CellContext`rayCount$$ = 
+        7, $CellContext`transform$$ = $CellContext`thinLens, $CellContext`x$$ = 
+        1, $CellContext`z$$ = 5}, "ControllerVariables" :> {
+        Hold[$CellContext`x$$, $CellContext`x$86091$$, 0], 
+        Hold[$CellContext`z$$, $CellContext`z$86092$$, 0], 
+        Hold[$CellContext`focalLength$$, $CellContext`focalLength$86093$$, 0], 
+        Hold[$CellContext`apertureRadius$$, \
+$CellContext`apertureRadius$86094$$, 0], 
+        Hold[$CellContext`rayCount$$, $CellContext`rayCount$86095$$, 0], 
+        Hold[$CellContext`transform$$, $CellContext`transform$86096$$, 
+         False]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> $CellContext`makeThinLensGraphics[$CellContext`transform$$, \
+$CellContext`focalLength$$, $CellContext`apertureRadius$$, \
+$CellContext`rayCount$$, $CellContext`x$$, $CellContext`z$$], 
+      "Specifications" :> {{{$CellContext`x$$, 1}, -10, 
+         10}, {{$CellContext`z$$, 5}, -10, 
+         10}, {{$CellContext`focalLength$$, 2}, 0, 
+         10}, {{$CellContext`apertureRadius$$, 5}, 0.1, 
+         10}, {{$CellContext`rayCount$$, 7}, 2, 10, 
+         1}, {$CellContext`transform$$, {$CellContext`thinLens, \
+$CellContext`perspective}}}, "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{409., {290., 295.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"makeThinLensGraphics", "[", 
+    RowBox[{
+    "transform", ",", "focalLength", ",", " ", "apertureRadius", ",", " ", 
+     "rayCount", ",", " ", "x", ",", " ", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", "a"}], "*", "x"}], " ", "+", " ", "b"}]}], "]"}], ",", 
+   " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"x", ",", " ", 
+       RowBox[{"-", "5"}]}], "}"}], ",", " ", 
+     RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"a", ",", " ", "1"}], "}"}], ",", " ", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"b", ",", " ", "1"}], "}"}], ",", " ", 
+     RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"focalLength", ",", " ", "10"}], "}"}], ",", " ", "0", ",", 
+     "10"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"apertureRadius", ",", " ", "5"}], "}"}], ",", " ", "0.1", ",", 
+     " ", "10"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"rayCount", ",", " ", "7"}], "}"}], ",", " ", "2", ",", " ", 
+     "10", ",", " ", "1"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"transform", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"thinLens", ",", "perspective"}], "}"}]}], "}"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.5093914119439917`*^9, 3.509391491622962*^9}, {
+   3.509391524507843*^9, 3.509391537744384*^9}, {3.509391571458312*^9, 
+   3.5093915745854907`*^9}, {3.5093916635855813`*^9, 
+   3.5093916760972967`*^9}, {3.5093918252338142`*^9, 3.5093918425298033`*^9}, 
+   3.509429841028373*^9, {3.5094300791413755`*^9, 3.5094300822835555`*^9}, {
+   3.50943070233467*^9, 3.509430703803754*^9}, {3.5100702963187523`*^9, 
+   3.510070297411815*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`a$$ = 1, $CellContext`apertureRadius$$ = 
+    5, $CellContext`b$$ = 1, $CellContext`focalLength$$ = 
+    10, $CellContext`rayCount$$ = 
+    7, $CellContext`transform$$ = $CellContext`thinLens, $CellContext`x$$ = \
+-5, Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`x$$], -5}, -10, 10}, {{
+       Hold[$CellContext`a$$], 1}, -5, 5}, {{
+       Hold[$CellContext`b$$], 1}, -10, 10}, {{
+       Hold[$CellContext`focalLength$$], 10}, 0, 10}, {{
+       Hold[$CellContext`apertureRadius$$], 5}, 0.1, 10}, {{
+       Hold[$CellContext`rayCount$$], 7}, 2, 10, 1}, {
+      Hold[$CellContext`transform$$], {$CellContext`thinLens, \
+$CellContext`perspective}}}, Typeset`size$$ = {360., {178., 182.}}, 
+    Typeset`update$$ = 0, Typeset`initDone$$, Typeset`skipInitDone$$ = 
+    True, $CellContext`x$46278$$ = 0, $CellContext`a$46279$$ = 
+    0, $CellContext`b$46280$$ = 0, $CellContext`focalLength$46281$$ = 
+    0, $CellContext`apertureRadius$46282$$ = 
+    0, $CellContext`rayCount$46283$$ = 0, $CellContext`transform$46284$$ = 
+    False}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`a$$ = 1, $CellContext`apertureRadius$$ = 
+        5, $CellContext`b$$ = 1, $CellContext`focalLength$$ = 
+        10, $CellContext`rayCount$$ = 
+        7, $CellContext`transform$$ = $CellContext`thinLens, $CellContext`x$$ = \
+-5}, "ControllerVariables" :> {
+        Hold[$CellContext`x$$, $CellContext`x$46278$$, 0], 
+        Hold[$CellContext`a$$, $CellContext`a$46279$$, 0], 
+        Hold[$CellContext`b$$, $CellContext`b$46280$$, 0], 
+        Hold[$CellContext`focalLength$$, $CellContext`focalLength$46281$$, 0], 
+        Hold[$CellContext`apertureRadius$$, \
+$CellContext`apertureRadius$46282$$, 0], 
+        Hold[$CellContext`rayCount$$, $CellContext`rayCount$46283$$, 0], 
+        Hold[$CellContext`transform$$, $CellContext`transform$46284$$, 
+         False]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> $CellContext`makeThinLensGraphics[$CellContext`transform$$, \
+$CellContext`focalLength$$, $CellContext`apertureRadius$$, \
+$CellContext`rayCount$$, $CellContext`x$$, (-$CellContext`a$$) \
+$CellContext`x$$ + $CellContext`b$$], 
+      "Specifications" :> {{{$CellContext`x$$, -5}, -10, 
+         10}, {{$CellContext`a$$, 1}, -5, 5}, {{$CellContext`b$$, 1}, -10, 
+         10}, {{$CellContext`focalLength$$, 10}, 0, 
+         10}, {{$CellContext`apertureRadius$$, 5}, 0.1, 
+         10}, {{$CellContext`rayCount$$, 7}, 2, 10, 
+         1}, {$CellContext`transform$$, {$CellContext`thinLens, \
+$CellContext`perspective}}}, "Options" :> {}, "DefaultOptions" :> {}],
+     ImageSizeCache->{409., {303., 308.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{
+  3.50943056470432*^9, 3.509430704397788*^9, 3.5098745928858385`*^9, 
+   3.5100688665639753`*^9, 3.5100689673607407`*^9, {3.510070294281636*^9, 
+   3.5100702983268676`*^9}, 3.510074000989648*^9, 3.5100746895720325`*^9}]
+}, Open  ]],
+
+Cell["\<\
+This experiment should show whether the simple thin lens model inherently \
+behaves as expected when the sensor plane is tilted.\
+\>", "Text",
+ CellChangeTimes->{{3.5094290781498756`*^9, 3.509429129204796*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", 
+  RowBox[{
+   RowBox[{"Graphics", "[", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Flatten", "[", 
+        RowBox[{"Table", "[", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"Module", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"z", ",", "sourcePoint", ",", " ", "targetPoint"}], 
+             "}"}], ",", "\[IndentingNewLine]", 
+            RowBox[{
+             RowBox[{"z", " ", "=", " ", 
+              RowBox[{
+               RowBox[{
+                RowBox[{"-", "a"}], "*", "x"}], " ", "+", "b"}]}], ";", 
+             "\[IndentingNewLine]", 
+             RowBox[{"sourcePoint", " ", "=", " ", 
+              RowBox[{"{", 
+               RowBox[{"x", ",", "z"}], "}"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{"targetPoint", " ", "=", " ", 
+              RowBox[{"thinLens", "[", 
+               RowBox[{
+                RowBox[{"{", 
+                 RowBox[{"x", ",", "0", ",", "z", ",", "1"}], "}"}], ",", 
+                "focalLength"}], "]"}]}], ";", "\[IndentingNewLine]", 
+             RowBox[{"{", "\[IndentingNewLine]", 
+              RowBox[{
+               RowBox[{"Hue", "[", 
+                RowBox[{
+                 RowBox[{"x", "/", "10"}], "+", "0.5"}], "]"}], ",", 
+               RowBox[{"Arrow", "[", 
+                RowBox[{"{", 
+                 RowBox[{"sourcePoint", ",", "targetPoint"}], "}"}], "]"}], 
+               ","}], "\[IndentingNewLine]", 
+              RowBox[{"(*", 
+               RowBox[{"Point", "[", 
+                RowBox[{"{", 
+                 RowBox[{"targetPoint", ",", "sourcePoint"}], "}"}], "]"}], 
+               "*)"}], "\[IndentingNewLine]", "}"}]}]}], 
+           "\[IndentingNewLine]", "]"}], ",", "\[IndentingNewLine]", 
+          RowBox[{"{", 
+           RowBox[{"x", ",", " ", 
+            RowBox[{"-", "5"}], ",", "5", ",", "0.2"}], "}"}]}], "]"}], "]"}],
+        ",", "\[IndentingNewLine]", 
+       RowBox[{"Darker", "[", "Green", "]"}], ",", 
+       RowBox[{"Tooltip", "[", 
+        RowBox[{
+         RowBox[{"Line", "[", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"-", "50"}], ",", "focalLength"}], "}"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"50", ",", "focalLength"}], "}"}]}], "}"}], "]"}], ",", 
+         "\"\<Focal plane with no tilt\>\""}], "]"}]}], "\[IndentingNewLine]",
+       "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+     RowBox[{"AxesLabel", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{"\"\<x\>\"", ",", "\"\<z\>\""}], "}"}]}], ",", 
+     RowBox[{"Frame", "\[Rule]", "True"}], ",", 
+     RowBox[{"FrameTicks", "\[Rule]", "Automatic"}], ",", " ", 
+     RowBox[{"PlotRange", "\[Rule]", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"-", "10"}], ",", "10"}], "}"}], ",", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"-", "10"}], ",", "10"}], "}"}]}], "}"}]}]}], 
+    "\[IndentingNewLine]", "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"a", ",", " ", 
+       RowBox[{"-", "0.05"}]}], "}"}], ",", " ", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"b", ",", " ", "1.5"}], "}"}], ",", " ", 
+     RowBox[{"-", "5"}], ",", "5"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"focalLength", ",", " ", "2"}], "}"}], ",", " ", "0", ",", 
+     "10"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.509391955851285*^9, 3.5093920231051316`*^9}, {
+   3.509392085874722*^9, 3.5093921764589033`*^9}, {3.5093922297559514`*^9, 
+   3.509392307655407*^9}, {3.5093923886000366`*^9, 3.5093924675135503`*^9}, {
+   3.5093925295310974`*^9, 3.5093925540895023`*^9}, {3.5093926997468333`*^9, 
+   3.50939272573532*^9}, {3.509428181007948*^9, 3.5094281817909927`*^9}, {
+   3.509428237960205*^9, 3.509428256110243*^9}, {3.509428428512104*^9, 
+   3.509428565736953*^9}, {3.5094287946438546`*^9, 3.509428841201329*^9}, {
+   3.5094299199008837`*^9, 3.5094299210129476`*^9}, {3.509814148944728*^9, 
+   3.5098142198417826`*^9}, {3.509815253474903*^9, 3.509815330491308*^9}, {
+   3.5098153623341293`*^9, 3.5098153694185343`*^9}, {3.5098155517859654`*^9, 
+   3.509815578862514*^9}, {3.509815611325371*^9, 3.5098156321345615`*^9}, {
+   3.5098156995564175`*^9, 3.509815740286747*^9}, {3.5098157841862583`*^9, 
+   3.509815785569337*^9}, {3.5098158651848907`*^9, 3.5098158963806753`*^9}, {
+   3.5098159974024534`*^9, 3.509816098503236*^9}, {3.5098161974718966`*^9, 
+   3.509816249669882*^9}, {3.5098162867540035`*^9, 3.5098162976996293`*^9}, {
+   3.5098163307635202`*^9, 3.50981633285264*^9}, {3.509816365492507*^9, 
+   3.509816412363188*^9}, 3.5098164497723274`*^9, 3.5098165373963394`*^9, 
+   3.5098165741584415`*^9, {3.509816637054039*^9, 3.509816675257224*^9}, {
+   3.5098746155261335`*^9, 3.509874642150656*^9}, {3.510070334656945*^9, 
+   3.510070339927247*^9}, {3.5100747003616495`*^9, 3.5100747123053327`*^9}}],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`a$$ = -0.05, $CellContext`b$$ = 
+    1.5, $CellContext`focalLength$$ = 2, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`a$$], -0.05}, -5, 5}, {{
+       Hold[$CellContext`b$$], 1.5}, -5, 5}, {{
+       Hold[$CellContext`focalLength$$], 2}, 0, 10}}, Typeset`size$$ = {
+    360., {178., 182.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`a$46436$$ = 
+    0, $CellContext`b$46437$$ = 0, $CellContext`focalLength$46438$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`a$$ = -0.05, $CellContext`b$$ = 
+        1.5, $CellContext`focalLength$$ = 2}, "ControllerVariables" :> {
+        Hold[$CellContext`a$$, $CellContext`a$46436$$, 0], 
+        Hold[$CellContext`b$$, $CellContext`b$46437$$, 0], 
+        Hold[$CellContext`focalLength$$, $CellContext`focalLength$46438$$, 
+         0]}, "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, "Body" :> Graphics[{
+         Flatten[
+          Table[
+           
+           Module[{$CellContext`z$, $CellContext`sourcePoint$, \
+$CellContext`targetPoint$}, $CellContext`z$ = (-$CellContext`a$$) \
+$CellContext`x + $CellContext`b$$; $CellContext`sourcePoint$ = \
+{$CellContext`x, $CellContext`z$}; $CellContext`targetPoint$ = \
+$CellContext`thinLens[{$CellContext`x, 0, $CellContext`z$, 
+                1}, $CellContext`focalLength$$]; {
+              Hue[$CellContext`x/10 + 0.5], 
+              Arrow[{$CellContext`sourcePoint$, $CellContext`targetPoint$}], 
+              Null}], {$CellContext`x, -5, 5, 0.2}]], 
+         Darker[Green], 
+         Tooltip[
+          
+          Line[{{-50, $CellContext`focalLength$$}, {
+            50, $CellContext`focalLength$$}}], "Focal plane with no tilt"]}, 
+        Axes -> True, AxesLabel -> {"x", "z"}, Frame -> True, FrameTicks -> 
+        Automatic, PlotRange -> {{-10, 10}, {-10, 10}}], 
+      "Specifications" :> {{{$CellContext`a$$, -0.05}, -5, 
+         5}, {{$CellContext`b$$, 1.5}, -5, 
+         5}, {{$CellContext`focalLength$$, 2}, 0, 10}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{409., {251., 256.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.5094288264281034`*^9, 3.509428842152931*^9}, 
+   3.509429921689986*^9, 3.5098142205758247`*^9, {3.509815268305751*^9, 
+   3.5098153309383335`*^9}, {3.5098153641192317`*^9, 3.5098153700885725`*^9}, 
+   3.5098155792525363`*^9, {3.509815620076872*^9, 3.509815632711594*^9}, {
+   3.509815701319518*^9, 3.5098157411677976`*^9}, 3.509815786156371*^9, {
+   3.5098160502464757`*^9, 3.5098160672894506`*^9}, 3.509816102815482*^9, {
+   3.509816240331348*^9, 3.509816252633052*^9}, 3.5098162986296825`*^9, 
+   3.509816368982706*^9, {3.509816399013424*^9, 3.509816413496252*^9}, 
+   3.5098164512914143`*^9, 3.509816539672469*^9, 3.509816575757533*^9, {
+   3.5098166423043394`*^9, 3.509816675967265*^9}, 3.509874597234087*^9, {
+   3.5098746282208595`*^9, 3.5098746428526964`*^9}, 3.510068871117236*^9, 
+   3.5100703041632013`*^9, 3.5100703406072855`*^9, {3.51007469372427*^9, 
+   3.510074712868365*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"thinLens", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"2", ",", "0", ",", "200", ",", "1"}], "}"}], ",", "5"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.5100789278914504`*^9, 3.5100789491216645`*^9}, {
+  3.5100789904830303`*^9, 3.510079011299221*^9}, {3.510079045188159*^9, 
+  3.510079066762393*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"-", 
+    FractionBox["2", "41"]}], ",", 
+   RowBox[{"-", 
+    FractionBox["200", "41"]}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.5100789428103037`*^9, 3.510078949459684*^9}, {
+   3.5100789985274906`*^9, 3.5100790118112507`*^9}, {3.5100790555877542`*^9, 
+   3.510079067161416*^9}, 3.510079781695285*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fromHomogeneous", "[", 
+   RowBox[{
+    RowBox[{"thinLensTransform", "[", 
+     RowBox[{"-", "2"}], "]"}], ".", 
+    RowBox[{"{", 
+     RowBox[{"1", ",", "0", ",", "5", ",", "1"}], "}"}]}], "]"}], " ", "//", 
+  " ", "N"}]], "Input",
+ CellChangeTimes->{{3.5100791571225615`*^9, 3.5100791714273796`*^9}, {
+   3.510079331267522*^9, 3.5100793810673704`*^9}, {3.5100795129629145`*^9, 
+   3.510079555614354*^9}, 3.510079663902548*^9, {3.510079718333661*^9, 
+   3.510079796484131*^9}, {3.5100801694764647`*^9, 3.510080172292626*^9}, {
+   3.5100806804606915`*^9, 3.5100807080832715`*^9}, {3.5100808970600805`*^9, 
+   3.5100808974041*^9}, {3.5100809488840446`*^9, 3.51008096103574*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"-", "0.2857142857142857`"}], ",", "0.`", ",", 
+   RowBox[{"-", "1.4285714285714286`"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.5100795409925175`*^9, 3.510079578190645*^9}, 
+   3.51007966428257*^9, {3.510079716723569*^9, 3.5100797968581524`*^9}, {
+   3.510080167270339*^9, 3.510080175126788*^9}, {3.5100806842139063`*^9, 
+   3.5100807086733055`*^9}, 3.5100808978581257`*^9, {3.510080950332127*^9, 
+   3.5100809613317566`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"tl", " ", "=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0", ",", "1", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0", ",", 
+        RowBox[{"1", "/", "f"}], ",", 
+        RowBox[{"-", "1"}]}], "}"}]}], "}"}]}], ";"}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"tlInv", " ", "=", " ", 
+   RowBox[{"Inverse", "[", "tl", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"MatrixForm", "[", "tl", "]"}], ",", 
+   RowBox[{"MatrixForm", "[", "tlInv", "]"}]}], "}"}], "\[IndentingNewLine]", 
+ RowBox[{"tl", ".", "tlInv"}]}], "Input",
+ CellChangeTimes->{{3.5100800335176888`*^9, 3.510080041320135*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {"1", "0", "0", "0"},
+       {"0", "1", "0", "0"},
+       {"0", "0", "1", "0"},
+       {"0", "0", 
+        FractionBox["1", "f"], 
+        RowBox[{"-", "1"}]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]], ",", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {"1", "0", "0", "0"},
+       {"0", "1", "0", "0"},
+       {"0", "0", "1", "0"},
+       {"0", "0", 
+        FractionBox["1", "f"], 
+        RowBox[{"-", "1"}]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}], "}"}]], "Output",
+ CellChangeTimes->{3.510079928075658*^9, 3.510080041901168*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", "1", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", "0", ",", "1"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.510079928075658*^9, 3.510080041903168*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"tl", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"f", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "f", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "f", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "1", ",", 
+       RowBox[{"-", "f"}]}], "}"}]}], "}"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"tlInv", " ", "=", " ", 
+   RowBox[{"Inverse", "[", "tl", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"MatrixForm", "[", "tl", "]"}], ",", 
+   RowBox[{"MatrixForm", "[", "tlInv", "]"}]}], "}"}], "\[IndentingNewLine]", 
+ RowBox[{"tl", ".", "tlInv"}]}], "Input",
+ CellChangeTimes->{{3.510079931921878*^9, 3.510079938945279*^9}, {
+  3.510079977264471*^9, 3.510080019769902*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {"f", "0", "0", "0"},
+       {"0", "f", "0", "0"},
+       {"0", "0", "f", "0"},
+       {"0", "0", "1", 
+        RowBox[{"-", "f"}]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]], ",", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {
+        FractionBox["1", "f"], "0", "0", "0"},
+       {"0", 
+        FractionBox["1", "f"], "0", "0"},
+       {"0", "0", 
+        FractionBox["1", "f"], "0"},
+       {"0", "0", 
+        FractionBox["1", 
+         SuperscriptBox["f", "2"]], 
+        RowBox[{"-", 
+         FractionBox["1", "f"]}]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.510079942862503*^9, {3.510079995044488*^9, 3.510080020268931*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", "1", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", "0", ",", "1"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.510079942862503*^9, {3.510079995044488*^9, 3.510080020270931*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"tl", "=", " ", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"f", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "f", ",", "0", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "f", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", 
+       RowBox[{"-", "1"}], ",", "f"}], "}"}]}], "}"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"tlInv", " ", "=", " ", 
+   RowBox[{"Inverse", "[", "tl", "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"MatrixForm", "[", "tl", "]"}], ",", 
+   RowBox[{"MatrixForm", "[", "tlInv", "]"}]}], "}"}], "\[IndentingNewLine]", 
+ RowBox[{"tl", ".", "tlInv"}], "\[IndentingNewLine]", 
+ RowBox[{"Clear", "[", 
+  RowBox[{"tl", ",", " ", "tlInv"}], "]"}]}], "Input",
+ CellChangeTimes->{{3.5100818946331387`*^9, 3.510081909954015*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {"f", "0", "0", "0"},
+       {"0", "f", "0", "0"},
+       {"0", "0", "f", "0"},
+       {"0", "0", 
+        RowBox[{"-", "1"}], "f"}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]], ",", 
+   TagBox[
+    RowBox[{"(", "\[NoBreak]", GridBox[{
+       {
+        FractionBox["1", "f"], "0", "0", "0"},
+       {"0", 
+        FractionBox["1", "f"], "0", "0"},
+       {"0", "0", 
+        FractionBox["1", "f"], "0"},
+       {"0", "0", 
+        FractionBox["1", 
+         SuperscriptBox["f", "2"]], 
+        FractionBox["1", "f"]}
+      },
+      GridBoxAlignment->{
+       "Columns" -> {{Center}}, "ColumnsIndexed" -> {}, 
+        "Rows" -> {{Baseline}}, "RowsIndexed" -> {}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.7]}, 
+          Offset[0.27999999999999997`]}, "ColumnsIndexed" -> {}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}, "RowsIndexed" -> {}}], "\[NoBreak]", ")"}],
+    Function[BoxForm`e$, 
+     MatrixForm[BoxForm`e$]]]}], "}"}]], "Output",
+ CellChangeTimes->{{3.5100818972212863`*^9, 3.5100819102170296`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"1", ",", "0", ",", "0", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "1", ",", "0", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", "1", ",", "0"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0", ",", "0", ",", "0", ",", "1"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.5100818972212863`*^9, 3.5100819102210298`*^9}}]
+}, Open  ]]
+},
+WindowSize->{707, 787},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+ShowSelection->True,
+FrontEndVersion->"8.0 for Microsoft Windows (64-bit) (November 13, 2010)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 1053, 24, 52, "Input"],
+Cell[1635, 48, 802, 23, 96, "Output"]
+}, Open  ]],
+Cell[2452, 74, 270, 8, 29, "Text"],
+Cell[CellGroupData[{
+Cell[2747, 86, 2284, 56, 72, "Input"],
+Cell[5034, 144, 1534, 44, 82, "Output"]
+}, Open  ]],
+Cell[6583, 191, 2550, 60, 189, "Text"],
+Cell[9136, 253, 4292, 99, 332, "Input"],
+Cell[CellGroupData[{
+Cell[13453, 356, 7894, 169, 552, "Input"],
+Cell[21350, 527, 3272, 61, 602, "Output"]
+}, Open  ]],
+Cell[24637, 591, 3229, 61, 602, "Input"],
+Cell[CellGroupData[{
+Cell[27891, 656, 1925, 53, 92, "Input"],
+Cell[29819, 711, 3698, 69, 628, "Output"]
+}, Open  ]],
+Cell[33532, 783, 220, 4, 47, "Text"],
+Cell[CellGroupData[{
+Cell[33777, 791, 5132, 113, 372, "Input"],
+Cell[38912, 906, 3826, 71, 524, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[42775, 982, 328, 8, 31, "Input"],
+Cell[43106, 992, 357, 9, 47, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[43500, 1006, 712, 14, 31, "Input"],
+Cell[44215, 1022, 480, 9, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[44732, 1036, 916, 25, 92, "Input"],
+Cell[45651, 1063, 1577, 45, 82, "Output"],
+Cell[47231, 1110, 433, 11, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[47701, 1126, 901, 23, 92, "Input"],
+Cell[48605, 1151, 1717, 50, 113, "Output"],
+Cell[50325, 1203, 460, 12, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[50822, 1220, 949, 25, 112, "Input"],
+Cell[51774, 1247, 1671, 48, 113, "Output"],
+Cell[53448, 1297, 439, 11, 30, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
