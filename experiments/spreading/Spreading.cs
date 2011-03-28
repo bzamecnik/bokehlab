@@ -21,20 +21,7 @@ namespace spreading
 {
     class RectangleSpreadingFilter
     {
-        public static readonly int DEFAULT_BLUR_RADIUS = 25;
-        public int MaxBlurRadius { get; set; }
-
-        public RectangleSpreadingFilter()
-        {
-            MaxBlurRadius = DEFAULT_BLUR_RADIUS;
-        }
-
-        public PFMImage FilterImage(PFMImage inputImage, PFMImage outputImage)
-        {
-            return FilterImage(inputImage, outputImage, null);
-        }
-
-        public PFMImage FilterImage(PFMImage inputImage, PFMImage outputImage, PFMImage depthMap)
+        public PFMImage FilterImage(PFMImage inputImage, PFMImage outputImage, BlurFunction blur)
         {
             if (inputImage == null) return null;
 
@@ -43,12 +30,7 @@ namespace spreading
 
             if (width < 1 || height < 1) return null;
 
-            if ((depthMap != null) && ((depthMap.Width != width) || (depthMap.Height != height)))
-            {
-                throw new ArgumentException(String.Format(
-                    "Depth map must have the same dimensions as the input image"
-                    + " {0}x{1}, but it's size was {2}x{3}.", width, height, depthMap.Width, depthMap.Height));
-            }
+            
 
             if (outputImage == null)
             {
@@ -60,9 +42,6 @@ namespace spreading
 
             // initialize the spreading table to 0.0 and the normalization channel to 1.0
             InitializeTables(spreadingTable, normalizationTable);
-
-            //Blur blur = new ConstantBlur(MaxBlurRadius);
-            Blur blur = CreateBlurFunction(depthMap, width, height);
 
             // phase 1: distribute corners into the table
             Spread(inputImage, spreadingTable, normalizationTable, blur);
@@ -108,7 +87,7 @@ namespace spreading
             //Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
         }
 
-        private static void Spread(PFMImage inputImage, PFMImage spreadingTable, PFMImage normalizationTable, Blur blur)
+        private static void Spread(PFMImage inputImage, PFMImage spreadingTable, PFMImage normalizationTable, BlurFunction blur)
         {
             //Stopwatch sw = new Stopwatch();
             //sw.Reset();
@@ -239,81 +218,6 @@ namespace spreading
                 }
             }
             //Console.WriteLine("Normalizing to output image: {0} ms", sw.ElapsedMilliseconds);
-        }
-
-        private Blur CreateBlurFunction(PFMImage depthMap, uint width, uint height)
-        {
-            Blur blur;
-            if (depthMap != null)
-            {
-                blur = new DepthMapBlur(depthMap, MaxBlurRadius);
-            }
-            else
-            {
-                blur = new ProceduralBlur((int)width, (int)height, MaxBlurRadius);
-            }
-            //new ConstantBlur(MaxBlurRadius);
-            return blur;
-        }
-    }
-
-    interface Blur
-    {
-        float GetPSFRadius(int x, int y);
-    }
-
-    class DepthMapBlur : Blur
-    {
-        PFMImage DepthMap { get; set; }
-        float MaxPSFRadius { get; set; }
-
-        public DepthMapBlur(PFMImage depthMap, int maxPSFRadius)
-        {
-            DepthMap = depthMap;
-            MaxPSFRadius = maxPSFRadius;
-        }
-
-        public float GetPSFRadius(int x, int y)
-        {
-            return DepthMap.Image[x, y, 0] * MaxPSFRadius;
-        }
-    }
-
-    class ProceduralBlur : Blur
-    {
-        float MaxPSFRadius { get; set; }
-
-        float widthInv;
-        float heightInv;
-
-        public ProceduralBlur(int width, int height, int maxPSFRadius)
-        {
-            widthInv = 1.0f / (float)width;
-            heightInv = 1.0f / (float)height;
-            MaxPSFRadius = maxPSFRadius;
-        }
-
-        public float GetPSFRadius(int x, int y)
-        {
-            // coordinates normalized to [0.0; 1.0]
-            //float xNorm = x * widthInv;
-            float yNorm = y * heightInv;
-            return MaxPSFRadius * Math.Abs(2 * yNorm - 1);
-        }
-    }
-
-    class ConstantBlur : Blur
-    {
-        float PSFRadius { get; set; }
-
-        public ConstantBlur(int psfRadius)
-        {
-            PSFRadius = psfRadius;
-        }
-
-        public float GetPSFRadius(int x, int y)
-        {
-            return PSFRadius;
         }
     }
 }

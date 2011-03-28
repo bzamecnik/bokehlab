@@ -26,11 +26,16 @@ namespace spreading
 
         protected PFMImage depthMap = null;
 
+        protected ThinLensDepthMapBlur thinLensBlur = null;
+
         public Form1()
         {
             InitializeComponent();
-            blurRadiusNumeric.Value = RectangleSpreadingFilter.DEFAULT_BLUR_RADIUS;
+            blurRadiusNumeric.Value = ProceduralBlur.DEFAULT_BLUR_RADIUS;
             imageTypeComboBox.SelectedIndex = 0;
+            thinLensBlur = new ThinLensDepthMapBlur(50, 20, 100, 1000, 260);
+            apertureNumeric.Value = (decimal)thinLensBlur.Aperture;
+            focusPlaneNumeric.Value = (decimal)thinLensBlur.FocusPlane;
         }
 
         private void buttonLoad_Click(object sender, EventArgs e)
@@ -174,13 +179,21 @@ namespace spreading
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            RectangleSpreadingFilter filter = new RectangleSpreadingFilter()
-            {
-                MaxBlurRadius = (int)blurRadiusNumeric.Value
-            };
+            RectangleSpreadingFilter filter = new RectangleSpreadingFilter();
             try
             {
-                outputHdrImage = filter.FilterImage(inputHdrImage, outputHdrImage, depthMap);
+                uint width = inputHdrImage.Width;
+                uint height = inputHdrImage.Height;
+                if ((depthMap != null) &&
+                    ((depthMap.Width != width) ||
+                    (depthMap.Height != height)))
+                {
+                    throw new ArgumentException(String.Format(
+                        "Depth map must have the same dimensions as the input image"
+                        + " {0}x{1}, but it's size was {2}x{3}.", width, height, depthMap.Width, depthMap.Height));
+                }
+                BlurFunction blurFunc = CreateBlurFunction(depthMap, width, height);
+                outputHdrImage = filter.FilterImage(inputHdrImage, outputHdrImage, blurFunc);
                 ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr());
                 pictureBox1.Image = outputLdrImage;
             }
@@ -254,6 +267,36 @@ namespace spreading
                 pictureBox1.Image.Dispose();
                 pictureBox1.Image = null;
             }
+        }
+
+        private BlurFunction CreateBlurFunction(PFMImage depthMap, uint width, uint height)
+        {
+            BlurFunction blur;
+            if (depthMap != null)
+            {
+                //blur = new DepthMapBlur(depthMap, MaxBlurRadius);
+                thinLensBlur.DepthMap = depthMap;
+                blur = thinLensBlur;
+            }
+            else
+            {
+                int maxBlurRadius = (int)blurRadiusNumeric.Value;
+                //blur = new ProceduralBlur((int)width, (int)height, );
+                blur = new ConstantBlur(maxBlurRadius);
+            }
+            return blur;
+        }
+
+        private void focusPlaneNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            thinLensBlur.FocusPlane = (float)focusPlaneNumeric.Value;
+            filterImage();
+        }
+
+        private void apertureNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            thinLensBlur.Aperture = (float)apertureNumeric.Value;
+            filterImage();
         }
     }
 }
