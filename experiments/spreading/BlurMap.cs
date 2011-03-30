@@ -10,12 +10,12 @@ using mathHelper;
 
 namespace spreading
 {
-    public interface BlurFunction
+    public interface BlurMap
     {
         float GetPSFRadius(int x, int y);
     }
 
-    public class DepthMapBlur : BlurFunction
+    public class DepthMapBlur : BlurMap
     {
         PFMImage DepthMap { get; set; }
         float MaxPSFRadius { get; set; }
@@ -32,7 +32,7 @@ namespace spreading
         }
     }
 
-    public class ThinLensDepthMapBlur : BlurFunction
+    public class ThinLensDepthMapBlur : BlurMap
     {
         public PFMImage DepthMap { get; set; }
         float FocalLength { get; set; }
@@ -65,7 +65,7 @@ namespace spreading
         }
     }
 
-    public class ProceduralBlur : BlurFunction
+    public class ProceduralBlur : BlurMap
     {
         public static readonly int DEFAULT_BLUR_RADIUS = 25;
         float MaxPSFRadius { get; set; }
@@ -89,7 +89,7 @@ namespace spreading
         }
     }
 
-    public class ConstantBlur : BlurFunction
+    public class ConstantBlur : BlurMap
     {
         float PSFRadius { get; set; }
 

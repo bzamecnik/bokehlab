@@ -179,7 +179,6 @@ namespace spreading
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            RectangleSpreadingFilter filter = new RectangleSpreadingFilter();
             try
             {
                 uint width = inputHdrImage.Width;
@@ -192,8 +191,14 @@ namespace spreading
                         "Depth map must have the same dimensions as the input image"
                         + " {0}x{1}, but it's size was {2}x{3}.", width, height, depthMap.Width, depthMap.Height));
                 }
-                BlurFunction blurFunc = CreateBlurFunction(depthMap, width, height);
-                outputHdrImage = filter.FilterImage(inputHdrImage, outputHdrImage, blurFunc);
+                //AbstractSpreadingFilter filter = new RectangleSpreadingFilter()
+                PSF.Perimeter.IPSFGenerator psfGen = new PSF.Perimeter.LinearPSFGenerator();
+                AbstractSpreadingFilter filter = new PerimeterSpreadingFilter(
+                    psfGen.GeneratePSF((int)blurRadiusNumeric.Value))
+                {
+                    Blur = CreateBlurFunction(depthMap, width, height)
+                };
+                outputHdrImage = filter.FilterImage(inputHdrImage, outputHdrImage);
                 ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr());
                 pictureBox1.Image = outputLdrImage;
             }
@@ -269,9 +274,9 @@ namespace spreading
             }
         }
 
-        private BlurFunction CreateBlurFunction(PFMImage depthMap, uint width, uint height)
+        private BlurMap CreateBlurFunction(PFMImage depthMap, uint width, uint height)
         {
-            BlurFunction blur;
+            BlurMap blur;
             if (depthMap != null)
             {
                 //blur = new DepthMapBlur(depthMap, MaxBlurRadius);

@@ -13,15 +13,18 @@ using mathHelper;
 //   - now it seems it has to be larger by 1px
 // - should the spreading table and normalization channel be squashed into
 //   one image for better locality?
+// - could alpha channel be used as a normalization channel?
 // - implement better PSFs:
 //   - perimeter spreading
 //   - polynomial spreading
 
 namespace spreading
 {
-    class RectangleSpreadingFilter
+    public abstract class AbstractSpreadingFilter : ISpreadingFilter
     {
-        public PFMImage FilterImage(PFMImage inputImage, PFMImage outputImage, BlurFunction blur)
+        public BlurMap Blur;
+
+        public PFMImage FilterImage(PFMImage inputImage, PFMImage outputImage)
         {
             if (inputImage == null) return null;
 
@@ -29,8 +32,6 @@ namespace spreading
             uint height = inputImage.Height;
 
             if (width < 1 || height < 1) return null;
-
-            
 
             if (outputImage == null)
             {
@@ -44,16 +45,13 @@ namespace spreading
             InitializeTables(spreadingTable, normalizationTable);
 
             // phase 1: distribute corners into the table
-            Spread(inputImage, spreadingTable, normalizationTable, blur);
+            Spread(inputImage, spreadingTable, normalizationTable);
 
             // phase 2: accumulate the corners into rectangles
             Integrate(spreadingTable, normalizationTable);
 
             Normalize(spreadingTable, normalizationTable, outputImage);
 
-            Console.WriteLine();
-
-            // TODO: dispose the spreadingTable and normalizationTable
             spreadingTable.Dispose();
             normalizationTable.Dispose();
 
@@ -87,7 +85,7 @@ namespace spreading
             //Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
         }
 
-        private static void Spread(PFMImage inputImage, PFMImage spreadingTable, PFMImage normalizationTable, BlurFunction blur)
+        private void Spread(PFMImage inputImage, PFMImage spreadingTable, PFMImage normalizationTable)
         {
             //Stopwatch sw = new Stopwatch();
             //sw.Reset();
@@ -108,7 +106,7 @@ namespace spreading
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float radius = blur.GetPSFRadius(x, y);
+                    float radius = Blur.GetPSFRadius(x, y);
 
                     // spread PSFs of a non-integer radius using two weighted
                     // PSFs of integer size close to the original radius
@@ -125,40 +123,33 @@ namespace spreading
             //Console.WriteLine("Phase 1, spreading: {0} ms", sw.ElapsedMilliseconds);
         }
 
-        private static void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)
+        protected abstract void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands);
+
+        protected abstract void Integrate(PFMImage spreadingTable, PFMImage normalizationTable);
+
+        protected static void IntegrateVertically(PFMImage spreadingTable, PFMImage normalizationTable)
         {
-            float psfSide = radius * 2 + 1; // side of a square PSF
-            float areaInv = weight / (psfSide * psfSide);
+            uint bands = spreadingTable.ChannelsCount;
+            float[, ,] spreadingImage = spreadingTable.Image;
+            float[, ,] normalizationImage = normalizationTable.Image;
+            int tableWidth = (int)spreadingTable.Width;
+            int tableHeight = (int)spreadingTable.Height;
 
-            int top = MathHelper.Clamp<int>(y - radius, 0, tableHeight - 1);
-            int bottom = MathHelper.Clamp<int>(y + radius + 1, 0, tableHeight - 1);
-            int left = MathHelper.Clamp<int>(x - radius, 0, tableWidth - 1);
-            int right = MathHelper.Clamp<int>(x + radius + 1, 0, tableWidth - 1);
-
-            for (int band = 0; band < bands; band++)
+            for (int x = 0; x < tableWidth; x++)
             {
-                float cornerValue = origImage[x, y, band] * areaInv;
-                PutCorners(spreadingImage, top, bottom, left, right, band, cornerValue);
+                for (int y = 1; y < tableHeight; y++)
+                {
+                    for (int band = 0; band < bands; band++)
+                    {
+                        spreadingImage[x, y, band] += spreadingImage[x, y - 1, band];
+                    }
+                    normalizationImage[x, y, 0] += normalizationImage[x, y - 1, 0];
+                }
             }
-            // Note: intensity for the normalization is 1.0
-            PutCorners(normalizationImage, top, bottom, left, right, 0, areaInv);
         }
 
-        private static void PutCorners(float[, ,] table, int top, int bottom, int left, int right, int band, float value)
+        protected static void IntegrateHorizontally(PFMImage spreadingTable, PFMImage normalizationTable)
         {
-            table[left, top, band] += value;
-            table[right, top, band] -= value;
-            table[left, bottom, band] -= value;
-            table[right, bottom, band] += value;
-        }
-
-        private static void Integrate(PFMImage spreadingTable, PFMImage normalizationTable)
-        {
-            //long start = 0;
-            //Stopwatch sw = new Stopwatch();
-            //sw.Reset();
-            //sw.Start();
-
             uint bands = spreadingTable.ChannelsCount;
             float[, ,] spreadingImage = spreadingTable.Image;
             float[, ,] normalizationImage = normalizationTable.Image;
@@ -176,21 +167,6 @@ namespace spreading
                     normalizationImage[x, y, 0] += normalizationImage[x - 1, y, 0];
                 }
             }
-            //Console.WriteLine("Phase 2, horizontal integration: {0} ms", sw.ElapsedMilliseconds);
-
-            //start = sw.ElapsedMilliseconds;
-            for (int x = 0; x < tableWidth; x++)
-            {
-                for (int y = 1; y < tableHeight; y++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        spreadingImage[x, y, band] += spreadingImage[x, y - 1, band];
-                    }
-                    normalizationImage[x, y, 0] += normalizationImage[x, y - 1, 0];
-                }
-            }
-            //Console.WriteLine("Phase 2, vertical intergration: {0} ms", sw.ElapsedMilliseconds - start);
         }
 
         private static void Normalize(PFMImage spreadingTable, PFMImage normalizationTable, PFMImage outputImage)

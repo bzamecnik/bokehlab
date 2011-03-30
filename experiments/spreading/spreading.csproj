@@ -50,8 +50,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BlurFunction.cs" />
-    <Compile Include="Spreading.cs" />
+    <Compile Include="BlurMap.cs" />
+    <Compile Include="ISpreadingFilter.cs" />
+    <Compile Include="PSF\Perimeter\ImageBasedPSFGenerator.cs" />
+    <Compile Include="PSF\Perimeter\LinearPSFGenerator.cs" />
+    <Compile Include="PSF\Perimeter\IPSFGenerator.cs" />
+    <Compile Include="PSF\Perimeter\PerimeterPSFDescription.cs" />
+    <Compile Include="PerimeterSpreadingFilter.cs" />
+    <Compile Include="RectangleSpreadingFilter.cs" />
+    <Compile Include="AbstractSpreadingFilter.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,6 +90,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="PSF\Perimeter\CirclePSFGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\libpfm\libpfm.csproj">
