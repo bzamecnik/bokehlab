@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pfmUtil", "..\pfmUtil\pfmUt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mathHelper", "..\mathHelper\mathHelper.csproj", "{26E431BD-7267-4A7F-914E-229072AAC363}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSFDiffVisualizer", "..\PSFDiffVisualizer\PSFDiffVisualizer.csproj", "{66A45E6E-18B0-45C6-BC24-56D6A2D05880}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{26E431BD-7267-4A7F-914E-229072AAC363}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26E431BD-7267-4A7F-914E-229072AAC363}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26E431BD-7267-4A7F-914E-229072AAC363}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66A45E6E-18B0-45C6-BC24-56D6A2D05880}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66A45E6E-18B0-45C6-BC24-56D6A2D05880}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66A45E6E-18B0-45C6-BC24-56D6A2D05880}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66A45E6E-18B0-45C6-BC24-56D6A2D05880}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
