@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using spreading.PSF.Perimeter;
 
 namespace PSFDeltaVisualizer
 {
@@ -19,11 +21,13 @@ namespace PSFDeltaVisualizer
 
         int ScaleFactor { get; set; }
 
-        Bitmap psf;
-        Bitmap psfDiffX;
+        Bitmap PsfImage { get; set; }
+        Bitmap PsfDiffXImage { get; set; }
 
-        Bitmap psfScaled;
-        Bitmap psfDiffXScaled;
+        Bitmap PsfImageScaled { get; set; }
+        Bitmap PsfDiffXImageScaled { get; set; }
+
+        List<Delta> Deltas { get; set; }
 
         SmoothingMode SmoothingMode
         {
@@ -44,7 +48,6 @@ namespace PSFDeltaVisualizer
             ShowDiffX = true;
             diffXcheckBox.Checked = ShowDiffX;
 
-
             psfPictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
 
             this.SetStyle(ControlStyles.UserPaint, true);
@@ -56,60 +59,80 @@ namespace PSFDeltaVisualizer
 
         private void Recompute()
         {
-            if (psf != null)
+            if (PsfImage != null)
             {
-                psf.Dispose();
+                PsfImage.Dispose();
             }
-            if (psfDiffX != null)
+            if (PsfDiffXImage != null)
             {
-                psfDiffX.Dispose();
+                PsfDiffXImage.Dispose();
             }
 
-            psf = CirclePSFGenerator.CreateCircle(Radius, SmoothingMode);
-            psfDiffX = PSFDeltaVisualizer.DiffImageHorizontally(psf);
+            PsfImage = CirclePSFGenerator.CreateCircle(Radius, SmoothingMode);
+            Deltas = CirclePSFGenerator.DiffHorizontally(PsfImage);
+            RedrawDeltas();
+            //PsfDiffXImage = PSFDeltaVisualizer.DiffImageHorizontally(PsfImage);
 
             ScaleImages();
+
             SetImageToPictureBox();
         }
 
-        private void SetImageToPictureBox()
+        private void RedrawDeltas()
         {
-            psfPictureBox.Image = ShowDiffX ? psfDiffXScaled : psfScaled;
+            PsfDiffXImage = PSFDeltaVisualizer.VisualizePSFDeltas(Deltas, PsfImage.Width, PsfImage.Height);
         }
 
         private void ScaleImages()
         {
-            if ((psf == null) || (psfDiffX == null))
+            if ((PsfImage == null) || (PsfDiffXImage == null))
             {
                 return;
             }
-            if (psfScaled != null)
+            if (PsfImageScaled != null)
             {
-                psfScaled.Dispose();
+                PsfImageScaled.Dispose();
             }
-            if (psfDiffXScaled != null)
+            if (PsfDiffXImageScaled != null)
             {
-                psfDiffXScaled.Dispose();
+                PsfDiffXImageScaled.Dispose();
             }
 
-            psfScaled = ScaleImage(psf);
-            psfDiffXScaled = ScaleImage(psfDiffX);
+            PsfImageScaled = ScaleImage(PsfImage, ScaleFactor);
+            PsfDiffXImageScaled = ScaleImage(PsfDiffXImage, ScaleFactor);
         }
 
-        private Bitmap ScaleImage(Bitmap inputImage)
+
+        public static Bitmap ScaleImage(Bitmap inputImage, int scalingFactor)
         {
-            int width = ScaleFactor * inputImage.Width;
-            int height = ScaleFactor * inputImage.Height;
-            Bitmap scaledImage = new Bitmap(width, height, inputImage.PixelFormat);
-            using (Graphics g = Graphics.FromImage(scaledImage))
+            int width = inputImage.Width;
+            int height = inputImage.Height;
+            Bitmap scaledImage = new Bitmap(scalingFactor * width, scalingFactor * height,
+                inputImage.PixelFormat);
+
+            for (int y = 0; y < height; y++)
             {
-                g.FillRectangle(Brushes.Black, 0, 0, width, height);
-                g.InterpolationMode = InterpolationMode.NearestNeighbor;
-                // Note: adding ScaleFactor is really odd!
-                //g.DrawImage(inputImage, 0, 0, width + ScaleFactor, height + ScaleFactor);
-                g.DrawImage(inputImage, 0, 0, width, height);
+                for (int x = 0; x < width; x++)
+                {
+                    Color color = inputImage.GetPixel(x, y);
+                    for (int offsetY = 0; offsetY < scalingFactor; offsetY++)
+                    {
+                        for (int offsetX = 0; offsetX < scalingFactor; offsetX++)
+                        {
+                            scaledImage.SetPixel(
+                                scalingFactor * x + offsetX,
+                                scalingFactor * y + offsetY,
+                                color);
+                        }
+                    }
+                }
             }
             return scaledImage;
+        }
+
+        private void SetImageToPictureBox()
+        {
+            psfPictureBox.Image = ShowDiffX ? PsfDiffXImageScaled : PsfImageScaled;
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
@@ -132,7 +155,7 @@ namespace PSFDeltaVisualizer
 
         private void scaleFactorNumeric_ValueChanged(object sender, EventArgs e)
         {
-            ScaleFactor = (int)Math.Pow(2, (int)scaleFactorNumeric.Value);
+            ScaleFactor = (int)scaleFactorNumeric.Value;
             ScaleImages();
             SetImageToPictureBox();
         }

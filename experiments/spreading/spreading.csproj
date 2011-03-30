@@ -55,7 +55,7 @@
     <Compile Include="PSF\Perimeter\ImageBasedPSFGenerator.cs" />
     <Compile Include="PSF\Perimeter\LinearPSFGenerator.cs" />
     <Compile Include="PSF\Perimeter\IPSFGenerator.cs" />
-    <Compile Include="PSF\Perimeter\PerimeterPSFDescription.cs" />
+    <Compile Include="PSF\Perimeter\PSFDescription.cs" />
     <Compile Include="PerimeterSpreadingFilter.cs" />
     <Compile Include="RectangleSpreadingFilter.cs" />
     <Compile Include="AbstractSpreadingFilter.cs" />

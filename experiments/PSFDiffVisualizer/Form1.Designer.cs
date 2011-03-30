@@ -115,13 +115,23 @@
             // 
             this.scaleFactorNumeric.Location = new System.Drawing.Point(445, 13);
             this.scaleFactorNumeric.Maximum = new decimal(new int[] {
-            3,
+            16,
+            0,
+            0,
+            0});
+            this.scaleFactorNumeric.Minimum = new decimal(new int[] {
+            1,
             0,
             0,
             0});
             this.scaleFactorNumeric.Name = "scaleFactorNumeric";
             this.scaleFactorNumeric.Size = new System.Drawing.Size(63, 20);
             this.scaleFactorNumeric.TabIndex = 1;
+            this.scaleFactorNumeric.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.scaleFactorNumeric.ValueChanged += new System.EventHandler(this.scaleFactorNumeric_ValueChanged);
             // 
             // Form1
@@ -138,7 +148,7 @@
             this.Controls.Add(this.label1);
             this.DoubleBuffered = true;
             this.Name = "Form1";
-            this.Text = "PSF Generator";
+            this.Text = "PSF delta visualizer";
             ((System.ComponentModel.ISupportInitialize)(this.psfRadiusNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.psfPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.scaleFactorNumeric)).EndInit();

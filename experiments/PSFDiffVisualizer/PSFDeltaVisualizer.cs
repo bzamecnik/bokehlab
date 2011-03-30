@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using spreading.PSF.Perimeter;
 
 namespace PSFDeltaVisualizer
 {
@@ -28,12 +31,24 @@ namespace PSFDeltaVisualizer
             return diffImage;
         }
 
+        public static Bitmap VisualizePSFDeltas(List<Delta> deltas, int width, int height)
+        {
+            Bitmap image = new Bitmap(width + 1, height,
+                PixelFormat.Format32bppArgb);
+            foreach (Delta delta in deltas)
+            {                
+                image.SetPixel(delta.x, delta.y, VisualizeDelta((int)(delta.value * 255)));
+            }
+            return image;
+        }
+
+
         /// <summary>
         /// Return intensity of a pixel at [x; y] as [0; 255] integer.
-        /// Be kind to reads beyond image borders. In such a situation
+        /// Be kind to reads beyond scaledImage borders. In such a situation
         /// return 0 (black).
         /// </summary>
-        /// <param name="image"></param>
+        /// <param name="scaledImage"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
