@@ -1,4 +1,4 @@
-﻿namespace PSFDiffVisualizer
+﻿namespace PSFDeltaVisualizer
 {
     partial class Form1
     {
