@@ -259,7 +259,12 @@ namespace libpfm
 
         public Bitmap ToLdr()
         {
-            return ToLdr(false, 1.0f, 0.0f);
+            return ToLdr(false);
+        }
+
+        public Bitmap ToLdr(bool tonemappingEnabled)
+        {
+            return ToLdr(tonemappingEnabled, 1.0f, 0.0f);
         }
 
         public Bitmap ToLdr(bool tonemappingEnabled, float scale, float shift)

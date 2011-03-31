@@ -31,13 +31,13 @@ namespace PSFDeltaVisualizer
             return diffImage;
         }
 
-        public static Bitmap VisualizePSFDeltas(List<Delta> deltas, int width, int height)
+        public static Bitmap VisualizePSFDeltas(List<Delta> deltas, int radius, int width, int height)
         {
             Bitmap image = new Bitmap(width + 1, height,
                 PixelFormat.Format32bppArgb);
             foreach (Delta delta in deltas)
-            {                
-                image.SetPixel(delta.x, delta.y, VisualizeDelta((int)(delta.value * 255)));
+            {
+                image.SetPixel(delta.x + radius, delta.y + radius - 1, VisualizeDelta((int)(delta.value * 255)));
             }
             return image;
         }

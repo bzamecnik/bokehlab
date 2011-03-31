@@ -28,14 +28,36 @@ namespace spreading
 
         protected ThinLensDepthMapBlur thinLensBlur = null;
 
+        protected bool ToneMappingEnabled { get; set; }
+
+        private RectangleSpreadingFilter RectangleFilter;
+        private PerimeterSpreadingFilter PerimeterFilter;
+
         public Form1()
         {
             InitializeComponent();
             blurRadiusNumeric.Value = ProceduralBlur.DEFAULT_BLUR_RADIUS;
             imageTypeComboBox.SelectedIndex = 0;
+            filterTypeComboBox.SelectedIndex = 0;
             thinLensBlur = new ThinLensDepthMapBlur(50, 20, 100, 1000, 260);
             apertureNumeric.Value = (decimal)thinLensBlur.Aperture;
             focusPlaneNumeric.Value = (decimal)thinLensBlur.FocusPlane;
+            toneMappingCheckBox.Checked = false;
+
+            RectangleFilter = new RectangleSpreadingFilter();
+            PerimeterFilter = new PerimeterSpreadingFilter();
+        }
+
+        private void GeneratePerimeterPSFs(PerimeterSpreadingFilter filter, int maxRadius)
+        {
+            //PSF.Perimeter.IPSFGenerator psfGen = new PSF.Perimeter.LinearPSFGenerator();
+            PSF.Perimeter.IPSFGenerator psfGen = new PSF.Perimeter.CirclePSFGenerator();
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            filter.Psf = psfGen.GeneratePSF(maxRadius);
+            sw.Stop();
+            Console.WriteLine("Generated PSF with max. radius {0} in {1:f}s", maxRadius, 1.0e-3 * sw.ElapsedMilliseconds);
         }
 
         private void buttonLoad_Click(object sender, EventArgs e)
@@ -63,7 +85,7 @@ namespace spreading
                     inputHdrImage.Dispose();
                 }
                 inputHdrImage = PFMImage.LoadImage(ofd.FileName);
-                ReplaceLdrImage(ref inputLdrImage, inputHdrImage.ToLdr());
+                ReplaceLdrImage(ref inputLdrImage, inputHdrImage.ToLdr(ToneMappingEnabled));
             }
             else
             {
@@ -74,7 +96,8 @@ namespace spreading
                 }
                 inputHdrImage = PFMImage.FromLdr(inputLdrImage);
             }
-            pictureBox1.Image = inputLdrImage;
+            imageTypeComboBox.SelectedIndex = 0; // TODO: select original better
+            updatePictureBoxImage();
 
             if (outputHdrImage != null)
             {
@@ -191,16 +214,12 @@ namespace spreading
                         "Depth map must have the same dimensions as the input image"
                         + " {0}x{1}, but it's size was {2}x{3}.", width, height, depthMap.Width, depthMap.Height));
                 }
-                //AbstractSpreadingFilter filter = new RectangleSpreadingFilter()
-                PSF.Perimeter.IPSFGenerator psfGen = new PSF.Perimeter.LinearPSFGenerator();
-                AbstractSpreadingFilter filter = new PerimeterSpreadingFilter(
-                    psfGen.GeneratePSF((int)blurRadiusNumeric.Value))
-                {
-                    Blur = CreateBlurFunction(depthMap, width, height)
-                };
+                AbstractSpreadingFilter filter = GetSpreadingFilter();
+                filter.Blur = CreateBlurFunction(depthMap);
                 outputHdrImage = filter.FilterImage(inputHdrImage, outputHdrImage);
-                ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr());
-                pictureBox1.Image = outputLdrImage;
+                ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr(ToneMappingEnabled));
+                imageTypeComboBox.SelectedIndex = 1; // TODO: select the filtered image better
+                updatePictureBoxImage();
             }
             catch (Exception ex)
             {
@@ -213,7 +232,35 @@ namespace spreading
             Cursor.Current = Cursors.Default;
         }
 
+        private AbstractSpreadingFilter GetSpreadingFilter()
+        {
+            string filterName = filterTypeComboBox.SelectedItem.ToString();
+            if (filterName == "rectangle") {
+                return RectangleFilter;
+            }
+            else if (filterName == "perimeter")
+            {
+                PerimeterFilter.ForceMaxRadius = (int)blurRadiusNumeric.Value;
+                if (PerimeterFilter.Psf == null)
+                {
+                    int maxGeneratedPsfRadius = 100;
+                    Console.WriteLine("Generating perimeter PSFs up to radius {0}.", maxGeneratedPsfRadius);
+                    GeneratePerimeterPSFs(PerimeterFilter, maxGeneratedPsfRadius);
+                }
+                return PerimeterFilter;
+            }
+            else
+            {
+                throw new ArgumentException("Unknown filter name: {0}", filterName);
+            }
+        }
+
         private void imageTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            updatePictureBoxImage();
+        }
+
+        private void updatePictureBoxImage()
         {
             // TODO: use enum
             switch (imageTypeComboBox.SelectedItem.ToString())
@@ -225,7 +272,7 @@ namespace spreading
                     pictureBox1.Image = outputLdrImage;
                     break;
                 case "Depth map":
-                    pictureBox1.Image = (depthMap != null) ? depthMap.ToLdr() : null;
+                    pictureBox1.Image = (depthMap != null) ? depthMap.ToLdr(ToneMappingEnabled) : null;
                     break;
             }
         }
@@ -274,20 +321,18 @@ namespace spreading
             }
         }
 
-        private BlurMap CreateBlurFunction(PFMImage depthMap, uint width, uint height)
+        private BlurMap CreateBlurFunction(PFMImage depthMap)
         {
             BlurMap blur;
             if (depthMap != null)
             {
-                //blur = new DepthMapBlur(depthMap, MaxBlurRadius);
                 thinLensBlur.DepthMap = depthMap;
                 blur = thinLensBlur;
             }
             else
             {
                 int maxBlurRadius = (int)blurRadiusNumeric.Value;
-                //blur = new ProceduralBlur((int)width, (int)height, );
-                blur = new ConstantBlur(maxBlurRadius);
+                blur = new ConstantBlur(maxBlurRadius - 1);
             }
             return blur;
         }
@@ -302,6 +347,20 @@ namespace spreading
         {
             thinLensBlur.Aperture = (float)apertureNumeric.Value;
             filterImage();
+        }
+
+        private void toneMappingCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            ToneMappingEnabled = toneMappingCheckBox.Checked;
+            if (outputHdrImage != null)
+            {
+                ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToLdr(ToneMappingEnabled));
+            }
+            if (inputHdrImage != null)
+            {
+                ReplaceLdrImage(ref inputLdrImage, inputHdrImage.ToLdr(ToneMappingEnabled));
+            }
+            updatePictureBoxImage();
         }
     }
 }

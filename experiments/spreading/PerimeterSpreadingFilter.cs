@@ -14,20 +14,27 @@ namespace spreading
         // [radius][deltaIndex]
         // radius: [0; maxRadius]
         // deltaIndex: [0; maxDeltaIndex(radius)]
-        private PSFDescription psf;
+        public PSFDescription Psf { get; set; }
 
-        public PerimeterSpreadingFilter(PSFDescription psf)
-        {
-            this.psf = psf;
-        }
+        // for debugging purposes
+        // can be lower than the real maximum available PSF radius
+        public int ForceMaxRadius { get; set; }
 
         protected override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)
         {
-            if (radius > psf.MaxRadius)
+            Debug.Assert(Psf != null);
+
+            if ((radius > Psf.MaxRadius) || (radius > ForceMaxRadius))
             {
-                return;
+                // TODO: a missing PSF sample for the current radius
+                // could be generated and added to the Psf description
+
+                //Console.WriteLine("Warning: Trying to spread a PSF with larger radius ({0}) than is available {1}.", radius, Psf.MaxRadius);
+                
+                // visualize where the PSF of requested radius is unavalable
+                radius = 0; // Psf.MaxRadius;
             }
-            Delta[] deltas = psf.deltasByRadius[radius];
+            Delta[] deltas = Psf.deltasByRadius[radius];
             Debug.Assert(deltas != null);
             for (int i = 0; i < deltas.Length; i++)
             {

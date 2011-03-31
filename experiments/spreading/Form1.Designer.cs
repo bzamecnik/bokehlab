@@ -39,31 +39,34 @@
         this.imageSizeOrigbutton = new System.Windows.Forms.Button();
         this.imageSizeStretchButton = new System.Windows.Forms.Button();
         this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+        this.toneMappingCheckBox = new System.Windows.Forms.CheckBox();
+        this.label7 = new System.Windows.Forms.Label();
+        this.apertureNumeric = new System.Windows.Forms.NumericUpDown();
+        this.label6 = new System.Windows.Forms.Label();
+        this.label5 = new System.Windows.Forms.Label();
+        this.focusPlaneNumeric = new System.Windows.Forms.NumericUpDown();
+        this.label4 = new System.Windows.Forms.Label();
         this.imageSizeLabel = new System.Windows.Forms.Label();
         this.label3 = new System.Windows.Forms.Label();
         this.label2 = new System.Windows.Forms.Label();
         this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
         this.clearDepthmapButton = new System.Windows.Forms.Button();
         this.pictureBox1 = new System.Windows.Forms.PictureBox();
-        this.focusPlaneNumeric = new System.Windows.Forms.NumericUpDown();
-        this.label4 = new System.Windows.Forms.Label();
-        this.label5 = new System.Windows.Forms.Label();
-        this.apertureNumeric = new System.Windows.Forms.NumericUpDown();
-        this.label6 = new System.Windows.Forms.Label();
-        this.label7 = new System.Windows.Forms.Label();
+        this.filterTypeComboBox = new System.Windows.Forms.ComboBox();
+        this.label8 = new System.Windows.Forms.Label();
         ((System.ComponentModel.ISupportInitialize)(this.blurRadiusNumeric)).BeginInit();
         this.splitContainer1.Panel1.SuspendLayout();
         this.splitContainer1.Panel2.SuspendLayout();
         this.splitContainer1.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)(this.apertureNumeric)).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)(this.focusPlaneNumeric)).BeginInit();
         this.tableLayoutPanel1.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.focusPlaneNumeric)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.apertureNumeric)).BeginInit();
         this.SuspendLayout();
         // 
         // buttonSave
         // 
-        this.buttonSave.Location = new System.Drawing.Point(1, 153);
+        this.buttonSave.Location = new System.Drawing.Point(1, 177);
         this.buttonSave.Name = "buttonSave";
         this.buttonSave.Size = new System.Drawing.Size(145, 23);
         this.buttonSave.TabIndex = 6;
@@ -73,7 +76,7 @@
         // 
         // buttonFilter
         // 
-        this.buttonFilter.Location = new System.Drawing.Point(2, 106);
+        this.buttonFilter.Location = new System.Drawing.Point(2, 130);
         this.buttonFilter.Name = "buttonFilter";
         this.buttonFilter.Size = new System.Drawing.Size(144, 23);
         this.buttonFilter.TabIndex = 3;
@@ -84,7 +87,7 @@
         // labelElapsed
         // 
         this.labelElapsed.AutoSize = true;
-        this.labelElapsed.Location = new System.Drawing.Point(2, 132);
+        this.labelElapsed.Location = new System.Drawing.Point(2, 156);
         this.labelElapsed.Name = "labelElapsed";
         this.labelElapsed.Size = new System.Drawing.Size(70, 13);
         this.labelElapsed.TabIndex = 0;
@@ -135,7 +138,7 @@
             "Original",
             "Filtered",
             "Depth map"});
-        this.imageTypeComboBox.Location = new System.Drawing.Point(2, 232);
+        this.imageTypeComboBox.Location = new System.Drawing.Point(3, 224);
         this.imageTypeComboBox.Name = "imageTypeComboBox";
         this.imageTypeComboBox.Size = new System.Drawing.Size(144, 21);
         this.imageTypeComboBox.TabIndex = 7;
@@ -190,6 +193,9 @@
         // 
         // splitContainer1.Panel1
         // 
+        this.splitContainer1.Panel1.Controls.Add(this.label8);
+        this.splitContainer1.Panel1.Controls.Add(this.filterTypeComboBox);
+        this.splitContainer1.Panel1.Controls.Add(this.toneMappingCheckBox);
         this.splitContainer1.Panel1.Controls.Add(this.label7);
         this.splitContainer1.Panel1.Controls.Add(this.apertureNumeric);
         this.splitContainer1.Panel1.Controls.Add(this.label6);
@@ -214,73 +220,65 @@
         // 
         this.splitContainer1.Panel2.AutoScroll = true;
         this.splitContainer1.Panel2.Controls.Add(this.pictureBox1);
-        this.splitContainer1.Size = new System.Drawing.Size(860, 537);
+        this.splitContainer1.Size = new System.Drawing.Size(889, 561);
         this.splitContainer1.SplitterDistance = 150;
         this.splitContainer1.TabIndex = 15;
         // 
-        // imageSizeLabel
+        // toneMappingCheckBox
         // 
-        this.imageSizeLabel.AutoSize = true;
-        this.imageSizeLabel.Location = new System.Drawing.Point(69, 29);
-        this.imageSizeLabel.Name = "imageSizeLabel";
-        this.imageSizeLabel.Size = new System.Drawing.Size(0, 13);
-        this.imageSizeLabel.TabIndex = 16;
+        this.toneMappingCheckBox.AutoSize = true;
+        this.toneMappingCheckBox.Location = new System.Drawing.Point(3, 280);
+        this.toneMappingCheckBox.Name = "toneMappingCheckBox";
+        this.toneMappingCheckBox.Size = new System.Drawing.Size(135, 17);
+        this.toneMappingCheckBox.TabIndex = 22;
+        this.toneMappingCheckBox.Text = "Tone mapping enabled";
+        this.toneMappingCheckBox.UseVisualStyleBackColor = true;
+        this.toneMappingCheckBox.CheckedChanged += new System.EventHandler(this.toneMappingCheckBox_CheckedChanged);
         // 
-        // label3
+        // label7
         // 
-        this.label3.AutoSize = true;
-        this.label3.Location = new System.Drawing.Point(3, 29);
-        this.label3.Name = "label3";
-        this.label3.Size = new System.Drawing.Size(60, 13);
-        this.label3.TabIndex = 16;
-        this.label3.Text = "Image size:";
+        this.label7.AutoSize = true;
+        this.label7.Location = new System.Drawing.Point(3, 417);
+        this.label7.Name = "label7";
+        this.label7.Size = new System.Drawing.Size(93, 13);
+        this.label7.TabIndex = 0;
+        this.label7.Text = "Constant blur size:";
         // 
-        // label2
+        // apertureNumeric
         // 
-        this.label2.AutoSize = true;
-        this.label2.Location = new System.Drawing.Point(2, 216);
-        this.label2.Name = "label2";
-        this.label2.Size = new System.Drawing.Size(75, 13);
-        this.label2.TabIndex = 0;
-        this.label2.Text = "Display image:";
+        this.apertureNumeric.Location = new System.Drawing.Point(4, 384);
+        this.apertureNumeric.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+        this.apertureNumeric.Name = "apertureNumeric";
+        this.apertureNumeric.Size = new System.Drawing.Size(144, 20);
+        this.apertureNumeric.TabIndex = 5;
+        this.apertureNumeric.Value = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
+        this.apertureNumeric.ValueChanged += new System.EventHandler(this.apertureNumeric_ValueChanged);
         // 
-        // tableLayoutPanel1
+        // label6
         // 
-        this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                    | System.Windows.Forms.AnchorStyles.Right)));
-        this.tableLayoutPanel1.AutoSize = true;
-        this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-        this.tableLayoutPanel1.ColumnCount = 2;
-        this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        this.tableLayoutPanel1.Controls.Add(this.imageSizeStretchButton, 1, 0);
-        this.tableLayoutPanel1.Controls.Add(this.imageSizeOrigbutton, 0, 0);
-        this.tableLayoutPanel1.Location = new System.Drawing.Point(2, 259);
-        this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-        this.tableLayoutPanel1.RowCount = 1;
-        this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-        this.tableLayoutPanel1.Size = new System.Drawing.Size(116, 23);
-        this.tableLayoutPanel1.TabIndex = 14;
+        this.label6.AutoSize = true;
+        this.label6.Location = new System.Drawing.Point(3, 368);
+        this.label6.Name = "label6";
+        this.label6.Size = new System.Drawing.Size(50, 13);
+        this.label6.TabIndex = 21;
+        this.label6.Text = "Aperture:";
         // 
-        // clearDepthmapButton
+        // label5
         // 
-        this.clearDepthmapButton.Location = new System.Drawing.Point(3, 77);
-        this.clearDepthmapButton.Name = "clearDepthmapButton";
-        this.clearDepthmapButton.Size = new System.Drawing.Size(144, 23);
-        this.clearDepthmapButton.TabIndex = 11;
-        this.clearDepthmapButton.Text = "Clear depth map";
-        this.clearDepthmapButton.UseVisualStyleBackColor = true;
-        this.clearDepthmapButton.Click += new System.EventHandler(this.clearDepthmapButton_Click);
-        // 
-        // pictureBox1
-        // 
-        this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-        this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-        this.pictureBox1.Name = "pictureBox1";
-        this.pictureBox1.Size = new System.Drawing.Size(706, 537);
-        this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-        this.pictureBox1.TabIndex = 2;
-        this.pictureBox1.TabStop = false;
+        this.label5.AutoSize = true;
+        this.label5.Location = new System.Drawing.Point(3, 306);
+        this.label5.Name = "label5";
+        this.label5.Size = new System.Drawing.Size(84, 13);
+        this.label5.TabIndex = 0;
+        this.label5.Text = "Thin lens model:";
         // 
         // focusPlaneNumeric
         // 
@@ -319,56 +317,96 @@
         this.label4.TabIndex = 0;
         this.label4.Text = "Focus plane (Z):";
         // 
-        // label5
+        // imageSizeLabel
         // 
-        this.label5.AutoSize = true;
-        this.label5.Location = new System.Drawing.Point(3, 306);
-        this.label5.Name = "label5";
-        this.label5.Size = new System.Drawing.Size(84, 13);
-        this.label5.TabIndex = 0;
-        this.label5.Text = "Thin lens model:";
+        this.imageSizeLabel.AutoSize = true;
+        this.imageSizeLabel.Location = new System.Drawing.Point(69, 29);
+        this.imageSizeLabel.Name = "imageSizeLabel";
+        this.imageSizeLabel.Size = new System.Drawing.Size(0, 13);
+        this.imageSizeLabel.TabIndex = 16;
         // 
-        // apertureNumeric
+        // label3
         // 
-        this.apertureNumeric.Location = new System.Drawing.Point(4, 384);
-        this.apertureNumeric.Maximum = new decimal(new int[] {
-            10000,
-            0,
-            0,
-            0});
-        this.apertureNumeric.Name = "apertureNumeric";
-        this.apertureNumeric.Size = new System.Drawing.Size(144, 20);
-        this.apertureNumeric.TabIndex = 5;
-        this.apertureNumeric.Value = new decimal(new int[] {
-            20,
-            0,
-            0,
-            0});
-        this.apertureNumeric.ValueChanged += new System.EventHandler(this.apertureNumeric_ValueChanged);
+        this.label3.AutoSize = true;
+        this.label3.Location = new System.Drawing.Point(3, 29);
+        this.label3.Name = "label3";
+        this.label3.Size = new System.Drawing.Size(60, 13);
+        this.label3.TabIndex = 16;
+        this.label3.Text = "Image size:";
         // 
-        // label6
+        // label2
         // 
-        this.label6.AutoSize = true;
-        this.label6.Location = new System.Drawing.Point(3, 368);
-        this.label6.Name = "label6";
-        this.label6.Size = new System.Drawing.Size(50, 13);
-        this.label6.TabIndex = 21;
-        this.label6.Text = "Aperture:";
+        this.label2.AutoSize = true;
+        this.label2.Location = new System.Drawing.Point(3, 208);
+        this.label2.Name = "label2";
+        this.label2.Size = new System.Drawing.Size(75, 13);
+        this.label2.TabIndex = 0;
+        this.label2.Text = "Display image:";
         // 
-        // label7
+        // tableLayoutPanel1
         // 
-        this.label7.AutoSize = true;
-        this.label7.Location = new System.Drawing.Point(3, 417);
-        this.label7.Name = "label7";
-        this.label7.Size = new System.Drawing.Size(93, 13);
-        this.label7.TabIndex = 0;
-        this.label7.Text = "Constant blur size:";
+        this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                    | System.Windows.Forms.AnchorStyles.Right)));
+        this.tableLayoutPanel1.AutoSize = true;
+        this.tableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+        this.tableLayoutPanel1.ColumnCount = 2;
+        this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+        this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+        this.tableLayoutPanel1.Controls.Add(this.imageSizeStretchButton, 1, 0);
+        this.tableLayoutPanel1.Controls.Add(this.imageSizeOrigbutton, 0, 0);
+        this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 251);
+        this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+        this.tableLayoutPanel1.RowCount = 1;
+        this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+        this.tableLayoutPanel1.Size = new System.Drawing.Size(116, 23);
+        this.tableLayoutPanel1.TabIndex = 14;
+        // 
+        // clearDepthmapButton
+        // 
+        this.clearDepthmapButton.Location = new System.Drawing.Point(3, 77);
+        this.clearDepthmapButton.Name = "clearDepthmapButton";
+        this.clearDepthmapButton.Size = new System.Drawing.Size(144, 23);
+        this.clearDepthmapButton.TabIndex = 11;
+        this.clearDepthmapButton.Text = "Clear depth map";
+        this.clearDepthmapButton.UseVisualStyleBackColor = true;
+        this.clearDepthmapButton.Click += new System.EventHandler(this.clearDepthmapButton_Click);
+        // 
+        // pictureBox1
+        // 
+        this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+        this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+        this.pictureBox1.Name = "pictureBox1";
+        this.pictureBox1.Size = new System.Drawing.Size(735, 561);
+        this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+        this.pictureBox1.TabIndex = 2;
+        this.pictureBox1.TabStop = false;
+        // 
+        // filterTypeComboBox
+        // 
+        this.filterTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.filterTypeComboBox.FormattingEnabled = true;
+        this.filterTypeComboBox.Items.AddRange(new object[] {
+            "rectangle",
+            "perimeter"});
+        this.filterTypeComboBox.Location = new System.Drawing.Point(67, 103);
+        this.filterTypeComboBox.Name = "filterTypeComboBox";
+        this.filterTypeComboBox.Size = new System.Drawing.Size(79, 21);
+        this.filterTypeComboBox.TabIndex = 23;
+        // 
+        // label8
+        // 
+        this.label8.AutoSize = true;
+        this.label8.Location = new System.Drawing.Point(6, 107);
+        this.label8.Name = "label8";
+        this.label8.Size = new System.Drawing.Size(55, 13);
+        this.label8.TabIndex = 24;
+        this.label8.Text = "Filter type:";
         // 
         // Form1
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-        this.ClientSize = new System.Drawing.Size(884, 562);
+        this.ClientSize = new System.Drawing.Size(913, 586);
         this.Controls.Add(this.splitContainer1);
         this.MinimumSize = new System.Drawing.Size(200, 200);
         this.Name = "Form1";
@@ -379,11 +417,11 @@
         this.splitContainer1.Panel1.PerformLayout();
         this.splitContainer1.Panel2.ResumeLayout(false);
         this.splitContainer1.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)(this.apertureNumeric)).EndInit();
+        ((System.ComponentModel.ISupportInitialize)(this.focusPlaneNumeric)).EndInit();
         this.tableLayoutPanel1.ResumeLayout(false);
         this.tableLayoutPanel1.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.focusPlaneNumeric)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.apertureNumeric)).EndInit();
         this.ResumeLayout(false);
 
     }
@@ -413,6 +451,9 @@
     private System.Windows.Forms.NumericUpDown focusPlaneNumeric;
     private System.Windows.Forms.Label label4;
     private System.Windows.Forms.Label label7;
+    private System.Windows.Forms.CheckBox toneMappingCheckBox;
+    private System.Windows.Forms.Label label8;
+    private System.Windows.Forms.ComboBox filterTypeComboBox;
   }
 }
 

@@ -19,7 +19,7 @@ namespace spreading.PSF.Perimeter
         }
     }
 
-    public struct PSFDescription
+    public class PSFDescription
     {
         public Delta[][] deltasByRadius;
         public int MaxRadius

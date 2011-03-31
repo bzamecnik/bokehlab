@@ -26,13 +26,13 @@ namespace spreading.PSF.Perimeter
             {
                 Bitmap psfImage = CirclePSFGenerator.CreateCircle(radius, SmoothingMode.None);
 
-                List<Delta> deltas = DiffHorizontally(psfImage);
+                List<Delta> deltas = DiffHorizontally(psfImage, radius);
                 desc.deltasByRadius[radius] = deltas.ToArray();
             }
             return desc;
         }
 
-        public static List<Delta> DiffHorizontally(Bitmap psfImage)
+        public static List<Delta> DiffHorizontally(Bitmap psfImage, int radius)
         {
             List<Delta> deltas = new List<Delta>();
             int width = psfImage.Width + 1;
@@ -45,7 +45,7 @@ namespace spreading.PSF.Perimeter
                     int delta = GetPixel(psfImage, x, y) - GetPixel(psfImage, x - 1, y);
                     if (delta != 0)
                     {
-                        deltas.Add(new Delta(x, y, (float)delta / 255.0f));
+                        deltas.Add(new Delta(x - radius, y - radius + 1, (float)delta / 255.0f));
                     }
                 }
             }

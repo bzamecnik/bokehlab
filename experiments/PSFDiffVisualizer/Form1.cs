@@ -69,7 +69,7 @@ namespace PSFDeltaVisualizer
             }
 
             PsfImage = CirclePSFGenerator.CreateCircle(Radius, SmoothingMode);
-            Deltas = CirclePSFGenerator.DiffHorizontally(PsfImage);
+            Deltas = CirclePSFGenerator.DiffHorizontally(PsfImage, Radius);
             RedrawDeltas();
             //PsfDiffXImage = PSFDeltaVisualizer.DiffImageHorizontally(PsfImage);
 
@@ -80,7 +80,7 @@ namespace PSFDeltaVisualizer
 
         private void RedrawDeltas()
         {
-            PsfDiffXImage = PSFDeltaVisualizer.VisualizePSFDeltas(Deltas, PsfImage.Width, PsfImage.Height);
+            PsfDiffXImage = PSFDeltaVisualizer.VisualizePSFDeltas(Deltas, Radius, PsfImage.Width, PsfImage.Height);
         }
 
         private void ScaleImages()
