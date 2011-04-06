@@ -10,14 +10,14 @@ namespace BokehLab.FloatMap.Util
     class Program
     {
         private static void ReadAndWriteTestImage(string filename) {
-            Console.WriteLine("Writing a test hdrImage.");
+            Console.WriteLine("Writing a test image.");
             FloatMapImage image = CreateTestImage();
             DisplayInfo(image);
             PrintImageContents(image);
             PortableFloatMap.SaveImage(image, filename);
             Console.WriteLine();
 
-            Console.WriteLine("Reading a test hdrImage.");
+            Console.WriteLine("Reading a test image.");
             FloatMapImage loadedImage = PortableFloatMap.LoadImage(filename);
             DisplayInfo(loadedImage);
             PrintImageContents(loadedImage);
@@ -25,15 +25,15 @@ namespace BokehLab.FloatMap.Util
 
         private static void ReadAndWriteExistingImage(string filename)
         {
-            Console.WriteLine("Reading an existing hdrImage.");
+            Console.WriteLine("Reading an existing image.");
             FloatMapImage image = PortableFloatMap.LoadImage(filename);
             DisplayInfo(image);
             Console.WriteLine();
 
-            Console.WriteLine("Writing a copy of an existing hdrImage.");
+            Console.WriteLine("Writing a copy of an existing image.");
             string copyFilename = filename + ".out";
             PortableFloatMap.SaveImage(image, copyFilename);
-            Console.WriteLine("Reading a copy of an existing hdrImage.");
+            Console.WriteLine("Reading a copy of an existing image.");
             FloatMapImage loadedImage = PortableFloatMap.LoadImage(copyFilename);
             DisplayInfo(loadedImage);
         }

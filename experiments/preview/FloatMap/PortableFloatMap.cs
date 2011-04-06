@@ -32,7 +32,7 @@ namespace BokehLab.FloatMap
             // read the header
             FloatMapImage image = ReadHeader(fs, out endianness);
 
-            // read the hdrImage data
+            // read the image data
             byte[] rawIntensity = new byte[FLOAT_BYTE_COUNT];
             for (int y = 0; y < image.Height; y++)
             {
@@ -68,7 +68,7 @@ namespace BokehLab.FloatMap
             string token = ReadToken(fs);
             if ((token.Length != 2) || (token[0] != 'P'))
             {
-                throw new OutOfMemoryException("Bad header: hdrImage signature.");
+                throw new OutOfMemoryException("Bad header: image signature.");
             }
             PixelFormat pixelFormat;
             switch (token[1])
@@ -83,30 +83,30 @@ namespace BokehLab.FloatMap
                     throw new OutOfMemoryException("Bad header: pixel format.");
             }
 
-            // hdrImage dimensions - width, height
+            // image dimensions - width, height
 
             token = ReadToken(fs);
 
             uint width;
             if (!uint.TryParse(token, out width))
             {
-                throw new OutOfMemoryException("Bad header: hdrImage width");
+                throw new OutOfMemoryException("Bad header: image width");
             }
             token = ReadToken(fs);
             uint height;
             if (!uint.TryParse(token, out height))
             {
-                throw new OutOfMemoryException("Bad header: hdrImage height");
+                throw new OutOfMemoryException("Bad header: image height");
             }
 
-            // hdrImage endianness and scale
+            // image endianness and scale
             token = ReadToken(fs);
             //reader.Dispose();
 
             float scale;
             if (!float.TryParse(token, NumberStyles.Float, CultureInfo.CreateSpecificCulture("en-US"), out scale))
             {
-                throw new OutOfMemoryException("Bad header: hdrImage endianness and scale");
+                throw new OutOfMemoryException("Bad header: image endianness and scale");
             }
 
             endianness = (scale < 0) ? Endianness.LittleEndian : Endianness.BigEndian;
@@ -151,7 +151,7 @@ namespace BokehLab.FloatMap
             // write the header
             SaveHeader(fs, image, endianness);
 
-            // write the hdrImage data
+            // write the image data
             for (int y = 0; y < image.Height; y++)
             {
                 for (int x = 0; x < image.Width; x++)
@@ -195,10 +195,10 @@ namespace BokehLab.FloatMap
             }
             writer.Write("{0}\n", signature);
 
-            // write hdrImage dimensions - width, height
+            // write image dimensions - width, height
             writer.Write("{0} {1}\n", image.Width, image.Height);
 
-            // write hdrImage scale and endianness
+            // write image scale and endianness
             float scale = image.Scale;
             if (endianness == Endianness.LittleEndian)
             {
