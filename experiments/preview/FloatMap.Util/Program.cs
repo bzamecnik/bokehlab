@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Globalization;
 using BokehLab.FloatMap;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace BokehLab.FloatMap.Util
 {
@@ -83,17 +85,61 @@ namespace BokehLab.FloatMap.Util
             }
         }
 
+        private static FloatMapImage LoadFile(string filename)
+        {
+            if (filename.ToLower().EndsWith(".pfm")) {
+                return PortableFloatMap.LoadImage(filename);
+            } else if (filename.ToLower().EndsWith(".png")) {
+                return ((Bitmap)Bitmap.FromFile(filename)).ToFloatMap();
+            }
+            else if (filename.ToLower().EndsWith(".jpg"))
+            {
+                return ((Bitmap)Bitmap.FromFile(filename)).ToFloatMap();
+            }
+            throw new ArgumentException("Unknown file format: {0}", filename);
+        }
+
+        private static void SaveFile(FloatMapImage image, string filename)
+        {            
+            if (filename.ToLower().EndsWith(".pfm"))
+            {
+                image.SaveImage(filename);
+            }
+            else if (filename.ToLower().EndsWith(".png"))
+            {
+                image.ToBitmap().Save(filename, ImageFormat.Png);
+            }
+            else
+            {
+                throw new ArgumentException(String.Format("Unknown file format: {0}", filename));
+            }
+        }
+
+        private static void Composite(string fileA, string fileB, string outputFile)
+        {
+            FloatMapImage imageA = LoadFile(fileA);
+            Console.WriteLine(fileA);
+            DisplayInfo(imageA);
+            FloatMapImage imageB = LoadFile(fileB);
+            Console.WriteLine(fileB);
+            DisplayInfo(imageB);
+
+            SaveFile(imageA.Over(imageB), outputFile);
+        }
+
         static void Main(string[] args)
         {
-            if (args.Length <= 0)
+            if (args.Length < 3)
             {
                 return;
             }
 
             try
             {
-                FloatMapImage image = PortableFloatMap.LoadImage(args[0]);
-                DisplayInfo(image);
+                Composite(args[0], args[1], args[2]);
+
+                //FloatMapImage image = PortableFloatMap.LoadImage(args[0]);
+                //DisplayInfo(image);
 
                 //ReadAndWriteExistingImage(args[0]);
                 //ReadAndWriteATestImage(args[0]);
