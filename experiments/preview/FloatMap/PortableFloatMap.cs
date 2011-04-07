@@ -38,7 +38,7 @@ namespace BokehLab.FloatMap
             {
                 for (int x = 0; x < image.Width; x++)
                 {
-                    for (int band = 0; band < image.ChannelsCount; band++)
+                    for (int band = 0; band < image.TotalChannelsCount; band++)
                     {
                         // read one float
                         if (fs.Read(rawIntensity, 0, FLOAT_BYTE_COUNT) != FLOAT_BYTE_COUNT)
@@ -66,18 +66,24 @@ namespace BokehLab.FloatMap
         {
             // read signature - pixel format
             string token = ReadToken(fs);
-            if ((token.Length != 2) || (token[0] != 'P'))
+            if ((token.Length < 2) || (token.Length > 3) || (token[0] != 'P'))
             {
                 throw new OutOfMemoryException("Bad header: image signature.");
             }
             PixelFormat pixelFormat;
-            switch (token[1])
+            switch (token)
             {
-                case 'F':
+                case "PF":
                     pixelFormat = PixelFormat.RGB;
                     break;
-                case 'f':
+                case "Pf":
                     pixelFormat = PixelFormat.Greyscale;
+                    break;
+                case "PFA":
+                    pixelFormat = PixelFormat.RGBA;
+                    break;
+                case "PfA":
+                    pixelFormat = PixelFormat.GreyscaleA;
                     break;
                 default:
                     throw new OutOfMemoryException("Bad header: pixel format.");
@@ -139,12 +145,12 @@ namespace BokehLab.FloatMap
             }
         }
 
-        public static void SaveImage(FloatMapImage image, string filename)
+        public static void SaveImage(this FloatMapImage image, string filename)
         {
             SaveImage(image, filename, Endianness.LittleEndian);
         }
 
-        public static void SaveImage(FloatMapImage image, string filename, Endianness endianness)
+        public static void SaveImage(this FloatMapImage image, string filename, Endianness endianness)
         {
             FileStream fs = new FileStream(filename, FileMode.Create);
 
@@ -156,7 +162,7 @@ namespace BokehLab.FloatMap
             {
                 for (int x = 0; x < image.Width; x++)
                 {
-                    for (int band = 0; band < image.ChannelsCount; band++)
+                    for (int band = 0; band < image.TotalChannelsCount; band++)
                     {
                         float intensity = image.Image[x, y, band];
                         byte[] rawIntensity = BitConverter.GetBytes(intensity);
@@ -189,6 +195,12 @@ namespace BokehLab.FloatMap
                     break;
                 case PixelFormat.Greyscale:
                     signature = "Pf";
+                    break;
+                case PixelFormat.RGBA:
+                    signature = "PFA";
+                    break;
+                case PixelFormat.GreyscaleA:
+                    signature = "PfA";
                     break;
                 default:
                     throw new ArgumentException(String.Format("Unsupported pixel format: {0}", image.PixelFormat));

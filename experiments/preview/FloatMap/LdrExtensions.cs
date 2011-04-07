@@ -27,23 +27,28 @@ namespace BokehLab.FloatMap
         {
             int width = (int)image.Width;
             int height = (int)image.Height;
+            float[, ,] floatMap = image.Image;
 
-            Bitmap outputImage = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            System.Drawing.Imaging.PixelFormat outputPixelFormat = image.PixelFormat.ToBitmapFormat();
+            Bitmap outputImage = new Bitmap(width, height, outputPixelFormat);
 
-            int bands = (int)image.ChannelsCount;
-            int maxBand = bands - 1;
+            bool shouldWriteAlpha = image.PixelFormat.HasAlpha();
+            int colorBands = (int)image.ColorChannelsCount;
+            int maxColorBand = colorBands - 1;
+            int alphaBand = colorBands;
+            int bands = (int)image.TotalChannelsCount;
 
             float minValue = float.MaxValue;
             float maxValue = float.MinValue;
             if (tonemappingEnabled)
             {
-                for (int y = 0; y < image.Height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int x = 0; x < image.Width; x++)
+                    for (int x = 0; x < width; x++)
                     {
-                        for (int band = maxBand; band >= 0; band--)
+                        for (int band = maxColorBand; band >= 0; band--)
                         {
-                            float value = image.Image[x, y, band];
+                            float value = floatMap[x, y, band];
                             minValue = Math.Min(minValue, value);
                             maxValue = Math.Max(maxValue, value);
                         }
@@ -55,18 +60,21 @@ namespace BokehLab.FloatMap
                ImageLockMode.ReadOnly, outputImage.PixelFormat);
             unsafe
             {
+                // Note: convert greyscale to RGB
                 bool isGreyscale = (image.PixelFormat == PixelFormat.Greyscale);
+                int maxOutputColorBand = 2;
+                int outputBands = 3 + (image.PixelFormat.HasAlpha() ? 1 : 0);
                 float scaleRangeInv = 1.0f / (maxValue - minValue); // for tone-mapping
-                for (int y = 0; y < image.Height; y++)
+                for (int y = 0; y < height; y++)
                 {
                     byte* outputRow = (byte*)outputData.Scan0 + (y * outputData.Stride);
-                    for (int x = 0; x < image.Width; x++)
+                    for (int x = 0; x < width; x++)
                     {
-                        for (int band = 2; band >= 0; band--)
+                        for (int band = maxOutputColorBand; band >= 0; band--)
                         {
-                            int hdrBand = (isGreyscale) ? 0 : maxBand - band;
+                            int hdrBand = (isGreyscale) ? 0 : maxOutputColorBand - band;
                             // translate RGB input image to BGR output image
-                            float intensity = image.Image[x, y, hdrBand];
+                            float intensity = floatMap[x, y, hdrBand];
                             intensity = (intensity + shift) * scale;
                             if (tonemappingEnabled)
                             {
@@ -74,7 +82,12 @@ namespace BokehLab.FloatMap
                                 // from [min; max] to [0.0; 1.0]
                                 intensity = (intensity - minValue) * scaleRangeInv;
                             }
-                            outputRow[x * 3 + band] = (byte)MathHelper.Clamp(intensity * 255.0f, 0.0f, 255.0f);
+                            outputRow[x * outputBands + band] = (byte)MathHelper.Clamp(intensity * 255.0f, 0.0f, 255.0f);
+                        }
+                        if (shouldWriteAlpha)
+                        {
+                            float intensity = floatMap[x, y, alphaBand];
+                            outputRow[x * outputBands + alphaBand] = (byte)MathHelper.Clamp(intensity * 255.0f, 0.0f, 255.0f);
                         }
                     }
                 }
@@ -89,43 +102,35 @@ namespace BokehLab.FloatMap
             Bitmap inputImage = ldrImage;
             int width = ldrImage.Width;
             int height = ldrImage.Height;
-            PixelFormat pixelFormat;
-            switch (ldrImage.PixelFormat)
-            {
-                case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
-                    inputImage = ldrImage.Clone(new Rectangle(0, 0, width, height), System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    pixelFormat = PixelFormat.RGB;
-                    break;
-                case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
-                    pixelFormat = PixelFormat.RGB;
-                    break;
-                case System.Drawing.Imaging.PixelFormat.Format8bppIndexed:
-                    pixelFormat = PixelFormat.Greyscale;
-                    break;
-                default:
-                    throw new ArgumentException(String.Format("Unsupported input LDR image pixel format: {0}", ldrImage.PixelFormat));
-            }
-
+            PixelFormat pixelFormat = PixelFormatExtensions.FromBitmapFormat(ldrImage.PixelFormat);
+            bool shouldWriteAlpha = pixelFormat.HasAlpha();
             FloatMapImage hdrImage = new FloatMapImage((uint)width, (uint)height, pixelFormat);
 
             BitmapData inputData = inputImage.LockBits(new Rectangle(0, 0, width, height),
                ImageLockMode.ReadOnly, inputImage.PixelFormat);
             float conversionFactor = 1 / 255.0f;
+            float[, ,] floatMap = hdrImage.Image;
             unsafe
             {
-                bool isGreyscale = (hdrImage.PixelFormat == PixelFormat.Greyscale);
-                int bands = (int)hdrImage.ChannelsCount;
-                int maxBand = bands - 1;
+                int colorBands = (int)hdrImage.ColorChannelsCount;
+                int maxColorBand = colorBands - 1;
+                int alphaBand = colorBands;
+                int bands = (int)hdrImage.TotalChannelsCount;
                 for (int y = 0; y < height; y++)
                 {
                     byte* inputRow = (byte*)inputData.Scan0 + (y * inputData.Stride);
                     for (int x = 0; x < width; x++)
                     {
-                        for (int band = maxBand; band >= 0; band--)
+                        // BGR -> RGB or BGRA -> RGBA
+                        for (int band = maxColorBand; band >= 0; band--)
                         {
-                            int hdrBand = (isGreyscale) ? 0 : maxBand - band;
+                            int hdrBand = maxColorBand - band;
                             // translate BGR input image to RGB output image in case of a RGB input image
-                            hdrImage.Image[x, y, hdrBand] = inputRow[x * bands + band] * conversionFactor;
+                            floatMap[x, y, hdrBand] = inputRow[x * bands + band] * conversionFactor;
+                        }
+                        if (shouldWriteAlpha)
+                        {
+                            floatMap[x, y, alphaBand] = inputRow[x * bands + alphaBand] * conversionFactor;
                         }
                     }
                 }

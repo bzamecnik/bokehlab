@@ -65,10 +65,10 @@ namespace BokehLab.FloatMap.Util
                 for (int x = 0; x < image.Width; x++)
                 {
                     Console.Write("[");
-                    for (int band = 0; band < image.ChannelsCount; band++)
+                    for (int band = 0; band < image.ColorChannelsCount; band++)
                     {
                         Console.Write("{0}", String.Format(CultureInfo.CreateSpecificCulture("en-US"), "{0}", image.Image[x, y, band]));
-                        if (band < image.ChannelsCount - 1)
+                        if (band < image.ColorChannelsCount - 1)
                         {
                             Console.Write(", ");
                         }
@@ -92,7 +92,10 @@ namespace BokehLab.FloatMap.Util
 
             try
             {
-                ReadAndWriteExistingImage(args[0]);
+                FloatMapImage image = PortableFloatMap.LoadImage(args[0]);
+                DisplayInfo(image);
+
+                //ReadAndWriteExistingImage(args[0]);
                 //ReadAndWriteATestImage(args[0]);
             }
             catch (OutOfMemoryException ex)
