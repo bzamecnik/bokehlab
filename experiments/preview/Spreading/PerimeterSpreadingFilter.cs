@@ -15,7 +15,7 @@ namespace BokehLab.Spreading
         // can be lower than the real maximum available PSF radius
         public int ForceMaxRadius { get; set; }
 
-        protected override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, int tableWidth, int tableHeight, uint bands, bool hasAlpha)
+        protected override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)
         {
             Debug.Assert(Psf != null);
 
@@ -31,7 +31,6 @@ namespace BokehLab.Spreading
             }
             Delta[] deltas = Psf.deltasByRadius[radius];
             Debug.Assert(deltas != null);
-            uint alphaBand = bands;
             for (int i = 0; i < deltas.Length; i++)
             {
                 Delta delta = deltas[i];
@@ -42,13 +41,13 @@ namespace BokehLab.Spreading
                 {
                     spreadingImage[u, v, band] += value * origImage[x, y, band];
                 }
-                spreadingImage[u, v, alphaBand] += value;
+                normalizationImage[u, v, 0] += value;
             }
         }
 
-        protected override void Integrate(FloatMapImage spreadingTable)
+        protected override void Integrate(FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
-            IntegrateHorizontally(spreadingTable);
+            IntegrateHorizontally(spreadingTable, normalizationTable);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace BokehLab.Spreading
 {
     public class RectangleSpreadingFilter : AbstractSpreadingFilter
     {
-        protected override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, int tableWidth, int tableHeight, uint bands, bool hasAlpha)
+        protected override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)
         {
             float psfSide = radius * 2 + 1; // side of a square PSF
             float areaInv = weight / (psfSide * psfSide);
@@ -14,20 +14,13 @@ namespace BokehLab.Spreading
             int left = MathHelper.Clamp<int>(x - radius, 0, tableWidth - 1);
             int right = MathHelper.Clamp<int>(x + radius + 1, 0, tableWidth - 1);
 
-            int alphaBand = (int)bands;
-            float originalAlpha = 1.0f;
-            if (hasAlpha)
-            {
-                originalAlpha = origImage[x, y, alphaBand];
-            }
             for (int band = 0; band < bands; band++)
             {
-                float cornerValue = origImage[x, y, band] * originalAlpha * areaInv;
+                float cornerValue = origImage[x, y, band] * areaInv;
                 PutCorners(spreadingImage, top, bottom, left, right, band, cornerValue);
             }
             // Note: intensity for the normalization is 1.0
-            //PutCorners(spreadingImage, top, bottom, left, right, alphaBand, origImage[x, y, alphaBand] * areaInv);
-            PutCorners(spreadingImage, top, bottom, left, right, alphaBand, areaInv);
+            PutCorners(normalizationImage, top, bottom, left, right, 0, areaInv);
         }
 
         private static void PutCorners(float[, ,] table, int top, int bottom, int left, int right, int band, float value)
@@ -38,10 +31,10 @@ namespace BokehLab.Spreading
             table[right, bottom, band] += value;
         }
 
-        protected override void Integrate(FloatMapImage spreadingTable)
+        protected override void Integrate(FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
-            IntegrateHorizontally(spreadingTable);
-            IntegrateVertically(spreadingTable);
+            IntegrateHorizontally(spreadingTable, normalizationTable);
+            IntegrateVertically(spreadingTable, normalizationTable);
         }
     }
 }
