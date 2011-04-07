@@ -216,6 +216,7 @@ namespace BokehLab.Spreading.GUI
                 }
                 AbstractSpreadingFilter filter = GetSpreadingFilter();
                 filter.Blur = CreateBlurFunction(depthMap);
+                //filter.SpreadOneRoundedPSF = true;
                 outputHdrImage = filter.FilterImage(inputHdrImage, outputHdrImage);
                 ReplaceLdrImage(ref outputLdrImage, outputHdrImage.ToBitmap(ToneMappingEnabled));
                 imageTypeComboBox.SelectedIndex = 1; // TODO: select the filtered image better

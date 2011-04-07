@@ -6,6 +6,7 @@
 // - should the spreading table and normalization channel be squashed into
 //   one image for better locality?
 // - could alpha channel be used as a normalization channel?
+//   - if we want to spread transparent images, a separate normalization channel is needed
 // - implement better PSFs:
 //   - perimeter spreading
 //   - polynomial spreading
@@ -15,6 +16,7 @@ namespace BokehLab.Spreading
     public abstract class AbstractSpreadingFilter : ISpreadingFilter
     {
         public BlurMap Blur;
+        public bool SpreadOneRoundedPSF { get; set; }
 
         public FloatMapImage FilterImage(FloatMapImage inputImage, FloatMapImage outputImage)
         {
@@ -95,22 +97,34 @@ namespace BokehLab.Spreading
             int tableWidth = (int)spreadingTable.Width;
             int tableHeight = (int)spreadingTable.Height;
 
-            for (int y = 0; y < height; y++)
+            if (SpreadOneRoundedPSF)
             {
-                for (int x = 0; x < width; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    float radius = Blur.GetPSFRadius(x, y);
+                    for (int x = 0; x < width; x++)
+                    {
+                        float radius = Blur.GetPSFRadius(x, y);
+                        SpreadPSF(x, y, (int)radius, 1.0f, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
+                    }
+                }
+            }
+            else
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        float radius = Blur.GetPSFRadius(x, y);
 
-                    // spread PSFs of a non-integer radius using two weighted
-                    // PSFs of integer size close to the original radius
-                    int smallerRadius = (int)radius;
-                    int biggerRadius = smallerRadius + 1;
-                    float weight = biggerRadius - radius;
+                        // spread PSFs of a non-integer radius using two weighted
+                        // PSFs of integer size close to the original radius
+                        int smallerRadius = (int)radius;
+                        int biggerRadius = smallerRadius + 1;
+                        float weight = biggerRadius - radius;
 
-                    //SpreadPSF(x, y, smallerRadius, 1.0f, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
-
-                    SpreadPSF(x, y, smallerRadius, weight, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
-                    SpreadPSF(x, y, biggerRadius, 1 - weight, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
+                        SpreadPSF(x, y, smallerRadius, weight, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
+                        SpreadPSF(x, y, biggerRadius, 1 - weight, origImage, spreadingImage, normalizationImage, tableWidth, tableHeight, bands);
+                    }
                 }
             }
             //Console.WriteLine("Phase 1, spreading: {0} ms", sw.ElapsedMilliseconds);
