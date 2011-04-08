@@ -164,7 +164,7 @@ namespace BokehLab.Spreading.GUI
 
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Title = "Save output file";
-            sfd.Filter = "JPEG Files|*.jpg|PNG Files|*.png|PFM Files|*.pfm";
+            sfd.Filter = "PNG Files|*.png|PFM Files|*.pfm|JPEG Files|*.jpg";
             sfd.AddExtension = true;
             sfd.FileName = "";
             if (sfd.ShowDialog() != DialogResult.OK)
