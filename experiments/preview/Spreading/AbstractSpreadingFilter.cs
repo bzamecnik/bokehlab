@@ -22,6 +22,11 @@ namespace BokehLab.Spreading
         {
             if (inputImage == null) return null;
 
+            if (inputImage.PixelFormat.HasAlpha())
+            {
+                inputImage = inputImage.PremultiplyByAlpha();
+            }
+
             uint width = inputImage.Width;
             uint height = inputImage.Height;
 

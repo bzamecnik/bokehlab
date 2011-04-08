@@ -16,14 +16,50 @@ namespace BokehLab.FloatMap
     /// </summary>
     public static class Compositor
     {
-        private static FloatMapImage Composite(this FloatMapImage imageA, FloatMapImage imageB)
+        /// <summary>
+        /// Multiplies colors by alpha channel. Needed for combining
+        /// semi-transparent pixels (such as compositing, blurring, etc.).
+        /// Creates a new image for the result. Alpha channel remains the same.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        public static FloatMapImage PremultiplyByAlpha(this FloatMapImage image)
         {
-            return null;
+            if (!image.PixelFormat.HasAlpha())
+            {
+                throw new ArgumentException(String.Format(
+                    "The image must have an alpha channel. Pixel format: {0}",
+                    image.PixelFormat));
+            }
+
+            uint width = image.Width;
+            uint height = image.Height;
+            uint bands = image.PixelFormat.GetColorChannelsCount();
+            uint alphaBand = bands;
+
+            FloatMapImage outputImage = new FloatMapImage(width, height, image.PixelFormat);
+            float[, ,] imIn = image.Image;
+            float[, ,] imOut = outputImage.Image;
+
+            for (uint y = 0; y < height; y++)
+            {
+                for (uint x = 0; x < width; x++)
+                {
+                    float alpha = imIn[x, y, alphaBand];
+                    imOut[x, y, alphaBand] = alpha;
+                    for (uint band = 0; band < bands; band++)
+                    {
+                        imOut[x, y, band] = alpha * imIn[x, y, band];
+                    }
+                }
+            }
+            return outputImage;
         }
 
         /// <summary>
-        /// A over B. A has alpha channel, B hasn't.
-        /// Both A and B are not alpha pre-multiplied.
+        /// Composites images: A over B. Both A and B are alpha pre-multiplied.
+        /// Assumes that image A has an alpha channel and image B is completely
+        /// opaque (does not have any alpha channel).
         /// </summary>
         /// <param name="imageA"></param>
         /// <param name="imageB"></param>
@@ -41,8 +77,6 @@ namespace BokehLab.FloatMap
             float[, ,] imB = imageB.Image;
             float[, ,] imOut = outputImage.Image;
 
-            bool hasAlphaOut = outputImage.PixelFormat.HasAlpha();
-
             for (uint y = 0; y < height; y++)
             {
                 for (uint x = 0; x < width; x++)
@@ -50,40 +84,12 @@ namespace BokehLab.FloatMap
                     float alphaA = imA[x, y, alphaBand];
                     for (uint band = 0; band < bands; band++)
                     {
-                        imOut[x, y, band] = alphaA * imA[x, y, band] + (1 - alphaA) * imB[x, y, band];
+                        imOut[x, y, band] = imA[x, y, band] + (1 - alphaA) * imB[x, y, band];
                     }
                 }
             }
             return outputImage;
         }
-
-        //public static FloatMapImage NormalizeByAlpha(this FloatMapImage image)
-        //{
-        //    if (!image.PixelFormat.HasAlpha())
-        //    {
-        //        return image;
-        //    }
-        //    uint width = image.Width;
-        //    uint height = image.Height;
-        //    uint bands = image.PixelFormat.GetColorChannelsCount();
-        //    uint alphaBand = bands;
-
-        //    float[, ,] im = image.Image;
-
-        //    for (uint y = 0; y < height; y++)
-        //    {
-        //        for (uint x = 0; x < width; x++)
-        //        {
-        //            float alphaInv = 1 / im[x, y, alphaBand];
-        //            for (uint band = 0; band < bands; band++)
-        //            {
-        //                im[x, y, band] = alphaInv * im[x, y, band];
-        //            }
-        //            im[x, y, alphaBand] = 1;
-        //        }
-        //    }
-        //    return image;
-        //}
 
         ///// <summary>
         ///// A Over B, then normalize by resulting alpha.
@@ -138,7 +144,7 @@ namespace BokehLab.FloatMap
             if (!imageA.PixelFormat.HasAlpha())
             {
                 throw new ArgumentException(String.Format(
-                    "The upper image must have alpha channel. Pixel format: {0}",
+                    "The upper image must have an alpha channel. Pixel format: {0}",
                     imageA.PixelFormat));
             }
         }
