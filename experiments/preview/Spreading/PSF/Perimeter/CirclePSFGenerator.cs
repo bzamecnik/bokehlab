@@ -36,6 +36,7 @@ namespace BokehLab.Spreading.PSF.Perimeter
             int width = psfImage.Width + 1;
             int height = psfImage.Height;
             Bitmap diffImage = new Bitmap(width, height, psfImage.PixelFormat);
+            float areaInv = (float)(1 / Math.Max(1, (Math.PI * radius * radius)));
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -43,7 +44,7 @@ namespace BokehLab.Spreading.PSF.Perimeter
                     int delta = GetPixel(psfImage, x, y) - GetPixel(psfImage, x - 1, y);
                     if (delta != 0)
                     {
-                        deltas.Add(new Delta(x - radius, y - radius + 1, (float)delta / 255.0f));
+                        deltas.Add(new Delta(x - radius, y - radius + 1, areaInv * delta / 255.0f));
                     }
                 }
             }
