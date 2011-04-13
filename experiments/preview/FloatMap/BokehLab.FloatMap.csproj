@@ -50,7 +50,10 @@
   <ItemGroup>
     <Compile Include="Compositor.cs" />
     <Compile Include="FloatMapImage.cs" />
+    <Compile Include="ImageProcessing.cs" />
     <Compile Include="LdrExtensions.cs" />
+    <Compile Include="PixelFormat.cs" />
+    <Compile Include="PixelFormatExtensions.cs" />
     <Compile Include="PortableFloatMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
