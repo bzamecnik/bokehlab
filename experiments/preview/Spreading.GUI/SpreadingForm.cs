@@ -18,6 +18,8 @@ namespace BokehLab.Spreading.GUI
 {
     public partial class SpreadingForm : Form
     {
+        private static readonly int MAX_GENERATED_PSF_RADIUS = 50;
+
         protected Bitmap inputLdrImage = null;
         protected Bitmap outputLdrImage = null;
 
@@ -32,6 +34,7 @@ namespace BokehLab.Spreading.GUI
 
         private RectangleSpreadingFilter RectangleFilter;
         private PerimeterSpreadingFilter PerimeterFilter;
+        private HybridSpreadingFilter HybridFilter;
 
         public SpreadingForm()
         {
@@ -46,6 +49,7 @@ namespace BokehLab.Spreading.GUI
 
             RectangleFilter = new RectangleSpreadingFilter();
             PerimeterFilter = new PerimeterSpreadingFilter();
+            HybridFilter = new HybridSpreadingFilter(RectangleFilter, PerimeterFilter);
         }
 
         private void GeneratePerimeterPSFs(PerimeterSpreadingFilter filter, int maxRadius)
@@ -241,18 +245,29 @@ namespace BokehLab.Spreading.GUI
             }
             else if (filterName == "perimeter")
             {
-                PerimeterFilter.ForceMaxRadius = (int)blurRadiusNumeric.Value;
-                if (PerimeterFilter.Psf == null)
-                {
-                    int maxGeneratedPsfRadius = 100;
-                    Console.WriteLine("Generating perimeter PSFs up to radius {0}.", maxGeneratedPsfRadius);
-                    GeneratePerimeterPSFs(PerimeterFilter, maxGeneratedPsfRadius);
-                }
+                PreparePerimeterFilter();
                 return PerimeterFilter;
+            }
+            else if (filterName == "hybrid")
+            {
+                PreparePerimeterFilter();
+                HybridFilter.MaxRadiusForQualityFilter = PerimeterFilter.Psf.MaxRadius;
+                return HybridFilter;
             }
             else
             {
                 throw new ArgumentException("Unknown filter name: {0}", filterName);
+            }
+        }
+
+        private void PreparePerimeterFilter()
+        {
+            PerimeterFilter.ForceMaxRadius = (int)blurRadiusNumeric.Value;
+            if (PerimeterFilter.Psf == null)
+            {
+                int maxGeneratedPsfRadius = MAX_GENERATED_PSF_RADIUS;
+                Console.WriteLine("Generating perimeter PSFs up to radius {0}.", maxGeneratedPsfRadius);
+                GeneratePerimeterPSFs(PerimeterFilter, maxGeneratedPsfRadius);
             }
         }
 

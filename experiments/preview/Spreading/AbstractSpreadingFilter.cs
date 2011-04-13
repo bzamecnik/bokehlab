@@ -40,13 +40,9 @@ namespace BokehLab.Spreading
             FloatMapImage spreadingTable = new FloatMapImage(width + 1, height + 1, inputImage.PixelFormat);
             FloatMapImage normalizationTable = new FloatMapImage(width + 1, height + 1, PixelFormat.Greyscale);
 
-            InitializeTables(spreadingTable, normalizationTable);
+            //InitializeTables(spreadingTable, normalizationTable);
 
-            // phase 1: distribute corners into the table
-            Spread(inputImage, spreadingTable, normalizationTable);
-
-            // phase 2: accumulate the corners into rectangles
-            Integrate(spreadingTable, normalizationTable);
+            Filter(inputImage, spreadingTable, normalizationTable);
 
             Normalize(spreadingTable, normalizationTable, outputImage);
 
@@ -55,6 +51,8 @@ namespace BokehLab.Spreading
 
             return outputImage;
         }
+
+        protected abstract void Filter(FloatMapImage inputImage, FloatMapImage spreadingTable, FloatMapImage normalizationTable);
 
         private static void InitializeTables(FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
@@ -85,7 +83,7 @@ namespace BokehLab.Spreading
             //Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
         }
 
-        private void Spread(FloatMapImage inputImage, FloatMapImage spreadingTable, FloatMapImage normalizationTable)
+        protected void Spread(FloatMapImage inputImage, FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
             //Stopwatch sw = new Stopwatch();
             //sw.Reset();
@@ -147,50 +145,18 @@ namespace BokehLab.Spreading
         /// <param name="tableWidth"></param>
         /// <param name="tableHeight"></param>
         /// <param name="bands">Color bands in original image.</param>
-        protected abstract void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands);
-
-        protected abstract void Integrate(FloatMapImage spreadingTable, FloatMapImage normalizationTable);
+        internal abstract void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands);
 
         protected static void IntegrateVertically(FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
-            uint bands = spreadingTable.TotalChannelsCount;
-            float[, ,] spreadingImage = spreadingTable.Image;
-            float[, ,] normalizationImage = normalizationTable.Image;
-            int tableWidth = (int)spreadingTable.Width;
-            int tableHeight = (int)spreadingTable.Height;
-
-            for (int x = 0; x < tableWidth; x++)
-            {
-                for (int y = 1; y < tableHeight; y++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        spreadingImage[x, y, band] += spreadingImage[x, y - 1, band];
-                    }
-                    normalizationImage[x, y, 0] += normalizationImage[x, y - 1, 0];
-                }
-            }
+            spreadingTable.IntegrateVertically(true);
+            normalizationTable.IntegrateVertically(true);
         }
 
         protected static void IntegrateHorizontally(FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
-            uint bands = spreadingTable.TotalChannelsCount;
-            float[, ,] spreadingImage = spreadingTable.Image;
-            float[, ,] normalizationImage = normalizationTable.Image;
-            int tableWidth = (int)spreadingTable.Width;
-            int tableHeight = (int)spreadingTable.Height;
-
-            for (int y = 0; y < tableHeight; y++)
-            {
-                for (int x = 1; x < tableWidth; x++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        spreadingImage[x, y, band] += spreadingImage[x - 1, y, band];
-                    }
-                    normalizationImage[x, y, 0] += normalizationImage[x - 1, y, 0];
-                }
-            }
+            spreadingTable.IntegrateHorizontally(true);
+            normalizationTable.IntegrateHorizontally(true);
         }
 
         private static void Normalize(FloatMapImage spreadingTable, FloatMapImage normalizationTable, FloatMapImage outputImage)
@@ -199,24 +165,11 @@ namespace BokehLab.Spreading
             //sw.Reset();
             //sw.Start();
 
-            uint bands = outputImage.TotalChannelsCount;
-            float[, ,] image = outputImage.Image;
-            float[, ,] spreadingImage = spreadingTable.Image;
-            float[, ,] normalizationImage = normalizationTable.Image;
-            int width = (int)outputImage.Width;
-            int height = (int)outputImage.Height;
+            outputImage = spreadingTable.DivideBy(normalizationTable, outputImage, true);
+            
+            //normalizationTable.ToBitmap(true).Save("normalization.png");
+            //spreadingTable.ToBitmap(true).Save("unnormalized.png");
 
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    float normalization = 1 / normalizationImage[x, y, 0];
-                    for (int band = 0; band < bands; band++)
-                    {
-                        image[x, y, band] = spreadingImage[x, y, band] * normalization;
-                    }
-                }
-            }
             //Console.WriteLine("Normalizing to output image: {0} ms", sw.ElapsedMilliseconds);
         }
     }

@@ -4,7 +4,7 @@ namespace BokehLab.Spreading
 {
     public class RectangleSpreadingFilter : AbstractSpreadingFilter
     {
-        protected override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)
+        internal override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)
         {
             float psfSide = radius * 2 + 1; // side of a square PSF
             float areaInv = weight / (psfSide * psfSide);
@@ -30,9 +30,12 @@ namespace BokehLab.Spreading
             table[left, bottom, band] -= value;
             table[right, bottom, band] += value;
         }
-
-        protected override void Integrate(FloatMapImage spreadingTable, FloatMapImage normalizationTable)
+        protected override void Filter(FloatMapImage inputImage, FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
+            // phase 1: distribute corners into the table
+            Spread(inputImage, spreadingTable, normalizationTable);
+
+            // phase 2: accumulate the corners into rectangles
             IntegrateHorizontally(spreadingTable, normalizationTable);
             IntegrateVertically(spreadingTable, normalizationTable);
         }

@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="AbstractSpreadingFilter.cs" />
     <Compile Include="BlurMap.cs" />
+    <Compile Include="HybridSpreadingFilter.cs" />
     <Compile Include="ISpreadingFilter.cs" />
     <Compile Include="PerimeterSpreadingFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

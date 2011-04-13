@@ -39,6 +39,8 @@
         this.imageSizeOrigbutton = new System.Windows.Forms.Button();
         this.imageSizeStretchButton = new System.Windows.Forms.Button();
         this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+        this.label8 = new System.Windows.Forms.Label();
+        this.filterTypeComboBox = new System.Windows.Forms.ComboBox();
         this.toneMappingCheckBox = new System.Windows.Forms.CheckBox();
         this.label7 = new System.Windows.Forms.Label();
         this.apertureNumeric = new System.Windows.Forms.NumericUpDown();
@@ -52,8 +54,6 @@
         this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
         this.clearDepthmapButton = new System.Windows.Forms.Button();
         this.pictureBox1 = new System.Windows.Forms.PictureBox();
-        this.filterTypeComboBox = new System.Windows.Forms.ComboBox();
-        this.label8 = new System.Windows.Forms.Label();
         ((System.ComponentModel.ISupportInitialize)(this.blurRadiusNumeric)).BeginInit();
         this.splitContainer1.Panel1.SuspendLayout();
         this.splitContainer1.Panel2.SuspendLayout();
@@ -224,6 +224,28 @@
         this.splitContainer1.SplitterDistance = 150;
         this.splitContainer1.TabIndex = 15;
         // 
+        // label8
+        // 
+        this.label8.AutoSize = true;
+        this.label8.Location = new System.Drawing.Point(6, 107);
+        this.label8.Name = "label8";
+        this.label8.Size = new System.Drawing.Size(55, 13);
+        this.label8.TabIndex = 24;
+        this.label8.Text = "Filter type:";
+        // 
+        // filterTypeComboBox
+        // 
+        this.filterTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+        this.filterTypeComboBox.FormattingEnabled = true;
+        this.filterTypeComboBox.Items.AddRange(new object[] {
+            "rectangle",
+            "perimeter",
+            "hybrid"});
+        this.filterTypeComboBox.Location = new System.Drawing.Point(67, 103);
+        this.filterTypeComboBox.Name = "filterTypeComboBox";
+        this.filterTypeComboBox.Size = new System.Drawing.Size(79, 21);
+        this.filterTypeComboBox.TabIndex = 23;
+        // 
         // toneMappingCheckBox
         // 
         this.toneMappingCheckBox.AutoSize = true;
@@ -381,35 +403,14 @@
         this.pictureBox1.TabIndex = 2;
         this.pictureBox1.TabStop = false;
         // 
-        // filterTypeComboBox
-        // 
-        this.filterTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-        this.filterTypeComboBox.FormattingEnabled = true;
-        this.filterTypeComboBox.Items.AddRange(new object[] {
-            "rectangle",
-            "perimeter"});
-        this.filterTypeComboBox.Location = new System.Drawing.Point(67, 103);
-        this.filterTypeComboBox.Name = "filterTypeComboBox";
-        this.filterTypeComboBox.Size = new System.Drawing.Size(79, 21);
-        this.filterTypeComboBox.TabIndex = 23;
-        // 
-        // label8
-        // 
-        this.label8.AutoSize = true;
-        this.label8.Location = new System.Drawing.Point(6, 107);
-        this.label8.Name = "label8";
-        this.label8.Size = new System.Drawing.Size(55, 13);
-        this.label8.TabIndex = 24;
-        this.label8.Text = "Filter type:";
-        // 
-        // Form1
+        // SpreadingForm
         // 
         this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         this.ClientSize = new System.Drawing.Size(913, 586);
         this.Controls.Add(this.splitContainer1);
         this.MinimumSize = new System.Drawing.Size(200, 200);
-        this.Name = "Form1";
+        this.Name = "SpreadingForm";
         this.Text = "Fast rectangle spreading";
         this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
         ((System.ComponentModel.ISupportInitialize)(this.blurRadiusNumeric)).EndInit();
