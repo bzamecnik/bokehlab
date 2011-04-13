@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BokehLab.Spreading.Lib")]
+[assembly: AssemblyTitle("BokehLab.FloatMap.Test")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
-[assembly: AssemblyProduct("BokehLab.Spreading.Lib")]
+[assembly: AssemblyProduct("BokehLab.FloatMap.Test")]
 [assembly: AssemblyCopyright("Copyright © Microsoft 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c13f0b0e-0af7-4c5c-92c5-53929aeddd99")]
+[assembly: Guid("215423cb-cb6a-4cfe-85c6-3482d4eb46d2")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,6 +34,3 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-
-// Explicitly allow unit test assembly to access internal classes and members.
-[assembly: InternalsVisibleToAttribute("BokehLab.Spreading.Test")]

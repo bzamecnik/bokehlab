@@ -12,6 +12,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.PSFDeltaVisualizer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Spreading", "Spreading\BokehLab.Spreading.csproj", "{8908BC20-5995-49DB-A095-C02E100F45D6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.FloatMap.Test", "BokehLab.FloatMap.Test\BokehLab.FloatMap.Test.csproj", "{AA0F6377-61FB-4E36-9713-7D220FE9C228}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Spreading.Test", "BokehLab.Spreading.Test\BokehLab.Spreading.Test.csproj", "{578C626F-9977-40B4-A943-D6B2D43D1D16}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +46,14 @@ Global
 		{8908BC20-5995-49DB-A095-C02E100F45D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8908BC20-5995-49DB-A095-C02E100F45D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8908BC20-5995-49DB-A095-C02E100F45D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA0F6377-61FB-4E36-9713-7D220FE9C228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA0F6377-61FB-4E36-9713-7D220FE9C228}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA0F6377-61FB-4E36-9713-7D220FE9C228}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA0F6377-61FB-4E36-9713-7D220FE9C228}.Release|Any CPU.Build.0 = Release|Any CPU
+		{578C626F-9977-40B4-A943-D6B2D43D1D16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{578C626F-9977-40B4-A943-D6B2D43D1D16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{578C626F-9977-40B4-A943-D6B2D43D1D16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{578C626F-9977-40B4-A943-D6B2D43D1D16}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

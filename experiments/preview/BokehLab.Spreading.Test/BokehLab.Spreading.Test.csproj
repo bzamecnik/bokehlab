@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8908BC20-5995-49DB-A095-C02E100F45D6}</ProjectGuid>
+    <ProjectGuid>{578C626F-9977-40B4-A943-D6B2D43D1D16}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BokehLab.Spreading</RootNamespace>
-    <AssemblyName>BokehLab.Spreading</AssemblyName>
+    <RootNamespace>BokehLab.Spreading.Test</RootNamespace>
+    <AssemblyName>BokehLab.Spreading.Test</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -50,18 +50,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractSpreadingFilter.cs" />
-    <Compile Include="BlurMap.cs" />
-    <Compile Include="HybridSpreadingFilter.cs" />
-    <Compile Include="ISpreadingFilter.cs" />
-    <Compile Include="PerimeterSpreadingFilter.cs" />
+    <Compile Include="HybridSpreadingFilterTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PSF\Perimeter\CirclePSFGenerator.cs" />
-    <Compile Include="PSF\Perimeter\ImageBasedPSFGenerator.cs" />
-    <Compile Include="PSF\Perimeter\IPSFGenerator.cs" />
-    <Compile Include="PSF\Perimeter\LinearPSFGenerator.cs" />
-    <Compile Include="PSF\Perimeter\PSFDescription.cs" />
-    <Compile Include="RectangleSpreadingFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FloatMap\BokehLab.FloatMap.csproj">
@@ -71,6 +61,10 @@
     <ProjectReference Include="..\Math\BokehLab.Math.csproj">
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Spreading\BokehLab.Spreading.csproj">
+      <Project>{8908BC20-5995-49DB-A095-C02E100F45D6}</Project>
+      <Name>BokehLab.Spreading</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
