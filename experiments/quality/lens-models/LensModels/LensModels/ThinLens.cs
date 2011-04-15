@@ -12,19 +12,39 @@ namespace BokehLab.Lens
         /// <summary>
         /// ApertureRadius must be > 0
         /// </summary>
-        public float ApertureRadius { get; private set; }
+        public double ApertureRadius { get; set; }
 
+        private double focalLength;
         /// <summary>
         /// FocalLength must be > 0
         /// </summary>
-        public float FocalLength { get; private set; }
+        public double FocalLength
+        {
+            get { return focalLength; }
+            set
+            {
+                focalLength = value;
+                transferMatrix = new Matrix4d(
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, -1 / focalLength,
+                    0, 0, 0, 1
+                );
+                transferMatrixInv = new Matrix4d(
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, 1 / focalLength,
+                    0, 0, 0, 1
+                );
+            }
+        }
 
         private Matrix4d transferMatrix;
         private Matrix4d transferMatrixInv;
 
-        private static float DEFAULT_APERTURE_RADIUS = 1;
+        private static double DEFAULT_APERTURE_RADIUS = 1;
 
-        private static float DEFAULT_FOCAL_LENGTH = 1;
+        private static double DEFAULT_FOCAL_LENGTH = 1;
 
         private Sampler sampler = new Sampler();
 
@@ -33,22 +53,10 @@ namespace BokehLab.Lens
         {
         }
 
-        public ThinLens(float focalLength, float apertureRadius)
+        public ThinLens(double focalLength, double apertureRadius)
         {
             FocalLength = focalLength;
             ApertureRadius = apertureRadius;
-            transferMatrix = new Matrix4d(
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, -1 / FocalLength,
-                0, 0, 0, 1
-                );
-            transferMatrixInv = new Matrix4d(
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 1 / FocalLength,
-                0, 0, 0, 1
-                );
         }
 
         private Matrix4d GetTransferMatrix(double z)

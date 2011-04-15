@@ -10,9 +10,9 @@ namespace LightTracing
 {
     public class LightTracer
     {
-        Vector3d LightSourcePosition { get; set; }
+        public Vector3d LightSourcePosition { get; set; }
 
-        Vector3d SenzorCenter { get; set; }
+        public Vector3d SenzorCenter { get; set; }
 
         /// <summary>
         /// Senzor spans from [-SensorSize.X/2; -SensorSize.Y/2] to
@@ -27,11 +27,11 @@ namespace LightTracing
         /// </summary>
         Size RasterSize { get; set; }
 
-        ThinLens Lens { get; set; }
+        public ThinLens Lens { get; set; }
 
-        int SampleCount { get; set; }
+        public int SampleCount { get; set; }
 
-        float LightIntensity { get; set; }
+        public float LightIntensity { get; set; }
 
         public LightTracer()
         {
