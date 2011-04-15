@@ -32,7 +32,7 @@ namespace BokehLab.Lens
                 return false;
             }
 
-            Ray otherRay = (Ray) obj;
+            Ray otherRay = (Ray)obj;
             return Vector3d.Equals(Origin, otherRay.Origin) &&
                 Vector3d.Equals(Direction, otherRay.Direction);
         }
@@ -41,7 +41,6 @@ namespace BokehLab.Lens
         public override int GetHashCode()
         {
             // TODO: write your implementation of GetHashCode() here
-            throw new NotImplementedException();
             return base.GetHashCode();
         }
 
@@ -65,7 +64,7 @@ namespace BokehLab.Lens
             {
                 return true;
             }
-            
+
             // TODO: this is not a nice epsilon comparison :/
             if ((x.Origin.X - y.Origin.X) > Epsilon)
             {

@@ -26,6 +26,8 @@ namespace BokehLab.Lens
 
         private static float DEFAULT_FOCAL_LENGTH = 1;
 
+        private Sampler sampler = new Sampler();
+
         public ThinLens()
             : this(DEFAULT_FOCAL_LENGTH, DEFAULT_APERTURE_RADIUS)
         {
@@ -64,7 +66,9 @@ namespace BokehLab.Lens
                 // make sure lensPos is on the lens
                 // - if it is not on the lens plane (z=0) intersect the ray with this plane
                 lensPos = IntersectRayWithLensPlane(incomingRay);
-            } else {
+            }
+            else
+            {
                 lensPos = origin;
                 origin = -incomingRay.Direction;
             }
@@ -99,6 +103,11 @@ namespace BokehLab.Lens
                 outputDirection = -outputDirection;
             }
             return new Ray(lensPos, outputDirection);
+        }
+
+        public Vector2d GenerateLensPositionSample()
+        {
+            return sampler.UniformSampleDisk(sampler.GenerateRandomTuple());
         }
 
         private bool IsPointWithinLens(Vector3d point)

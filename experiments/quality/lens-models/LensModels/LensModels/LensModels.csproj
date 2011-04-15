@@ -44,6 +44,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sampler.cs" />
     <Compile Include="Ray.cs" />
     <Compile Include="Tests\ThinLensTest.cs" />
     <Compile Include="ThinLens.cs" />
