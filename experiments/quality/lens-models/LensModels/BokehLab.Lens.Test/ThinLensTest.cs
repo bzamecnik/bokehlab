@@ -5,7 +5,7 @@ using System.Text;
 using Xunit;
 using OpenTK;
 
-namespace BokehLab.Lens.Tests
+namespace BokehLab.Lens.Test
 {
     public class ThinLensTest
     {
