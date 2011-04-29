@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -36,7 +37,10 @@ namespace LightTracing
 
         private void Recompute()
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
             pictureBox1.Image = lightTracer.TraceLight();
+            stopwatch.Stop();
+            elapsedTimeStatusLabel.Text = string.Format("{0} ms", stopwatch.ElapsedMilliseconds);
         }
 
         private void lightXNumeric_ValueChanged(object sender, EventArgs e)

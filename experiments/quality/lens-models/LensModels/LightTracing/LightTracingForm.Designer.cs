@@ -46,6 +46,9 @@
             this.label2 = new System.Windows.Forms.Label();
             this.lightXNumeric = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.elapsedTimeStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -58,6 +61,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.lightZNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lightYNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lightXNumeric)).BeginInit();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -67,7 +71,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Location = new System.Drawing.Point(3, 3);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(548, 555);
+            this.pictureBox1.Size = new System.Drawing.Size(548, 510);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -98,7 +102,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.pictureBox1);
-            this.splitContainer1.Size = new System.Drawing.Size(755, 561);
+            this.splitContainer1.Size = new System.Drawing.Size(755, 516);
             this.splitContainer1.SplitterDistance = 197;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -330,11 +334,34 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Light X:";
             // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel1,
+            this.elapsedTimeStatusLabel});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 563);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(779, 22);
+            this.statusStrip1.TabIndex = 2;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // elapsedTimeStatusLabel
+            // 
+            this.elapsedTimeStatusLabel.Name = "elapsedTimeStatusLabel";
+            this.elapsedTimeStatusLabel.Size = new System.Drawing.Size(0, 17);
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(77, 17);
+            this.toolStripStatusLabel1.Text = "Elapsed time:";
+            // 
             // LightTracingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(779, 585);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.splitContainer1);
             this.Name = "LightTracingForm";
             this.Text = "BokehLab - PSF light tracer";
@@ -351,7 +378,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.lightZNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lightYNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lightXNumeric)).EndInit();
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -375,6 +405,9 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.NumericUpDown sampleCountNumeric;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel elapsedTimeStatusLabel;
     }
 }
 
