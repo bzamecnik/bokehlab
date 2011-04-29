@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using OpenTK;
 using BokehLab.Lens;
+using BokehLab.FloatMap;
 
 namespace LightTracing
 {
@@ -33,6 +34,8 @@ namespace LightTracing
 
         public float LightIntensity { get; set; }
 
+        private FloatMapImage senzorFloatMap;
+
         public LightTracer()
         {
             LightSourcePosition = new Vector3d(0, 0, 20);
@@ -41,7 +44,8 @@ namespace LightTracing
             RasterSize = new Size(500, 500);
             SampleCount = 1000;
             Lens = new ThinLens(10, 1);
-            LightIntensity = 1;
+            LightIntensity = 0.5f;
+            senzorFloatMap = new FloatMapImage((uint)RasterSize.Width, (uint)RasterSize.Height,PixelFormat.Greyscale);
         }
 
         // TODO:
@@ -49,14 +53,13 @@ namespace LightTracing
 
         public Bitmap TraceLight()
         {
-            Bitmap senzor = new Bitmap(RasterSize.Width, RasterSize.Height);
-            using (Graphics g = Graphics.FromImage(senzor))
+            for (int y = 0; y < senzorFloatMap.Height; y++)
             {
-                g.FillRectangle(Brushes.Black, 0, 0, RasterSize.Width, RasterSize.Height);
+                for (int x = 0; x < senzorFloatMap.Width; x++)
+                {
+                    senzorFloatMap.Image[x, y, 0] = 0;
+                }
             }
-
-            int pixelIntensity = (int)(255 * LightIntensity);
-            Color lightColor = Color.FromArgb(pixelIntensity, pixelIntensity, pixelIntensity);
 
             for (int i = 0; i < SampleCount; i++)
             {
@@ -72,19 +75,19 @@ namespace LightTracing
                 Vector3d intersectionPoint = outgoingRay.Origin + t * outgoingRay.Direction;
                 Vector2d intersectionPixelPoint = SenzorToRaster(intersectionPoint.Xy);
                 // put a splat on the senzor at the intersection
-                Splat(senzor, lightColor, intersectionPixelPoint);
+                Splat(senzorFloatMap, LightIntensity, intersectionPixelPoint);
             }
 
-            return senzor;
+            return senzorFloatMap.ToBitmap();
         }
 
-        private void Splat(Bitmap senzor, Color lightColor, Vector2d intersectionPixelPoint)
+        private void Splat(FloatMapImage senzor, float lightIntensity, Vector2d intersectionPixelPoint)
         {
             int x = (int)intersectionPixelPoint.X;
             int y = (int)intersectionPixelPoint.Y;
             if ((x >= 0) && (x < RasterSize.Width) && (y >= 0) && (y < RasterSize.Height))
             {
-                senzor.SetPixel(x, y, lightColor);
+                senzor.Image[x, y, 0] += lightIntensity;
             }
         }
 
