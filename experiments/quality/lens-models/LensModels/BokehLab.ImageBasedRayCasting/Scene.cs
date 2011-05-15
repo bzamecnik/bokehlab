@@ -8,41 +8,21 @@ using BokehLab.FloatMap;
 
 namespace BokehLab.ImageBasedRayCasting
 {
+    // TODO:
+    // - create a similar transform as is in Senzor
+
     class Scene
     {
-        // For simplicity the scene is a rectangle with center at
-        // Position (0,0,z) and normal (0,0,1) aligned with the
-        // optical axis.
-        //
-        // The scene shading is precomputed and colors stored in
-        // a float map.
+        public ImageLayer Layer { get; set; }
 
-        public Vector3d Position { get; set; }
-
-        public FloatMapImage Image { get; set; }
+        public Scene()
+        {
+            Layer = new ImageLayer();
+        }
 
         public Intersection Intersect(Ray ray)
         {
-            // intersect
-            Vector3d intersectionPos = new Vector3d();
-            // compute 2D position in image coordinates
-            // retrieve color
-            int x = 0;
-            int y = 0;
-            float color = Image.Image[x, y, 0];
-            return new Intersection(intersectionPos, color);
-        }
-    }
-
-    struct Intersection
-    {
-        public Vector3d position;
-        public float color;
-
-        public Intersection(Vector3d position, float color)
-        {
-            this.position = position;
-            this.color = color;
+            return Layer.Intersect(ray);
         }
     }
 }

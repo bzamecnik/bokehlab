@@ -17,6 +17,28 @@ namespace BokehLab.Lens
             Direction = direction;
         }
 
+        public Ray Transform(Matrix4d matrix)
+        {
+            Vector3d newOrigin = Vector3d.Transform(Origin, matrix);
+            Vector3d newDirection = Vector3d.Transform(Direction, matrix);
+            return new Ray(newOrigin, newDirection);
+        }
+
+        /// <summary>
+        /// Evaluates the ray at parameter value t.
+        /// </summary>
+        /// <param name="t">Ray parameter, t >= 0</param>
+        /// <returns>Point of ray, or null if the parameter is less than zero.
+        /// </returns>
+        public Vector3d? Evaluate(double t)
+        {
+            if (t < 0)
+            {
+                return null;
+            }
+            return Origin + t * Direction;
+        }
+
         // override object.Equals
         public override bool Equals(object obj)
         {
