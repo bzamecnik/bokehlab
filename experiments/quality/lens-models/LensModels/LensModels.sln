@@ -1,8 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Lens", "LensModels\BokehLab.Lens.csproj", "{5F147FC9-B3DE-4C21-B13C-E2CFF298FC26}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Lens", "BokehLab.LensModels\BokehLab.Lens.csproj", "{5F147FC9-B3DE-4C21-B13C-E2CFF298FC26}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.LightTracing", "LightTracing\BokehLab.LightTracing.csproj", "{9F93F9DA-896D-4016-9FD1-7BB7E2957D94}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.LightTracing", "BokehLab.LightTracing\BokehLab.LightTracing.csproj", "{9F93F9DA-896D-4016-9FD1-7BB7E2957D94}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Lens.Test", "BokehLab.Lens.Test\BokehLab.Lens.Test.csproj", "{ECB89AB7-7B2A-4071-9489-6F605457F0EA}"
 EndProject
@@ -50,6 +50,16 @@ Global
 		{ECB89AB7-7B2A-4071-9489-6F605457F0EA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{ECB89AB7-7B2A-4071-9489-6F605457F0EA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{ECB89AB7-7B2A-4071-9489-6F605457F0EA}.Release|x86.ActiveCfg = Release|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{30306116-6656-4AFD-8B23-0D85283F54C0}.Release|x86.ActiveCfg = Release|Any CPU
 		{A742CC09-6F5E-436F-A4F5-EB3153E00710}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A742CC09-6F5E-436F-A4F5-EB3153E00710}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A742CC09-6F5E-436F-A4F5-EB3153E00710}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
