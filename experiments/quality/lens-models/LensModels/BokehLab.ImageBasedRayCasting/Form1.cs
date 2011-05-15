@@ -21,7 +21,7 @@ namespace BokehLab.ImageBasedRayCasting
             InitializeComponent();
         }
 
-        private void RenderImage(RayTracer rayTracer)
+        private void RenderImage()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -42,6 +42,10 @@ namespace BokehLab.ImageBasedRayCasting
             Bitmap sceneImage = (Bitmap)Bitmap.FromFile("TestData/testImage.jpg");
             rayTracer.Scene.Layer.Image = sceneImage.ToFloatMap();
 
+            rayTracer.Scene.Layer.Normal = new Vector3d(1, 1, 1);
+
+            sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
+
             rayTracer.Camera.Sensor.Width = 10;
             rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
             senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
@@ -49,7 +53,7 @@ namespace BokehLab.ImageBasedRayCasting
             rayTracer.Scene.Layer.Origin = new Vector3d(0, 0, -20);
             layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Origin.Z;
 
-            RenderImage(rayTracer);
+            RenderImage();
         }
 
         private void renderButton_Click(object sender, EventArgs e)
@@ -62,7 +66,7 @@ namespace BokehLab.ImageBasedRayCasting
             sceneOrigin.Z = (double)layerZNumeric.Value;
             rayTracer.Scene.Layer.Origin = sceneOrigin;
 
-            RenderImage(rayTracer);
+            RenderImage();
         }
 
         private void senzorShiftZNumeric_ValueChanged(object sender, EventArgs e)
@@ -71,17 +75,23 @@ namespace BokehLab.ImageBasedRayCasting
             senzorShift.Z = (double)senzorShiftZNumeric.Value;
             rayTracer.Camera.Sensor.Shift = senzorShift;
 
-            RenderImage(rayTracer);
+            RenderImage();
         }
 
         private void layerZNumeric_ValueChanged(object sender, EventArgs e)
         {
-
             Vector3d sceneOrigin = rayTracer.Scene.Layer.Origin;
             sceneOrigin.Z = (double)layerZNumeric.Value;
             rayTracer.Scene.Layer.Origin = sceneOrigin;
 
-            RenderImage(rayTracer);
+            RenderImage();
+        }
+
+        private void sampleCountNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.SampleCount = (int)sampleCountNumeric.Value;
+
+            RenderImage();
         }
     }
 }

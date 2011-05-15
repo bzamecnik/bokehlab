@@ -38,11 +38,14 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.elapsedTimeToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.sampleCountNumeric = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.layerZNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).BeginInit();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.sampleCountNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -52,7 +55,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Location = new System.Drawing.Point(199, 12);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(446, 412);
+            this.pictureBox1.Size = new System.Drawing.Size(361, 294);
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
@@ -61,13 +64,15 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
             this.groupBox1.Controls.Add(this.renderButton);
+            this.groupBox1.Controls.Add(this.sampleCountNumeric);
+            this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.layerZNumeric);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.senzorShiftZNumeric);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(181, 412);
+            this.groupBox1.Size = new System.Drawing.Size(181, 294);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Settings";
@@ -143,9 +148,9 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.elapsedTimeToolStripStatusLabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 427);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 309);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(657, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(572, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -160,11 +165,33 @@
             this.elapsedTimeToolStripStatusLabel.Name = "elapsedTimeToolStripStatusLabel";
             this.elapsedTimeToolStripStatusLabel.Size = new System.Drawing.Size(0, 17);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(6, 105);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(75, 13);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "Sample count:";
+            // 
+            // sampleCountNumeric
+            // 
+            this.sampleCountNumeric.Location = new System.Drawing.Point(109, 103);
+            this.sampleCountNumeric.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.sampleCountNumeric.Name = "sampleCountNumeric";
+            this.sampleCountNumeric.Size = new System.Drawing.Size(60, 20);
+            this.sampleCountNumeric.TabIndex = 1;
+            this.sampleCountNumeric.ValueChanged += new System.EventHandler(this.sampleCountNumeric_ValueChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(657, 449);
+            this.ClientSize = new System.Drawing.Size(572, 331);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
@@ -178,6 +205,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.sampleCountNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -195,6 +223,8 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel elapsedTimeToolStripStatusLabel;
+        private System.Windows.Forms.NumericUpDown sampleCountNumeric;
+        private System.Windows.Forms.Label label3;
     }
 }
 

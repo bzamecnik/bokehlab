@@ -14,10 +14,13 @@ namespace BokehLab.ImageBasedRayCasting
         public Scene Scene { get; set; }
         public Camera Camera { get; set; }
 
+        public int SampleCount;
+
         public RayTracer()
         {
             Scene = new Scene();
             Camera = new Camera();
+            SampleCount = 1;
         }
 
         public FloatMapImage RenderImage(Size imageSize) {
@@ -27,33 +30,42 @@ namespace BokehLab.ImageBasedRayCasting
 
             Camera.Sensor.RasterSize = imageSize;
 
+            float[] color = new float[outputImage.ColorChannelsCount];
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    // generate a ray from the senzor and lens towards the scene
-                    Vector2d imagePos = GenerateImageSample(new Point(x, y));
-                    Ray outgoingRay = Camera.GenerateRay(imagePos);
-                    if (outgoingRay == null)
+                    for (int sampleIndex = 0; sampleIndex < SampleCount; sampleIndex++)
                     {
-                        continue;
+                        // generate a ray from the senzor and lens towards the scene
+                        Vector2d imagePos = GenerateImageSample(new Point(x, y));
+                        Ray outgoingRay = Camera.GenerateRay(imagePos);
+                        if (outgoingRay == null)
+                        {
+                            continue;
+                        }
+                        Ray outgoingRayWorld = outgoingRay.Transform(Camera.CameraToWorld);
+
+                        // intersect the scene
+
+                        Intersection intersection = Scene.Intersect(outgoingRayWorld);
+
+                        if (intersection == null)
+                        {
+                            continue;
+                        }
+
+                        // get the color stored in the scene point
+
+                        for (int i = 0; i < outputImage.ColorChannelsCount; i++)
+                        {
+                            color[i] += intersection.color[i];
+                        }
                     }
-                    Ray outgoingRayWorld = outgoingRay.Transform(Camera.CameraToWorld);
-
-                    // intersect the scene
-
-                    Intersection intersection = Scene.Intersect(outgoingRayWorld);
-
-                    if (intersection == null)
-                    {
-                        continue;
-                    }
-
-                    // get the color stored in the scene point
-
                     for (int i = 0; i < outputImage.ColorChannelsCount; i++)
                     {
-                        outputImage.Image[x, y, i] = intersection.color[i];
+                        outputImage.Image[x, y, i] = color[i] / (float)SampleCount;
+                        color[i] = 0;
                     }
                 }
             }
