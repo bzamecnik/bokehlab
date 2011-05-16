@@ -1,5 +1,6 @@
 ﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using System;
     using System.Drawing;
     using BokehLab.FloatMap;
     using BokehLab.Math;
@@ -19,23 +20,28 @@
             SampleCount = 1;
         }
 
-        public FloatMapImage RenderImage(Size imageSize) {
+        public FloatMapImage RenderImage(Size imageSize)
+        {
             int height = imageSize.Height;
             int width = imageSize.Width;
             FloatMapImage outputImage = new FloatMapImage((uint)width, (uint)height);
 
             Camera.Sensor.RasterSize = imageSize;
 
+            Sampler sampler = new Sampler();
+            int sqrtSampleCount = (int)Math.Sqrt(SampleCount);
+            int totalSampleCount = sqrtSampleCount * sqrtSampleCount;
+
             float[] color = new float[outputImage.ColorChannelsCount];
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    for (int sampleIndex = 0; sampleIndex < SampleCount; sampleIndex++)
+                    foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
                     {
                         // generate a ray from the senzor and lens towards the scene
                         Vector2d imagePos = GenerateImageSample(new Point(x, y));
-                        Ray outgoingRay = Camera.GenerateRay(imagePos);
+                        Ray outgoingRay = Camera.GenerateRay(imagePos, sample);
                         if (outgoingRay == null)
                         {
                             continue;
@@ -60,7 +66,7 @@
                     }
                     for (int i = 0; i < outputImage.ColorChannelsCount; i++)
                     {
-                        outputImage.Image[x, y, i] = color[i] / (float)SampleCount;
+                        outputImage.Image[x, y, i] = color[i] / (float)totalSampleCount;
                         color[i] = 0;
                     }
                 }

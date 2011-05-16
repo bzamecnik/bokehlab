@@ -49,7 +49,7 @@
         /// space)</param>
         /// <returns>Outgoint ray or null if the ray is absorbed inside lens.
         /// </returns>
-        public Ray GenerateRay(Vector2d imagePos)
+        public Ray GenerateRay(Vector2d imagePos, Vector2d sample)
         {
             // for a position on the sensor generate a position on the lens
 
@@ -57,7 +57,7 @@
             // image which corresponds to the senzor position.
 
             Vector3d senzorPos = Sensor.ImageToCamera(imagePos);
-            Vector3d lensPos = LensToCamera(GenerateLensPosition());
+            Vector3d lensPos = LensToCamera(new Vector3d(Lens.GetLensSample(sample)));
             Ray outgoingRay = Lens.Transfer(senzorPos, lensPos);
             return outgoingRay;
         }
@@ -66,11 +66,6 @@
         {
             // NOTE: a more complex transform can be there
             return lensPos;
-        }
-
-        private Vector3d GenerateLensPosition()
-        {
-            return new Vector3d(Lens.GenerateLensPositionSample());
         }
     }
 }

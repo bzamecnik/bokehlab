@@ -57,11 +57,6 @@
             ApertureRadius = apertureRadius;
         }
 
-        private Matrix4d GetTransferMatrix(double z)
-        {
-            if (z > 0) return transferMatrix;
-            else return transferMatrixInv;
-        }
 
         public Ray Transfer(Ray incomingRay)
         {
@@ -111,10 +106,16 @@
             return new Ray(lensPos, outputDirection);
         }
 
-        public Vector2d GenerateLensPositionSample()
+        public Vector2d GetLensSample(Vector2d sample)
         {
-            //return sampler.UniformSampleDisk(sampler.GenerateRandomTuple());
-            return sampler.ConcentricSampleDisk(sampler.GenerateRandomTuple());
+            //return sampler.UniformSampleDisk(sample);
+            return Sampler.ConcentricSampleDisk(sample);
+        }
+
+        private Matrix4d GetTransferMatrix(double z)
+        {
+            if (z > 0) return transferMatrix;
+            else return transferMatrixInv;
         }
 
         private bool IsPointWithinLens(Vector3d point)

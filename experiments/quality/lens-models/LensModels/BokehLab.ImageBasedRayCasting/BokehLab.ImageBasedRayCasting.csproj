@@ -87,15 +87,15 @@
     <Compile Include="Sensor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\preview\FloatMap\BokehLab.FloatMap.csproj">
+    <ProjectReference Include="..\..\..\..\common\BokehLab.FloatMap\BokehLab.FloatMap.csproj">
       <Project>{A742CC09-6F5E-436F-A4F5-EB3153E00710}</Project>
       <Name>BokehLab.FloatMap</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\preview\Math\BokehLab.Math.csproj">
+    <ProjectReference Include="..\..\..\..\common\BokehLab.Math\BokehLab.Math.csproj">
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BokehLab.LensModels\BokehLab.Lens.csproj">
+    <ProjectReference Include="..\BokehLab.Lens\BokehLab.Lens.csproj">
       <Project>{5F147FC9-B3DE-4C21-B13C-E2CFF298FC26}</Project>
       <Name>BokehLab.Lens</Name>
     </ProjectReference>

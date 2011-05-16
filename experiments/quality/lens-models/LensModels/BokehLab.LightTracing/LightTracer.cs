@@ -1,5 +1,6 @@
 ﻿namespace LightTracing
 {
+    using System;
     using System.Drawing;
     using BokehLab.FloatMap;
     using BokehLab.Lens;
@@ -42,7 +43,7 @@
             SampleCount = 1000;
             Lens = new ThinLens(10, 1);
             LightIntensity = 0.5f;
-            senzorFloatMap = new FloatMapImage((uint)RasterSize.Width, (uint)RasterSize.Height,PixelFormat.Greyscale);
+            senzorFloatMap = new FloatMapImage((uint)RasterSize.Width, (uint)RasterSize.Height, PixelFormat.Greyscale);
         }
 
         // TODO:
@@ -58,10 +59,12 @@
                 }
             }
 
-            for (int i = 0; i < SampleCount; i++)
+            Sampler sampler = new Sampler();
+            int SqrtSampleCount = (int)Math.Sqrt(SampleCount);
+            foreach (Vector2d sample in sampler.GenerateJitteredSamples(SqrtSampleCount))
             {
                 // generate a sample at the lens surface
-                Vector2d lensPosCameraSpace = Lens.GenerateLensPositionSample();
+                Vector2d lensPosCameraSpace = Lens.GetLensSample(sample);
                 Vector3d lensPos = new Vector3d(lensPosCameraSpace);
                 lensPos.Z = 0;
                 // make an incoming ray from the light source to the lens sample and

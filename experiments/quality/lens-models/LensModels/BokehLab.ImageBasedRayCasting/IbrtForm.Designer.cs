@@ -30,10 +30,15 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.tonemapOutputCheckBox = new System.Windows.Forms.CheckBox();
+            this.specificOutputSizeCheckBox = new System.Windows.Forms.CheckBox();
             this.lensFocalLengthNumeric = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
             this.lensApertureNumeric = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
+            this.outputSizeYNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label7 = new System.Windows.Forms.Label();
+            this.outputSizeXNumeric = new System.Windows.Forms.NumericUpDown();
             this.sampleCountNumeric = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
             this.layerZNumeric = new System.Windows.Forms.NumericUpDown();
@@ -51,22 +56,17 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.renderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.specificOutputSizeCheckBox = new System.Windows.Forms.CheckBox();
-            this.outputSizeXNumeric = new System.Windows.Forms.NumericUpDown();
-            this.label7 = new System.Windows.Forms.Label();
-            this.outputSizeYNumeric = new System.Windows.Forms.NumericUpDown();
-            this.tonemapOutputCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lensFocalLengthNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lensApertureNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.outputSizeYNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.outputSizeXNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sampleCountNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layerZNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.outputSizeXNumeric)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.outputSizeYNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -102,9 +102,31 @@
             this.groupBox1.Location = new System.Drawing.Point(12, 31);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(181, 275);
-            this.groupBox1.TabIndex = 1;
+            this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Settings";
+            // 
+            // tonemapOutputCheckBox
+            // 
+            this.tonemapOutputCheckBox.AutoSize = true;
+            this.tonemapOutputCheckBox.Location = new System.Drawing.Point(9, 201);
+            this.tonemapOutputCheckBox.Name = "tonemapOutputCheckBox";
+            this.tonemapOutputCheckBox.Size = new System.Drawing.Size(141, 17);
+            this.tonemapOutputCheckBox.TabIndex = 9;
+            this.tonemapOutputCheckBox.Text = "Tonemap output image?";
+            this.tonemapOutputCheckBox.UseVisualStyleBackColor = true;
+            this.tonemapOutputCheckBox.CheckedChanged += new System.EventHandler(this.tonemapOutputCheckBox_CheckedChanged);
+            // 
+            // specificOutputSizeCheckBox
+            // 
+            this.specificOutputSizeCheckBox.AutoSize = true;
+            this.specificOutputSizeCheckBox.Location = new System.Drawing.Point(9, 152);
+            this.specificOutputSizeCheckBox.Name = "specificOutputSizeCheckBox";
+            this.specificOutputSizeCheckBox.Size = new System.Drawing.Size(121, 17);
+            this.specificOutputSizeCheckBox.TabIndex = 6;
+            this.specificOutputSizeCheckBox.Text = "Specify output size?";
+            this.specificOutputSizeCheckBox.UseVisualStyleBackColor = true;
+            this.specificOutputSizeCheckBox.CheckedChanged += new System.EventHandler(this.specificOutputSizeCheckBox_CheckedChanged);
             // 
             // lensFocalLengthNumeric
             // 
@@ -112,7 +134,7 @@
             this.lensFocalLengthNumeric.Location = new System.Drawing.Point(109, 71);
             this.lensFocalLengthNumeric.Name = "lensFocalLengthNumeric";
             this.lensFocalLengthNumeric.Size = new System.Drawing.Size(60, 20);
-            this.lensFocalLengthNumeric.TabIndex = 1;
+            this.lensFocalLengthNumeric.TabIndex = 3;
             this.lensFocalLengthNumeric.ValueChanged += new System.EventHandler(this.lensFocalLengthNumeric_ValueChanged);
             // 
             // label5
@@ -130,7 +152,7 @@
             this.lensApertureNumeric.Location = new System.Drawing.Point(109, 45);
             this.lensApertureNumeric.Name = "lensApertureNumeric";
             this.lensApertureNumeric.Size = new System.Drawing.Size(60, 20);
-            this.lensApertureNumeric.TabIndex = 1;
+            this.lensApertureNumeric.TabIndex = 2;
             this.lensApertureNumeric.ValueChanged += new System.EventHandler(this.lensApertureNumeric_ValueChanged);
             // 
             // label4
@@ -141,6 +163,61 @@
             this.label4.Size = new System.Drawing.Size(75, 13);
             this.label4.TabIndex = 0;
             this.label4.Text = "Lens aperture:";
+            // 
+            // outputSizeYNumeric
+            // 
+            this.outputSizeYNumeric.Enabled = false;
+            this.outputSizeYNumeric.Location = new System.Drawing.Point(106, 175);
+            this.outputSizeYNumeric.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.outputSizeYNumeric.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.outputSizeYNumeric.Name = "outputSizeYNumeric";
+            this.outputSizeYNumeric.Size = new System.Drawing.Size(69, 20);
+            this.outputSizeYNumeric.TabIndex = 8;
+            this.outputSizeYNumeric.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(88, 177);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(12, 13);
+            this.label7.TabIndex = 0;
+            this.label7.Text = "x";
+            // 
+            // outputSizeXNumeric
+            // 
+            this.outputSizeXNumeric.Enabled = false;
+            this.outputSizeXNumeric.Location = new System.Drawing.Point(9, 175);
+            this.outputSizeXNumeric.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.outputSizeXNumeric.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.outputSizeXNumeric.Name = "outputSizeXNumeric";
+            this.outputSizeXNumeric.Size = new System.Drawing.Size(73, 20);
+            this.outputSizeXNumeric.TabIndex = 7;
+            this.outputSizeXNumeric.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // sampleCountNumeric
             // 
@@ -180,7 +257,7 @@
             -2147483648});
             this.layerZNumeric.Name = "layerZNumeric";
             this.layerZNumeric.Size = new System.Drawing.Size(60, 20);
-            this.layerZNumeric.TabIndex = 1;
+            this.layerZNumeric.TabIndex = 5;
             this.layerZNumeric.ValueChanged += new System.EventHandler(this.layerZNumeric_ValueChanged);
             // 
             // label2
@@ -208,7 +285,7 @@
             -2147483648});
             this.senzorShiftZNumeric.Name = "senzorShiftZNumeric";
             this.senzorShiftZNumeric.Size = new System.Drawing.Size(60, 20);
-            this.senzorShiftZNumeric.TabIndex = 1;
+            this.senzorShiftZNumeric.TabIndex = 4;
             this.senzorShiftZNumeric.ValueChanged += new System.EventHandler(this.senzorShiftZNumeric_ValueChanged);
             // 
             // label1
@@ -228,7 +305,7 @@
             this.statusStrip1.Location = new System.Drawing.Point(0, 309);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(572, 22);
-            this.statusStrip1.TabIndex = 2;
+            this.statusStrip1.TabIndex = 0;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
@@ -250,7 +327,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(572, 24);
-            this.menuStrip1.TabIndex = 3;
+            this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // toolStripMenuItem1
@@ -266,7 +343,7 @@
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -274,7 +351,7 @@
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -293,83 +370,6 @@
             this.renderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.renderToolStripMenuItem.Text = "&Render";
             this.renderToolStripMenuItem.Click += new System.EventHandler(this.renderToolStripMenuItem_Click);
-            // 
-            // specificOutputSizeCheckBox
-            // 
-            this.specificOutputSizeCheckBox.AutoSize = true;
-            this.specificOutputSizeCheckBox.Location = new System.Drawing.Point(9, 152);
-            this.specificOutputSizeCheckBox.Name = "specificOutputSizeCheckBox";
-            this.specificOutputSizeCheckBox.Size = new System.Drawing.Size(121, 17);
-            this.specificOutputSizeCheckBox.TabIndex = 2;
-            this.specificOutputSizeCheckBox.Text = "Specify output size?";
-            this.specificOutputSizeCheckBox.UseVisualStyleBackColor = true;
-            this.specificOutputSizeCheckBox.CheckedChanged += new System.EventHandler(this.specificOutputSizeCheckBox_CheckedChanged);
-            // 
-            // outputSizeXNumeric
-            // 
-            this.outputSizeXNumeric.Enabled = false;
-            this.outputSizeXNumeric.Location = new System.Drawing.Point(9, 175);
-            this.outputSizeXNumeric.Maximum = new decimal(new int[] {
-            10000,
-            0,
-            0,
-            0});
-            this.outputSizeXNumeric.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.outputSizeXNumeric.Name = "outputSizeXNumeric";
-            this.outputSizeXNumeric.Size = new System.Drawing.Size(73, 20);
-            this.outputSizeXNumeric.TabIndex = 1;
-            this.outputSizeXNumeric.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(88, 177);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(12, 13);
-            this.label7.TabIndex = 0;
-            this.label7.Text = "x";
-            // 
-            // outputSizeYNumeric
-            // 
-            this.outputSizeYNumeric.Enabled = false;
-            this.outputSizeYNumeric.Location = new System.Drawing.Point(106, 175);
-            this.outputSizeYNumeric.Maximum = new decimal(new int[] {
-            10000,
-            0,
-            0,
-            0});
-            this.outputSizeYNumeric.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.outputSizeYNumeric.Name = "outputSizeYNumeric";
-            this.outputSizeYNumeric.Size = new System.Drawing.Size(69, 20);
-            this.outputSizeYNumeric.TabIndex = 1;
-            this.outputSizeYNumeric.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            // 
-            // tonemapOutputCheckBox
-            // 
-            this.tonemapOutputCheckBox.AutoSize = true;
-            this.tonemapOutputCheckBox.Location = new System.Drawing.Point(9, 201);
-            this.tonemapOutputCheckBox.Name = "tonemapOutputCheckBox";
-            this.tonemapOutputCheckBox.Size = new System.Drawing.Size(141, 17);
-            this.tonemapOutputCheckBox.TabIndex = 2;
-            this.tonemapOutputCheckBox.Text = "Tonemap output image?";
-            this.tonemapOutputCheckBox.UseVisualStyleBackColor = true;
-            this.tonemapOutputCheckBox.CheckedChanged += new System.EventHandler(this.tonemapOutputCheckBox_CheckedChanged);
             // 
             // IbrtForm
             // 
@@ -390,6 +390,8 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lensFocalLengthNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lensApertureNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.outputSizeYNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.outputSizeXNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sampleCountNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layerZNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).EndInit();
@@ -397,8 +399,6 @@
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.outputSizeXNumeric)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.outputSizeYNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

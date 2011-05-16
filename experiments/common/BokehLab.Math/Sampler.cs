@@ -1,6 +1,7 @@
 ﻿namespace BokehLab.Math
 {
     using System;
+    using System.Collections.Generic;
     using OpenTK;
 
     public class Sampler
@@ -12,9 +13,17 @@
         /// </summary>
         /// <returns>Random numbers from a square
         /// [0; 1] x [0; 1].</returns>
-        public Vector2d GenerateRandomTuple()
+        public Vector2d GenerateUniformPoint()
         {
-            return new Vector2d((float)random.NextDouble(), (float)random.NextDouble());
+            return new Vector2d(random.NextDouble(), random.NextDouble());
+        }
+
+        public IEnumerable<Vector2d> GenerateUniformPoints(int sampleCount)
+        {
+            for (int i = 0; i < sampleCount; i++)
+            {
+                yield return GenerateUniformPoint();
+            }
         }
 
         /// <summary>
@@ -24,7 +33,7 @@
         /// [0; 1] x [0; 1].</param>
         /// <returns>Random numbers from a disk of radius 1 centered at [0; 0].
         /// </returns>
-        public Vector2d UniformSampleDisk(Vector2d randomNumbers)
+        public static Vector2d PolarSampleDisk(Vector2d randomNumbers)
         {
             double radius = Math.Sqrt(randomNumbers.X);
             double theta = 2.0 * Math.PI * randomNumbers.Y;
@@ -56,7 +65,7 @@
         /// [0; 1] x [0; 1].</param>
         /// <returns>Random numbers from a disk of radius 1 centered at [0; 0].
         /// </returns>
-        public Vector2d ConcentricSampleDisk(Vector2d randomNumbers)
+        public static Vector2d ConcentricSampleDisk(Vector2d randomNumbers)
         {
             double phi;
             double r;
@@ -65,7 +74,7 @@
             double a = 2 * randomNumbers.X - 1;
             double b = 2 * randomNumbers.Y - 1;
 
-            if (a < -b)
+            if (a > -b)
             {
                 // region 1 or 2
                 if (a > b)
@@ -110,5 +119,73 @@
                 r * Math.Sin(phi));
             return diskSamples;
         }
+
+        /// <summary>
+        /// Generate a NxN matrix of point samples inside the [0; 1] x [0; 1]
+        /// interval using the stratified sampling method with semi-jittering.
+        /// </summary>
+        /// <remarks>
+        /// The interval is divided into NxN square blocks and one sample is
+        /// generated inside each block. The semiJittering parameter controls
+        /// the amplitude of semi-jittering in each block from full jittering
+        /// to regular sampling (where only block centers are chosen).
+        /// </remarks>
+        /// <param name="sampleCount">number of samples in one direction (N);
+        /// in total NxN samples will be generated</param>
+        /// <param name="semiJittering">amount of semi-jittering; from
+        /// [0.0; 1.0] 0.0 - no jittering, 1.0 - full jittering</param>
+        /// <param name="samples">pre-allocated do size NxN or null for
+        /// being created here</param>
+        /// <returns></returns>
+        public IEnumerable<Vector2d> GenerateSemiJitteredSamples(int sampleCount, double semiJittering)
+        {
+            int totalSampleCount = sampleCount * sampleCount;
+
+            double step = 1.0 / sampleCount;
+            double amplitude = semiJittering * step;
+            double origin = 0.5 * (step - amplitude);
+
+            double y = origin; // sample block origin positions
+            for (int j = 0; j < sampleCount; j++)
+            {
+                double x = origin;
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    Vector2d sample = new Vector2d(
+                        x + random.NextDouble() * amplitude,
+                        y + random.NextDouble() * amplitude);
+                    yield return sample;
+                    x += step;
+                }
+                y += step;
+            }
+        }
+
+        /// <summary>
+        /// Generate a NxN matrix of point samples inside the [0; 1] x [0; 1]
+        /// square using the stratified sampling method with full jittering.
+        /// </summary>
+        /// <param name="sampleCount"></param>
+        /// <returns></returns>
+        public IEnumerable<Vector2d> GenerateJitteredSamples(int sampleCount)
+        {
+            int totalSampleCount = sampleCount * sampleCount;
+            double step = 1.0 / sampleCount;
+            double y = 0;
+            for (int j = 0; j < sampleCount; j++)
+            {
+                double x = 0;
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    Vector2d sample = new Vector2d(
+                        x + random.NextDouble() * step,
+                        y + random.NextDouble() * step);
+                    yield return sample;
+                    x += step;
+                }
+                y += step;
+            }
+        }
+
     }
 }
