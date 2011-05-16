@@ -77,7 +77,7 @@
             {
                 tilt = value;
                 UpdateSenzorToCamera();
-                Plane.Normal = Vector3d.Transform(Vector3d.UnitZ, TiltMatrix);
+                Plane.Normal = Vector3d.Transform(-Vector3d.UnitZ, TiltMatrix);
             }
         }
 
@@ -108,7 +108,10 @@
 
         public Sensor()
         {
-            Plane = new Plane();
+            Plane = new Plane()
+            {
+                Normal = -Vector3d.UnitZ
+            };
             Width = 1.0;
             RasterSize = new Size(1, 1);
             Shift = new Vector3d(0, 0, 2);

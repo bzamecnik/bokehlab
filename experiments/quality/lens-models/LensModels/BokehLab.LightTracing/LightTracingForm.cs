@@ -23,7 +23,7 @@
             lightXNumeric.Value = (decimal)lightTracer.LightSourcePosition.X;
             lightYNumeric.Value = (decimal)lightTracer.LightSourcePosition.Y;
             lightZNumeric.Value = (decimal)lightTracer.LightSourcePosition.Z;
-            senzorCenterZNumeric.Value = (decimal)lightTracer.SenzorCenter.Z;
+            senzorCenterZNumeric.Value = (decimal)lightTracer.Sensor.Shift.Z;
             lensFocalLengthNumeric.Value = (decimal)lightTracer.Lens.FocalLength;
             lensApertureNumeric.Value = (decimal)lightTracer.Lens.ApertureRadius;
             lightIntensityNumeric.Value = (decimal)lightTracer.LightIntensity;
@@ -67,9 +67,9 @@
 
         private void senzorCenterZNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lightTracer.SenzorCenter = new Vector3d(
-                lightTracer.SenzorCenter.X,
-                lightTracer.SenzorCenter.Y,
+            lightTracer.Sensor.Shift = new Vector3d(
+                lightTracer.Sensor.Shift.X,
+                lightTracer.Sensor.Shift.Y,
                 (double)senzorCenterZNumeric.Value);
             Recompute();
         }

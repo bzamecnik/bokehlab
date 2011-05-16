@@ -12,20 +12,7 @@
     {
         public Vector3d LightSourcePosition { get; set; }
 
-        public Vector3d SenzorCenter { get; set; }
-
-        /// <summary>
-        /// Senzor spans from [-SensorSize.X/2; -SensorSize.Y/2] to
-        /// [SensorSize.X/2; SensorSize.Y/2]. [0;0] is at the center
-        /// corresponding to SenzorPosition.
-        /// </summary>
-        Vector2d SensorSize { get; set; }
-
-        /// <summary>
-        /// Raster spans from [0; 0] to [RasterSize.X; Raster.Y].
-        /// Left to right, top to bottom.
-        /// </summary>
-        Size RasterSize { get; set; }
+        public Sensor Sensor { get; set; }
 
         public ThinLens Lens { get; set; }
 
@@ -33,9 +20,13 @@
 
         public LightTracer()
         {
-            LightSourcePosition = new Vector3d(0, 0, 20);
-            SenzorCenter = new Vector3d(0, 0, -10);
-            SensorSize = new Vector2d(4, 4);
+            LightSourcePosition = new Vector3d(0, 0, -20);
+            Sensor = new Sensor()
+            {
+                Shift = new Vector3d(0, 0, 10),
+                Width = 4,
+                Tilt = new Vector3d(0.1, 0.1, 0)
+            };
             SampleCount = 1000;
             Lens = new ThinLens(10, 1);
             LightIntensity = 0.5f;
@@ -51,6 +42,7 @@
             int height = imageSize.Height;
             int width = imageSize.Width;
             FloatMapImage outputImage = new FloatMapImage((uint)width, (uint)height, PixelFormat.Greyscale);
+            Sensor.RasterSize = imageSize;
 
             Sampler sampler = new Sampler();
             int SqrtSampleCount = (int)Math.Sqrt(SampleCount);
@@ -67,9 +59,13 @@
                     continue;
                 }
                 // intersect the senzor with the outgoing ray
-                double t = (SenzorCenter.Z - outgoingRay.Origin.Z) / outgoingRay.Direction.Z;
-                Vector3d intersectionPoint = outgoingRay.Origin + t * outgoingRay.Direction;
-                Vector2d intersectionPixelPoint = SenzorToRaster(intersectionPoint.Xy, imageSize);
+                Intersection intersection = Sensor.Intersect(outgoingRay);
+                if (intersection == null)
+                {
+                    continue;
+                }
+                Vector3d intersectionPoint = intersection.Position;
+                Vector2d intersectionPixelPoint = Sensor.CameraToImage(intersectionPoint);
                 // put a splat on the senzor at the intersection
                 Splat(outputImage, LightIntensity, intersectionPixelPoint);
             }
@@ -87,19 +83,6 @@
             {
                 senzor.Image[x, y, 0] += lightIntensity;
             }
-        }
-
-        /// <summary>
-        /// Transform from position in senzor space to raster space.
-        /// </summary>
-        /// <param name="senzorPos"></param>
-        /// <returns></returns>
-        private Vector2d SenzorToRaster(Vector2d senzorPos, Size senzorSize)
-        {
-            return new Vector2d(
-                (senzorPos.X / (1 * SensorSize.X) + 0.5) * senzorSize.Width,
-                (1 - (senzorPos.Y / (1 * SensorSize.Y) + 0.5)) * senzorSize.Height
-                );
         }
     }
 }
