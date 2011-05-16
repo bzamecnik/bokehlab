@@ -56,8 +56,10 @@
     <Compile Include="IbrtForm.Designer.cs">
       <DependentUpon>IbrtForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IIntersectable.cs" />
     <Compile Include="ImageLayer.cs" />
     <Compile Include="Intersection.cs" />
+    <Compile Include="IRenderer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="IbrtForm.resx">

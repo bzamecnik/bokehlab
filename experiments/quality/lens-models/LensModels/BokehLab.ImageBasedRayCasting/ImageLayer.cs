@@ -5,7 +5,7 @@
     using BokehLab.Math;
     using OpenTK;
 
-    class ImageLayer
+    public class ImageLayer : IIntersectable
     {
         // For simplicity the scene is a rectangle with center at
         // Position (0,0,z) and normal (0,0,1) aligned with the
@@ -98,6 +98,8 @@
             RasterSize = new Size(1, 1);
         }
 
+        #region IIntersectable Members
+
         public Intersection Intersect(Ray ray)
         {
             // intersect
@@ -130,6 +132,8 @@
             }
             return new Intersection(intersectionPos.Value, color);
         }
+
+        #endregion
 
         private void UpdateObjectToWorld()
         {

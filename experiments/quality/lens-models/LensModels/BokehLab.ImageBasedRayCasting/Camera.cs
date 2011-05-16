@@ -4,7 +4,7 @@
     using BokehLab.Math;
     using OpenTK;
 
-    class Camera
+    public class Camera
     {
         public Sensor Sensor { get; set; }
 

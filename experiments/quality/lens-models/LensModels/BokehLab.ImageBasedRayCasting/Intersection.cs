@@ -2,7 +2,7 @@
 {
     using OpenTK;
 
-    class Intersection
+    public class Intersection
     {
         public Vector3d position;
         public float[] color;

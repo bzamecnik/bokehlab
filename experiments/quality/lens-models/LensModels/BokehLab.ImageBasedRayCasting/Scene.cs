@@ -2,10 +2,7 @@
 {
     using BokehLab.Math;
 
-    // TODO:
-    // - create a similar transform as is in Senzor
-
-    class Scene
+    public class Scene : IIntersectable
     {
         public ImageLayer Layer { get; set; }
 
@@ -14,9 +11,13 @@
             Layer = new ImageLayer();
         }
 
+        #region IIntersectable Members
+
         public Intersection Intersect(Ray ray)
         {
             return Layer.Intersect(ray);
         }
+
+        #endregion
     }
 }

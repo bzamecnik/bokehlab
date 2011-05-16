@@ -10,7 +10,7 @@
     // (towards lens and scene) and camera space Z axis extends in front of
     // the senzor (toward the viewer).
 
-    class Sensor
+    public class Sensor
     {
         Size rasterSize { get; set; }
         public Size RasterSize

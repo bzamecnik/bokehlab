@@ -6,12 +6,10 @@
     using BokehLab.Math;
     using OpenTK;
 
-    class RayTracer
+    public class RayTracer : IRenderer
     {
         public Scene Scene { get; set; }
         public Camera Camera { get; set; }
-
-        public int SampleCount;
 
         public RayTracer()
         {
@@ -19,6 +17,10 @@
             Camera = new Camera();
             SampleCount = 1;
         }
+
+        #region IRenderer Members
+
+        public int SampleCount { get; set; }
 
         public FloatMapImage RenderImage(Size imageSize)
         {
@@ -73,6 +75,8 @@
             }
             return outputImage;
         }
+
+        #endregion
 
         /// <summary>
         /// Generates a sample within the pixel rectangle
