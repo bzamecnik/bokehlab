@@ -50,18 +50,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="IbrtForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="IbrtForm.Designer.cs">
+      <DependentUpon>IbrtForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ImageLayer.cs" />
     <Compile Include="Intersection.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="IbrtForm.resx">
+      <DependentUpon>IbrtForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

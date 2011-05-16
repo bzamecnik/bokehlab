@@ -101,7 +101,7 @@ namespace BokehLab.ImageBasedRayCasting
             // - scale by (width, height, 1)
             // - translate by (shiftX, shiftY, distanceZ)
             // - [tilt around X by tiltX, ...]
-            var matrix = Matrix4d.CreateTranslation(-0.5, -0.5, 0);
+            var matrix = Matrix4d.CreateTranslation(-0.5, AspectRatio * - 0.5, 0);
             matrix = Matrix4d.Mult(matrix, Matrix4d.Scale(Width, Width, 1));
             matrix = Matrix4d.Mult(matrix, Matrix4d.CreateTranslation(Shift));
             SenzorToCamera = matrix;
