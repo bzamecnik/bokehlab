@@ -5,16 +5,38 @@
     using BokehLab.Math;
     using OpenTK;
 
-    public class ThinLens
+    /// <summary>
+    /// Represents the thin-lens model.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Thin-lens is an approximation to more complex lenses.
+    /// The lens consists of a circle of radius equal to ApertureRadius,
+    /// centered at (0, 0, 0) in camera space. The optical axis is aligned
+    /// with the Z axis. Object space (scene) is within the negative Z
+    /// halfspace, senzor (image) space is within the positive Z halfspace.
+    /// </para>
+    /// <para>
+    /// Thin-lens transforms points with a projective transform from one
+    /// half-space into the other one. Every set of rays intersecting at a
+    /// single point A is transformed into another set of rays intersecting
+    /// at a single point B which is obtained from A by the lens' projective
+    /// transform. In particular every set of coherent rays (meeting at
+    /// infinity) is transformed into a set of rays which meet at one point
+    /// on the focal plane (x, y, +/- FocalLength).
+    /// </para>
+    /// </remarks>
+    public class ThinLens : ILens
     {
         /// <summary>
-        /// ApertureRadius must be > 0
+        /// Radius of the lens aperture. The value must be > 0.
         /// </summary>
         public double ApertureRadius { get; set; }
 
         private double focalLength;
         /// <summary>
-        /// FocalLength must be > 0
+        /// Focal length of the lens (distance from the lens plane to a focal
+        /// plane). The value must be > 0.
         /// </summary>
         public double FocalLength
         {
@@ -43,8 +65,6 @@
         private static double DEFAULT_APERTURE_RADIUS = 1;
 
         private static double DEFAULT_FOCAL_LENGTH = 1;
-
-        private Sampler sampler = new Sampler();
 
         public ThinLens()
             : this(DEFAULT_FOCAL_LENGTH, DEFAULT_APERTURE_RADIUS)
@@ -76,6 +96,8 @@
             return Transfer(origin, lensPos);
         }
 
+        #region ILens Members
+
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
             Debug.Assert(Math.Abs(lensPos.Z) < double.Epsilon);
@@ -106,11 +128,20 @@
             return new Ray(lensPos, outputDirection);
         }
 
-        public Vector2d GetLensSample(Vector2d sample)
+        public Vector3d GetBackSurfaceSample(Vector2d sample)
         {
-            //return sampler.UniformSampleDisk(sample);
-            return Sampler.ConcentricSampleDisk(sample);
+            //var sample2d = Sampler.UniformSampleDisk(sample);
+            var sample2d = Sampler.ConcentricSampleDisk(sample);
+            return new Vector3d(ApertureRadius * sample2d);
         }
+
+        public Vector3d GetFrontSurfaceSample(Vector2d sample)
+        {
+            // the surfaces are the same
+            return GetBackSurfaceSample(sample);
+        }
+
+        #endregion
 
         private Matrix4d GetTransferMatrix(double z)
         {

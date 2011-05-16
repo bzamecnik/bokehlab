@@ -22,7 +22,8 @@
         public FloatMapImage Image
         {
             get { return image; }
-            set {
+            set
+            {
                 image = value;
                 if (image != null)
                 {
@@ -108,11 +109,11 @@
             {
                 return null;
             }
-            
+
             // compute 2D position in image coordinates
             Vector2d intPosImage = WorldToImage(intersectionPos.Value);
-            if ((intPosImage.X < 0) || (intPosImage.X > RasterSize.Width) ||
-                (intPosImage.Y < 0) || (intPosImage.Y > RasterSize.Height))
+            if ((intPosImage.X < 0) || (intPosImage.X >= RasterSize.Width) ||
+                (intPosImage.Y < 0) || (intPosImage.Y >= RasterSize.Height))
             {
                 return null;
             }

@@ -8,7 +8,7 @@
     {
         public Sensor Sensor { get; set; }
 
-        public ThinLens Lens { get; set; }
+        public ILens Lens { get; set; }
 
         private Matrix4d cameraToWorld;
         /// <summary>
@@ -57,7 +57,7 @@
             // image which corresponds to the senzor position.
 
             Vector3d senzorPos = Sensor.ImageToCamera(imagePos);
-            Vector3d lensPos = LensToCamera(new Vector3d(Lens.GetLensSample(sample)));
+            Vector3d lensPos = LensToCamera(Lens.GetBackSurfaceSample(sample));
             Ray outgoingRay = Lens.Transfer(senzorPos, lensPos);
             return outgoingRay;
         }

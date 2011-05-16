@@ -1,15 +1,17 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
-using BokehLab.FloatMap;
-using OpenTK;
-
-namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using System;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.Windows.Forms;
+    using BokehLab.FloatMap;
+    using BokehLab.Lens;
+    using OpenTK;
+
     public partial class IbrtForm : Form
     {
         RayTracer rayTracer = new RayTracer();
+        ThinLens thinLens = new ThinLens();
 
         FloatMapImage layerImage;
         FloatMapImage outputImage;
@@ -17,6 +19,7 @@ namespace BokehLab.ImageBasedRayCasting
         public IbrtForm()
         {
             InitializeComponent();
+            thinLens.FocalLength = 10;
         }
 
         private void RenderImage()
@@ -53,10 +56,14 @@ namespace BokehLab.ImageBasedRayCasting
             outputSizeXNumeric.Value = outputImageSize.Width;
             outputSizeYNumeric.Value = outputImageSize.Height;
 
-            rayTracer.Camera.Lens.FocalLength = 10;
+            rayTracer.Camera.Lens = thinLens;
+            //rayTracer.Camera.Lens = new PinholeLens();
+
+            rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
+
             OpenLayerImage("TestData/testImage.jpg");
 
-            rayTracer.Scene.Layer.Normal = new Vector3d(1, 1, 1);
+            //rayTracer.Scene.Layer.Normal = new Vector3d(1, 1, 1);
 
             sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
 
@@ -67,8 +74,8 @@ namespace BokehLab.ImageBasedRayCasting
             rayTracer.Scene.Layer.Origin = new Vector3d(0, 0, -20);
             layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Origin.Z;
 
-            lensFocalLengthNumeric.Value = (decimal)rayTracer.Camera.Lens.FocalLength;
-            lensApertureNumeric.Value = (decimal)rayTracer.Camera.Lens.ApertureRadius;
+            lensFocalLengthNumeric.Value = (decimal)thinLens.FocalLength;
+            lensApertureNumeric.Value = (decimal)thinLens.ApertureRadius;
 
             RenderImage();
         }
@@ -114,20 +121,21 @@ namespace BokehLab.ImageBasedRayCasting
 
         private void lensApertureNumeric_ValueChanged(object sender, EventArgs e)
         {
-            rayTracer.Camera.Lens.ApertureRadius = (double)lensApertureNumeric.Value;
+            thinLens.ApertureRadius = (double)lensApertureNumeric.Value;
             RenderImage();
         }
 
         private void lensFocalLengthNumeric_ValueChanged(object sender, EventArgs e)
         {
-            rayTracer.Camera.Lens.FocalLength = (double)lensFocalLengthNumeric.Value;
+            thinLens.FocalLength = (double)lensFocalLengthNumeric.Value;
             RenderImage();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DialogResult result = openLayerFileDialog.ShowDialog();
-            if (result  == DialogResult.OK) {
+            if (result == DialogResult.OK)
+            {
                 OpenLayerImage(openLayerFileDialog.FileName);
             }
         }
@@ -158,7 +166,8 @@ namespace BokehLab.ImageBasedRayCasting
                 return;
             }
             DialogResult result = saveRenderedFileDialog.ShowDialog();
-            if (result  == DialogResult.OK) {
+            if (result == DialogResult.OK)
+            {
                 SaveOutputImage(saveRenderedFileDialog.FileName);
             }
         }

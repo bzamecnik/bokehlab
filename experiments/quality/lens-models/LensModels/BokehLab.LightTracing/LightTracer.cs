@@ -64,8 +64,7 @@
             foreach (Vector2d sample in sampler.GenerateJitteredSamples(SqrtSampleCount))
             {
                 // generate a sample at the lens surface
-                Vector2d lensPosCameraSpace = Lens.GetLensSample(sample);
-                Vector3d lensPos = new Vector3d(lensPosCameraSpace);
+                Vector3d lensPos = Lens.GetBackSurfaceSample(sample);
                 lensPos.Z = 0;
                 // make an incoming ray from the light source to the lens sample and
                 // transfer the incoming ray through the lens creating the outgoing ray

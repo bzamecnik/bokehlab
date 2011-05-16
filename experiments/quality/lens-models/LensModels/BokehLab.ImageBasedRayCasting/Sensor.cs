@@ -60,6 +60,16 @@
             set { shift = value; UpdateSenzorToCamera(); }
         }
 
+        private Vector3d tilt;
+        /// <summary>
+        /// Senzor tilt around X, X and Z axes (in this order).
+        /// </summary>
+        public Vector3d Tilt
+        {
+            get { return tilt; }
+            set { tilt = value; UpdateSenzorToCamera(); }
+        }
+
         private Matrix4d senzorToCamera;
         /// <summary>
         /// Transforms from normalized senzor space to camera space.
@@ -88,6 +98,7 @@
             Shift = new Vector3d(0, 0, 2);
             senzorToCamera = Matrix4d.Identity;
             CameraToSenzor = Matrix4d.Identity;
+            tilt = Vector3d.Zero;
         }
 
         private void UpdateSenzorToCamera()
@@ -96,9 +107,21 @@
             // - scale by (width, height, 1)
             // - translate by (shiftX, shiftY, distanceZ)
             // - [tilt around X by tiltX, ...]
-            var matrix = Matrix4d.CreateTranslation(-0.5, AspectRatio * - 0.5, 0);
+            var matrix = Matrix4d.CreateTranslation(-0.5, AspectRatio * -0.5, 0);
             matrix = Matrix4d.Mult(matrix, Matrix4d.Scale(Width, Width, 1));
             matrix = Matrix4d.Mult(matrix, Matrix4d.CreateTranslation(Shift));
+            if (Tilt.X != 0)
+            {
+                matrix = Matrix4d.Mult(matrix, Matrix4d.CreateRotationX(Tilt.X));
+            }
+            if (Tilt.Y != 0)
+            {
+                matrix = Matrix4d.Mult(matrix, Matrix4d.CreateRotationY(Tilt.Y));
+            }
+            if (Tilt.Z != 0)
+            {
+                matrix = Matrix4d.Mult(matrix, Matrix4d.CreateRotationZ(Tilt.Z));
+            }
             SenzorToCamera = matrix;
         }
 

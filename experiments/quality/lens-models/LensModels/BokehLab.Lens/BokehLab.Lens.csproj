@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ILens.cs" />
+    <Compile Include="PinholeLens.cs" />
     <Compile Include="ThinLens.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
