@@ -1,7 +1,8 @@
-﻿using BokehLab.FloatMap;
-
-namespace BokehLab.Spreading
+﻿namespace BokehLab.Spreading
 {
+    using BokehLab.FloatMap;
+    using BokehLab.Math;
+
     public class RectangleSpreadingFilter : AbstractSpreadingFilter
     {
         internal override void SpreadPSF(int x, int y, int radius, float weight, float[, ,] origImage, float[, ,] spreadingImage, float[, ,] normalizationImage, int tableWidth, int tableHeight, uint bands)

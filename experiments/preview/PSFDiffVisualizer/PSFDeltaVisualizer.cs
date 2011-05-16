@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using BokehLab.Spreading.PSF.Perimeter;
-
-namespace BokehLab.Spreading.PSF
+﻿namespace BokehLab.Spreading.PSF
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using BokehLab.Spreading.PSF.Perimeter;
+
     public class PSFDeltaVisualizer
     {
         /// <summary>

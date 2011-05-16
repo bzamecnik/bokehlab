@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xunit;
-using OpenTK;
-
-namespace BokehLab.Lens.Test
+﻿namespace BokehLab.Lens.Test
 {
+    using System.Collections.Generic;
+    using BokehLab.Math;
+    using OpenTK;
+    using Xunit;
+
     public class ThinLensTest
     {
         IEqualityComparer<Ray> rayComparer;

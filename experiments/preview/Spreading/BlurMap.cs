@@ -1,9 +1,9 @@
-﻿using System;
-using System.Diagnostics;
-using BokehLab.FloatMap;
-
-namespace BokehLab.Spreading
+﻿namespace BokehLab.Spreading
 {
+    using System;
+    using System.Diagnostics;
+    using BokehLab.FloatMap;
+
     public interface BlurMap
     {
         float GetPSFRadius(int x, int y);

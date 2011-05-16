@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BokehLab.Lens;
-using OpenTK;
-
-namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using BokehLab.Lens;
+    using BokehLab.Math;
+    using OpenTK;
+
     class Camera
     {
         public Sensor Sensor { get; set; }

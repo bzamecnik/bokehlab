@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Globalization;
-using System.Drawing;
-using System.Drawing.Imaging;
-
-namespace BokehLab.FloatMap
+﻿namespace BokehLab.FloatMap
 {
+    using System;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+
     /// <summary>
     /// Represents the Portable Float Map file format and provides means for I/O.
     /// </summary>

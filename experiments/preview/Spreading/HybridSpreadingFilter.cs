@@ -1,11 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using BokehLab.FloatMap;
-using BokehLab.Spreading.PSF.Perimeter;
-
-namespace BokehLab.Spreading
+﻿namespace BokehLab.Spreading
 {
+    using BokehLab.FloatMap;
+    using BokehLab.Math;
+
     public class HybridSpreadingFilter : AbstractSpreadingFilter
     {
         private static readonly float DEFAULT_CRITERION_THRESHOLD = 0.25f;

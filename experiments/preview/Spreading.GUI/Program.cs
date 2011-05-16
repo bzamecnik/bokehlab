@@ -1,19 +1,19 @@
-﻿using System;
-using System.Windows.Forms;
-
-namespace BokehLab.Spreading.GUI
+﻿namespace BokehLab.Spreading.GUI
 {
-  static class Program
-  {
-    /// <summary>
-    /// The main entry point for the application.
-    /// </summary>
-    [STAThread]
-    static void Main ()
+    using System;
+    using System.Windows.Forms;
+
+    static class Program
     {
-      Application.EnableVisualStyles();
-      Application.SetCompatibleTextRenderingDefault( false );
-      Application.Run( new SpreadingForm() );
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new SpreadingForm());
+        }
     }
-  }
 }

@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
-using BokehLab.FloatMap;
-using BokehLab.Spreading.PSF.Perimeter;
-
-namespace BokehLab.Spreading
+﻿namespace BokehLab.Spreading
 {
+    using System.Diagnostics;
+    using BokehLab.FloatMap;
+    using BokehLab.Math;
+    using BokehLab.Spreading.PSF.Perimeter;
+
     public class PerimeterSpreadingFilter : AbstractSpreadingFilter
     {
         // [radius][deltaIndex]

@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Drawing;
-using OpenTK;
-using BokehLab.Lens;
-using BokehLab.FloatMap;
-
-namespace LightTracing
+﻿namespace LightTracing
 {
+    using System.Drawing;
+    using BokehLab.FloatMap;
+    using BokehLab.Lens;
+    using BokehLab.Math;
+    using OpenTK;
+
     public class LightTracer
     {
         public Vector3d LightSourcePosition { get; set; }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using BokehLab.FloatMap;
-using BokehLab.Lens;
-using OpenTK;
-
-namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using System.Drawing;
+    using BokehLab.FloatMap;
+    using BokehLab.Math;
+    using OpenTK;
+
     class RayTracer
     {
         public Scene Scene { get; set; }

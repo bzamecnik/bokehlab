@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace BokehLab.Lens.Test
+﻿namespace BokehLab.Lens.Test
 {
+    using System.Collections.Generic;
+    using BokehLab.Math;
+
     internal class RayEqualityComparer : EqualityComparer<Ray>
     {
         double Epsilon { get; set; }

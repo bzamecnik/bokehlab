@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-
-namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using System;
+    using System.Windows.Forms;
+
     static class Program
     {
         /// <summary>

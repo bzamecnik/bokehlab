@@ -1,6 +1,4 @@
-﻿using BokehLab.FloatMap;
-
-// TODO:
+﻿// TODO:
 // - shouldn't the table be of the same size as the input image?
 //   - now it seems it has to be larger by 1px
 // - should the spreading table and normalization channel be squashed into
@@ -13,6 +11,8 @@
 
 namespace BokehLab.Spreading
 {
+    using BokehLab.FloatMap;
+
     public abstract class AbstractSpreadingFilter : ISpreadingFilter
     {
         public BlurMap Blur;

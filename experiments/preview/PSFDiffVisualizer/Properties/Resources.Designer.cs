@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BokehLab.Spreading.PSF.Properties {
-    using System;
-    
-    
+namespace BokehLab.Spreading.PSF.Properties
+{
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>

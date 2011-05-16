@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace BokehLab.FloatMap
+﻿namespace BokehLab.FloatMap
 {
+    using System;
+
     /// <summary>
     /// Represents an in-memory HDR float-map image.
     /// </summary>

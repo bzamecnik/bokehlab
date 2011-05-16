@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OpenTK;
-using BokehLab.FloatMap;
-using BokehLab.Lens;
-using System.Drawing;
-
-namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using System.Drawing;
+    using BokehLab.FloatMap;
+    using BokehLab.Math;
+    using OpenTK;
+
     class ImageLayer
     {
         // For simplicity the scene is a rectangle with center at

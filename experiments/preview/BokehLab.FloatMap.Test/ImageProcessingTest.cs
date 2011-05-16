@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Drawing;
 using Xunit;
-using BokehLab.FloatMap;
-using System.Drawing;
 
 namespace BokehLab.FloatMap.Test
 {

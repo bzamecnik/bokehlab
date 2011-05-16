@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using BokehLab.FloatMap;
-using BokehLab.Spreading;
-using Xunit;
-using System.Drawing;
-using BokehLab;
-
-namespace BokehLab.Spreading.Test
+﻿namespace BokehLab.Spreading.Test
 {
+    using System.Drawing;
+    using BokehLab.FloatMap;
+    using BokehLab.Math;
+    using BokehLab.Spreading;
+    using Xunit;
+
     public class HybridSpreadingFilterTest
     {
         private static readonly float CRITERION_THRESHOLD = 0.3f;

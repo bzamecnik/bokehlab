@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OpenTK;
-using BokehLab.Lens;
-using BokehLab.FloatMap;
-
-namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using BokehLab.Math;
+
     // TODO:
     // - create a similar transform as is in Senzor
 

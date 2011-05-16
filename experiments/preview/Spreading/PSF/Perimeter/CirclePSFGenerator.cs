@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-
-namespace BokehLab.Spreading.PSF.Perimeter
+﻿namespace BokehLab.Spreading.PSF.Perimeter
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
+
     // TODO: sample the deltas using a circle eqation instead of
     // Windows.Drawing rasterization
 

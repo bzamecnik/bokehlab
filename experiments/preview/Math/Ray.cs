@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OpenTK;
-
-namespace BokehLab.Lens
+﻿namespace BokehLab.Math
 {
+    using System;
+    using OpenTK;
+
     public class Ray
     {
         public Vector3d Origin { get; set; }

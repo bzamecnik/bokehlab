@@ -1,9 +1,10 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-
-namespace BokehLab.FloatMap
+﻿namespace BokehLab.FloatMap
 {
+    using System;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using BokehLab.Math;
+
     /// <summary>
     /// Extensions methods for conversion between low dynamic range bitmaps
     /// and high dynamic range float maps.

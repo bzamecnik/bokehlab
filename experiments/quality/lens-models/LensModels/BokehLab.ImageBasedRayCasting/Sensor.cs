@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using BokehLab.FloatMap;
-using OpenTK;
-
-namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using System.Drawing;
+    using OpenTK;
+
     // Normalized senzor space:
     // 2D space [0; 1] x [0; AspectRatio]. X goes right, Y goes up.
     // When senzor is not tilted or shifted in any way it matches with camera

@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BokehLab.Spreading.GUI.Properties {
-    using System;
-    
-    
+namespace BokehLab.Spreading.GUI.Properties
+{
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>

@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.IO;
-using System.Drawing.Imaging;
-using BokehLab.FloatMap;
-
-// TODO:
+﻿// TODO:
 // - add controls for selecting the blur source (depth map, procedure, constant, ...)
 
 namespace BokehLab.Spreading.GUI
 {
+    using System;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.Windows.Forms;
+    using BokehLab.FloatMap;
+
     public partial class SpreadingForm : Form
     {
         private static readonly int MAX_GENERATED_PSF_RADIUS = 50;

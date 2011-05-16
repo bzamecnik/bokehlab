@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Globalization;
-using BokehLab.FloatMap;
-using System.Drawing;
-using System.Drawing.Imaging;
-
-namespace BokehLab.FloatMap.Util
+﻿namespace BokehLab.FloatMap.Util
 {
+    using System;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.Globalization;
+
     class Program
     {
         private static void ReadAndWriteTestImage(string filename) {
@@ -49,7 +45,7 @@ namespace BokehLab.FloatMap.Util
 
         public static FloatMapImage CreateTestImage()
         {
-            FloatMapImage image = new FloatMapImage(5, 7, PixelFormat.Greyscale);
+            FloatMapImage image = new FloatMapImage(5, 7, BokehLab.FloatMap.PixelFormat.Greyscale);
             for (int y = 0; y < image.Height; y++)
             {
                 for (int x = 0; x < image.Width; x++)

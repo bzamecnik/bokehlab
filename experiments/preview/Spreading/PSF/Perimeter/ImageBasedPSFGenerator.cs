@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace BokehLab.Spreading.PSF.Perimeter
+﻿namespace BokehLab.Spreading.PSF.Perimeter
 {
+    using System.Collections.Generic;
+
     // - final goal: use an arbitrary image as a PSF
     // - temporary implementation: draw a circle
 

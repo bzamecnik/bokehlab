@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace BokehLab.FloatMap
+﻿namespace BokehLab.FloatMap
 {
+    using System;
+
     public static class PixelFormatExtensions
     {
         public static bool HasAlpha(this PixelFormat pixelFormat)

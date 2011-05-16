@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Diagnostics;
-using OpenTK;
-
-namespace BokehLab.Lens
+﻿namespace BokehLab.Lens
 {
+    using System;
+    using System.Diagnostics;
+    using BokehLab.Math;
+    using OpenTK;
+
     public class ThinLens
     {
         /// <summary>

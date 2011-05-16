@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace BokehLab
+﻿namespace BokehLab.Math
 {
+    using System;
+
     public class MathHelper
     {
         public static T Clamp<T>(T number, T min, T max)
-            where T : System.IComparable<T>
+            where T : IComparable<T>
         {
             if (number.CompareTo(min) < 0) return min;
             if (number.CompareTo(max) > 0) return max;
