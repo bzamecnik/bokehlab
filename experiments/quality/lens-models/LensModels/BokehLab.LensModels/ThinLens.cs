@@ -113,7 +113,8 @@
 
         public Vector2d GenerateLensPositionSample()
         {
-            return sampler.UniformSampleDisk(sampler.GenerateRandomTuple());
+            //return sampler.UniformSampleDisk(sampler.GenerateRandomTuple());
+            return sampler.ConcentricSampleDisk(sampler.GenerateRandomTuple());
         }
 
         private bool IsPointWithinLens(Vector3d point)
