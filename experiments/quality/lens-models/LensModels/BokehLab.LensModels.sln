@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Math", "..\..\..\c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Math.Test", "..\..\..\common\BokehLab.Math.Test\BokehLab.Math.Test.csproj", "{170C330B-1396-4EE5-B5C5-7B115929A7A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.RayTracing", "BokehLab.RayTracing\BokehLab.RayTracing.csproj", "{01CE30B1-4554-40A6-B462-9F2157E0E3F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,6 +96,16 @@ Global
 		{170C330B-1396-4EE5-B5C5-7B115929A7A0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{170C330B-1396-4EE5-B5C5-7B115929A7A0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{170C330B-1396-4EE5-B5C5-7B115929A7A0}.Release|x86.ActiveCfg = Release|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{01CE30B1-4554-40A6-B462-9F2157E0E3F4}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -49,17 +49,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Camera.cs" />
     <Compile Include="IbrtForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="IbrtForm.Designer.cs">
       <DependentUpon>IbrtForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="IIntersectable.cs" />
     <Compile Include="ImageLayer.cs" />
-    <Compile Include="Intersection.cs" />
-    <Compile Include="IRenderer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="IbrtForm.resx">
@@ -86,7 +82,6 @@
     </Compile>
     <Compile Include="RayTracer.cs" />
     <Compile Include="Scene.cs" />
-    <Compile Include="Sensor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\common\BokehLab.FloatMap\BokehLab.FloatMap.csproj">
@@ -100,6 +95,10 @@
     <ProjectReference Include="..\BokehLab.Lens\BokehLab.Lens.csproj">
       <Project>{5F147FC9-B3DE-4C21-B13C-E2CFF298FC26}</Project>
       <Name>BokehLab.Lens</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BokehLab.RayTracing\BokehLab.RayTracing.csproj">
+      <Project>{01CE30B1-4554-40A6-B462-9F2157E0E3F4}</Project>
+      <Name>BokehLab.RayTracing</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

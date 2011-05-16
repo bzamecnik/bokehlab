@@ -1,6 +1,7 @@
 ﻿namespace BokehLab.ImageBasedRayCasting
 {
     using BokehLab.Math;
+    using BokehLab.RayTracing;
 
     public class Scene : IIntersectable
     {

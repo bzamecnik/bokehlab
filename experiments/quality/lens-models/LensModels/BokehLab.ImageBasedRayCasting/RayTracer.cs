@@ -4,6 +4,7 @@
     using System.Drawing;
     using BokehLab.FloatMap;
     using BokehLab.Math;
+    using BokehLab.RayTracing;
     using OpenTK;
 
     public class RayTracer : IRenderer
@@ -63,7 +64,7 @@
 
                         for (int i = 0; i < outputImage.ColorChannelsCount; i++)
                         {
-                            color[i] += intersection.color[i];
+                            color[i] += intersection.Color[i];
                         }
                     }
                     for (int i = 0; i < outputImage.ColorChannelsCount; i++)

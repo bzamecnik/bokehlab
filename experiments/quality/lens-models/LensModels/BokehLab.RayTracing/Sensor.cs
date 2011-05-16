@@ -1,6 +1,7 @@
-﻿namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.RayTracing
 {
     using System.Drawing;
+    using BokehLab.Math;
     using OpenTK;
 
     // Normalized senzor space:
@@ -10,7 +11,7 @@
     // (towards lens and scene) and camera space Z axis extends in front of
     // the senzor (toward the viewer).
 
-    public class Sensor
+    public class Sensor : IIntersectable
     {
         Size rasterSize { get; set; }
         public Size RasterSize
@@ -57,7 +58,12 @@
         public Vector3d Shift
         {
             get { return shift; }
-            set { shift = value; UpdateSenzorToCamera(); }
+            set
+            {
+                shift = value;
+                UpdateSenzorToCamera();
+                Plane.Origin = Shift;
+            }
         }
 
         private Vector3d tilt;
@@ -67,7 +73,12 @@
         public Vector3d Tilt
         {
             get { return tilt; }
-            set { tilt = value; UpdateSenzorToCamera(); }
+            set
+            {
+                tilt = value;
+                UpdateSenzorToCamera();
+                Plane.Normal = Vector3d.Transform(Vector3d.UnitZ, TiltMatrix);
+            }
         }
 
         private Matrix4d senzorToCamera;
@@ -91,15 +102,30 @@
         /// </summary>
         public Matrix4d CameraToSenzor { get; private set; }
 
+        private Matrix4d TiltMatrix { get; set; }
+
+        private Plane Plane { get; set; }
+
         public Sensor()
         {
+            Plane = new Plane();
             Width = 1.0;
             RasterSize = new Size(1, 1);
             Shift = new Vector3d(0, 0, 2);
             senzorToCamera = Matrix4d.Identity;
             CameraToSenzor = Matrix4d.Identity;
             tilt = Vector3d.Zero;
+
         }
+
+        #region IIntersectable Members
+
+        public Intersection Intersect(Ray ray)
+        {
+            return Plane.Intersect(ray);
+        }
+
+        #endregion
 
         private void UpdateSenzorToCamera()
         {
@@ -110,18 +136,20 @@
             var matrix = Matrix4d.CreateTranslation(-0.5, AspectRatio * -0.5, 0);
             matrix = Matrix4d.Mult(matrix, Matrix4d.Scale(Width, Width, 1));
             matrix = Matrix4d.Mult(matrix, Matrix4d.CreateTranslation(Shift));
+            TiltMatrix = Matrix4d.Identity;
             if (Tilt.X != 0)
             {
-                matrix = Matrix4d.Mult(matrix, Matrix4d.CreateRotationX(Tilt.X));
+                TiltMatrix = Matrix4d.CreateRotationX(Tilt.X);
             }
             if (Tilt.Y != 0)
             {
-                matrix = Matrix4d.Mult(matrix, Matrix4d.CreateRotationY(Tilt.Y));
+                TiltMatrix = Matrix4d.Mult(TiltMatrix, Matrix4d.CreateRotationY(Tilt.Y));
             }
             if (Tilt.Z != 0)
             {
-                matrix = Matrix4d.Mult(matrix, Matrix4d.CreateRotationZ(Tilt.Z));
+                TiltMatrix = Matrix4d.Mult(TiltMatrix, Matrix4d.CreateRotationZ(Tilt.Z));
             }
+            matrix = Matrix4d.Mult(matrix, TiltMatrix);
             SenzorToCamera = matrix;
         }
 

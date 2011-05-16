@@ -63,7 +63,7 @@
 
             OpenLayerImage("TestData/testImage.jpg");
 
-            //rayTracer.Scene.Layer.Normal = new Vector3d(1, 1, 1);
+            //rayTracer.Scene.Layer.Plane.Normal = new Vector3d(1, 1, 1);
 
             sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
 
@@ -71,8 +71,8 @@
             rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
             senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
 
-            rayTracer.Scene.Layer.Origin = new Vector3d(0, 0, -20);
-            layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Origin.Z;
+            rayTracer.Scene.Layer.Plane.Origin = new Vector3d(0, 0, -20);
+            layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Plane.Origin.Z;
 
             lensFocalLengthNumeric.Value = (decimal)thinLens.FocalLength;
             lensApertureNumeric.Value = (decimal)thinLens.ApertureRadius;
@@ -86,9 +86,9 @@
             senzorShift.Z = (double)senzorShiftZNumeric.Value;
             rayTracer.Camera.Sensor.Shift = senzorShift;
 
-            Vector3d sceneOrigin = rayTracer.Scene.Layer.Origin;
+            Vector3d sceneOrigin = rayTracer.Scene.Layer.Plane.Origin;
             sceneOrigin.Z = (double)layerZNumeric.Value;
-            rayTracer.Scene.Layer.Origin = sceneOrigin;
+            rayTracer.Scene.Layer.Plane.Origin = sceneOrigin;
 
             RenderImage();
         }
@@ -104,9 +104,9 @@
 
         private void layerZNumeric_ValueChanged(object sender, EventArgs e)
         {
-            Vector3d sceneOrigin = rayTracer.Scene.Layer.Origin;
+            Vector3d sceneOrigin = rayTracer.Scene.Layer.Plane.Origin;
             sceneOrigin.Z = (double)layerZNumeric.Value;
-            rayTracer.Scene.Layer.Origin = sceneOrigin;
+            rayTracer.Scene.Layer.Plane.Origin = sceneOrigin;
 
             RenderImage();
         }

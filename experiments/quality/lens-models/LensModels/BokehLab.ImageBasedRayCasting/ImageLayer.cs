@@ -3,6 +3,7 @@
     using System.Drawing;
     using BokehLab.FloatMap;
     using BokehLab.Math;
+    using BokehLab.RayTracing;
     using OpenTK;
 
     public class ImageLayer : IIntersectable
@@ -14,9 +15,7 @@
         // The scene shading is precomputed and colors stored in
         // a float map.
 
-        public Vector3d Origin { get; set; }
-
-        public Vector3d Normal { get; set; }
+        public Plane Plane { get; set; }
 
         private FloatMapImage image;
         public FloatMapImage Image
@@ -92,8 +91,11 @@
         {
             objectToWorld = Matrix4d.Identity;
             WorldToObject = Matrix4d.Identity;
-            Origin = new Vector3d(0, 0, -1);
-            Normal = new Vector3d(0, 0, 1);
+            Plane = new Plane()
+            {
+                Origin = new Vector3d(0, 0, -1),
+                Normal = new Vector3d(0, 0, 1)
+            };
             Width = 10.0;
             RasterSize = new Size(1, 1);
         }
@@ -103,17 +105,15 @@
         public Intersection Intersect(Ray ray)
         {
             // intersect
-
-            double t = Vector3d.Dot((Origin - ray.Origin), Normal)
-                / Vector3d.Dot(ray.Direction, Normal);
-            Vector3d? intersectionPos = ray.Evaluate(t);
-            if (!intersectionPos.HasValue)
+            Intersection intersection = Plane.Intersect(ray);
+            if (intersection == null)
             {
                 return null;
             }
+            Vector3d intersectionPos = intersection.Position;
 
             // compute 2D position in image coordinates
-            Vector2d intPosImage = WorldToImage(intersectionPos.Value);
+            Vector2d intPosImage = WorldToImage(intersectionPos);
             if ((intPosImage.X < 0) || (intPosImage.X >= RasterSize.Width) ||
                 (intPosImage.Y < 0) || (intPosImage.Y >= RasterSize.Height))
             {
@@ -130,7 +130,7 @@
             {
                 color[i] = Image.Image[x, y, i];
             }
-            return new Intersection(intersectionPos.Value, color);
+            return new Intersection(intersectionPos, color);
         }
 
         #endregion
@@ -142,7 +142,7 @@
             // - translate by origin
             var matrix = Matrix4d.CreateTranslation(-0.5, AspectRatio * -0.5, 0);
             matrix = Matrix4d.Mult(matrix, Matrix4d.Scale(Width, Width, 1));
-            matrix = Matrix4d.Mult(matrix, Matrix4d.CreateTranslation(Origin));
+            matrix = Matrix4d.Mult(matrix, Matrix4d.CreateTranslation(Plane.Origin));
             ObjectToWorld = matrix;
         }
 

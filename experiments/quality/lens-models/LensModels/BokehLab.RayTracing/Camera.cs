@@ -1,4 +1,4 @@
-﻿namespace BokehLab.ImageBasedRayCasting
+﻿namespace BokehLab.RayTracing
 {
     using BokehLab.Lens;
     using BokehLab.Math;

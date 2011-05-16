@@ -5,9 +5,10 @@
     using BokehLab.FloatMap;
     using BokehLab.Lens;
     using BokehLab.Math;
+    using BokehLab.RayTracing;
     using OpenTK;
 
-    public class LightTracer
+    public class LightTracer : IRenderer
     {
         public Vector3d LightSourcePosition { get; set; }
 
@@ -28,36 +29,28 @@
 
         public ThinLens Lens { get; set; }
 
-        public int SampleCount { get; set; }
-
         public float LightIntensity { get; set; }
-
-        private FloatMapImage senzorFloatMap;
 
         public LightTracer()
         {
             LightSourcePosition = new Vector3d(0, 0, 20);
             SenzorCenter = new Vector3d(0, 0, -10);
             SensorSize = new Vector2d(4, 4);
-            RasterSize = new Size(500, 500);
             SampleCount = 1000;
             Lens = new ThinLens(10, 1);
             LightIntensity = 0.5f;
-            senzorFloatMap = new FloatMapImage((uint)RasterSize.Width, (uint)RasterSize.Height, PixelFormat.Greyscale);
         }
 
-        // TODO:
-        // - use a FloatMap as the senzor, then tone-map it to a Bitmap
 
-        public Bitmap TraceLight()
+        #region IRenderer Members
+
+        public int SampleCount { get; set; }
+
+        public FloatMapImage RenderImage(Size imageSize)
         {
-            for (int y = 0; y < senzorFloatMap.Height; y++)
-            {
-                for (int x = 0; x < senzorFloatMap.Width; x++)
-                {
-                    senzorFloatMap.Image[x, y, 0] = 0;
-                }
-            }
+            int height = imageSize.Height;
+            int width = imageSize.Width;
+            FloatMapImage outputImage = new FloatMapImage((uint)width, (uint)height, PixelFormat.Greyscale);
 
             Sampler sampler = new Sampler();
             int SqrtSampleCount = (int)Math.Sqrt(SampleCount);
@@ -69,22 +62,28 @@
                 // make an incoming ray from the light source to the lens sample and
                 // transfer the incoming ray through the lens creating the outgoing ray
                 Ray outgoingRay = Lens.Transfer(LightSourcePosition, lensPos);
+                if (outgoingRay == null)
+                {
+                    continue;
+                }
                 // intersect the senzor with the outgoing ray
                 double t = (SenzorCenter.Z - outgoingRay.Origin.Z) / outgoingRay.Direction.Z;
                 Vector3d intersectionPoint = outgoingRay.Origin + t * outgoingRay.Direction;
-                Vector2d intersectionPixelPoint = SenzorToRaster(intersectionPoint.Xy);
+                Vector2d intersectionPixelPoint = SenzorToRaster(intersectionPoint.Xy, imageSize);
                 // put a splat on the senzor at the intersection
-                Splat(senzorFloatMap, LightIntensity, intersectionPixelPoint);
+                Splat(outputImage, LightIntensity, intersectionPixelPoint);
             }
 
-            return senzorFloatMap.ToBitmap();
+            return outputImage;
         }
+
+        #endregion
 
         private void Splat(FloatMapImage senzor, float lightIntensity, Vector2d intersectionPixelPoint)
         {
             int x = (int)intersectionPixelPoint.X;
             int y = (int)intersectionPixelPoint.Y;
-            if ((x >= 0) && (x < RasterSize.Width) && (y >= 0) && (y < RasterSize.Height))
+            if ((x >= 0) && (x < senzor.Width) && (y >= 0) && (y < senzor.Height))
             {
                 senzor.Image[x, y, 0] += lightIntensity;
             }
@@ -95,11 +94,11 @@
         /// </summary>
         /// <param name="senzorPos"></param>
         /// <returns></returns>
-        private Vector2d SenzorToRaster(Vector2d senzorPos)
+        private Vector2d SenzorToRaster(Vector2d senzorPos, Size senzorSize)
         {
             return new Vector2d(
-                (senzorPos.X / (1 * SensorSize.X) + 0.5) * RasterSize.Width,
-                (1 - (senzorPos.Y / (1 * SensorSize.Y) + 0.5)) * RasterSize.Height
+                (senzorPos.X / (1 * SensorSize.X) + 0.5) * senzorSize.Width,
+                (1 - (senzorPos.Y / (1 * SensorSize.Y) + 0.5)) * senzorSize.Height
                 );
         }
     }

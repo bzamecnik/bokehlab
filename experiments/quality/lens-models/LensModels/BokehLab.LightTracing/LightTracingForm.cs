@@ -4,6 +4,7 @@
     using System.Diagnostics;
     using System.Windows.Forms;
     using OpenTK;
+    using BokehLab.FloatMap;
 
     public partial class LightTracingForm : Form
     {
@@ -32,7 +33,7 @@
         private void Recompute()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-            pictureBox1.Image = lightTracer.TraceLight();
+            pictureBox1.Image = lightTracer.RenderImage(pictureBox1.Size).ToBitmap();
             stopwatch.Stop();
             elapsedTimeStatusLabel.Text = string.Format("{0} ms", stopwatch.ElapsedMilliseconds);
         }
