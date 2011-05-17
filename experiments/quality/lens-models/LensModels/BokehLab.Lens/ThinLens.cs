@@ -119,7 +119,7 @@
             {
                 outputDirection -= lensPos;
             }
-            if (Math.Abs(objectPos.Z) < FocalLength)
+            if (Math.Abs(objectPos.Z) <= FocalLength)
             {
                 // the image of the incoming ray origin was in the same
                 // half-plane as the origin itself

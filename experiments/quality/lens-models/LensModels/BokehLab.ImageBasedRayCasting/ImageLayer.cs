@@ -1,5 +1,6 @@
 ﻿namespace BokehLab.ImageBasedRayCasting
 {
+    using System;
     using System.Drawing;
     using BokehLab.FloatMap;
     using BokehLab.Math;
@@ -15,7 +16,33 @@
         // The scene shading is precomputed and colors stored in
         // a float map.
 
-        public Plane Plane { get; set; }
+        private Plane Plane { get; set; }
+
+        private double depth;
+        public double Depth
+        {
+            get { return depth; }
+            set
+            {
+                depth = value;
+                Plane.Origin = new Vector3d(Plane.Origin.X, Plane.Origin.Y, depth);
+                UpdateWidth();
+                UpdateObjectToWorld();
+            }
+        }
+
+        // TODO: fix it to be the correct FOV angle, not just a magic constant
+        private double fieldOfView;
+        public double FieldOfView
+        {
+            get { return fieldOfView; }
+            set
+            {
+                fieldOfView = value;
+                UpdateWidth();
+                UpdateObjectToWorld();
+            }
+        }
 
         private FloatMapImage image;
         public FloatMapImage Image
@@ -38,22 +65,17 @@
 
         private Size RasterSize { get; set; }
 
-        private double width;
         /// <summary>
         /// Senzor width in camera space. Its height is determined by the
         /// aspect ratio.
         /// </summary>
-        public double Width
-        {
-            get { return width; }
-            set { width = value; UpdateObjectToWorld(); }
-        }
+        private double Width { get; set; }
 
         /// <summary>
         /// Senzor height in camera space. It is determined by the
         /// senzor width and aspect ratio.
         /// </summary>
-        public double Height { get { return Width * AspectRatio; } }
+        private double Height { get { return Width * AspectRatio; } }
 
         /// <summary>
         /// The ratio of height/width.
@@ -96,7 +118,8 @@
                 Origin = new Vector3d(0, 0, -1),
                 Normal = new Vector3d(0, 0, 1)
             };
-            Width = 10.0;
+            Depth = -20;
+            FieldOfView = 0.5;
             RasterSize = new Size(1, 1);
         }
 
@@ -145,6 +168,12 @@
             matrix = Matrix4d.Mult(matrix, Matrix4d.CreateTranslation(Plane.Origin));
             ObjectToWorld = matrix;
         }
+
+        private void UpdateWidth()
+        {
+            Width = FieldOfView * Math.Abs(Depth);
+        }
+
 
         public Vector3d ImageToWorld(Vector2d imagePos)
         {

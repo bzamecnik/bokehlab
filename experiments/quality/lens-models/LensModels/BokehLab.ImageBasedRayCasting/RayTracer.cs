@@ -35,6 +35,11 @@
             int sqrtSampleCount = (int)Math.Sqrt(SampleCount);
             int totalSampleCount = sqrtSampleCount * sqrtSampleCount;
 
+            // NOTE: It is not useful to directly use the same lens samples
+            // for each pixel in the whole image. This leads to ugly artifacts
+            // and surprisigly there is only an insignificant performance
+            // benefit.
+
             float[] color = new float[outputImage.ColorChannelsCount];
             for (int y = 0; y < height; y++)
             {

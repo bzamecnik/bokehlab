@@ -59,7 +59,7 @@
             rayTracer.Camera.Lens = thinLens;
             //rayTracer.Camera.Lens = new PinholeLens();
 
-            rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
+            //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
 
             OpenLayerImage("TestData/testImage.jpg");
 
@@ -71,8 +71,8 @@
             rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
             senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
 
-            rayTracer.Scene.Layer.Plane.Origin = new Vector3d(0, 0, -20);
-            layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Plane.Origin.Z;
+            rayTracer.Scene.Layer.Depth = -20;
+            layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Depth;
 
             lensFocalLengthNumeric.Value = (decimal)thinLens.FocalLength;
             lensApertureNumeric.Value = (decimal)thinLens.ApertureRadius;
@@ -86,9 +86,7 @@
             senzorShift.Z = (double)senzorShiftZNumeric.Value;
             rayTracer.Camera.Sensor.Shift = senzorShift;
 
-            Vector3d sceneOrigin = rayTracer.Scene.Layer.Plane.Origin;
-            sceneOrigin.Z = (double)layerZNumeric.Value;
-            rayTracer.Scene.Layer.Plane.Origin = sceneOrigin;
+            rayTracer.Scene.Layer.Depth = (double)layerZNumeric.Value;
 
             RenderImage();
         }
@@ -104,9 +102,7 @@
 
         private void layerZNumeric_ValueChanged(object sender, EventArgs e)
         {
-            Vector3d sceneOrigin = rayTracer.Scene.Layer.Plane.Origin;
-            sceneOrigin.Z = (double)layerZNumeric.Value;
-            rayTracer.Scene.Layer.Plane.Origin = sceneOrigin;
+            rayTracer.Scene.Layer.Depth = (double)layerZNumeric.Value;
 
             RenderImage();
         }
