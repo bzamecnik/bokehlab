@@ -52,9 +52,11 @@
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Size outputImageSize = pictureBox1.Size;
+            //Size outputImageSize = pictureBox1.Size;
+            Size outputImageSize = new Size(450, 300);
             outputSizeXNumeric.Value = outputImageSize.Width;
             outputSizeYNumeric.Value = outputImageSize.Height;
+            specificOutputSizeCheckBox.Checked = true;
 
             rayTracer.Camera.Lens = thinLens;
             //rayTracer.Camera.Lens = new PinholeLens();
@@ -87,15 +89,6 @@
             rayTracer.Camera.Sensor.Shift = senzorShift;
 
             rayTracer.Scene.Layer.Depth = (double)layerZNumeric.Value;
-
-            RenderImage();
-        }
-
-        private void senzorShiftZNumeric_ValueChanged(object sender, EventArgs e)
-        {
-            Vector3d senzorShift = rayTracer.Camera.Sensor.Shift;
-            senzorShift.Z = (double)senzorShiftZNumeric.Value;
-            rayTracer.Camera.Sensor.Shift = senzorShift;
 
             RenderImage();
         }
@@ -195,6 +188,74 @@
         private void tonemapOutputCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             ShowImage();
+        }
+
+        private Vector3d UpdateVector3dComponent(Vector3d vector, NumericUpDown numeric, string component)
+        {
+            Vector3d updated = vector;
+            double newValue = (double)numeric.Value;
+            switch (component)
+            {
+                case "X": updated.X = newValue; break;
+                case "Y": updated.Y = newValue; break;
+                case "Z": updated.Z = newValue; break;
+            }
+            return updated;
+        }
+
+        private void senzorTiltXNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.Camera.Sensor.Tilt =
+                UpdateVector3dComponent(rayTracer.Camera.Sensor.Tilt,
+                senzorTiltXNumeric, "X");
+
+            RenderImage();
+        }
+
+        private void senzorTiltYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.Camera.Sensor.Tilt =
+                UpdateVector3dComponent(rayTracer.Camera.Sensor.Tilt,
+                senzorTiltYNumeric, "Y");
+
+            RenderImage();
+        }
+
+
+        private void senzorTiltZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.Camera.Sensor.Tilt =
+                UpdateVector3dComponent(rayTracer.Camera.Sensor.Tilt,
+                senzorTiltZNumeric, "Z");
+
+            RenderImage();
+        }
+
+        private void senzorShiftXNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.Camera.Sensor.Shift =
+                UpdateVector3dComponent(rayTracer.Camera.Sensor.Shift,
+                senzorShiftXNumeric, "X");
+
+            RenderImage();
+        }
+
+        private void senzorShiftYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.Camera.Sensor.Shift =
+                UpdateVector3dComponent(rayTracer.Camera.Sensor.Shift,
+                senzorShiftYNumeric, "Y");
+
+            RenderImage();
+        }
+
+        private void senzorShiftZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.Camera.Sensor.Shift =
+                UpdateVector3dComponent(rayTracer.Camera.Sensor.Shift,
+                senzorShiftZNumeric, "Z");
+
+            RenderImage();
         }
     }
 }
