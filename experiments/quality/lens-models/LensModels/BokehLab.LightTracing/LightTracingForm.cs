@@ -24,8 +24,8 @@
             lightYNumeric.Value = (decimal)lightTracer.LightSourcePosition.Y;
             lightZNumeric.Value = (decimal)lightTracer.LightSourcePosition.Z;
             senzorCenterZNumeric.Value = (decimal)lightTracer.Sensor.Shift.Z;
-            lensFocalLengthNumeric.Value = (decimal)lightTracer.Lens.FocalLength;
-            lensApertureNumeric.Value = (decimal)lightTracer.Lens.ApertureRadius;
+            lensFocalLengthNumeric.Value = (decimal)lightTracer.ThinLens.FocalLength;
+            lensApertureNumeric.Value = (decimal)lightTracer.ThinLens.ApertureRadius;
             lightIntensityNumeric.Value = (decimal)lightTracer.LightIntensity;
             sampleCountNumeric.Value = (decimal)lightTracer.SampleCount;
         }
@@ -76,13 +76,13 @@
 
         private void lensFocalLengthNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lightTracer.Lens.FocalLength = (double)lensFocalLengthNumeric.Value;
+            lightTracer.ThinLens.FocalLength = (double)lensFocalLengthNumeric.Value;
             Recompute();
         }
 
         private void lensApertureNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lightTracer.Lens.ApertureRadius = (double)lensApertureNumeric.Value;
+            lightTracer.ThinLens.ApertureRadius = (double)lensApertureNumeric.Value;
             Recompute();
         }
 

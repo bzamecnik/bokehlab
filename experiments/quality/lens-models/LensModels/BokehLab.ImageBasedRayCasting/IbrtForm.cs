@@ -58,8 +58,9 @@
             outputSizeYNumeric.Value = outputImageSize.Height;
             specificOutputSizeCheckBox.Checked = true;
 
-            rayTracer.Camera.Lens = thinLens;
+            //rayTracer.Camera.Lens = thinLens;
             //rayTracer.Camera.Lens = new PinholeLens();
+            rayTracer.Camera.Lens = new LensWithTwoStops() { Lens = thinLens };
 
             //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
 

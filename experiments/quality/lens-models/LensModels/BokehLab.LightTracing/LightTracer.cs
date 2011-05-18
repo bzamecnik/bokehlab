@@ -14,7 +14,8 @@
 
         public Sensor Sensor { get; set; }
 
-        public ThinLens Lens { get; set; }
+        public ThinLens ThinLens { get; set; }
+        public ILens Lens { get; set; }
 
         public float LightIntensity { get; set; }
 
@@ -25,10 +26,15 @@
             {
                 Shift = new Vector3d(0, 0, 10),
                 Width = 4,
-                Tilt = new Vector3d(0.1, 0.1, 0)
+                Tilt = new Vector3d(0, 0, 0)
             };
             SampleCount = 1000;
-            Lens = new ThinLens(10, 1);
+            ThinLens = new ThinLens(10, 1);
+            //Lens = ThinLens;
+            LensWithTwoStops vignettingLens = new LensWithTwoStops() { Lens = ThinLens };
+            vignettingLens.BackStop.Z = -1;
+            vignettingLens.FrontStop.Z = 1;
+            Lens = vignettingLens;
             LightIntensity = 0.5f;
         }
 
