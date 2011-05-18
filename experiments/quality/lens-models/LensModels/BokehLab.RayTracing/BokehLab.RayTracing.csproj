@@ -48,12 +48,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="Circle.cs" />
     <Compile Include="IIntersectable.cs" />
     <Compile Include="Intersection.cs" />
     <Compile Include="IRenderer.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sensor.cs" />
+    <Compile Include="Sphere.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\common\BokehLab.FloatMap\BokehLab.FloatMap.csproj">
