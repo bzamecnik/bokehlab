@@ -36,6 +36,95 @@
             return Origin + t * Direction;
         }
 
+        public Ray Reflect(Vector3d normal)
+        {
+            return Reflect(this, normal);
+        }
+
+        public Ray Refract(Vector3d normal, double n1, double n2)
+        {
+            return Refract(this, normal, n1, n2);
+        }
+
+        public static Ray Reflect(Ray incoming, Vector3d normal)
+        {
+            Ray reflected = new Ray(
+                incoming.Origin,
+                Reflect(incoming.Direction, normal));
+            return reflected;
+        }
+
+        public static Ray Refract(Ray incoming, Vector3d normal, double n1, double n2)
+        {
+            Ray reflected = new Ray(
+                incoming.Origin,
+                Refract(incoming.Direction, normal, n1, n2, false));
+            return reflected;
+        }
+
+        /// <summary>
+        /// Reflects the ray incoming at a surface with given normal.
+        /// </summary>
+        /// <param name="incoming">Incoming ray direction. Must be normalized.
+        /// </param>
+        /// <param name="normal">Direction of normal to the surface. Must be
+        /// normalized.</param>
+        /// <returns>Reflected ray direction. Is normalized.</returns>
+        public static Vector3d Reflect(Vector3d incoming, Vector3d normal)
+        {
+            double cosIncoming = Vector3d.Dot(normal, incoming);
+            Vector3d reflected = incoming - (2 * cosIncoming) * normal;
+            return reflected;
+        }
+
+        /// <summary>
+        /// Refracts the ray incoming at a surface with given normal.
+        /// </summary>
+        /// <param name="incoming">Incoming ray direction. Must be normalized.
+        /// </param>
+        /// <param name="normal">Direction of normal to the surface. Must be
+        /// normalized. Must be in from the same half-space as the incoming ray
+        /// comes from (also it must point to the material with index of
+        /// refraction n1).
+        /// </param>
+        /// <param name="n1">Index of refraction of material from which the
+        /// incoming ray comes. Normal point to this material.</param>
+        /// <param name="n2">Index of refraction of material where the
+        /// incoming ray might get refracted.
+        /// </param>
+        /// <param name="computeTotalInternalReflection">
+        /// Indicates whether the method should compute the vector of total
+        /// internal reflection or just return a zero vector.
+        /// </param>
+        /// <returns></returns>
+        public static Vector3d Refract(
+            Vector3d incoming,
+            Vector3d normal,
+            double n1,
+            double n2, bool computeTotalInternalReflection)
+        {
+            double cosIncoming = Vector3d.Dot(normal, incoming);
+            double eta = n1 / n2;
+            double sinRefractedSqr = eta * eta * (1 - cosIncoming * cosIncoming);
+            if (sinRefractedSqr <= 1)
+            {
+                // refraction
+                return (eta * incoming) - (eta + Math.Sqrt(1 - sinRefractedSqr)) * normal;
+            }
+            else
+            {
+                // total internal reflection - compute only if wanted
+                if (computeTotalInternalReflection)
+                {
+                    return Reflect(incoming, normal);
+                }
+                else
+                {
+                    return Vector3d.Zero;
+                }
+            }
+        }
+
         // override object.Equals
         public override bool Equals(object obj)
         {
