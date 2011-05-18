@@ -67,13 +67,12 @@
         /// </returns>
         public static Vector2d ConcentricSampleDisk(Vector2d randomNumbers)
         {
-            double phi;
-            double r;
-
             // convert from [0; 1]^2 to [-1; 1]^2
             double a = 2 * randomNumbers.X - 1;
             double b = 2 * randomNumbers.Y - 1;
 
+            double phi;
+            double r;
             if (a > -b)
             {
                 // region 1 or 2
@@ -81,13 +80,13 @@
                 {
                     // region 1, |a| > |b|
                     r = a;
-                    phi = 0.25 * Math.PI * (b / a);
+                    phi = b / a;
                 }
                 else
                 {
                     // region 2, |b| > |a|
                     r = b;
-                    phi = 0.25 * Math.PI * (2 - (a / b));
+                    phi = 2 - (a / b);
                 }
             }
             else
@@ -97,7 +96,7 @@
                 {
                     // region 3, |a| >= |b|, a != 0
                     r = -a;
-                    phi = 0.25 * Math.PI * (4 + (b / a));
+                    phi = 4 + (b / a);
                 }
                 else
                 {
@@ -105,7 +104,7 @@
                     r = -b;
                     if (b != 0)
                     {
-                        phi = 0.25 * Math.PI * (6 - (a / b));
+                        phi = 6 - (a / b);
                     }
                     else
                     {
@@ -113,11 +112,69 @@
                     }
                 }
             }
+            phi *= 0.25 * Math.PI;
             // transform back from polar coordinates
             var diskSamples = new Vector2d(
                 r * Math.Cos(phi),
                 r * Math.Sin(phi));
             return diskSamples;
+        }
+
+        /// <summary>
+        /// Generates a uniform random sample point on a unit hemisphere with
+        /// its base at the XY plane and normal pointing to Z direction.
+        /// </summary>
+        /// <param name="randomNumbers">Random numbers from a square
+        /// [0; 1] x [0; 1].</param>
+        /// <returns>Point on the hemisphere.</returns>
+        public static Vector3d UniformSampleHemisphere(Vector2d randomNumbers)
+        {
+            double sinTheta = randomNumbers.X;
+            double cosTheta = Math.Sqrt(1 - sinTheta * sinTheta);
+            double phi = 2 * Math.PI * randomNumbers.Y;
+            Vector3d hemisphereSample = new Vector3d(
+                Math.Cos(phi) * cosTheta,
+                Math.Sin(phi) * cosTheta,
+                sinTheta);
+            return hemisphereSample;
+        }
+
+        /// <summary>
+        /// Generates a uniform random sample point on a unit sphere or its
+        /// strip (truncated from poles no Z axis).
+        /// </summary>
+        /// <remarks>
+        /// (minSinTheta, maxSinTheta):
+        /// (-1,1) - full sphere
+        /// (-1,0) - lower hemisphere
+        /// (0,1)  - upper hemisphere
+        /// (sin(theta),1) - upper spherical cap
+        /// 
+        /// Theta is the elevation angle (measure from the XY plane).
+        /// -PI/2 = lower pole (-Z),
+        /// 0     = XY plane,
+        /// PI/2  = upper pole (Z)
+        /// </remarks>
+        /// <param name="randomNumbers">Random numbers from a square
+        /// [0; 1] x [0; 1].</param>
+        /// <param name="minSinTheta">Sine of minimum elevation angle.</param>
+        /// <param name="maxSinTheta">Sine of maximum elevation angle.</param>
+        /// <returns>Point on the sphere.</returns>
+        public static Vector3d UniformSampleSphere(
+            Vector2d randomNumbers,
+            double minSinTheta,
+            double maxSinTheta)
+        {
+            minSinTheta = Math.Max(minSinTheta, -1);
+            maxSinTheta = Math.Min(maxSinTheta, 1);
+            double sinTheta = minSinTheta + (maxSinTheta - minSinTheta) * randomNumbers.X;
+            double cosTheta = Math.Sqrt(1 - sinTheta * sinTheta);
+            double phi = 2 * Math.PI * randomNumbers.Y;
+            Vector3d sphereSample = new Vector3d(
+                Math.Cos(phi) * cosTheta,
+                Math.Sin(phi) * cosTheta,
+                sinTheta);
+            return sphereSample;
         }
 
         /// <summary>

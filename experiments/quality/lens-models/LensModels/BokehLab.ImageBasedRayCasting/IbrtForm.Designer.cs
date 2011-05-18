@@ -43,8 +43,11 @@
             this.label3 = new System.Windows.Forms.Label();
             this.layerZNumeric = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
+            this.senzorShiftZNumeric = new System.Windows.Forms.NumericUpDown();
+            this.senzorShiftYNumeric = new System.Windows.Forms.NumericUpDown();
             this.senzorTiltZNumeric = new System.Windows.Forms.NumericUpDown();
             this.senzorTiltYNumeric = new System.Windows.Forms.NumericUpDown();
+            this.senzorShiftXNumeric = new System.Windows.Forms.NumericUpDown();
             this.label8 = new System.Windows.Forms.Label();
             this.senzorTiltXNumeric = new System.Windows.Forms.NumericUpDown();
             this.label6 = new System.Windows.Forms.Label();
@@ -59,9 +62,6 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.renderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.senzorShiftXNumeric = new System.Windows.Forms.NumericUpDown();
-            this.senzorShiftYNumeric = new System.Windows.Forms.NumericUpDown();
-            this.senzorShiftZNumeric = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lensFocalLengthNumeric)).BeginInit();
@@ -70,14 +70,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.outputSizeXNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sampleCountNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layerZNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftYNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltZNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltYNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftXNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltXNumeric)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftXNumeric)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftYNumeric)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -148,7 +148,7 @@
             // 
             // lensFocalLengthNumeric
             // 
-            this.lensFocalLengthNumeric.DecimalPlaces = 1;
+            this.lensFocalLengthNumeric.DecimalPlaces = 3;
             this.lensFocalLengthNumeric.Location = new System.Drawing.Point(109, 71);
             this.lensFocalLengthNumeric.Name = "lensFocalLengthNumeric";
             this.lensFocalLengthNumeric.Size = new System.Drawing.Size(60, 20);
@@ -166,7 +166,7 @@
             // 
             // lensApertureNumeric
             // 
-            this.lensApertureNumeric.DecimalPlaces = 1;
+            this.lensApertureNumeric.DecimalPlaces = 2;
             this.lensApertureNumeric.Location = new System.Drawing.Point(109, 45);
             this.lensApertureNumeric.Name = "lensApertureNumeric";
             this.lensApertureNumeric.Size = new System.Drawing.Size(60, 20);
@@ -261,7 +261,7 @@
             // 
             // layerZNumeric
             // 
-            this.layerZNumeric.DecimalPlaces = 1;
+            this.layerZNumeric.DecimalPlaces = 3;
             this.layerZNumeric.Location = new System.Drawing.Point(109, 97);
             this.layerZNumeric.Maximum = new decimal(new int[] {
             100000,
@@ -286,6 +286,54 @@
             this.label2.Size = new System.Drawing.Size(91, 13);
             this.label2.TabIndex = 0;
             this.label2.Text = "Layer position (Z):";
+            // 
+            // senzorShiftZNumeric
+            // 
+            this.senzorShiftZNumeric.DecimalPlaces = 2;
+            this.senzorShiftZNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.senzorShiftZNumeric.Location = new System.Drawing.Point(120, 178);
+            this.senzorShiftZNumeric.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.senzorShiftZNumeric.Minimum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            -2147483648});
+            this.senzorShiftZNumeric.Name = "senzorShiftZNumeric";
+            this.senzorShiftZNumeric.Size = new System.Drawing.Size(49, 20);
+            this.senzorShiftZNumeric.TabIndex = 10;
+            this.senzorShiftZNumeric.ValueChanged += new System.EventHandler(this.senzorShiftZNumeric_ValueChanged);
+            // 
+            // senzorShiftYNumeric
+            // 
+            this.senzorShiftYNumeric.DecimalPlaces = 2;
+            this.senzorShiftYNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.senzorShiftYNumeric.Location = new System.Drawing.Point(69, 178);
+            this.senzorShiftYNumeric.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.senzorShiftYNumeric.Minimum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            -2147483648});
+            this.senzorShiftYNumeric.Name = "senzorShiftYNumeric";
+            this.senzorShiftYNumeric.Size = new System.Drawing.Size(45, 20);
+            this.senzorShiftYNumeric.TabIndex = 9;
+            this.senzorShiftYNumeric.ValueChanged += new System.EventHandler(this.senzorShiftYNumeric_ValueChanged);
             // 
             // senzorTiltZNumeric
             // 
@@ -334,6 +382,30 @@
             this.senzorTiltYNumeric.Size = new System.Drawing.Size(45, 20);
             this.senzorTiltYNumeric.TabIndex = 6;
             this.senzorTiltYNumeric.ValueChanged += new System.EventHandler(this.senzorTiltYNumeric_ValueChanged);
+            // 
+            // senzorShiftXNumeric
+            // 
+            this.senzorShiftXNumeric.DecimalPlaces = 2;
+            this.senzorShiftXNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.senzorShiftXNumeric.Location = new System.Drawing.Point(9, 178);
+            this.senzorShiftXNumeric.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.senzorShiftXNumeric.Minimum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            -2147483648});
+            this.senzorShiftXNumeric.Name = "senzorShiftXNumeric";
+            this.senzorShiftXNumeric.Size = new System.Drawing.Size(54, 20);
+            this.senzorShiftXNumeric.TabIndex = 8;
+            this.senzorShiftXNumeric.ValueChanged += new System.EventHandler(this.senzorShiftXNumeric_ValueChanged);
             // 
             // label8
             // 
@@ -459,78 +531,6 @@
             this.renderToolStripMenuItem.Text = "&Render";
             this.renderToolStripMenuItem.Click += new System.EventHandler(this.renderToolStripMenuItem_Click);
             // 
-            // senzorShiftXNumeric
-            // 
-            this.senzorShiftXNumeric.DecimalPlaces = 2;
-            this.senzorShiftXNumeric.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.senzorShiftXNumeric.Location = new System.Drawing.Point(9, 178);
-            this.senzorShiftXNumeric.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.senzorShiftXNumeric.Minimum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            -2147483648});
-            this.senzorShiftXNumeric.Name = "senzorShiftXNumeric";
-            this.senzorShiftXNumeric.Size = new System.Drawing.Size(54, 20);
-            this.senzorShiftXNumeric.TabIndex = 8;
-            this.senzorShiftXNumeric.ValueChanged += new System.EventHandler(this.senzorShiftXNumeric_ValueChanged);
-            // 
-            // senzorShiftYNumeric
-            // 
-            this.senzorShiftYNumeric.DecimalPlaces = 2;
-            this.senzorShiftYNumeric.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.senzorShiftYNumeric.Location = new System.Drawing.Point(69, 178);
-            this.senzorShiftYNumeric.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.senzorShiftYNumeric.Minimum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            -2147483648});
-            this.senzorShiftYNumeric.Name = "senzorShiftYNumeric";
-            this.senzorShiftYNumeric.Size = new System.Drawing.Size(45, 20);
-            this.senzorShiftYNumeric.TabIndex = 9;
-            this.senzorShiftYNumeric.ValueChanged += new System.EventHandler(this.senzorShiftYNumeric_ValueChanged);
-            // 
-            // senzorShiftZNumeric
-            // 
-            this.senzorShiftZNumeric.DecimalPlaces = 2;
-            this.senzorShiftZNumeric.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.senzorShiftZNumeric.Location = new System.Drawing.Point(120, 178);
-            this.senzorShiftZNumeric.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.senzorShiftZNumeric.Minimum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            -2147483648});
-            this.senzorShiftZNumeric.Name = "senzorShiftZNumeric";
-            this.senzorShiftZNumeric.Size = new System.Drawing.Size(49, 20);
-            this.senzorShiftZNumeric.TabIndex = 10;
-            this.senzorShiftZNumeric.ValueChanged += new System.EventHandler(this.senzorShiftZNumeric_ValueChanged);
-            // 
             // IbrtForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -554,16 +554,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.outputSizeXNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sampleCountNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layerZNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftYNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltZNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltYNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftXNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltXNumeric)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftXNumeric)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftYNumeric)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorShiftZNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

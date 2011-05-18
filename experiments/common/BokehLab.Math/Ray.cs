@@ -56,10 +56,9 @@
 
         public static Ray Refract(Ray incoming, Vector3d normal, double n1, double n2)
         {
-            Ray reflected = new Ray(
-                incoming.Origin,
-                Refract(incoming.Direction, normal, n1, n2, false));
-            return reflected;
+            Vector3d direction = Refract(incoming.Direction, normal, n1, n2, false);
+            Ray refracted = new Ray(incoming.Origin, direction);
+            return refracted;
         }
 
         /// <summary>
@@ -109,6 +108,7 @@
             if (sinRefractedSqr <= 1)
             {
                 // refraction
+                // TODO: the result should be normalized, but it isn't!
                 return (eta * incoming) - (eta + Math.Sqrt(1 - sinRefractedSqr)) * normal;
             }
             else
@@ -154,7 +154,11 @@
 
         public override string ToString()
         {
-            return String.Format("[{0} -> {1}]", Origin, Direction);
+            //return String.Format("[{0} -> {1}]", Origin, Direction);
+            Vector3d target = Origin + Direction;
+            return String.Format(System.Globalization.CultureInfo.InvariantCulture.NumberFormat,
+                "Arrow[{{{{ {0:0.##},{1:0.##},{2:0.##} }}, {{ {3:0.##},{4:0.##},{5:0.##} }}}}]",
+                Origin.X, Origin.Y, Origin.Z, target.X, target.Y, target.Z);
         }
     }
 }

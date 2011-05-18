@@ -16,14 +16,57 @@
         FloatMapImage layerImage;
         FloatMapImage outputImage;
 
+        bool initialized = false;
+
         public IbrtForm()
         {
             InitializeComponent();
             thinLens.FocalLength = 10;
+
+            //Size outputImageSize = pictureBox1.Size;
+            Size outputImageSize = new Size(450, 300);
+
+            //Size outputImageSize = new Size(10, 10);
+            outputSizeXNumeric.Value = outputImageSize.Width;
+            outputSizeYNumeric.Value = outputImageSize.Height;
+            specificOutputSizeCheckBox.Checked = true;
+
+            //rayTracer.Camera.Lens = thinLens;
+            //rayTracer.Camera.Lens = new PinholeLens();
+            //rayTracer.Camera.Lens = new LensWithTwoStops() { Lens = thinLens };
+            rayTracer.Camera.Lens = new BiconvexLens();
+
+            //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
+
+            OpenLayerImage("TestData/testImage.jpg");
+
+            //rayTracer.Scene.Layer.Plane.Normal = new Vector3d(1, 1, 1);
+
+            sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
+
+            //rayTracer.Camera.Sensor.Width = 10;
+            rayTracer.Camera.Sensor.Width = 2;
+            //rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
+            rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 5);
+            senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
+
+            //rayTracer.Scene.Layer.Depth = -20;
+            rayTracer.Scene.Layer.Depth = -2.18;
+            layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Depth;
+
+            lensFocalLengthNumeric.Value = (decimal)thinLens.FocalLength;
+            lensApertureNumeric.Value = (decimal)thinLens.ApertureRadius;
+
+            initialized = true;
         }
 
         private void RenderImage()
         {
+            if (!initialized)
+            {
+                return;
+            }
+
             Cursor = Cursors.WaitCursor;
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -52,34 +95,6 @@
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //Size outputImageSize = pictureBox1.Size;
-            Size outputImageSize = new Size(450, 300);
-            outputSizeXNumeric.Value = outputImageSize.Width;
-            outputSizeYNumeric.Value = outputImageSize.Height;
-            specificOutputSizeCheckBox.Checked = true;
-
-            //rayTracer.Camera.Lens = thinLens;
-            //rayTracer.Camera.Lens = new PinholeLens();
-            rayTracer.Camera.Lens = new LensWithTwoStops() { Lens = thinLens };
-
-            //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
-
-            OpenLayerImage("TestData/testImage.jpg");
-
-            //rayTracer.Scene.Layer.Plane.Normal = new Vector3d(1, 1, 1);
-
-            sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
-
-            rayTracer.Camera.Sensor.Width = 10;
-            rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
-            senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
-
-            rayTracer.Scene.Layer.Depth = -20;
-            layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Depth;
-
-            lensFocalLengthNumeric.Value = (decimal)thinLens.FocalLength;
-            lensApertureNumeric.Value = (decimal)thinLens.ApertureRadius;
-
             RenderImage();
         }
 
