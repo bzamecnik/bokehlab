@@ -3,23 +3,25 @@
     using BokehLab.Math;
     using OpenTK;
 
-    public class PinholeLens : ILens
+    public class LensWithTwoStops : ILens
     {
+        ILens Lens;
+
         #region ILens Members
 
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
-            return new Ray(lensPos, lensPos - objectPos);
+            throw new System.NotImplementedException();
         }
 
         public Vector3d GetBackSurfaceSample(Vector2d sample)
         {
-            return Vector3d.Zero;
+            throw new System.NotImplementedException();
         }
 
         public Vector3d GetFrontSurfaceSample(Vector2d sample)
         {
-            return Vector3d.Zero;
+            throw new System.NotImplementedException();
         }
 
         #endregion
