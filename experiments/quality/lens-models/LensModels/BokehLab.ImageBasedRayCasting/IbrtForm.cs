@@ -5,7 +5,7 @@
     using System.Drawing;
     using System.Windows.Forms;
     using BokehLab.FloatMap;
-    using BokehLab.Lens;
+    using BokehLab.RayTracing.Lens;
     using OpenTK;
 
     public partial class IbrtForm : Form

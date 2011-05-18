@@ -1,4 +1,4 @@
-﻿namespace BokehLab.Lens.Test
+﻿namespace BokehLab.RayTracing.Lens.Test
 {
     using System.Collections.Generic;
     using BokehLab.Math;
@@ -119,7 +119,7 @@
         //    Ray incomingRay = new Ray(objectPos, direction);
         //    Ray expectedRay = new Ray(lensPos, new Vector3d(-2.5, -3.5, 7.5));
         //    Ray outgoingRay = thinLens.Transfer(incomingRay);
-            
+
         //    Assert.NotNull(outgoingRay);
         //    Assert.Equal(expectedRay, outgoingRay, rayComparer);
         //}
@@ -189,7 +189,7 @@
         //public void TestTransferRayOutsideAperture()
         //{
         //    // ray outside aperture but on the lens plane
-            
+
         //    // should return null
         //}
 

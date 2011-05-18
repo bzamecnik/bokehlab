@@ -42,11 +42,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BiconvexLens.cs" />
-    <Compile Include="ILens.cs" />
-    <Compile Include="LensWithTwoStops.cs" />
-    <Compile Include="PinholeLens.cs" />
-    <Compile Include="ThinLens.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

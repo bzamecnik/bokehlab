@@ -1,4 +1,4 @@
-﻿namespace BokehLab.Lens
+﻿namespace BokehLab.RayTracing.Lens
 {
     using System;
     using System.Collections.Generic;

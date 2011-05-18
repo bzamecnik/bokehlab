@@ -1,4 +1,4 @@
-﻿namespace BokehLab.Lens
+﻿namespace BokehLab.RayTracing.Lens
 {
     using BokehLab.Math;
     using OpenTK;

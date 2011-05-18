@@ -3,7 +3,7 @@
     using System;
     using System.Drawing;
     using BokehLab.FloatMap;
-    using BokehLab.Lens;
+    using BokehLab.RayTracing.Lens;
     using BokehLab.Math;
     using BokehLab.RayTracing;
     using OpenTK;

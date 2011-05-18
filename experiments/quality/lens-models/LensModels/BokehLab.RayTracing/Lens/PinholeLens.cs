@@ -1,26 +1,25 @@
-﻿namespace BokehLab.Lens
+﻿namespace BokehLab.RayTracing.Lens
 {
-    using System;
     using BokehLab.Math;
     using OpenTK;
 
-    class BiconvexLens : ILens
+    public class PinholeLens : ILens
     {
         #region ILens Members
 
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
-            throw new NotImplementedException();
+            return new Ray(lensPos, lensPos - objectPos);
         }
 
         public Vector3d GetBackSurfaceSample(Vector2d sample)
         {
-            throw new NotImplementedException();
+            return Vector3d.Zero;
         }
 
         public Vector3d GetFrontSurfaceSample(Vector2d sample)
         {
-            throw new NotImplementedException();
+            return Vector3d.Zero;
         }
 
         #endregion

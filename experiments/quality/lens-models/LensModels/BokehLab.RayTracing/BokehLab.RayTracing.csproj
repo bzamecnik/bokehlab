@@ -52,6 +52,11 @@
     <Compile Include="IIntersectable.cs" />
     <Compile Include="Intersection.cs" />
     <Compile Include="IRenderer.cs" />
+    <Compile Include="Lens\BiconvexLens.cs" />
+    <Compile Include="Lens\ILens.cs" />
+    <Compile Include="Lens\LensWithTwoStops.cs" />
+    <Compile Include="Lens\PinholeLens.cs" />
+    <Compile Include="Lens\ThinLens.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sensor.cs" />
@@ -65,10 +70,6 @@
     <ProjectReference Include="..\..\..\..\common\BokehLab.Math\BokehLab.Math.csproj">
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BokehLab.Lens\BokehLab.Lens.csproj">
-      <Project>{5F147FC9-B3DE-4C21-B13C-E2CFF298FC26}</Project>
-      <Name>BokehLab.Lens</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -92,10 +92,6 @@
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>
     </ProjectReference>
-    <ProjectReference Include="..\BokehLab.Lens\BokehLab.Lens.csproj">
-      <Project>{5F147FC9-B3DE-4C21-B13C-E2CFF298FC26}</Project>
-      <Name>BokehLab.Lens</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BokehLab.RayTracing\BokehLab.RayTracing.csproj">
       <Project>{01CE30B1-4554-40A6-B462-9F2157E0E3F4}</Project>
       <Name>BokehLab.RayTracing</Name>
