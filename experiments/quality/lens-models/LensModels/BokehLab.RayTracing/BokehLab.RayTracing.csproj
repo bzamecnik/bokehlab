@@ -53,6 +53,7 @@
     <Compile Include="Intersection.cs" />
     <Compile Include="IRenderer.cs" />
     <Compile Include="Lens\BiconvexLens.cs" />
+    <Compile Include="Lens\Materials.cs" />
     <Compile Include="Lens\ILens.cs" />
     <Compile Include="Lens\LensWithTwoStops.cs" />
     <Compile Include="Lens\PinholeLens.cs" />
