@@ -10,6 +10,12 @@
 
         public Vector3d Center { get; set; }
 
+        public Sphere()
+        {
+            Radius = 1;
+            Center = Vector3d.Zero;
+        }
+
         #region IIntersectable Members
 
         public Intersection Intersect(Ray ray)
@@ -18,39 +24,52 @@
 
             // T is a point in the middle of the segment between the two
             // intersections (if they exist).
+            // T is also projection of Center to the ray, thus (T-Center) is
+            // perpendicular to (T-Origin).
+
+            // we must work with normalized ray direction
+            Vector3d direction = ray.Direction;
+            direction.Normalize();
 
             Vector3d b = Center - ray.Origin;
             // |b|^2
             double bLengthSqr = Vector3d.Dot(b, b);
-            // length od projection of b to ray.Direction
-            // t0 = |(T-Center)| = |b.direction|
-            // t0 is a ray parameter, T = Origin + t0 * Direction
-            double t0 = Math.Abs(Vector3d.Dot(b, ray.Direction));
-            // d = |(S-T)|, d^2 = |b|^2 - t0^2 (Pythagorean theorem)
+
+            // t_0 is the length od projection of b to ray.Direction
+            // t_0 = |(T-Origin)| = |b.direction|
+            // t_0 is a ray parameter, T = Origin + t_0 * Direction
+            double t0 = Math.Abs(Vector3d.Dot(b, direction));
+            // d = |(T-Center)|, d^2 = |b|^2 - t_0^2 (Pythagorean theorem)
             double dSqr = bLengthSqr - t0 * t0;
-            // td ... distance from T to the intersection(s)
-            // td^2 = Radius^2 - d^2 (Pythagorean theorem again)
-            // td also acts as a ray parameter
+            // t_d ... distance from T to the intersection(s)
+            // t_d^2 = Radius^2 - d^2 (Pythagorean theorem again)
+            // t_d also acts as a ray parameter
             double tdSqr = Radius * Radius - dSqr;
 
             Vector3d intersection;
             // TODO: use a better epsilon
             if (tdSqr > Double.Epsilon)
             {
-                // two intersections, at Center + (t0 +/- td) * Direction
+                // two intersections, at Origin + (t_0 +/- t_d) * Direction
                 // we're intereseted only in the first intersection
                 double td = Math.Sqrt(tdSqr);
-                intersection = Center + (t0 - td) * ray.Direction;
+                double t = t0 - td;
+                if (Math.Abs(t) < double.Epsilon)
+                {
+                    // ray origin is the first intersection
+                    t = t0 + td;
+                }
+                intersection = ray.Origin + t * direction;
             }
             else if (tdSqr < -Double.Epsilon)
             {
                 // no intersection
                 return null;
             }
-            else // if (tdSqr == 0)
+            else // if ((t_d)^2 == 0)
             {
-                // one (double) intersection, at Center + t0 * Direction
-                intersection = Center + t0 * ray.Direction;
+                // one (double) intersection, at Origin + t_0 * Direction
+                intersection = ray.Origin + t0 * direction;
             }
             return new Intersection(intersection, null);
         }
