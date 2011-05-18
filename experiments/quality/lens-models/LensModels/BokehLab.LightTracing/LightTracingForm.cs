@@ -23,7 +23,12 @@
             lightXNumeric.Value = (decimal)lightTracer.LightSourcePosition.X;
             lightYNumeric.Value = (decimal)lightTracer.LightSourcePosition.Y;
             lightZNumeric.Value = (decimal)lightTracer.LightSourcePosition.Z;
-            senzorCenterZNumeric.Value = (decimal)lightTracer.Sensor.Shift.Z;
+            senzorTiltXNumeric.Value = (decimal)lightTracer.Sensor.Tilt.X;
+            senzorTiltYNumeric.Value = (decimal)lightTracer.Sensor.Tilt.Y;
+            senzorTiltZNumeric.Value = (decimal)lightTracer.Sensor.Tilt.Z;
+            senzorShiftXNumeric.Value = (decimal)lightTracer.Sensor.Shift.X;
+            senzorShiftYNumeric.Value = (decimal)lightTracer.Sensor.Shift.Y;
+            senzorShiftZNumeric.Value = (decimal)lightTracer.Sensor.Shift.Z;
             lensFocalLengthNumeric.Value = (decimal)lightTracer.ThinLens.FocalLength;
             lensApertureNumeric.Value = (decimal)lightTracer.ThinLens.ApertureRadius;
             lightIntensityNumeric.Value = (decimal)lightTracer.LightIntensity;
@@ -40,37 +45,22 @@
 
         private void lightXNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lightTracer.LightSourcePosition = new Vector3d(
-                (double)lightXNumeric.Value,
-                lightTracer.LightSourcePosition.Y,
-                lightTracer.LightSourcePosition.Z);
+            lightTracer.LightSourcePosition =
+                GetVectorFromControls(lightXNumeric, lightYNumeric, lightZNumeric);
             Recompute();
         }
 
         private void lightYNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lightTracer.LightSourcePosition = new Vector3d(
-                lightTracer.LightSourcePosition.X,
-                (double)lightYNumeric.Value,
-                lightTracer.LightSourcePosition.Z);
+            lightTracer.LightSourcePosition =
+                GetVectorFromControls(lightXNumeric, lightYNumeric, lightZNumeric);
             Recompute();
         }
 
         private void lightZNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lightTracer.LightSourcePosition = new Vector3d(
-                lightTracer.LightSourcePosition.X,
-                lightTracer.LightSourcePosition.Y,
-                (double)lightZNumeric.Value);
-            Recompute();
-        }
-
-        private void senzorCenterZNumeric_ValueChanged(object sender, EventArgs e)
-        {
-            lightTracer.Sensor.Shift = new Vector3d(
-                lightTracer.Sensor.Shift.X,
-                lightTracer.Sensor.Shift.Y,
-                (double)senzorCenterZNumeric.Value);
+            lightTracer.LightSourcePosition =
+                GetVectorFromControls(lightXNumeric, lightYNumeric, lightZNumeric);
             Recompute();
         }
 
@@ -96,6 +86,59 @@
         {
             lightTracer.SampleCount = (int)sampleCountNumeric.Value;
             Recompute();
+        }
+
+        private void senzorTiltXNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lightTracer.Sensor.Tilt =
+                GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
+            Recompute();
+        }
+
+        private void senzorTiltYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lightTracer.Sensor.Tilt =
+                GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
+            Recompute();
+        }
+
+        private void senzorTiltZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lightTracer.Sensor.Tilt =
+                GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
+            Recompute();
+        }
+
+        private void senzorShiftXNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lightTracer.Sensor.Shift =
+                GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
+            Recompute();
+        }
+
+        private void senzorShiftYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lightTracer.Sensor.Shift =
+                GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
+            Recompute();
+        }
+
+        private void senzorShiftZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lightTracer.Sensor.Shift =
+                GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
+            Recompute();
+        }
+
+        private Vector3d GetVectorFromControls(
+            NumericUpDown xNumeric,
+            NumericUpDown yNumeric,
+            NumericUpDown zNumeric)
+        {
+            return new Vector3d(
+                (double)xNumeric.Value,
+                (double)yNumeric.Value,
+                (double)zNumeric.Value);
         }
     }
 }

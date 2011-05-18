@@ -191,24 +191,10 @@
             ShowImage();
         }
 
-        private Vector3d UpdateVector3dComponent(Vector3d vector, NumericUpDown numeric, string component)
-        {
-            Vector3d updated = vector;
-            double newValue = (double)numeric.Value;
-            switch (component)
-            {
-                case "X": updated.X = newValue; break;
-                case "Y": updated.Y = newValue; break;
-                case "Z": updated.Z = newValue; break;
-            }
-            return updated;
-        }
-
         private void senzorTiltXNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Camera.Sensor.Tilt =
-                UpdateVector3dComponent(rayTracer.Camera.Sensor.Tilt,
-                senzorTiltXNumeric, "X");
+                GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
 
             RenderImage();
         }
@@ -216,8 +202,7 @@
         private void senzorTiltYNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Camera.Sensor.Tilt =
-                UpdateVector3dComponent(rayTracer.Camera.Sensor.Tilt,
-                senzorTiltYNumeric, "Y");
+                GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
 
             RenderImage();
         }
@@ -226,8 +211,7 @@
         private void senzorTiltZNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Camera.Sensor.Tilt =
-                UpdateVector3dComponent(rayTracer.Camera.Sensor.Tilt,
-                senzorTiltZNumeric, "Z");
+                GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
 
             RenderImage();
         }
@@ -235,8 +219,7 @@
         private void senzorShiftXNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Camera.Sensor.Shift =
-                UpdateVector3dComponent(rayTracer.Camera.Sensor.Shift,
-                senzorShiftXNumeric, "X");
+                GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
 
             RenderImage();
         }
@@ -244,8 +227,7 @@
         private void senzorShiftYNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Camera.Sensor.Shift =
-                UpdateVector3dComponent(rayTracer.Camera.Sensor.Shift,
-                senzorShiftYNumeric, "Y");
+                GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
 
             RenderImage();
         }
@@ -253,10 +235,20 @@
         private void senzorShiftZNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Camera.Sensor.Shift =
-                UpdateVector3dComponent(rayTracer.Camera.Sensor.Shift,
-                senzorShiftZNumeric, "Z");
+                GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
 
             RenderImage();
+        }
+
+        private Vector3d GetVectorFromControls(
+            NumericUpDown xNumeric,
+            NumericUpDown yNumeric,
+            NumericUpDown zNumeric)
+        {
+            return new Vector3d(
+                (double)xNumeric.Value,
+                (double)yNumeric.Value,
+                (double)zNumeric.Value);
         }
     }
 }
