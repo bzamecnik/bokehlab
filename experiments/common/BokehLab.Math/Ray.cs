@@ -164,11 +164,7 @@
 
         public override string ToString()
         {
-            //return String.Format("[{0} -> {1}]", Origin, Direction);
-            Vector3d target = Origin + Direction;
-            return String.Format(System.Globalization.CultureInfo.InvariantCulture.NumberFormat,
-                "Arrow[{{{{ {0:0.##},{1:0.##},{2:0.##} }}, {{ {3:0.##},{4:0.##},{5:0.##} }}}}]",
-                Origin.X, Origin.Y, Origin.Z, target.X, target.Y, target.Z);
+            return String.Format("[{0} -> {1}]", Origin, Direction);
         }
     }
 }
