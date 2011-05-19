@@ -68,6 +68,11 @@
             // lensPos should be already an intersection of of the incoming
             // ray with the back surface
 
+            if (lensPos.Z <= 0)
+            {
+                return null;
+            }
+
             // DEBUG
             //string incomingStr = new Ray(objectPos, lensPos - objectPos).ToString();
 

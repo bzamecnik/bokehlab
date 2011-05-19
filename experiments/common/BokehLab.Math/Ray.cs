@@ -79,15 +79,20 @@
         /// <summary>
         /// Refracts the ray incoming at a surface with given normal.
         /// </summary>
+        /// <remarks>
+        /// The result is normalized.
+        /// </remarks>
         /// <param name="incoming">Incoming ray direction. Must be normalized.
+        /// Direction of the incoming ray points to the opposite half-space as
+        /// the normal points.
         /// </param>
         /// <param name="normal">Direction of normal to the surface. Must be
         /// normalized. Must be in from the same half-space as the incoming ray
-        /// comes from (also it must point to the material with index of
-        /// refraction n1).
+        /// comes from (also the normal must point to the material with index
+        /// of refraction n1).
         /// </param>
-        /// <param name="n1">Index of refraction of material from which the
-        /// incoming ray comes. Normal point to this material.</param>
+        /// <param name="n1">Index of refraction of material which the
+        /// incoming ray comes from. Normal point to this material.</param>
         /// <param name="n2">Index of refraction of material where the
         /// incoming ray might get refracted.
         /// </param>
@@ -95,34 +100,39 @@
         /// Indicates whether the method should compute the vector of total
         /// internal reflection or just return a zero vector.
         /// </param>
-        /// <returns></returns>
+        /// <returns>Refracted vector (the result should be normalized),
+        /// reflected vector in case of TIR (and its computation computation
+        /// is enabled) or zero vector (if TIR computation is disabled).</returns>
         public static Vector3d Refract(
             Vector3d incoming,
             Vector3d normal,
             double n1,
             double n2, bool computeTotalInternalReflection)
         {
-            double cosIncoming = Vector3d.Dot(normal, incoming);
+            double cosIncoming = -Vector3d.Dot(normal, incoming);
             double eta = n1 / n2;
             double sinRefractedSqr = eta * eta * (1 - cosIncoming * cosIncoming);
+            Vector3d result;
             if (sinRefractedSqr <= 1)
             {
                 // refraction
-                // TODO: the result should be normalized, but it isn't!
-                return (eta * incoming) - (eta + Math.Sqrt(1 - sinRefractedSqr)) * normal;
+                // the result should be normalized
+                double cosRefracted = Math.Sqrt(1 - sinRefractedSqr);
+                result = (eta * incoming) + (eta * cosIncoming - cosRefracted) * normal;
             }
             else
             {
                 // total internal reflection - compute only if wanted
                 if (computeTotalInternalReflection)
                 {
-                    return Reflect(incoming, normal);
+                    result = Reflect(incoming, normal);
                 }
                 else
                 {
-                    return Vector3d.Zero;
+                    result = Vector3d.Zero;
                 }
             }
+            return result;
         }
 
         // override object.Equals
