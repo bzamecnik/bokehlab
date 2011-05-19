@@ -46,8 +46,9 @@
 
         private double sinTheta;
 
-        private Sphere backSurface;
-        private Sphere frontSurface;
+        // DEBUG (should be private)
+        internal Sphere backSurface;
+        internal Sphere frontSurface;
 
         public double RefractiveIndex { get; set; }
 

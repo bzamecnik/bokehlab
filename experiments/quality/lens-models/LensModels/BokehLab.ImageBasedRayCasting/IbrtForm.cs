@@ -24,9 +24,9 @@
             thinLens.FocalLength = 10;
 
             //Size outputImageSize = pictureBox1.Size;
-            Size outputImageSize = new Size(450, 300);
+            //Size outputImageSize = new Size(450, 300);
 
-            //Size outputImageSize = new Size(10, 10);
+            Size outputImageSize = new Size(10, 10);
             outputSizeXNumeric.Value = outputImageSize.Width;
             outputSizeYNumeric.Value = outputImageSize.Height;
             specificOutputSizeCheckBox.Checked = true;
