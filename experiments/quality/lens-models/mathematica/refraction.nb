@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     25210,        628]
-NotebookOptionsPosition[     24479,        601]
-NotebookOutlinePosition[     24921,        618]
-CellTagsIndexPosition[     24878,        615]
+NotebookDataLength[     27021,        675]
+NotebookOptionsPosition[     26136,        643]
+NotebookOutlinePosition[     26578,        660]
+CellTagsIndexPosition[     26535,        657]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -217,14 +217,14 @@ Cell[BoxData[
          "\[IndentingNewLine]", "]"}]}]}], "\[IndentingNewLine]", "]"}]}], 
     ";"}]}]}]], "Input",
  CellChangeTimes->CompressedData["
-1:eJxTTMoPSmViYGCQAmIQXcD9leeQ/itH4QReIRCd8mqnDIhmXKyvDqKrnrVp
+1:eJxTTMoPSmViYGCQBmIQXcD9leeQ/itH4QReIRCd8mqnDIhmXKyvDqKrnrVp
 g2j5k+cMQPQL/T0mIPrPtwduINplzkVfEO1oaOUHopsE7cJB9LfdHjEg2ou3
 pw5EpwUfqQfRF6wE+sHmfGsF0wJXw6aB6IQPrWDas61kFojecm0mmI64vfgE
 iHZq8DkLom+93/MPRLfIdjEcBtLHX9YWgmgVsbQiEC29waUXRF9oLYXQ845M
 BdGWufumgehU6YiVIDql+hKY1ji+ZC2I/vVdch2InhDlvhVEc4jeAtMbxFbt
 AtEG6pvA9LUtQkdA9CrBK9dA9I37aU9B9BTXR59A9E1TwZ9g85fd/QMWd1qg
-fgRI55m/A9MqYhrTQPS7CWvBdN50mzkg+seCGWDa5+6uzKNA+sxt/hwQDQCS
-i9qW
+fgRI55m/A9MqYhrTQPS7CWvBdN50mzkg+seCGWDa5+6uzKNA+sxt/hwQvfT5
+3XU/gHTM5OaNIBoAmDrkdQ==
   "]],
 
 Cell[BoxData[{
@@ -481,10 +481,10 @@ Cell[BoxData[{
 Cell[BoxData[
  TagBox[
   StyleBox[
-   DynamicModuleBox[{$CellContext`n1$$ = 2.54, $CellContext`n2$$ = 
-    1.5, $CellContext`r$$ = 
-    1, $CellContext`\[Theta]$$ = -1.0869910581420683`, $CellContext`\[Phi]$$ =
-     Rational[1, 2] Pi, Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+   DynamicModuleBox[{$CellContext`n1$$ = 1.51673, $CellContext`n2$$ = 
+    1.00027715, $CellContext`r$$ = 
+    1, $CellContext`\[Theta]$$ = -0.8922123136195013, $CellContext`\[Phi]$$ = 
+    Rational[1, 2] Pi, Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
     Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
     1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{{
        Hold[$CellContext`\[Theta]$$], 0.5}, Rational[-1, 2] Pi, 
@@ -597,7 +597,49 @@ Cell[BoxData["1.1790937672559656`"], "Output",
 }, Open  ]],
 
 Cell[BoxData[""], "Input",
- CellChangeTimes->{{3.51474459598876*^9, 3.5147445969748163`*^9}}]
+ CellChangeTimes->{{3.51474459598876*^9, 3.5147445969748163`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"refract", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"0.08944154477111", ",", "0", ",", 
+     RowBox[{"-", "0.995992073296247"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"0.227831898744329", ",", "0", ",", "0.973700480596859"}], "}"}], 
+   ",", "\[IndentingNewLine]", "1.51673", ",", "1.00027715"}], 
+  "]"}], "\[IndentingNewLine]", 
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"-", "0.410191871795244"}], ",", "0", ",", 
+   RowBox[{"-", "3.84290997942142"}]}], "}"}]}], "Input",
+ CellChangeTimes->{{3.514808602801549*^9, 3.514808650097254*^9}, {
+  3.5148116918172307`*^9, 3.514811728640337*^9}, {3.5148281499601555`*^9, 
+  3.5148281710573616`*^9}, {3.5148282593574123`*^9, 3.514828259594426*^9}, {
+  3.5148283249321632`*^9, 3.5148283606452055`*^9}, {3.5148285508010817`*^9, 
+  3.5148285978897753`*^9}, {3.5148286466395636`*^9, 3.514828647663622*^9}, {
+  3.514828712278318*^9, 3.51482877718003*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"-", "0.4101918717952435`"}], ",", "0.`", ",", 
+   RowBox[{"-", "3.8429099794214148`"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.5148285826839056`*^9, 3.514828599177849*^9}, {
+  3.5148286292765703`*^9, 3.5148286480306435`*^9}, {3.5148287330175037`*^9, 
+  3.5148287774650464`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"-", "0.410191871795244`"}], ",", "0", ",", 
+   RowBox[{"-", "3.84290997942142`"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.5148285826839056`*^9, 3.514828599177849*^9}, {
+  3.5148286292765703`*^9, 3.5148286480306435`*^9}, {3.5148287330175037`*^9, 
+  3.5148287774700465`*^9}}]
+}, Open  ]]
 },
 WindowSize->{916, 912},
 WindowMargins->{{0, Automatic}, {1, Automatic}},
@@ -618,18 +660,23 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[557, 20, 2934, 77, 449, "Input"],
-Cell[3494, 99, 5235, 128, 854, "Input"],
-Cell[8732, 229, 802, 23, 71, "Input"],
+Cell[3494, 99, 5255, 128, 854, "Input"],
+Cell[8752, 229, 802, 23, 71, "Input"],
 Cell[CellGroupData[{
-Cell[9559, 256, 9215, 222, 935, "Input"],
-Cell[18777, 480, 4064, 76, 851, "Output"]
+Cell[9579, 256, 9215, 222, 935, "Input"],
+Cell[18797, 480, 4073, 76, 851, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[22878, 561, 986, 21, 206, "Input"],
-Cell[23867, 584, 304, 6, 42, "Output"],
-Cell[24174, 592, 193, 3, 42, "Output"]
+Cell[22907, 561, 986, 21, 206, "Input"],
+Cell[23896, 584, 304, 6, 42, "Output"],
+Cell[24203, 592, 193, 3, 42, "Output"]
 }, Open  ]],
-Cell[24382, 598, 93, 1, 43, "Input"]
+Cell[24411, 598, 93, 1, 43, "Input"],
+Cell[CellGroupData[{
+Cell[24529, 603, 924, 19, 125, "Input"],
+Cell[25456, 624, 333, 7, 42, "Output"],
+Cell[25792, 633, 328, 7, 42, "Output"]
+}, Open  ]]
 }
 ]
 *)
