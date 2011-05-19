@@ -11,7 +11,7 @@
     /// The lens body is in fact the intersection of two spheres of the same
     /// size, only with different position.
     /// </remarks>
-    public class BiconvexLens : ILens
+    public class BiconvexLens : ILens, IIntersectable
     {
         private double apertureRadius;
 
@@ -44,6 +44,8 @@
             }
         }
 
+        private double sinTheta;
+
         private Sphere backSurface;
         private Sphere frontSurface;
 
@@ -52,10 +54,8 @@
         public BiconvexLens()
         {
             RefractiveIndex = Materials.Fixed.GLASS_CROWN_K7;
-            apertureRadius = 1;
-            curvatureRadius = 1;
-            //backSurface = new Sphere() { Radius = 2, Center = 0.7 * -2 * Vector3d.UnitZ };
-            //frontSurface = new Sphere() { Radius = 2, Center = 0.7 * 2 * Vector3d.UnitZ };
+            apertureRadius = 2;
+            curvatureRadius = 2.5;
             backSurface = new Sphere();
             frontSurface = new Sphere();
             UpdateSpheres();
@@ -77,8 +77,7 @@
             //string incomingStr = new Ray(objectPos, lensPos - objectPos).ToString();
 
             // refract the incoming ray
-            Vector3d incomingDir = lensPos - objectPos;
-            incomingDir.Normalize();
+            Vector3d incomingDir = Vector3d.Normalize(lensPos - objectPos);
             Vector3d direction = Ray.Refract(incomingDir, backSurface.GetNormal(lensPos),
                 Materials.Fixed.AIR, RefractiveIndex, false);
             if (direction == Vector3d.Zero)
@@ -95,15 +94,13 @@
             //Console.WriteLine(new Ray(lensPos, intersection.Position - lensPos));
             //string innerStr = new Ray(lensPos, intersection.Position - lensPos).ToString();
             // refract the ray again
-            direction = intersection.Position - lensPos;
-            direction.Normalize();
-            direction = Ray.Refract(-direction, -frontSurface.GetNormal(intersection.Position),
+            direction = Vector3d.Normalize(intersection.Position - lensPos);
+            direction = Ray.Refract(direction, -frontSurface.GetNormal(intersection.Position),
                 RefractiveIndex, Materials.Fixed.AIR, false);
             if (direction == Vector3d.Zero)
             {
                 return null;
             }
-            direction.Normalize();
             Ray transferredRay = new Ray(intersection.Position, direction);
             //DEBUG
             //Console.WriteLine(transferredRay);
@@ -115,7 +112,8 @@
         public Vector3d GetBackSurfaceSample(Vector2d sample)
         {
             // TODO: implement proper sampling with respect to the cap angle
-            Vector3d unitSphereSample = Sampler.UniformSampleHemisphere(sample);
+            //Vector3d unitSphereSample = Sampler.UniformSampleHemisphere(sample);
+            Vector3d unitSphereSample = Sampler.UniformSampleSphere(sample, sinTheta, 1);
             return backSurface.Center + backSurface.Radius * unitSphereSample;
         }
 
@@ -123,7 +121,8 @@
         {
             // TODO: implement proper sampling
             // front surface is in the -Z hemisphere
-            Vector3d unitSphereSample = Sampler.UniformSampleHemisphere(sample);
+            //Vector3d unitSphereSample = Sampler.UniformSampleHemisphere(sample);
+            Vector3d unitSphereSample = Sampler.UniformSampleSphere(sample, sinTheta, 1);
             return frontSurface.Center + frontSurface.Radius * (-unitSphereSample);
         }
 
@@ -131,10 +130,27 @@
 
         private void UpdateSpheres()
         {
-            // backSurface.Center = ...
-            // backSurface.Radius = ...
-            // frontSurface.Center = ...
-            // frontSurface.Radius = ...
+            double r = CurvatureRadius;
+            backSurface.Radius = r;
+            frontSurface.Radius = r;
+            Vector3d center = Math.Sqrt(r * r - ApertureRadius * ApertureRadius)
+                * Vector3d.UnitZ;
+            backSurface.Center = -center;
+            frontSurface.Center = center;
+            // theta is the elevation angle from the base plane to the start
+            // of the spherical cap
+            // cos(theta) = sin(pi/2 - theta)
+            double cosTheta = ApertureRadius / CurvatureRadius;
+            sinTheta = Math.Sqrt(1 - cosTheta * cosTheta);
         }
+
+        #region IIntersectable Members
+
+        public Intersection Intersect(Ray ray)
+        {
+            return backSurface.Intersect(ray);
+        }
+
+        #endregion
     }
 }
