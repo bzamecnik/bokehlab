@@ -38,7 +38,8 @@
             // t_0 is the length od projection of b to ray.Direction
             // t_0 = |(T-Origin)| = |b.direction|
             // t_0 is a ray parameter, T = Origin + t_0 * Direction
-            double t0 = Math.Abs(Vector3d.Dot(b, direction));
+            double bDotDirection = Vector3d.Dot(b, direction);
+            double t0 = Math.Abs(bDotDirection);
             // d = |(T-Center)|, d^2 = |b|^2 - t_0^2 (Pythagorean theorem)
             double dSqr = bLengthSqr - t0 * t0;
             // t_d ... distance from T to the intersection(s)
@@ -53,11 +54,17 @@
                 // two intersections, at Origin + (t_0 +/- t_d) * Direction
                 // we're intereseted only in the first intersection
                 double td = Math.Sqrt(tdSqr);
-                double t = t0 - td;
-                if (Math.Abs(t) < double.Epsilon)
+                double t = (t0 - td) * Math.Sign(bDotDirection);
+                if ((t < 0) || (Math.Abs(t) < double.Epsilon))
                 {
-                    // ray origin is the first intersection
+                    // the first intersection is behind the ray or
+                    // the ray origin is the first intersection
                     t = t0 + td;
+                }
+                if (t < 0)
+                {
+                    // intersection is behind the ray
+                    return null;
                 }
                 intersection = ray.Origin + t * direction;
             }
@@ -69,7 +76,13 @@
             else // if ((t_d)^2 == 0)
             {
                 // one (double) intersection, at Origin + t_0 * Direction
-                intersection = ray.Origin + t0 * direction;
+                double t = bDotDirection;
+                if (t < 0)
+                {
+                    // intersection is behind the ray
+                    return null;
+                }
+                intersection = ray.Origin + t * direction;
             }
             return new Intersection(intersection, null);
         }
