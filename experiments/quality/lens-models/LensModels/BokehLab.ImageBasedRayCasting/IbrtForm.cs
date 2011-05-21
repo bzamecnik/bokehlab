@@ -12,6 +12,11 @@
     {
         RayTracer rayTracer = new RayTracer();
         ThinLens thinLens = new ThinLens();
+        BiconvexLens biconvexLens = new BiconvexLens()
+        {
+            ApertureRadius = 1.8,
+            CurvatureRadius = 10
+        };
 
         FloatMapImage layerImage;
         FloatMapImage outputImage;
@@ -24,9 +29,9 @@
             thinLens.FocalLength = 10;
 
             //Size outputImageSize = pictureBox1.Size;
-            //Size outputImageSize = new Size(450, 300);
+            Size outputImageSize = new Size(450, 300);
 
-            Size outputImageSize = new Size(10, 10);
+            //Size outputImageSize = new Size(10, 10);
             outputSizeXNumeric.Value = outputImageSize.Width;
             outputSizeYNumeric.Value = outputImageSize.Height;
             specificOutputSizeCheckBox.Checked = true;
@@ -34,7 +39,8 @@
             //rayTracer.Camera.Lens = thinLens;
             //rayTracer.Camera.Lens = new PinholeLens();
             //rayTracer.Camera.Lens = new LensWithTwoStops() { Lens = thinLens };
-            rayTracer.Camera.Lens = new BiconvexLens();
+            rayTracer.Camera.Lens = biconvexLens;
+            //rayTracer.Scene.Layer.Depth = -biconvexLens.FocalLength;
 
             //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
 
@@ -44,14 +50,14 @@
 
             sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
 
-            //rayTracer.Camera.Sensor.Width = 10;
-            rayTracer.Camera.Sensor.Width = 2;
+            rayTracer.Camera.Sensor.Width = 6;
             //rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
-            rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 5);
+            //rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 5);
+            rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, biconvexLens.FocalLength);
             senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
 
-            //rayTracer.Scene.Layer.Depth = -20;
-            rayTracer.Scene.Layer.Depth = -2.18;
+            rayTracer.Scene.Layer.Depth = -1000;
+            //rayTracer.Scene.Layer.Depth = -2.18;
             layerZNumeric.Value = (decimal)rayTracer.Scene.Layer.Depth;
 
             lensFocalLengthNumeric.Value = (decimal)thinLens.FocalLength;

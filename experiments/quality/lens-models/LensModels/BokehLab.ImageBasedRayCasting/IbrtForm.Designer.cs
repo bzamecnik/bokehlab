@@ -248,7 +248,6 @@
             this.sampleCountNumeric.Name = "sampleCountNumeric";
             this.sampleCountNumeric.Size = new System.Drawing.Size(60, 20);
             this.sampleCountNumeric.TabIndex = 1;
-            this.sampleCountNumeric.ValueChanged += new System.EventHandler(this.sampleCountNumeric_ValueChanged);
             // 
             // label3
             // 

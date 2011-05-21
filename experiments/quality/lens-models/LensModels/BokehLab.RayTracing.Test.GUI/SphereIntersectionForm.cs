@@ -28,11 +28,11 @@
             InitializeComponent();
             sphere = new Sphere()
             {
-                Radius = 150,
+                Radius = 100,
                 Center = new Vector3d(0, 0, 0)
             };
-            double directionPhi = Math.PI;
-            incomingRay = new Ray(new Vector3d(0, 0, 250), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
+            double directionPhi = 0; // Math.PI;
+            incomingRay = new Ray(new Vector3d(5, 0, 110), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
 
             rayDirectionPhiNumeric.Value = (decimal)directionPhi;
             sphereRadiusNumeric.Value = (decimal)sphere.Radius;
@@ -211,6 +211,22 @@
         }
 
         private void rayOriginZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void SphereIntersectionForm_Resize(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void sphereRadiusNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            sphere.Radius = (double)sphereRadiusNumeric.Value;
+            Recompute();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
         {
             Recompute();
         }

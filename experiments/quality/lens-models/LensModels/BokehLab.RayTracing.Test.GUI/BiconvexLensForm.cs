@@ -181,5 +181,21 @@
             Recompute();
         }
 
+        private void curvatureRadiusNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lens.CurvatureRadius = (double)curvatureRadiusNumeric.Value;
+            Recompute();
+        }
+
+        private void apertureRadiusNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lens.ApertureRadius = (double)apertureRadiusNumeric.Value;
+            Recompute();
+        }
+
+        private void BiconvexLensForm_Resize(object sender, EventArgs e)
+        {
+            Recompute();
+        }
     }
 }

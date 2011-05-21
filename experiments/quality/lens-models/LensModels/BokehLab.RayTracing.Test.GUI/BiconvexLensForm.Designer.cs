@@ -30,6 +30,7 @@
         {
             this.drawingPanel = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.rayOriginZNumeric = new System.Windows.Forms.NumericUpDown();
             this.apertureRadiusNumeric = new System.Windows.Forms.NumericUpDown();
             this.curvatureRadiusNumeric = new System.Windows.Forms.NumericUpDown();
@@ -42,7 +43,7 @@
             this.label10 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginZNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.apertureRadiusNumeric)).BeginInit();
@@ -50,18 +51,27 @@
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginYNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginXNumeric)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
             // drawingPanel
             // 
-            this.drawingPanel.Location = new System.Drawing.Point(12, 12);
+            this.drawingPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.drawingPanel.Location = new System.Drawing.Point(3, 3);
             this.drawingPanel.Name = "drawingPanel";
-            this.drawingPanel.Size = new System.Drawing.Size(580, 422);
+            this.drawingPanel.Size = new System.Drawing.Size(559, 415);
             this.drawingPanel.TabIndex = 0;
             this.drawingPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.drawingPanel_Paint);
             // 
             // groupBox1
             // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Controls.Add(this.rayOriginZNumeric);
             this.groupBox1.Controls.Add(this.apertureRadiusNumeric);
@@ -75,20 +85,25 @@
             this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(598, 12);
+            this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 422);
+            this.groupBox1.Size = new System.Drawing.Size(205, 415);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Controls";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(10, 193);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 13;
+            this.button1.Text = "Recompute!";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // rayOriginZNumeric
             // 
-            this.rayOriginZNumeric.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
             this.rayOriginZNumeric.Location = new System.Drawing.Point(122, 125);
             this.rayOriginZNumeric.Maximum = new decimal(new int[] {
             1000,
@@ -108,7 +123,6 @@
             // apertureRadiusNumeric
             // 
             this.apertureRadiusNumeric.DecimalPlaces = 1;
-            this.apertureRadiusNumeric.Enabled = false;
             this.apertureRadiusNumeric.Increment = new decimal(new int[] {
             2,
             0,
@@ -128,11 +142,11 @@
             this.apertureRadiusNumeric.Name = "apertureRadiusNumeric";
             this.apertureRadiusNumeric.Size = new System.Drawing.Size(77, 20);
             this.apertureRadiusNumeric.TabIndex = 1;
+            this.apertureRadiusNumeric.ValueChanged += new System.EventHandler(this.apertureRadiusNumeric_ValueChanged);
             // 
             // curvatureRadiusNumeric
             // 
             this.curvatureRadiusNumeric.DecimalPlaces = 1;
-            this.curvatureRadiusNumeric.Enabled = false;
             this.curvatureRadiusNumeric.Increment = new decimal(new int[] {
             2,
             0,
@@ -152,15 +166,10 @@
             this.curvatureRadiusNumeric.Name = "curvatureRadiusNumeric";
             this.curvatureRadiusNumeric.Size = new System.Drawing.Size(77, 20);
             this.curvatureRadiusNumeric.TabIndex = 1;
+            this.curvatureRadiusNumeric.ValueChanged += new System.EventHandler(this.curvatureRadiusNumeric_ValueChanged);
             // 
             // rayOriginYNumeric
             // 
-            this.rayOriginYNumeric.Enabled = false;
-            this.rayOriginYNumeric.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
             this.rayOriginYNumeric.Location = new System.Drawing.Point(71, 125);
             this.rayOriginYNumeric.Maximum = new decimal(new int[] {
             1000,
@@ -181,7 +190,7 @@
             // 
             this.rayDirectionPhiNumeric.DecimalPlaces = 3;
             this.rayDirectionPhiNumeric.Increment = new decimal(new int[] {
-            5,
+            1,
             0,
             0,
             131072});
@@ -230,11 +239,6 @@
             // 
             // rayOriginXNumeric
             // 
-            this.rayOriginXNumeric.Increment = new decimal(new int[] {
-            10,
-            0,
-            0,
-            0});
             this.rayOriginXNumeric.Location = new System.Drawing.Point(11, 125);
             this.rayOriginXNumeric.Maximum = new decimal(new int[] {
             1000,
@@ -280,27 +284,37 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "Lens:";
             // 
-            // button1
+            // splitContainer1
             // 
-            this.button1.Location = new System.Drawing.Point(10, 193);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 13;
-            this.button1.Text = "Recompute!";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer1.Location = new System.Drawing.Point(13, 13);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.groupBox1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.drawingPanel);
+            this.splitContainer1.Size = new System.Drawing.Size(780, 421);
+            this.splitContainer1.SplitterDistance = 211;
+            this.splitContainer1.TabIndex = 2;
             // 
             // BiconvexLensForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(805, 446);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.drawingPanel);
+            this.Controls.Add(this.splitContainer1);
             this.KeyPreview = true;
             this.MinimumSize = new System.Drawing.Size(620, 200);
             this.Name = "BiconvexLensForm";
             this.Text = "Biconvex lens";
+            this.Resize += new System.EventHandler(this.BiconvexLensForm_Resize);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginZNumeric)).EndInit();
@@ -309,6 +323,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginYNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginXNumeric)).EndInit();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -330,6 +347,7 @@
         private System.Windows.Forms.NumericUpDown apertureRadiusNumeric;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.SplitContainer splitContainer1;
 
     }
 }

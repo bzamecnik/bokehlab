@@ -44,6 +44,20 @@
             }
         }
 
+        /// <summary>
+        /// Computes the approximate focal length using the Descartes' formula.
+        /// </summary>
+        public double FocalLength
+        {
+            get
+            {
+                return 1 / (
+                    (RefractiveIndex - 1)
+                    * (1 / frontSurface.Center.Z - 1 / backSurface.Center.Z)
+                    );
+            }
+        }
+
         private double sinTheta;
 
         // DEBUG (should be private)
@@ -69,13 +83,12 @@
             // lensPos should be already an intersection of of the incoming
             // ray with the back surface
 
-            if (lensPos.Z <= 0)
+            if ((lensPos.Z <= 0) || (objectPos.Z < lensPos.Z))
             {
+                // lens sample is in the scene space or the ray origin
+                // is not behind the back surface
                 return null;
             }
-
-            // DEBUG
-            //string incomingStr = new Ray(objectPos, lensPos - objectPos).ToString();
 
             // refract the incoming ray
             Vector3d incomingDir = Vector3d.Normalize(lensPos - objectPos);
@@ -91,9 +104,6 @@
             {
                 return null;
             }
-            // DEBUG
-            //Console.WriteLine(new Ray(lensPos, intersection.Position - lensPos));
-            //string innerStr = new Ray(lensPos, intersection.Position - lensPos).ToString();
             // refract the ray again
             direction = Vector3d.Normalize(intersection.Position - lensPos);
             direction = Ray.Refract(direction, -frontSurface.GetNormal(intersection.Position),
@@ -103,26 +113,17 @@
                 return null;
             }
             Ray transferredRay = new Ray(intersection.Position, direction);
-            //DEBUG
-            //Console.WriteLine(transferredRay);
-            //string transferredStr = transferredRay.ToString();
-            //Console.WriteLine("Black, {0}, Green, {1}, Red, {2},", incomingStr, innerStr, transferredStr);
             return transferredRay;
         }
 
         public Vector3d GetBackSurfaceSample(Vector2d sample)
         {
-            // TODO: implement proper sampling with respect to the cap angle
-            //Vector3d unitSphereSample = Sampler.UniformSampleHemisphere(sample);
             Vector3d unitSphereSample = Sampler.UniformSampleSphere(sample, sinTheta, 1);
             return backSurface.Center + backSurface.Radius * unitSphereSample;
         }
 
         public Vector3d GetFrontSurfaceSample(Vector2d sample)
         {
-            // TODO: implement proper sampling
-            // front surface is in the -Z hemisphere
-            //Vector3d unitSphereSample = Sampler.UniformSampleHemisphere(sample);
             Vector3d unitSphereSample = Sampler.UniformSampleSphere(sample, sinTheta, 1);
             return frontSurface.Center + frontSurface.Radius * (-unitSphereSample);
         }
