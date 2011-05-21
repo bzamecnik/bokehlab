@@ -10,6 +10,8 @@
 
         public Vector3d Center { get; set; }
 
+        private static readonly double epsilon = 1e-6;
+
         public Sphere()
         {
             Radius = 1;
@@ -48,27 +50,27 @@
             double tdSqr = Radius * Radius - dSqr;
 
             Vector3d intersection;
-            // TODO: use a better epsilon
-            if (tdSqr > Double.Epsilon)
+            if (tdSqr > epsilon)
             {
                 // two intersections, at Origin + (t_0 +/- t_d) * Direction
                 // we're intereseted only in the first intersection
+                // NOTE: bDotDirection is the signed t0
                 double td = Math.Sqrt(tdSqr);
-                double t = (t0 - td) * Math.Sign(bDotDirection);
-                if ((t < 0) || (Math.Abs(t) < double.Epsilon))
+                double t = bDotDirection - td;
+                if (t < epsilon)
                 {
                     // the first intersection is behind the ray or
                     // the ray origin is the first intersection
-                    t = t0 + td;
+                    t = bDotDirection + td;
                 }
-                if (t < 0)
+                if (t < epsilon)
                 {
-                    // intersection is behind the ray
+                    // even the second intersection is behind the ray
                     return null;
                 }
                 intersection = ray.Origin + t * direction;
             }
-            else if (tdSqr < -Double.Epsilon)
+            else if (tdSqr < -epsilon)
             {
                 // no intersection
                 return null;
@@ -77,7 +79,7 @@
             {
                 // one (double) intersection, at Origin + t_0 * Direction
                 double t = bDotDirection;
-                if (t < 0)
+                if (t < epsilon)
                 {
                     // intersection is behind the ray
                     return null;

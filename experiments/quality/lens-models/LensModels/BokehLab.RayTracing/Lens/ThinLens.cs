@@ -66,6 +66,8 @@
 
         private static double DEFAULT_FOCAL_LENGTH = 1;
 
+        private static readonly double epsilon = 1e-6;
+
         public ThinLens()
             : this(DEFAULT_FOCAL_LENGTH, DEFAULT_APERTURE_RADIUS)
         {
@@ -100,7 +102,7 @@
 
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
-            Debug.Assert(Math.Abs(lensPos.Z) < double.Epsilon);
+            Debug.Assert(Math.Abs(lensPos.Z) < epsilon);
             if (!IsPointWithinLens(lensPos))
             {
                 return null;
@@ -110,12 +112,12 @@
                 (new Vector4d(objectPos) + Vector4d.UnitW),
                 GetTransferMatrix(objectPos.Z));
 
-            if (Math.Abs(transformedPos.W) > double.Epsilon)
+            if (Math.Abs(transformedPos.W) > epsilon)
             {
                 Vector4d.Divide(ref transformedPos, transformedPos.W, out transformedPos);
             }
             Vector3d outputDirection = transformedPos.Xyz;
-            if (Math.Abs(transformedPos.W) > double.Epsilon)
+            if (Math.Abs(transformedPos.W) > epsilon)
             {
                 outputDirection -= lensPos;
             }
