@@ -20,7 +20,7 @@ namespace SphericLensGUI
             //Bench.Elements.Convex = false;
             Bench.IncidentRay = new SphericLens.Ray(new SphericLens.Point(200, 20), new SphericLens.Vector(-20, 5));
             //this.KeyDown += new KeyEventHandler(pictureResult.KeyPressed);
-            rayDirectionPhiNumericUpDown.Value = (decimal)(Bench.IncidentRay.Direction.Phi % (2*Math.PI));
+            rayDirectionPhiNumericUpDown.Value = (decimal)(Bench.IncidentRay.Direction.Phi % (2 * Math.PI));
             SphericLens.Vector originAsVector = SphericLens.Vector.FromPoint(Bench.IncidentRay.Origin);
             rayOriginPhiNumericUpDown.Value = (decimal)originAsVector.Phi;
             rayOriginRadiusNumericUpDown.Value = (decimal)originAsVector.Radius;
@@ -173,7 +173,8 @@ namespace SphericLensGUI
                     SphericLens.SphericalCap cap = element as SphericLens.SphericalCap;
                     cap.Radius *= scaleFactor;
                     cap.Aperture *= apertureScaleFactor;
-                } else if (element is SphericLens.CircularStop)
+                }
+                else if (element is SphericLens.CircularStop)
                 {
                     SphericLens.CircularStop stop = element as SphericLens.CircularStop;
                     stop.Aperture *= apertureScaleFactor;
@@ -213,12 +214,16 @@ namespace SphericLensGUI
 
             g.TranslateTransform((float)-Bench.LensCenter, 0.0f);
             double translation = 0.0;
-            foreach (SphericLens.SphericalCap element in Bench.Elements)
+            foreach (SphericLens.OpticalElement element in Bench.Elements)
             {
-                double signedRadius = (element.Convex ? 1.0 : -1.0) * element.Radius;
-                g.TranslateTransform((float)-(translation + signedRadius), 0.0f);
-                DrawSphericalCap(g, element);
-                g.TranslateTransform((float)(translation + signedRadius), 0.0f);
+                if (element is SphericLens.SphericalCap)
+                {
+                    SphericLens.SphericalCap cap = (SphericLens.SphericalCap)element;
+                    double signedRadius = (cap.Convex ? 1.0 : -1.0) * cap.Radius;
+                    g.TranslateTransform((float)-(translation + signedRadius), 0.0f);
+                    DrawSphericalCap(g, cap);
+                    g.TranslateTransform((float)(translation + signedRadius), 0.0f);
+                }
                 translation += element.DistanceToNext;
             }
             g.TranslateTransform((float)Bench.LensCenter, 0.0f);
@@ -239,7 +244,7 @@ namespace SphericLensGUI
 
                 FillSquare(g, Brushes.Red, intersection, 3);
             }
-            
+
             g.DrawLine(Pens.Orange,
                         SphericPointToFormsPoint(lastOutgoingRay.Origin),
                         SphericPointToFormsPoint(lastOutgoingRay.Evaluate(100)));
@@ -251,7 +256,7 @@ namespace SphericLensGUI
             float startAngle = (cap.Convex ? 360.0f : 180.0f) - angle;
             float sweepAngle = 2.0f * angle;
             g.DrawArc(Pens.Red, (float)-cap.Radius, (float)-cap.Radius, (float)(2 * cap.Radius), (float)(2 * cap.Radius), startAngle, sweepAngle);
-            
+
             //float x = (float)((cap.Convex ? cap.Radius : -cap.Radius) - (cap.Convex ? cap.Thickness : -cap.Thickness));
             //float y = (float)cap.Aperture;
             //g.DrawLine(Pens.Black, x, -y, x, y);
