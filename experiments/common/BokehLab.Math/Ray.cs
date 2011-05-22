@@ -36,6 +36,16 @@
             return Origin + t * Direction;
         }
 
+        public void NormalizeDirection()
+        {
+            Direction = Vector3d.Normalize(Direction);
+        }
+
+        public static Ray NormalizeDirection(Ray ray)
+        {
+            return new Ray(ray.Origin, Vector3d.Normalize(ray.Direction));
+        }
+
         public Ray Reflect(Vector3d normal)
         {
             return Reflect(this, normal);

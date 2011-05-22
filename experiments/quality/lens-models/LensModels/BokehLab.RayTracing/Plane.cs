@@ -9,6 +9,8 @@
 
         public Vector3d Normal { get; set; }
 
+        #region IIntersectable Members
+
         public Intersection Intersect(Ray ray)
         {
             double t = Vector3d.Dot((Origin - ray.Origin), Normal)
@@ -17,5 +19,12 @@
             return intersectionPos.HasValue ?
                 new Intersection(intersectionPos.Value) : null;
         }
+
+        public Vector3d GetNormal(Vector3d position)
+        {
+            return Normal;
+        }
+
+        #endregion
     }
 }

@@ -4,7 +4,7 @@
     using BokehLab.Math;
     using OpenTK;
 
-    public class Sphere : IIntersectable
+    public class Sphere : IIntersectable, INormalField
     {
         public double Radius { get; set; }
 
@@ -89,11 +89,42 @@
             return new Intersection(intersection, null);
         }
 
+        #endregion
+
+        #region INormalField Members
+
         public Vector3d GetNormal(Vector3d surfacePoint)
         {
             return (surfacePoint - Center) / Radius;
         }
 
         #endregion
+
+        public double GetCapElevationAngleSine(double baseRadius)
+        {
+            // theta is the elevation angle from the base plane to the start
+            // of the spherical cap
+            // cos(theta) = sin(pi/2 - theta)
+            double cosTheta = baseRadius / Radius;
+            double sinTheta = Math.Sqrt(1 - cosTheta * cosTheta);
+            return sinTheta;
+        }
+
+        public Vector3d GetCapCenter(double baseRadius, Vector3d direction)
+        {
+            return Math.Sqrt(Radius * Radius - baseRadius * baseRadius)
+                 * direction;
+        }
+
+        /// <summary>
+        /// Computes the height of a spherical cap.
+        /// </summary>
+        /// <param name="radius">Radius of the sphere</param>
+        /// <param name="apertureRadius">Radius of the cap base</param>
+        /// <returns></returns>
+        public double GetCapHeight(double radius, double baseRadius)
+        {
+            return radius - Math.Sqrt(radius * radius - baseRadius * baseRadius);
+        }
     }
 }

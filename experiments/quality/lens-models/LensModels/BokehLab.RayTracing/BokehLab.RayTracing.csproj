@@ -50,6 +50,7 @@
     <Compile Include="Camera.cs" />
     <Compile Include="Circle.cs" />
     <Compile Include="IIntersectable.cs" />
+    <Compile Include="INormalField.cs" />
     <Compile Include="Intersection.cs" />
     <Compile Include="IRenderer.cs" />
     <Compile Include="Lens\BiconvexLens.cs" />

@@ -4,7 +4,7 @@
     using BokehLab.Math;
     using OpenTK;
 
-    public class Circle : IIntersectable
+    public class Circle : IIntersectable, INormalField
     {
         public double Radius { get; set; }
 
@@ -75,6 +75,14 @@
             return (inside) ? intersection : null;
         }
 
+        #endregion
+
+        #region INormalField Members
+
+        public Vector3d GetNormal(Vector3d position)
+        {
+            return plane.GetNormal(position);
+        }
         #endregion
     }
 }
