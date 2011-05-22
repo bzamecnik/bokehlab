@@ -34,11 +34,11 @@
             Sampler sampler = new Sampler();
             int sampleCount = 64;
             int sqrtSampleCount = (int)Math.Sqrt(sampleCount);
+            Vector3d objectPos = new Vector3d(10, 0, 100);
             foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
             {
                 Vector3d lensPos = lens.GetBackSurfaceSample(sample);
                 //Vector3d objectPos = lensPos + 10 * Vector3d.UnitZ + 2 * Vector3d.UnitX;
-                Vector3d objectPos = new Vector3d(10, 0, 100);
                 Ray result = lens.Transfer(objectPos, lensPos);
             }
         }

@@ -15,28 +15,31 @@
 
     public partial class BiconvexLensForm : Form
     {
-        private BiconvexLens lens;
+        private BiconvexLens biconvexLens;
+        private ComplexLens complexLens;
         private Ray incomingRay;
         private Ray outgoingRay;
         private Vector3d backLensPos;
+        private Ray complexOutgoingRay;
 
         bool initialized = false;
 
         public BiconvexLensForm()
         {
             InitializeComponent();
-            lens = new BiconvexLens()
+            biconvexLens = new BiconvexLens()
             {
                 CurvatureRadius = 150,
                 ApertureRadius = 100,
                 RefractiveIndex = Materials.Fixed.GLASS_CROWN_BK7
             };
+            complexLens = ComplexLens.CreateBiconvexLens(150, 100);
             double directionPhi = Math.PI;
             incomingRay = new Ray(new Vector3d(70, 0, 150), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
 
             rayDirectionPhiNumeric.Value = (decimal)directionPhi;
-            curvatureRadiusNumeric.Value = (decimal)lens.CurvatureRadius;
-            apertureRadiusNumeric.Value = (decimal)lens.ApertureRadius;
+            curvatureRadiusNumeric.Value = (decimal)biconvexLens.CurvatureRadius;
+            apertureRadiusNumeric.Value = (decimal)biconvexLens.ApertureRadius;
             FillVectorToControls(incomingRay.Origin, rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
             initialized = true;
             Recompute();
@@ -53,16 +56,25 @@
             double directionPhi = (double)rayDirectionPhiNumeric.Value;
             incomingRay.Direction = new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi));
 
-            Intersection backInt = lens.Intersect(incomingRay);
+            Intersection backInt = biconvexLens.Intersect(incomingRay);
             if (backInt != null)
             {
-                outgoingRay = lens.Transfer(incomingRay.Origin, backInt.Position);
+                outgoingRay = biconvexLens.Transfer(incomingRay.Origin, backInt.Position);
                 backLensPos = backInt.Position;
             }
             else
             {
                 outgoingRay = null;
                 backLensPos = Vector3d.Zero;
+            }
+            backInt = complexLens.Intersect(incomingRay);
+            if (backInt != null)
+            {
+                complexOutgoingRay = complexLens.Transfer(incomingRay.Origin, backInt.Position);
+            }
+            else
+            {
+                complexOutgoingRay = null;
             }
             drawingPanel.Invalidate();
         }
@@ -98,8 +110,8 @@
             //g.TranslateTransform((float)-Bench.LensCenter, 0.0f);
 
             // draw spheres
-            DrawCircle(g, Pens.Blue, Vector3dToPoint(lens.backSurface.Center), (float)lens.backSurface.Radius);
-            DrawCircle(g, Pens.Purple, Vector3dToPoint(lens.frontSurface.Center), (float)lens.frontSurface.Radius);
+            DrawCircle(g, Pens.Blue, Vector3dToPoint(biconvexLens.backSurface.Center), (float)biconvexLens.backSurface.Radius);
+            DrawCircle(g, Pens.Purple, Vector3dToPoint(biconvexLens.frontSurface.Center), (float)biconvexLens.frontSurface.Radius);
 
             // draw incoming ray
             if (incomingRay.Direction != Vector3d.Zero)
@@ -122,7 +134,7 @@
                 FillSquare(g, Brushes.Red, Vector3dToPoint(backLensPos), 3);
             }
 
-            // draw outgoing ray
+            // draw outgoing ray from biconvex lens
             if ((outgoingRay != null) && (outgoingRay.Direction != Vector3d.Zero))
             {
                 Point origin = Vector3dToPoint(outgoingRay.Origin);
@@ -131,7 +143,22 @@
                 g.DrawLine(Pens.Green, Vector3dToPoint(backLensPos), origin);
 
                 // draw normal
-                g.DrawLine(Pens.Purple, origin, Vector3dToPoint(outgoingRay.Origin + 20 * -lens.frontSurface.GetNormal(outgoingRay.Origin)));
+                g.DrawLine(Pens.Purple, origin, Vector3dToPoint(outgoingRay.Origin + 20 * -biconvexLens.frontSurface.GetNormal(outgoingRay.Origin)));
+            }
+
+            // draw outgoing ray from complex lens
+            if ((complexOutgoingRay != null) && (complexOutgoingRay.Direction != Vector3d.Zero))
+            {
+                Point origin = Vector3dToPoint(complexOutgoingRay.Origin);
+                Point target = Vector3dToPoint(complexOutgoingRay.Origin + 1000 * Vector3d.Normalize(complexOutgoingRay.Direction));
+                g.DrawLine(Pens.Brown, origin, target);
+                g.DrawLine(Pens.DarkGreen, Vector3dToPoint(backLensPos), origin);
+
+                // draw normal
+                g.DrawLine(Pens.Purple, origin, Vector3dToPoint(complexOutgoingRay.Origin + 20 * -complexLens.ElementSurfaces.Last().SurfaceNormalField.GetNormal(complexOutgoingRay.Origin)));
+
+                // draw normal
+                g.DrawLine(Pens.Purple, Vector3dToPoint(backLensPos), Vector3dToPoint(backLensPos + 20 * -complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(backLensPos)));
             }
         }
 
@@ -183,13 +210,13 @@
 
         private void curvatureRadiusNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lens.CurvatureRadius = (double)curvatureRadiusNumeric.Value;
+            biconvexLens.CurvatureRadius = (double)curvatureRadiusNumeric.Value;
             Recompute();
         }
 
         private void apertureRadiusNumeric_ValueChanged(object sender, EventArgs e)
         {
-            lens.ApertureRadius = (double)apertureRadiusNumeric.Value;
+            biconvexLens.ApertureRadius = (double)apertureRadiusNumeric.Value;
             Recompute();
         }
 

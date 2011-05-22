@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Lens\BiconvexLensTest.cs" />
+    <Compile Include="Lens\ComplexLensTest.cs" />
     <Compile Include="SphereTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Lens\RayEqualityComparer.cs" />

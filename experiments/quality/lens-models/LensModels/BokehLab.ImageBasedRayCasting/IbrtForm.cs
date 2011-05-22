@@ -1,10 +1,12 @@
 ﻿namespace BokehLab.ImageBasedRayCasting
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Drawing;
     using System.Windows.Forms;
     using BokehLab.FloatMap;
+    using BokehLab.RayTracing;
     using BokehLab.RayTracing.Lens;
     using OpenTK;
 
@@ -18,6 +20,8 @@
             CurvatureRadius = 10
         };
 
+        ComplexLens complexLens;
+
         FloatMapImage layerImage;
         FloatMapImage outputImage;
 
@@ -26,6 +30,9 @@
         public IbrtForm()
         {
             InitializeComponent();
+
+            complexLens = ComplexLens.CreateBiconvexLens(10, 1);
+
             thinLens.FocalLength = 10;
 
             //Size outputImageSize = pictureBox1.Size;
@@ -39,8 +46,9 @@
             //rayTracer.Camera.Lens = thinLens;
             //rayTracer.Camera.Lens = new PinholeLens();
             //rayTracer.Camera.Lens = new LensWithTwoStops() { Lens = thinLens };
-            rayTracer.Camera.Lens = biconvexLens;
+            //rayTracer.Camera.Lens = biconvexLens;
             //rayTracer.Scene.Layer.Depth = -biconvexLens.FocalLength;
+            rayTracer.Camera.Lens = complexLens;
 
             //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
 
@@ -111,28 +119,27 @@
             rayTracer.Camera.Sensor.Shift = senzorShift;
 
             rayTracer.Scene.Layer.Depth = (double)layerZNumeric.Value;
-
             RenderImage();
         }
 
         private void layerZNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Scene.Layer.Depth = (double)layerZNumeric.Value;
-
             RenderImage();
         }
 
         private void sampleCountNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.SampleCount = (int)sampleCountNumeric.Value;
-
-            RenderImage();
+            //RenderImage();
         }
 
 
         private void lensApertureNumeric_ValueChanged(object sender, EventArgs e)
         {
-            thinLens.ApertureRadius = (double)lensApertureNumeric.Value;
+            double aperture = (double)lensApertureNumeric.Value;
+            thinLens.ApertureRadius = aperture;
+            biconvexLens.ApertureRadius = aperture;
             RenderImage();
         }
 
