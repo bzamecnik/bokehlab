@@ -12,6 +12,9 @@
     /// </summary>
     public interface ILens
     {
+        // TODO:
+        // - better use signature: Ray Transfer(Ray incomingRay);
+
         /// <summary>
         /// Transfers an incoming ray through the lens.
         /// </summary>

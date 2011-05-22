@@ -58,6 +58,10 @@
             }
         }
 
+        /// <summary>
+        /// Sine of the spherical cap elevation angle. Used to limit
+        /// hemisphere sampling.
+        /// </summary>
         private double sinTheta;
 
         // DEBUG (should be private)
@@ -135,15 +139,10 @@
             double r = CurvatureRadius;
             backSurface.Radius = r;
             frontSurface.Radius = r;
-            Vector3d center = Math.Sqrt(r * r - ApertureRadius * ApertureRadius)
-                * Vector3d.UnitZ;
+            Vector3d center = backSurface.GetCapCenter(ApertureRadius, Vector3d.UnitZ);
             backSurface.Center = -center;
             frontSurface.Center = center;
-            // theta is the elevation angle from the base plane to the start
-            // of the spherical cap
-            // cos(theta) = sin(pi/2 - theta)
-            double cosTheta = ApertureRadius / CurvatureRadius;
-            sinTheta = Math.Sqrt(1 - cosTheta * cosTheta);
+            sinTheta = backSurface.GetCapElevationAngleSine(ApertureRadius);
         }
 
         #region IIntersectable Members

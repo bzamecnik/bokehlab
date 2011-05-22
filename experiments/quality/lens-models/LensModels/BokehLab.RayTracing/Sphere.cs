@@ -112,6 +112,11 @@
 
         public Vector3d GetCapCenter(double baseRadius, Vector3d direction)
         {
+            if (Radius < baseRadius)
+            {
+                throw new ArgumentException(
+                    "Spherical cap base circle radius must not be greater than sphere radius.");
+            }
             return Math.Sqrt(Radius * Radius - baseRadius * baseRadius)
                  * direction;
         }
