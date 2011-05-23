@@ -32,7 +32,7 @@
             InitializeComponent();
 
             //complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
-            complexLens = ComplexLens.CreateDoubleGaussLens();
+            complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
 
             thinLens.FocalLength = 10;
 
@@ -59,11 +59,12 @@
 
             sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
 
-            rayTracer.Camera.Sensor.Width = 70;
-            //rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
-            //rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 5);
-            rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, biconvexLens.FocalLength);
+            //double senzorZ = biconvexLens.FocalLength;
+            double senzorZ = 317.50;
+            rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, senzorZ);
             senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
+            rayTracer.Camera.Sensor.Width = 100;
+            senzorWidthNumeric.Value = (decimal)rayTracer.Camera.Sensor.Width;
 
             rayTracer.Scene.Layer.Depth = -1000;
             //rayTracer.Scene.Layer.Depth = -2.18;
@@ -278,6 +279,11 @@
                 (double)xNumeric.Value,
                 (double)yNumeric.Value,
                 (double)zNumeric.Value);
+        }
+
+        private void senzorWidthNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            rayTracer.Camera.Sensor.Width = (double)senzorWidthNumeric.Value;
         }
     }
 }

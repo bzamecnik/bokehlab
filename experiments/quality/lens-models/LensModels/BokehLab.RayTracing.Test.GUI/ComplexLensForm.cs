@@ -19,6 +19,7 @@
         private Ray incomingRay;
         private Ray outgoingRay;
         private Vector3d backLensPos;
+        private IList<Vector3d> intersections;
 
         bool initialized = false;
 
@@ -27,7 +28,7 @@
             InitializeComponent();
             complexLens = CreateLens();
             double directionPhi = Math.PI;
-            incomingRay = new Ray(new Vector3d(25.2, 0, 150), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
+            incomingRay = new Ray(new Vector3d(25, 0, 300), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
 
             rayDirectionPhiNumeric.Value = (decimal)directionPhi;
             FillVectorToControls(incomingRay.Origin, rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
@@ -65,7 +66,7 @@
             //});
             //return ComplexLens.Create(surfaces, Materials.Fixed.AIR);
 
-            return ComplexLens.CreateDoubleGaussLens();
+            return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
         }
 
         private void Recompute()
@@ -79,10 +80,12 @@
             double directionPhi = (double)rayDirectionPhiNumeric.Value;
             incomingRay.Direction = new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi));
 
+            intersections = new List<Vector3d>();
             Intersection backInt = complexLens.Intersect(incomingRay);
             if (backInt != null)
             {
-                outgoingRay = complexLens.Transfer(incomingRay.Origin, backInt.Position);
+                outgoingRay = complexLens.TransferDebug(incomingRay.Origin, backInt.Position,
+                    out intersections, true);
                 backLensPos = backInt.Position;
             }
             else
@@ -103,7 +106,7 @@
             float panelHalfHeight = e.ClipRectangle.Height / 2.0f;
             g.TranslateTransform(panelHalfWidth, panelHalfHeight);
             g.ScaleTransform(1.0f, -1.0f);
-            float scale = 2.0f;
+            float scale = 1.0f;
             g.ScaleTransform(scale, scale);
 
             // draw X axis
@@ -153,13 +156,24 @@
                 Point origin = Vector3dToPoint(outgoingRay.Origin);
                 Point target = Vector3dToPoint(outgoingRay.Origin + 1000 * Vector3d.Normalize(outgoingRay.Direction));
                 g.DrawLine(Pens.Brown, origin, target);
-                g.DrawLine(Pens.DarkGreen, Vector3dToPoint(backLensPos), origin);
+                //g.DrawLine(Pens.DarkGreen, Vector3dToPoint(backLensPos), origin);
 
                 //// draw normal
                 //g.DrawLine(Pens.Purple, origin, Vector3dToPoint(outgoingRay.Origin + 20 * -complexLens.ElementSurfaces.Last().SurfaceNormalField.GetNormal(outgoingRay.Origin)));
 
                 //// draw normal
                 //g.DrawLine(Pens.Purple, Vector3dToPoint(backLensPos), Vector3dToPoint(backLensPos + 20 * -complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(backLensPos)));
+            }
+
+            // draw ray inside lens
+            if (intersections != null)
+            {
+                for (int i = 0; i < intersections.Count - 1; i++)
+                {
+                    Point origin = Vector3dToPoint(intersections[i]);
+                    Point target = Vector3dToPoint(intersections[i + 1]);
+                    g.DrawLine(Pens.Brown, origin, target);
+                }
             }
         }
 

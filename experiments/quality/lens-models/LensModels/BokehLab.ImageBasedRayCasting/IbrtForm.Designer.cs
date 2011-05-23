@@ -62,6 +62,8 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.renderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.label1 = new System.Windows.Forms.Label();
+            this.senzorWidthNumeric = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lensFocalLengthNumeric)).BeginInit();
@@ -78,6 +80,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltXNumeric)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorWidthNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -96,6 +99,7 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox1.Controls.Add(this.senzorWidthNumeric);
             this.groupBox1.Controls.Add(this.tonemapOutputCheckBox);
             this.groupBox1.Controls.Add(this.specificOutputSizeCheckBox);
             this.groupBox1.Controls.Add(this.lensFocalLengthNumeric);
@@ -114,6 +118,7 @@
             this.groupBox1.Controls.Add(this.senzorTiltZNumeric);
             this.groupBox1.Controls.Add(this.senzorTiltYNumeric);
             this.groupBox1.Controls.Add(this.senzorShiftXNumeric);
+            this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.label8);
             this.groupBox1.Controls.Add(this.senzorTiltXNumeric);
             this.groupBox1.Controls.Add(this.label6);
@@ -295,7 +300,7 @@
             0,
             0,
             65536});
-            this.senzorShiftZNumeric.Location = new System.Drawing.Point(120, 178);
+            this.senzorShiftZNumeric.Location = new System.Drawing.Point(119, 178);
             this.senzorShiftZNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -307,7 +312,7 @@
             0,
             -2147483648});
             this.senzorShiftZNumeric.Name = "senzorShiftZNumeric";
-            this.senzorShiftZNumeric.Size = new System.Drawing.Size(49, 20);
+            this.senzorShiftZNumeric.Size = new System.Drawing.Size(50, 20);
             this.senzorShiftZNumeric.TabIndex = 10;
             this.senzorShiftZNumeric.ValueChanged += new System.EventHandler(this.senzorShiftZNumeric_ValueChanged);
             // 
@@ -319,7 +324,7 @@
             0,
             0,
             65536});
-            this.senzorShiftYNumeric.Location = new System.Drawing.Point(69, 178);
+            this.senzorShiftYNumeric.Location = new System.Drawing.Point(64, 178);
             this.senzorShiftYNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -331,7 +336,7 @@
             0,
             -2147483648});
             this.senzorShiftYNumeric.Name = "senzorShiftYNumeric";
-            this.senzorShiftYNumeric.Size = new System.Drawing.Size(45, 20);
+            this.senzorShiftYNumeric.Size = new System.Drawing.Size(50, 20);
             this.senzorShiftYNumeric.TabIndex = 9;
             this.senzorShiftYNumeric.ValueChanged += new System.EventHandler(this.senzorShiftYNumeric_ValueChanged);
             // 
@@ -343,7 +348,7 @@
             0,
             0,
             131072});
-            this.senzorTiltZNumeric.Location = new System.Drawing.Point(120, 139);
+            this.senzorTiltZNumeric.Location = new System.Drawing.Point(119, 139);
             this.senzorTiltZNumeric.Maximum = new decimal(new int[] {
             10,
             0,
@@ -355,7 +360,7 @@
             0,
             -2147483648});
             this.senzorTiltZNumeric.Name = "senzorTiltZNumeric";
-            this.senzorTiltZNumeric.Size = new System.Drawing.Size(49, 20);
+            this.senzorTiltZNumeric.Size = new System.Drawing.Size(50, 20);
             this.senzorTiltZNumeric.TabIndex = 7;
             this.senzorTiltZNumeric.ValueChanged += new System.EventHandler(this.senzorTiltZNumeric_ValueChanged);
             // 
@@ -367,7 +372,7 @@
             0,
             0,
             131072});
-            this.senzorTiltYNumeric.Location = new System.Drawing.Point(69, 139);
+            this.senzorTiltYNumeric.Location = new System.Drawing.Point(63, 139);
             this.senzorTiltYNumeric.Maximum = new decimal(new int[] {
             10,
             0,
@@ -379,7 +384,7 @@
             0,
             -2147483648});
             this.senzorTiltYNumeric.Name = "senzorTiltYNumeric";
-            this.senzorTiltYNumeric.Size = new System.Drawing.Size(45, 20);
+            this.senzorTiltYNumeric.Size = new System.Drawing.Size(50, 20);
             this.senzorTiltYNumeric.TabIndex = 6;
             this.senzorTiltYNumeric.ValueChanged += new System.EventHandler(this.senzorTiltYNumeric_ValueChanged);
             // 
@@ -403,7 +408,7 @@
             0,
             -2147483648});
             this.senzorShiftXNumeric.Name = "senzorShiftXNumeric";
-            this.senzorShiftXNumeric.Size = new System.Drawing.Size(54, 20);
+            this.senzorShiftXNumeric.Size = new System.Drawing.Size(50, 20);
             this.senzorShiftXNumeric.TabIndex = 8;
             this.senzorShiftXNumeric.ValueChanged += new System.EventHandler(this.senzorShiftXNumeric_ValueChanged);
             // 
@@ -436,7 +441,7 @@
             0,
             -2147483648});
             this.senzorTiltXNumeric.Name = "senzorTiltXNumeric";
-            this.senzorTiltXNumeric.Size = new System.Drawing.Size(54, 20);
+            this.senzorTiltXNumeric.Size = new System.Drawing.Size(50, 20);
             this.senzorTiltXNumeric.TabIndex = 5;
             this.senzorTiltXNumeric.ValueChanged += new System.EventHandler(this.senzorTiltXNumeric_ValueChanged);
             // 
@@ -531,6 +536,39 @@
             this.renderToolStripMenuItem.Text = "&Render";
             this.renderToolStripMenuItem.Click += new System.EventHandler(this.renderToolStripMenuItem_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 206);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(71, 13);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Senzor width:";
+            // 
+            // senzorWidthNumeric
+            // 
+            this.senzorWidthNumeric.DecimalPlaces = 2;
+            this.senzorWidthNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.senzorWidthNumeric.Location = new System.Drawing.Point(106, 204);
+            this.senzorWidthNumeric.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.senzorWidthNumeric.Minimum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            -2147483648});
+            this.senzorWidthNumeric.Name = "senzorWidthNumeric";
+            this.senzorWidthNumeric.Size = new System.Drawing.Size(63, 20);
+            this.senzorWidthNumeric.TabIndex = 15;
+            this.senzorWidthNumeric.ValueChanged += new System.EventHandler(this.senzorWidthNumeric_ValueChanged);
+            // 
             // IbrtForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -564,6 +602,7 @@
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorWidthNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -605,6 +644,8 @@
         private System.Windows.Forms.NumericUpDown senzorShiftZNumeric;
         private System.Windows.Forms.NumericUpDown senzorShiftYNumeric;
         private System.Windows.Forms.NumericUpDown senzorShiftXNumeric;
+        private System.Windows.Forms.NumericUpDown senzorWidthNumeric;
+        private System.Windows.Forms.Label label1;
     }
 }
 

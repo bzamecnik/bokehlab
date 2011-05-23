@@ -84,6 +84,8 @@
 
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
+            //Console.WriteLine("Biconvex lens");
+
             // lensPos should be already an intersection of of the incoming
             // ray with the back surface
 
@@ -96,6 +98,7 @@
 
             // refract the incoming ray
             Vector3d incomingDir = Vector3d.Normalize(lensPos - objectPos);
+            //Console.WriteLine("Incoming: {0}, ", new Ray(lensPos, lensPos - objectPos).ToString());
             Vector3d direction = Ray.Refract(incomingDir, backSurface.GetNormal(lensPos),
                 Materials.Fixed.AIR, RefractiveIndex, false);
             if (direction == Vector3d.Zero)
@@ -104,6 +107,7 @@
             }
             // intersect the ray with the front surface
             Intersection intersection = frontSurface.Intersect(new Ray(lensPos, direction));
+            //Console.WriteLine("Outgoing: {0}, ", new Ray(lensPos, direction).ToString());
             if (intersection == null)
             {
                 return null;
@@ -117,6 +121,7 @@
                 return null;
             }
             Ray transferredRay = new Ray(intersection.Position, direction);
+            //Console.WriteLine("Outgoing: {0}, ", transferredRay.ToString());
             return transferredRay;
         }
 

@@ -63,6 +63,12 @@
             frontSurface.NextRefractiveIndex = MediumRefractiveIndex;
         }
 
+        public static ComplexLens Create(
+           IList<SphericalElementSurfaceDefinition> surfaceDefs)
+        {
+            return Create(surfaceDefs, Materials.Fixed.AIR, 1.0);
+        }
+
         /// <summary>
         /// Creates a new instance of a complex lens using a definition of
         /// elements.
@@ -82,12 +88,17 @@
         /// <returns>The created complex lens instance.</returns>
         public static ComplexLens Create(
             IList<SphericalElementSurfaceDefinition> surfaceDefs,
-            double mediumRefractiveIndex)
+            double mediumRefractiveIndex,
+            double scale)
         {
             var surfaces = new List<ElementSurface>();
-            double lastRefractiveIndex = mediumRefractiveIndex;
 
             var surfaceDefsReverse = surfaceDefs.Reverse().ToList();
+            // scale the lens if needed
+            if (Math.Abs(scale - 1.0) > epsilon)
+            {
+                surfaceDefsReverse = surfaceDefsReverse.Select(surface => surface.Scale(scale)).ToList();
+            }
             // thickness of the whole lens (from front to back apex)
             // (without the distance to the senzor - backmost surface def.)
             double lensThickness = surfaceDefsReverse.Skip(1).Sum(def => def.Thickness);
@@ -104,13 +115,19 @@
             {
                 if (defIndex > 0)
                 {
-                    elementBasePlaneShiftZ -= surfaceDefsReverse[defIndex].Thickness;
+                    elementBasePlaneShiftZ -= definition.Thickness;
                 }
 
                 ElementSurface surface = new ElementSurface();
                 surface.ApertureRadius = 0.5 * definition.ApertureDiameter;
-                surface.NextRefractiveIndex = lastRefractiveIndex;
-                lastRefractiveIndex = definition.NextRefractiveIndex;
+                if (defIndex + 1 < surfaceDefsReverse.Count)
+                {
+                    surface.NextRefractiveIndex = surfaceDefsReverse[defIndex + 1].NextRefractiveIndex;
+                }
+                else
+                {
+                    surface.NextRefractiveIndex = mediumRefractiveIndex;
+                }
                 if (definition.CurvatureRadius.HasValue)
                 {
                     // spherical surface
@@ -153,13 +170,18 @@
                 defIndex++;
             }
 
+            //DEBUG
+            foreach (var surface in surfaces)
+            {
+                Console.WriteLine("{0}, {1}, {2}", surface.ApertureRadius,
+                    surface.Convex, surface.NextRefractiveIndex);
+            }
+
             ComplexLens lens = new ComplexLens(surfaces)
             {
                 MediumRefractiveIndex = mediumRefractiveIndex
             };
             return lens;
-
-            throw new NotImplementedException();
         }
 
         public static ComplexLens CreateBiconvexLens(
@@ -199,7 +221,9 @@
             return lens;
         }
 
-        public static ComplexLens CreateDoubleGaussLens()
+        public static ComplexLens CreateDoubleGaussLens(
+            double mediumRefractiveIndex,
+            double scale)
         {
             var surfaces = new List<ComplexLens.SphericalElementSurfaceDefinition>();
             surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
@@ -213,7 +237,7 @@
             {
                 CurvatureRadius = 169.660,
                 Thickness = 0.240,
-                NextRefractiveIndex = Materials.Fixed.AIR,
+                NextRefractiveIndex = mediumRefractiveIndex,
                 ApertureDiameter = 50.4,
             });
             surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
@@ -234,14 +258,14 @@
             {
                 CurvatureRadius = 25.500,
                 Thickness = 11.410,
-                NextRefractiveIndex = Materials.Fixed.AIR,
+                NextRefractiveIndex = mediumRefractiveIndex,
                 ApertureDiameter = 36.0,
             });
             surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
             {
                 CurvatureRadius = null,
                 Thickness = 9.0,
-                NextRefractiveIndex = Materials.Fixed.AIR,
+                NextRefractiveIndex = mediumRefractiveIndex,
                 ApertureDiameter = 34.2,
             });
             surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
@@ -262,7 +286,7 @@
             {
                 CurvatureRadius = -40.770,
                 Thickness = 0.380,
-                NextRefractiveIndex = Materials.Fixed.AIR,
+                NextRefractiveIndex = mediumRefractiveIndex,
                 ApertureDiameter = 40.0,
             });
             surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
@@ -276,17 +300,30 @@
             {
                 CurvatureRadius = -79.460,
                 Thickness = 72.228, // distance to senzor
-                NextRefractiveIndex = Materials.Fixed.AIR,
+                NextRefractiveIndex = mediumRefractiveIndex,
                 ApertureDiameter = 40.0,
             });
-            return ComplexLens.Create(surfaces, Materials.Fixed.AIR);
+            return ComplexLens.Create(surfaces, mediumRefractiveIndex, scale);
         }
 
         #region ILens Members
 
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
+            IList<Vector3d> intersections;
+            return TransferDebug(objectPos, lensPos, out intersections, false);
+        }
+
+        internal Ray TransferDebug(Vector3d objectPos, Vector3d lensPos,
+            out IList<Vector3d> intersections, bool saveIntersections)
+        {
             //Console.WriteLine("Complex lens");
+
+            intersections = null;
+            if (saveIntersections)
+            {
+                intersections = new List<Vector3d>();
+            }
 
             double lastRefractiveIndex = MediumRefractiveIndex;
             Vector3d shiftFromLensCenter = Vector3d.Zero;
@@ -309,6 +346,12 @@
                     // no intersection at all
                     return null;
                 }
+
+                if (saveIntersections)
+                {
+                    intersections.Add(intersection.Position);
+                }
+
                 if (intersection.Position.Xy.LengthSquared >
                     surface.ApertureRadius * surface.ApertureRadius)
                 {
@@ -456,6 +499,17 @@
             /// Index of refraction of the material after this surface.
             /// </summary>
             public double NextRefractiveIndex;
+
+            public SphericalElementSurfaceDefinition Scale(double scale)
+            {
+                return new SphericalElementSurfaceDefinition()
+                {
+                    ApertureDiameter = scale * ApertureDiameter,
+                    CurvatureRadius = scale * CurvatureRadius,
+                    Thickness = scale * Thickness,
+                    NextRefractiveIndex = NextRefractiveIndex,
+                };
+            }
         }
 
 
