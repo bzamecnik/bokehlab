@@ -31,7 +31,8 @@
         {
             InitializeComponent();
 
-            complexLens = ComplexLens.CreateBiconvexLens(10, 1);
+            //complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
+            complexLens = ComplexLens.CreateDoubleGaussLens();
 
             thinLens.FocalLength = 10;
 
@@ -58,7 +59,7 @@
 
             sampleCountNumeric.Value = (decimal)rayTracer.SampleCount;
 
-            rayTracer.Camera.Sensor.Width = 6;
+            rayTracer.Camera.Sensor.Width = 70;
             //rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 20);
             //rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, 5);
             rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, biconvexLens.FocalLength);

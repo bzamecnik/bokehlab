@@ -55,6 +55,12 @@
     <Compile Include="BiconvexLensForm.Designer.cs">
       <DependentUpon>BiconvexLensForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ComplexLensForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComplexLensForm.Designer.cs">
+      <DependentUpon>ComplexLensForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SphereIntersectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -65,6 +71,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="BiconvexLensForm.resx">
       <DependentUpon>BiconvexLensForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComplexLensForm.resx">
+      <DependentUpon>ComplexLensForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SphereIntersectionForm.resx">
       <DependentUpon>SphereIntersectionForm.cs</DependentUpon>

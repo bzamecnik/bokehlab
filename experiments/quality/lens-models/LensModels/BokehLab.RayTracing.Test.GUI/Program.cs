@@ -15,7 +15,7 @@ namespace BokehLab.RayTracing.Test.GUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new BiconvexLensForm());
+            Application.Run(new ComplexLensForm());
         }
     }
 }

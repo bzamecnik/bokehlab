@@ -33,7 +33,7 @@
                 ApertureRadius = 100,
                 RefractiveIndex = Materials.Fixed.GLASS_CROWN_BK7
             };
-            complexLens = ComplexLens.CreateBiconvexLens(150, 100);
+            complexLens = ComplexLens.CreateBiconvexLens(150, 100, 0);
             double directionPhi = Math.PI;
             incomingRay = new Ray(new Vector3d(70, 0, 150), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
 

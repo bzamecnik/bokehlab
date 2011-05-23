@@ -12,7 +12,7 @@
         [Fact]
         public void TraceSingleRay()
         {
-            ComplexLens lens = ComplexLens.CreateBiconvexLens(4, 2);
+            ComplexLens lens = ComplexLens.CreateBiconvexLens(4, 2, 0);
 
             Sampler sampler = new Sampler();
             int sampleCount = 64;
@@ -31,7 +31,7 @@
         [Fact]
         public void TraceRays()
         {
-            ComplexLens lens = ComplexLens.CreateBiconvexLens(4, 2);
+            ComplexLens lens = ComplexLens.CreateBiconvexLens(4, 2, 0);
 
             Sampler sampler = new Sampler();
             int sampleCount = 64;
