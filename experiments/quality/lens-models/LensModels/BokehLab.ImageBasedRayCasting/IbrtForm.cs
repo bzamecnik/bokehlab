@@ -33,6 +33,7 @@
 
             //complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
             complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
+            complexLens = ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 2.0);
 
             thinLens.FocalLength = 10;
 
@@ -63,7 +64,7 @@
             double senzorZ = 317.50;
             rayTracer.Camera.Sensor.Shift = new Vector3d(0, 0, senzorZ);
             senzorShiftZNumeric.Value = (decimal)rayTracer.Camera.Sensor.Shift.Z;
-            rayTracer.Camera.Sensor.Width = 100;
+            rayTracer.Camera.Sensor.Width = 120;
             senzorWidthNumeric.Value = (decimal)rayTracer.Camera.Sensor.Width;
 
             rayTracer.Scene.Layer.Depth = -1000;
@@ -82,6 +83,9 @@
             {
                 return;
             }
+
+            rayTracer.SampleCount = (int)sampleCountNumeric.Value;
+            rayTracer.Camera.Sensor.Width = (double)senzorWidthNumeric.Value;
 
             Cursor = Cursors.WaitCursor;
             Stopwatch stopwatch = Stopwatch.StartNew();

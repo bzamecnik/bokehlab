@@ -478,11 +478,11 @@
             // 
             // openLayerFileDialog
             // 
-            this.openLayerFileDialog.Filter = "PNG Files|*.png|All files|*.*";
+            this.openLayerFileDialog.Filter = "PNG Files|*.png|JPEG files|*.jpg|All files|*.*";
             // 
             // saveRenderedFileDialog
             // 
-            this.saveRenderedFileDialog.Filter = "PNG Files|*.png|All files|*.*";
+            this.saveRenderedFileDialog.Filter = "PNG Files|*.png|JPEG files|*.jpg|All files|*.*";
             // 
             // menuStrip1
             // 

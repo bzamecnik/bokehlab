@@ -150,7 +150,7 @@
         /// (0,1)  - upper hemisphere
         /// (sin(theta),1) - upper spherical cap
         /// 
-        /// Theta is the elevation angle (measure from the XY plane).
+        /// Theta is the elevation angle (measured from the XY plane).
         /// -PI/2 = lower pole (-Z),
         /// 0     = XY plane,
         /// PI/2  = upper pole (Z)

@@ -2,11 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data;
     using System.Drawing;
     using System.Linq;
-    using System.Text;
     using System.Windows.Forms;
     using BokehLab.Math;
     using BokehLab.RayTracing;
@@ -20,6 +17,13 @@
         private Ray outgoingRay;
         private Vector3d backLensPos;
         private IList<Vector3d> intersections;
+        double directionPhi;
+        // lens position parameter (sample for back surface sampling, 0.0-1.0)
+        double lensPosU;
+
+        // directly provide the position on lens back surface or derive it by
+        // intersecting the incoming ray with the lens
+        bool inputLensPosDirectly = false;
 
         bool initialized = false;
 
@@ -27,7 +31,7 @@
         {
             InitializeComponent();
             complexLens = CreateLens();
-            double directionPhi = Math.PI;
+            directionPhi = Math.PI;
             incomingRay = new Ray(new Vector3d(25, 0, 300), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
 
             rayDirectionPhiNumeric.Value = (decimal)directionPhi;
@@ -41,32 +45,8 @@
             //double curvatureRadius = 150;
             //double apertureRadius = 100;
             //return ComplexLens.CreateBiconvexLens(curvatureRadius, apertureRadius, 100);
-
-            //var surfaces = new List<ComplexLens.SphericalElementSurfaceDefinition>();
-            //surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            //{
-            //    CurvatureRadius = null,//58.950,
-            //    Thickness = 5.520,
-            //    NextRefractiveIndex = 1.670,
-            //    ApertureDiameter = 50.4,
-            //});
-            //surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            //{
-            //    CurvatureRadius = null,//169.660,
-            //    Thickness = 12.240,
-            //    NextRefractiveIndex = Materials.Fixed.AIR,
-            //    ApertureDiameter = 50.4,
-            //});
-            //surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            //{
-            //    CurvatureRadius = null,//38.550,
-            //    Thickness = 18.050,
-            //    NextRefractiveIndex = 1.670,
-            //    ApertureDiameter = 46.0,
-            //});
-            //return ComplexLens.Create(surfaces, Materials.Fixed.AIR);
-
-            return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            //return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            return ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0);
         }
 
         private void Recompute()
@@ -76,9 +56,34 @@
                 return;
             }
 
-            incomingRay.Origin = GetVectorFromControls(rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
-            double directionPhi = (double)rayDirectionPhiNumeric.Value;
-            incomingRay.Direction = new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi));
+            directionPhi = (double)rayDirectionPhiNumeric.Value;
+            Vector3d rayDirection = new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi));
+            if (inputLensPosDirectly)
+            {
+                incomingRay.Origin = GetVectorFromControls(rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
+            }
+            else
+            {
+                // compute lens position from lens position parameter
+                // (with Y = 0)
+                double lensPosV = 0.5;
+                lensPosU = (double)lensPosTNumeric.Value;
+                if (lensPosU > 1.0)
+                {
+                    lensPosU = 2.0 - lensPosU;
+                    lensPosV = 0.0;
+                }
+                Vector3d lensPos = complexLens.GetBackSurfaceSample(new Vector2d(lensPosU, lensPosV));
+                lensPos.Z += 10e-6;
+                incomingRay.Origin = lensPos;
+                // update incoming ray direction with normal
+                // (convert from tangent space of lens position to camera space)
+                // normal at lensPos converts to (0,0,1)
+                // TODO: this is a bad computation
+                Vector3d normal = complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(lensPos);
+                incomingRay.Direction = rayDirection - normal;
+            }
+            incomingRay.Direction = rayDirection;
 
             intersections = new List<Vector3d>();
             Intersection backInt = complexLens.Intersect(incomingRay);
@@ -297,6 +302,16 @@
 
         private void complexLensForm_Resize(object sender, EventArgs e)
         {
+            Recompute();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            inputLensPosDirectly = checkBox1.Checked;
+            rayOriginXNumeric.Enabled = inputLensPosDirectly;
+            rayOriginYNumeric.Enabled = inputLensPosDirectly;
+            rayOriginZNumeric.Enabled = inputLensPosDirectly;
+            lensPosTNumeric.Enabled = !inputLensPosDirectly;
             Recompute();
         }
     }

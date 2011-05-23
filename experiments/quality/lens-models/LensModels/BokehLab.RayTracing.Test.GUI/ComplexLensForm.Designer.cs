@@ -30,10 +30,13 @@
         {
             this.drawingPanel = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button1 = new System.Windows.Forms.Button();
             this.rayOriginZNumeric = new System.Windows.Forms.NumericUpDown();
             this.rayOriginYNumeric = new System.Windows.Forms.NumericUpDown();
+            this.lensPosTNumeric = new System.Windows.Forms.NumericUpDown();
             this.rayDirectionPhiNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.rayOriginXNumeric = new System.Windows.Forms.NumericUpDown();
             this.label10 = new System.Windows.Forms.Label();
@@ -43,6 +46,7 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginZNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginYNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lensPosTNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginXNumeric)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -66,10 +70,13 @@
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Controls.Add(this.rayOriginZNumeric);
             this.groupBox1.Controls.Add(this.rayOriginYNumeric);
+            this.groupBox1.Controls.Add(this.lensPosTNumeric);
             this.groupBox1.Controls.Add(this.rayDirectionPhiNumeric);
+            this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.rayOriginXNumeric);
             this.groupBox1.Controls.Add(this.label10);
@@ -82,9 +89,20 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Controls";
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(7, 89);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(137, 17);
+            this.checkBox1.TabIndex = 14;
+            this.checkBox1.Text = "Input ray origin directly?";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(10, 193);
+            this.button1.Location = new System.Drawing.Point(10, 229);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 13;
@@ -128,6 +146,30 @@
             this.rayOriginYNumeric.TabIndex = 6;
             this.rayOriginYNumeric.ValueChanged += new System.EventHandler(this.SceneControlsValueChanged);
             // 
+            // lensPosTNumeric
+            // 
+            this.lensPosTNumeric.DecimalPlaces = 3;
+            this.lensPosTNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            this.lensPosTNumeric.Location = new System.Drawing.Point(11, 164);
+            this.lensPosTNumeric.Maximum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.lensPosTNumeric.Name = "lensPosTNumeric";
+            this.lensPosTNumeric.Size = new System.Drawing.Size(54, 20);
+            this.lensPosTNumeric.TabIndex = 8;
+            this.lensPosTNumeric.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            65536});
+            this.lensPosTNumeric.ValueChanged += new System.EventHandler(this.SceneControlsValueChanged);
+            // 
             // rayDirectionPhiNumeric
             // 
             this.rayDirectionPhiNumeric.DecimalPlaces = 3;
@@ -136,7 +178,7 @@
             0,
             0,
             131072});
-            this.rayDirectionPhiNumeric.Location = new System.Drawing.Point(11, 167);
+            this.rayDirectionPhiNumeric.Location = new System.Drawing.Point(11, 203);
             this.rayDirectionPhiNumeric.Maximum = new decimal(new int[] {
             10,
             0,
@@ -152,10 +194,19 @@
             this.rayDirectionPhiNumeric.TabIndex = 8;
             this.rayDirectionPhiNumeric.ValueChanged += new System.EventHandler(this.SceneControlsValueChanged);
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 148);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(103, 13);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "Origin (X parameter):";
+            // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(8, 151);
+            this.label4.Location = new System.Drawing.Point(8, 187);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(75, 13);
             this.label4.TabIndex = 12;
@@ -192,7 +243,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label3.Location = new System.Drawing.Point(8, 90);
+            this.label3.Location = new System.Drawing.Point(8, 73);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(83, 13);
             this.label3.TabIndex = 1;
@@ -242,6 +293,7 @@
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginZNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginYNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lensPosTNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayDirectionPhiNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayOriginXNumeric)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -265,6 +317,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.NumericUpDown lensPosTNumeric;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox checkBox1;
 
     }
 }
