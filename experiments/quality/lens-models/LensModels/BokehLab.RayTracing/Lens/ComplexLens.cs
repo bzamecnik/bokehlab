@@ -33,6 +33,9 @@
         private double backSurfaceSinTheta;
         private double frontSurfaceSinTheta;
 
+        private double backSurfaceApertureRadius;
+        private double frontSurfaceApertureRadius;
+
         public double MediumRefractiveIndex { get; set; }
 
         private static readonly double epsilon = 1e-6;
@@ -49,10 +52,12 @@
             ElementSurface frontSurface = surfaces.LastOrDefault((surface) => surface.Surface is Sphere);
             frontSphericalSurface = (Sphere)frontSurface.Surface;
             frontSurfaceSinTheta = frontSphericalSurface.GetCapElevationAngleSine(frontSurface.ApertureRadius);
+            frontSurfaceApertureRadius = frontSurface.ApertureRadius;
 
             ElementSurface backSurface = surfaces.FirstOrDefault((surface) => surface.Surface is Sphere);
             backSphericalSurface = (Sphere)backSurface.Surface;
             backSurfaceSinTheta = backSphericalSurface.GetCapElevationAngleSine(backSurface.ApertureRadius);
+            backSurfaceApertureRadius = backSurface.ApertureRadius;
 
             MediumRefractiveIndex = Materials.Fixed.AIR;
             frontSurface.NextRefractiveIndex = MediumRefractiveIndex;
@@ -81,15 +86,29 @@
         {
             var surfaces = new List<ElementSurface>();
             double lastRefractiveIndex = mediumRefractiveIndex;
-            double lastThickness = 0;
+
+            var surfaceDefsReverse = surfaceDefs.Reverse().ToList();
+            // thickness of the whole lens (from front to back apex)
+            // (without the distance to the senzor - backmost surface def.)
+            double lensThickness = surfaceDefsReverse.Skip(1).Sum(def => def.Thickness);
+            double elementBasePlaneShiftZ = lensThickness;
+
+            double lastCapHeight = 0;
+            double capHeight = 0;
 
             // definition list is ordered from front to back, working list
             // must be ordered from back to front, so a conversion has to be
             // performed
-            foreach (var definition in surfaceDefs.Reverse())
+            int defIndex = 0;
+            foreach (var definition in surfaceDefsReverse)
             {
+                if (defIndex > 0)
+                {
+                    elementBasePlaneShiftZ -= surfaceDefsReverse[defIndex].Thickness;
+                }
+
                 ElementSurface surface = new ElementSurface();
-                surface.ApertureRadius = definition.ApertureRadius;
+                surface.ApertureRadius = 0.5 * definition.ApertureDiameter;
                 surface.NextRefractiveIndex = lastRefractiveIndex;
                 lastRefractiveIndex = definition.NextRefractiveIndex;
                 if (definition.CurvatureRadius.HasValue)
@@ -105,10 +124,11 @@
                     };
                     sphere.Center = Math.Sign(radius) *
                         sphere.GetCapCenter(surface.ApertureRadius, Vector3d.UnitZ);
+                    capHeight = Math.Sign(radius) * sphere.GetCapHeight(sphere.Radius, surface.ApertureRadius);
+                    elementBasePlaneShiftZ -= lastCapHeight - capHeight;
+                    sphere.Center += new Vector3d(0, 0, elementBasePlaneShiftZ);
                     surface.Surface = sphere;
                     surface.SurfaceNormalField = sphere;
-                    // TODO
-                    //surface.ShiftToNext = ...
                 }
                 else
                 {
@@ -117,16 +137,20 @@
                     // else -> planar element surface
                     surface.NextRefractiveIndex = definition.NextRefractiveIndex;
                     surface.Convex = true;
-                    surface.Surface = new Circle()
+                    capHeight = 0;
+                    elementBasePlaneShiftZ -= lastCapHeight - capHeight;
+                    Circle circle = new Circle()
                     {
-                        Radius = definition.ApertureRadius
+                        Radius = 0.5 * definition.ApertureDiameter,
+                        Z = elementBasePlaneShiftZ,
                     };
 
-                    // TODO:
-                    //surface.ShiftToNext = ...
+                    surface.Surface = circle;
+                    surface.SurfaceNormalField = circle;
                 }
-                surface.ShiftToNext = lastThickness;
-                lastThickness = definition.Thickness;
+                lastCapHeight = capHeight;
+                surfaces.Add(surface);
+                defIndex++;
             }
 
             ComplexLens lens = new ComplexLens(surfaces)
@@ -138,21 +162,22 @@
             throw new NotImplementedException();
         }
 
-        public static ComplexLens CreateBiconvexLens(double curvatureRadius, double apertureRadius)
+        public static ComplexLens CreateBiconvexLens(
+            double curvatureRadius,
+            double apertureRadius,
+            double thickness)
         {
-            //double thickness = 5;
-            double thickness = 0;
             var surfaces = new List<ComplexLens.ElementSurface>();
             Sphere backSphere = new Sphere()
             {
                 Radius = curvatureRadius,
             };
             backSphere.Center = backSphere.GetCapCenter(apertureRadius, -Vector3d.UnitZ);
+            backSphere.Center += new Vector3d(0, 0, thickness);
             surfaces.Add(new ComplexLens.ElementSurface()
             {
                 ApertureRadius = apertureRadius,
                 NextRefractiveIndex = Materials.Fixed.GLASS_CROWN_K7,
-                ShiftToNext = thickness, // DEBUG
                 Surface = backSphere,
                 SurfaceNormalField = backSphere,
                 Convex = true
@@ -165,7 +190,6 @@
             surfaces.Add(new ComplexLens.ElementSurface()
             {
                 ApertureRadius = apertureRadius,
-                ShiftToNext = 0,
                 Surface = frontSphere,
                 SurfaceNormalField = frontSphere,
                 Convex = false
@@ -173,6 +197,89 @@
 
             ComplexLens lens = new ComplexLens(surfaces);
             return lens;
+        }
+
+        public static ComplexLens CreateDoubleGaussLens()
+        {
+            var surfaces = new List<ComplexLens.SphericalElementSurfaceDefinition>();
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = 58.950,
+                Thickness = 7.520,
+                NextRefractiveIndex = 1.670,
+                ApertureDiameter = 50.4,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = 169.660,
+                Thickness = 0.240,
+                NextRefractiveIndex = Materials.Fixed.AIR,
+                ApertureDiameter = 50.4,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = 38.550,
+                Thickness = 8.050,
+                NextRefractiveIndex = 1.670,
+                ApertureDiameter = 46.0,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = 81.540,
+                Thickness = 6.550,
+                NextRefractiveIndex = 1.699,
+                ApertureDiameter = 46.0,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = 25.500,
+                Thickness = 11.410,
+                NextRefractiveIndex = Materials.Fixed.AIR,
+                ApertureDiameter = 36.0,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = null,
+                Thickness = 9.0,
+                NextRefractiveIndex = Materials.Fixed.AIR,
+                ApertureDiameter = 34.2,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = -28.990,
+                Thickness = 2.360,
+                NextRefractiveIndex = 1.603,
+                ApertureDiameter = 34.0,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = 81.540,
+                Thickness = 12.130,
+                NextRefractiveIndex = 1.658,
+                ApertureDiameter = 40.0,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = -40.770,
+                Thickness = 0.380,
+                NextRefractiveIndex = Materials.Fixed.AIR,
+                ApertureDiameter = 40.0,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = 874.130,
+                Thickness = 6.440,
+                NextRefractiveIndex = 1.717,
+                ApertureDiameter = 40.0,
+            });
+            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
+            {
+                CurvatureRadius = -79.460,
+                Thickness = 72.228, // distance to senzor
+                NextRefractiveIndex = Materials.Fixed.AIR,
+                ApertureDiameter = 40.0,
+            });
+            return ComplexLens.Create(surfaces, Materials.Fixed.AIR);
         }
 
         #region ILens Members
@@ -194,7 +301,6 @@
 
                 // Compute intersection
 
-                incomingRay.Origin -= shiftFromLensCenter;
                 // the intersection is done on the element surface in its
                 // normalized position
                 Intersection intersection = surface.Surface.Intersect(incomingRay);
@@ -209,7 +315,6 @@
                     // intersection is outside the aperture
                     return null;
                 }
-                intersection.Position += shiftFromLensCenter;
 
                 // Compute refracted ray
 
@@ -226,6 +331,10 @@
                     Vector3d refractedDirection = Ray.Refract(
                         incomingRay.Direction, normal, lastRefractiveIndex,
                         nextRefractiveIndex, false);
+                    if (refractedDirection == Vector3d.Zero)
+                    {
+                        return null;
+                    }
                     outgoingRay = new Ray(intersectionPos, refractedDirection);
                 }
                 else
@@ -235,7 +344,6 @@
                 }
 
                 lastRefractiveIndex = nextRefractiveIndex;
-                shiftFromLensCenter += new Vector3d(0, 0, -surface.ShiftToNext);
                 incomingRay = new Ray(outgoingRay.Origin, outgoingRay.Direction);
                 //Console.WriteLine("Red, {0}, ", outgoingRay.ToLine());
                 //Console.WriteLine("Outgoing: {0}, ", Ray.NormalizeDirection(outgoingRay).ToString());
@@ -265,7 +373,14 @@
 
         public Intersection Intersect(Ray ray)
         {
-            return backSphericalSurface.Intersect(ray);
+            Intersection isec = backSphericalSurface.Intersect(ray);
+            if ((isec != null) &&
+                (isec.Position.Xy.LengthSquared >
+                backSurfaceApertureRadius * backSurfaceApertureRadius))
+            {
+                return null;
+            }
+            return isec;
         }
 
         #endregion
@@ -276,6 +391,7 @@
         /// <remarks>
         /// The surfaces follow one after another from back of the lens to
         /// the front (the same way as ray tracing proceeds within the lens).
+        /// Each surface is absolutely positioned in the camera space.
         /// </remarks>
         public class ElementSurface
         {
@@ -295,10 +411,6 @@
             /// Radius of aperture in the base (XY) plane.
             /// </summary>
             public double ApertureRadius;
-            /// <summary>
-            /// (Signed) shift from one element base (XY) plane to another.
-            /// </summary>
-            public double ShiftToNext;
             /// <summary>
             /// Index of refraction of the material after this surface.
             /// </summary>
@@ -320,13 +432,14 @@
         /// The surfaces follow one after another from front of the lens to
         /// the back. The format of definition should be suitable to the
         /// format in which the lens data are commonly available.
+        /// Surfaces are relatively positioned one after another.
         /// </remarks>
         public class SphericalElementSurfaceDefinition
         {
             /// <summary>
-            /// Radius of aperture in the base (XY) plane.
+            /// Diameter (not radius!) of aperture in the base (XY) plane.
             /// </summary>
-            public double ApertureRadius;
+            public double ApertureDiameter;
             /// <summary>
             /// Signed radius of curvature. Positive: convex from front,
             /// negative: concave from front. In case of no value the surface
