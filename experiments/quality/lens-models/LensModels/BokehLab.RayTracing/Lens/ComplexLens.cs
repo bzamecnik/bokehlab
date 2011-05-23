@@ -171,17 +171,45 @@
             }
 
             //DEBUG
-            foreach (var surface in surfaces)
-            {
-                Console.WriteLine("{0}, {1}, {2}", surface.ApertureRadius,
-                    surface.Convex, surface.NextRefractiveIndex);
-            }
+            //foreach (var surface in surfaces)
+            //{
+            //    Console.WriteLine("{0}, {1}, {2}", surface.ApertureRadius,
+            //        surface.Convex, surface.NextRefractiveIndex);
+            //}
 
             ComplexLens lens = new ComplexLens(surfaces)
             {
                 MediumRefractiveIndex = mediumRefractiveIndex
             };
             return lens;
+        }
+
+        /// <summary>
+        /// Create a lens from a table.
+        /// </summary>
+        /// <param name="table">
+        /// Rows: surfaces, ordered from front to back.
+        /// Columns: CurvatureRadius, Thickness, NextRefractiveIndex, ApertureDiameter.
+        /// </param>
+        /// <param name="mediumRefractiveIndex"></param>
+        /// <param name="scale"></param>
+        /// <returns></returns>
+        public static ComplexLens CreateFromSphericalElementTable(
+            double?[,] table,
+            double mediumRefractiveIndex,
+            double scale)
+        {
+            var surfaceDefs = new List<SphericalElementSurfaceDefinition>();
+            for (int surfaceIndex = 0; surfaceIndex < table.GetLength(0); surfaceIndex++)
+            {
+                var surface = new SphericalElementSurfaceDefinition();
+                surface.CurvatureRadius = table[surfaceIndex, 0];
+                surface.Thickness = table[surfaceIndex, 1].Value;
+                surface.NextRefractiveIndex = table[surfaceIndex, 2].Value;
+                surface.ApertureDiameter = table[surfaceIndex, 3].Value;
+                surfaceDefs.Add(surface);
+            }
+            return Create(surfaceDefs, mediumRefractiveIndex, scale);
         }
 
         public static ComplexLens CreateBiconvexLens(
@@ -225,85 +253,38 @@
             double mediumRefractiveIndex,
             double scale)
         {
-            var surfaces = new List<ComplexLens.SphericalElementSurfaceDefinition>();
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = 58.950,
-                Thickness = 7.520,
-                NextRefractiveIndex = 1.670,
-                ApertureDiameter = 50.4,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = 169.660,
-                Thickness = 0.240,
-                NextRefractiveIndex = mediumRefractiveIndex,
-                ApertureDiameter = 50.4,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = 38.550,
-                Thickness = 8.050,
-                NextRefractiveIndex = 1.670,
-                ApertureDiameter = 46.0,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = 81.540,
-                Thickness = 6.550,
-                NextRefractiveIndex = 1.699,
-                ApertureDiameter = 46.0,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = 25.500,
-                Thickness = 11.410,
-                NextRefractiveIndex = mediumRefractiveIndex,
-                ApertureDiameter = 36.0,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = null,
-                Thickness = 9.0,
-                NextRefractiveIndex = mediumRefractiveIndex,
-                ApertureDiameter = 34.2,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = -28.990,
-                Thickness = 2.360,
-                NextRefractiveIndex = 1.603,
-                ApertureDiameter = 34.0,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = 81.540,
-                Thickness = 12.130,
-                NextRefractiveIndex = 1.658,
-                ApertureDiameter = 40.0,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = -40.770,
-                Thickness = 0.380,
-                NextRefractiveIndex = mediumRefractiveIndex,
-                ApertureDiameter = 40.0,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = 874.130,
-                Thickness = 6.440,
-                NextRefractiveIndex = 1.717,
-                ApertureDiameter = 40.0,
-            });
-            surfaces.Add(new ComplexLens.SphericalElementSurfaceDefinition()
-            {
-                CurvatureRadius = -79.460,
-                Thickness = 72.228, // distance to senzor
-                NextRefractiveIndex = mediumRefractiveIndex,
-                ApertureDiameter = 40.0,
-            });
-            return ComplexLens.Create(surfaces, mediumRefractiveIndex, scale);
+            double?[,] table = {
+                { 58.950, 7.520, 1.670, 50.4 },
+                { 169.660, 0.240, mediumRefractiveIndex, 50.4 },
+                { 38.550, 8.050, 1.670, 46.0 },
+                { 81.540, 6.550, 1.699, 46.0 },
+                { 25.500, 11.410, mediumRefractiveIndex, 36.0 },
+                { null, 9.0, mediumRefractiveIndex, 34.2 },
+                { -28.990, 2.360, 1.603, 34.0 },
+                { 81.540, 12.130, 1.658, 40.0 },
+                { -40.770, 0.380, mediumRefractiveIndex, 40.0 },
+                { 874.130, 6.440, 1.717, 40.0 },
+                { -79.460, 72.228 /* distance to senzor*/, mediumRefractiveIndex, 40.0 },
+            };
+            return CreateFromSphericalElementTable(table, mediumRefractiveIndex, scale);
+        }
+
+        public static ComplexLens CreatePetzvalLens(
+            double mediumRefractiveIndex,
+            double scale)
+        {
+            double?[,] table = {
+                { 52.9, 5.8, 1.517, 30 },
+                { -41.4, 1.5, 1.575, 30 },
+                { 436.2, 23.3, mediumRefractiveIndex, 30 },
+                { null, 23.3, mediumRefractiveIndex, 25.17398 },
+                { 104.8, 2.2, 1.575, 30 },
+                { 36.8, 0.7, mediumRefractiveIndex, 30 },
+                { 45.5, 3.6, 1.517000, 30 },
+                { -149.5, 58.5, mediumRefractiveIndex, 30 },
+            };
+            // senzor diagonal diameter: 43.59859
+            return CreateFromSphericalElementTable(table, mediumRefractiveIndex, scale);
         }
 
         #region ILens Members
@@ -480,25 +461,28 @@
         public class SphericalElementSurfaceDefinition
         {
             /// <summary>
-            /// Diameter (not radius!) of aperture in the base (XY) plane.
-            /// </summary>
-            public double ApertureDiameter;
-            /// <summary>
             /// Signed radius of curvature. Positive: convex from front,
             /// negative: concave from front. In case of no value the surface
             /// is not spherical but rather planar (a planar glass surface or
             /// a stop).
             /// </summary>
             public double? CurvatureRadius;
+
             /// <summary>
             /// (Unsigned) distance from this element's apex to the next
             /// element's apex.
             /// </summary>
             public double Thickness;
+
             /// <summary>
             /// Index of refraction of the material after this surface.
             /// </summary>
             public double NextRefractiveIndex;
+
+            /// <summary>
+            /// Diameter (not radius!) of aperture in the base (XY) plane.
+            /// </summary>
+            public double ApertureDiameter;
 
             public SphericalElementSurfaceDefinition Scale(double scale)
             {
