@@ -30,6 +30,7 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.senzorWidthNumeric = new System.Windows.Forms.NumericUpDown();
             this.tonemapOutputCheckBox = new System.Windows.Forms.CheckBox();
             this.specificOutputSizeCheckBox = new System.Windows.Forms.CheckBox();
             this.lensFocalLengthNumeric = new System.Windows.Forms.NumericUpDown();
@@ -48,6 +49,7 @@
             this.senzorTiltZNumeric = new System.Windows.Forms.NumericUpDown();
             this.senzorTiltYNumeric = new System.Windows.Forms.NumericUpDown();
             this.senzorShiftXNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.senzorTiltXNumeric = new System.Windows.Forms.NumericUpDown();
             this.label6 = new System.Windows.Forms.Label();
@@ -62,10 +64,10 @@
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.renderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.label1 = new System.Windows.Forms.Label();
-            this.senzorWidthNumeric = new System.Windows.Forms.NumericUpDown();
+            this.renderPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorWidthNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lensFocalLengthNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lensApertureNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.outputSizeYNumeric)).BeginInit();
@@ -80,7 +82,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltXNumeric)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorWidthNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -129,13 +130,37 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Settings";
             // 
+            // senzorWidthNumeric
+            // 
+            this.senzorWidthNumeric.DecimalPlaces = 2;
+            this.senzorWidthNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.senzorWidthNumeric.Location = new System.Drawing.Point(106, 204);
+            this.senzorWidthNumeric.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.senzorWidthNumeric.Minimum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            -2147483648});
+            this.senzorWidthNumeric.Name = "senzorWidthNumeric";
+            this.senzorWidthNumeric.Size = new System.Drawing.Size(63, 20);
+            this.senzorWidthNumeric.TabIndex = 11;
+            this.senzorWidthNumeric.ValueChanged += new System.EventHandler(this.senzorWidthNumeric_ValueChanged);
+            // 
             // tonemapOutputCheckBox
             // 
             this.tonemapOutputCheckBox.AutoSize = true;
             this.tonemapOutputCheckBox.Location = new System.Drawing.Point(9, 297);
             this.tonemapOutputCheckBox.Name = "tonemapOutputCheckBox";
             this.tonemapOutputCheckBox.Size = new System.Drawing.Size(141, 17);
-            this.tonemapOutputCheckBox.TabIndex = 14;
+            this.tonemapOutputCheckBox.TabIndex = 15;
             this.tonemapOutputCheckBox.Text = "Tonemap output image?";
             this.tonemapOutputCheckBox.UseVisualStyleBackColor = true;
             this.tonemapOutputCheckBox.CheckedChanged += new System.EventHandler(this.tonemapOutputCheckBox_CheckedChanged);
@@ -146,7 +171,7 @@
             this.specificOutputSizeCheckBox.Location = new System.Drawing.Point(9, 248);
             this.specificOutputSizeCheckBox.Name = "specificOutputSizeCheckBox";
             this.specificOutputSizeCheckBox.Size = new System.Drawing.Size(121, 17);
-            this.specificOutputSizeCheckBox.TabIndex = 11;
+            this.specificOutputSizeCheckBox.TabIndex = 12;
             this.specificOutputSizeCheckBox.Text = "Specify output size?";
             this.specificOutputSizeCheckBox.UseVisualStyleBackColor = true;
             this.specificOutputSizeCheckBox.CheckedChanged += new System.EventHandler(this.specificOutputSizeCheckBox_CheckedChanged);
@@ -203,7 +228,7 @@
             0});
             this.outputSizeYNumeric.Name = "outputSizeYNumeric";
             this.outputSizeYNumeric.Size = new System.Drawing.Size(69, 20);
-            this.outputSizeYNumeric.TabIndex = 13;
+            this.outputSizeYNumeric.TabIndex = 14;
             this.outputSizeYNumeric.Value = new decimal(new int[] {
             1,
             0,
@@ -235,7 +260,7 @@
             0});
             this.outputSizeXNumeric.Name = "outputSizeXNumeric";
             this.outputSizeXNumeric.Size = new System.Drawing.Size(73, 20);
-            this.outputSizeXNumeric.TabIndex = 12;
+            this.outputSizeXNumeric.TabIndex = 13;
             this.outputSizeXNumeric.Value = new decimal(new int[] {
             1,
             0,
@@ -412,6 +437,15 @@
             this.senzorShiftXNumeric.TabIndex = 8;
             this.senzorShiftXNumeric.ValueChanged += new System.EventHandler(this.senzorShiftXNumeric_ValueChanged);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 206);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(71, 13);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Senzor width:";
+            // 
             // label8
             // 
             this.label8.AutoSize = true;
@@ -523,7 +557,8 @@
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.renderToolStripMenuItem});
+            this.renderToolStripMenuItem,
+            this.renderPreviewToolStripMenuItem});
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
             this.toolStripMenuItem2.Size = new System.Drawing.Size(73, 20);
             this.toolStripMenuItem2.Text = "Rendering";
@@ -536,38 +571,13 @@
             this.renderToolStripMenuItem.Text = "&Render";
             this.renderToolStripMenuItem.Click += new System.EventHandler(this.renderToolStripMenuItem_Click);
             // 
-            // label1
+            // renderPreviewToolStripMenuItem
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 206);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(71, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Senzor width:";
-            // 
-            // senzorWidthNumeric
-            // 
-            this.senzorWidthNumeric.DecimalPlaces = 2;
-            this.senzorWidthNumeric.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.senzorWidthNumeric.Location = new System.Drawing.Point(106, 204);
-            this.senzorWidthNumeric.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.senzorWidthNumeric.Minimum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            -2147483648});
-            this.senzorWidthNumeric.Name = "senzorWidthNumeric";
-            this.senzorWidthNumeric.Size = new System.Drawing.Size(63, 20);
-            this.senzorWidthNumeric.TabIndex = 15;
-            this.senzorWidthNumeric.ValueChanged += new System.EventHandler(this.senzorWidthNumeric_ValueChanged);
+            this.renderPreviewToolStripMenuItem.Name = "renderPreviewToolStripMenuItem";
+            this.renderPreviewToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
+            this.renderPreviewToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
+            this.renderPreviewToolStripMenuItem.Text = "Render preview";
+            this.renderPreviewToolStripMenuItem.Click += new System.EventHandler(this.renderPreviewToolStripMenuItem_Click);
             // 
             // IbrtForm
             // 
@@ -586,6 +596,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.senzorWidthNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lensFocalLengthNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lensApertureNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.outputSizeYNumeric)).EndInit();
@@ -602,7 +613,6 @@
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.senzorWidthNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -646,6 +656,7 @@
         private System.Windows.Forms.NumericUpDown senzorShiftXNumeric;
         private System.Windows.Forms.NumericUpDown senzorWidthNumeric;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripMenuItem renderPreviewToolStripMenuItem;
     }
 }
 

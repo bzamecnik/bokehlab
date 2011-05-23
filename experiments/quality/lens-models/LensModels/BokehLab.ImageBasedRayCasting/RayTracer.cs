@@ -25,9 +25,19 @@
 
         public FloatMapImage RenderImage(Size imageSize)
         {
+            return RenderImagePreview(imageSize, new Rectangle(Point.Empty, imageSize), null);
+        }
+
+        public FloatMapImage RenderImagePreview(Size imageSize, Rectangle preview, FloatMapImage outputImage)
+        {
             int height = imageSize.Height;
             int width = imageSize.Width;
-            FloatMapImage outputImage = new FloatMapImage((uint)width, (uint)height);
+            if ((outputImage == null) ||
+                (outputImage.Width != width) ||
+                (outputImage.Height != height))
+            {
+                outputImage = new FloatMapImage((uint)width, (uint)height);
+            }
 
             Camera.Sensor.RasterSize = imageSize;
 
@@ -40,10 +50,14 @@
             // and surprisigly there is only an insignificant performance
             // benefit.
 
+            int minX = preview.Left;
+            int maxX = preview.Right;
+            int minY = preview.Top;
+            int maxY = preview.Bottom;
             float[] color = new float[outputImage.ColorChannelsCount];
-            for (int y = 0; y < height; y++)
+            for (int y = minY; y < maxY; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = minX; x < maxX; x++)
                 {
                     foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
                     {

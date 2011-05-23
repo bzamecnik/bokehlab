@@ -32,7 +32,7 @@
             InitializeComponent();
 
             //complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
-            complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
+            //complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
             complexLens = ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 2.0);
 
             thinLens.FocalLength = 10;
@@ -77,7 +77,12 @@
             initialized = true;
         }
 
-        private void RenderImage()
+        private void RenderPreview()
+        {
+            RenderImage(true);
+        }
+
+        private void RenderImage(bool preview)
         {
             if (!initialized)
             {
@@ -95,7 +100,31 @@
                     (int)outputSizeYNumeric.Value)
                 : pictureBox1.Size;
 
-            outputImage = rayTracer.RenderImage(outputImageSize);
+            if (preview)
+            {
+                Size previewSize = new Size(outputImageSize.Width / 4, outputImageSize.Height / 4);
+                int sampleCount = rayTracer.SampleCount;
+                outputImage = rayTracer.RenderImagePreview(outputImageSize, new Rectangle(
+                    new Point(
+                        (outputImageSize.Width - previewSize.Width) / 2,
+                        (outputImageSize.Height - previewSize.Height) / 2),
+                    previewSize),
+                    null);
+
+                rayTracer.SampleCount = 64;
+                Size focusWindowSize = new Size(40, 40);
+                outputImage = rayTracer.RenderImagePreview(outputImageSize, new Rectangle(
+                    new Point(
+                        (outputImageSize.Width - focusWindowSize.Width) / 2,
+                        (outputImageSize.Height - focusWindowSize.Height) / 2),
+                    focusWindowSize),
+                    outputImage);
+                rayTracer.SampleCount = sampleCount;
+            }
+            else
+            {
+                outputImage = rayTracer.RenderImage(outputImageSize);
+            }
 
             stopwatch.Stop();
 
@@ -115,7 +144,7 @@
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            RenderImage();
+            RenderImage(false);
         }
 
         private void renderButton_Click(object sender, EventArgs e)
@@ -125,13 +154,13 @@
             rayTracer.Camera.Sensor.Shift = senzorShift;
 
             rayTracer.Scene.Layer.Depth = (double)layerZNumeric.Value;
-            RenderImage();
+            RenderImage(false);
         }
 
         private void layerZNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Scene.Layer.Depth = (double)layerZNumeric.Value;
-            RenderImage();
+            RenderPreview();
         }
 
         private void sampleCountNumeric_ValueChanged(object sender, EventArgs e)
@@ -140,19 +169,18 @@
             //RenderImage();
         }
 
-
         private void lensApertureNumeric_ValueChanged(object sender, EventArgs e)
         {
             double aperture = (double)lensApertureNumeric.Value;
             thinLens.ApertureRadius = aperture;
             biconvexLens.ApertureRadius = aperture;
-            RenderImage();
+            RenderPreview();
         }
 
         private void lensFocalLengthNumeric_ValueChanged(object sender, EventArgs e)
         {
             thinLens.FocalLength = (double)lensFocalLengthNumeric.Value;
-            RenderImage();
+            RenderPreview();
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -180,7 +208,7 @@
 
         private void renderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RenderImage();
+            RenderImage(false);
         }
 
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -230,7 +258,7 @@
             rayTracer.Camera.Sensor.Tilt =
                 GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
 
-            RenderImage();
+            RenderPreview();
         }
 
         private void senzorTiltYNumeric_ValueChanged(object sender, EventArgs e)
@@ -238,7 +266,7 @@
             rayTracer.Camera.Sensor.Tilt =
                 GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
 
-            RenderImage();
+            RenderPreview();
         }
 
 
@@ -247,7 +275,7 @@
             rayTracer.Camera.Sensor.Tilt =
                 GetVectorFromControls(senzorTiltXNumeric, senzorTiltYNumeric, senzorTiltZNumeric);
 
-            RenderImage();
+            RenderPreview();
         }
 
         private void senzorShiftXNumeric_ValueChanged(object sender, EventArgs e)
@@ -255,7 +283,7 @@
             rayTracer.Camera.Sensor.Shift =
                 GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
 
-            RenderImage();
+            RenderPreview();
         }
 
         private void senzorShiftYNumeric_ValueChanged(object sender, EventArgs e)
@@ -263,7 +291,7 @@
             rayTracer.Camera.Sensor.Shift =
                 GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
 
-            RenderImage();
+            RenderPreview();
         }
 
         private void senzorShiftZNumeric_ValueChanged(object sender, EventArgs e)
@@ -271,7 +299,7 @@
             rayTracer.Camera.Sensor.Shift =
                 GetVectorFromControls(senzorShiftXNumeric, senzorShiftYNumeric, senzorShiftZNumeric);
 
-            RenderImage();
+            RenderPreview();
         }
 
         private Vector3d GetVectorFromControls(
@@ -288,6 +316,11 @@
         private void senzorWidthNumeric_ValueChanged(object sender, EventArgs e)
         {
             rayTracer.Camera.Sensor.Width = (double)senzorWidthNumeric.Value;
+        }
+
+        private void renderPreviewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RenderPreview();
         }
     }
 }
