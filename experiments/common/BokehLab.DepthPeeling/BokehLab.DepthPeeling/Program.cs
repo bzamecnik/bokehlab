@@ -13,7 +13,7 @@ namespace BokehLab.DepthPeeling
         [STAThread]
         public static void Main()
         {
-            SimpleFBO.RunExample();
+            DepthPeeling.RunExample();
         }
     }
 }
