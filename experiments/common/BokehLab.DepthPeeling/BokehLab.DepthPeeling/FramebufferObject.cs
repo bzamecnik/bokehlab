@@ -33,10 +33,12 @@ namespace BokehLab.DepthPeeling
 
         const int TextureSize = 512;
 
+
+
         #region Randoms
 
         Random rnd = new Random();
-        public const float scale = 3f;
+        public const float scale = 2f;
 
         /// <summary>Returns a random Float in the range [-0.5*scale..+0.5*scale]</summary>
         public float GetRandom()
@@ -90,6 +92,9 @@ namespace BokehLab.DepthPeeling
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+
+            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
+
             // GL.Ext.GenerateMipmap( GenerateMipmapTarget.Texture2D );
 
             // Create a FBO and attach the textures
@@ -276,36 +281,58 @@ namespace BokehLab.DepthPeeling
 
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBOHandle);
 
-            GL.PushAttrib(AttribMask.ViewportBit);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
             {
-                GL.Viewport(0, 0, TextureSize, TextureSize);
-
-                // clear the screen in red, to make it very obvious what the clear affected. only the FBO, not the real framebuffer
-                GL.ClearColor(1f, 0f, 0f, 0f);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-                // smack 50 random triangles into the FBO's textures
-                GL.Begin(BeginMode.Triangles);
+                GL.LoadIdentity();
+                GL.Ortho(-1, 1, -1, 1, 1, -1);
+                GL.MatrixMode(MatrixMode.Modelview);
+                GL.PushMatrix();
                 {
-                    //for (int i = 0; i < 10; i++)
-                    //{
-                    //    GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
-                    //    GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
-                    //    GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
-                    //    GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
-                    //    GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
-                    //    GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
-                    //}
-                    GL.Color3(0.5, 0, 0);
-                    GL.Vertex3(0, 0, 0);
-                    GL.Color3(0, 0.5, 0);
-                    GL.Vertex3(1, 1, -1);
-                    GL.Color3(0, 0, 0.5);
-                    GL.Vertex3(0, 1, 1);
+                    Matrix4 lookat = Matrix4.LookAt(0, 0, 0, 0, 0, -100, 0, 1, 0);
+                    GL.LoadMatrix(ref lookat);
+
+                    GL.PushAttrib(AttribMask.ViewportBit);
+                    {
+                        GL.Viewport(0, 0, TextureSize, TextureSize);
+
+                        // clear the screen in red, to make it very obvious what the clear affected. only the FBO, not the real framebuffer
+                        GL.ClearColor(1f, 0f, 0f, 0f);
+                        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+                        // smack 50 random triangles into the FBO's textures
+                        GL.Begin(BeginMode.Triangles);
+                        {
+                            for (int i = 0; i < 10; i++)
+                            {
+                                GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
+                                GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
+                                GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
+                                GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
+                                GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
+                                GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
+                            }
+
+                            //GL.Color3(0.5, 0, 0); GL.Vertex3(0, 0, 0);
+                            //GL.Color3(0, 0.5, 0); GL.Vertex3(1, 1, 0);
+                            //GL.Color3(0, 0, 0.5); GL.Vertex3(0, 1, 0);
+
+                            //GL.Color3(0.5, 0, 0); GL.Vertex3(0, 0, -1);
+                            //GL.Color3(0, 0.5, 0); GL.Vertex3(1, 1, 0);
+                            //GL.Color3(0, 0, 0.5); GL.Vertex3(0, 1, 1);
+
+                            //GL.Color3(0.5, 0, 0); GL.Vertex3(-1, -1, -1);
+                            //GL.Color3(0, 0.5, 0); GL.Vertex3(-1, 1, -1);
+                            //GL.Color3(0, 0, 0.5); GL.Vertex3(1, -1, 1);
+                        }
+                        GL.End();
+                    }
+                    GL.PopAttrib();
                 }
-                GL.End();
+                GL.PopMatrix();
             }
-            GL.PopAttrib();
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PopMatrix();
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // disable rendering into the FBO
 
             GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
@@ -362,7 +389,7 @@ namespace BokehLab.DepthPeeling
 
             GL.PushMatrix();
             {
-                //// Draw the Color Texture
+                // Draw the Color Texture
                 GL.Translate(-1.1f, 0f, 0f);
                 GL.BindTexture(TextureTarget.Texture2D, ColorTexture);
                 GL.Begin(BeginMode.Quads);
