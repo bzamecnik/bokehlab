@@ -9,7 +9,7 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
-
+using System.IO;
 using OpenTK;
 using OpenTK.Input;
 using OpenTK.Graphics;
@@ -31,7 +31,7 @@ namespace BokehLab.DepthPeeling
         bool showColorTexture = true;
 
         public DepthPeeling()
-            : base(1100, 600)
+            : base(512, 512)
         {
         }
 
@@ -43,27 +43,11 @@ namespace BokehLab.DepthPeeling
         /// </summary>
         uint FBOHandle;
 
+        int fragmentShaderObject;
+        int shaderProgram;
+
         Matrix4 scenePerspective;
         Matrix4 sceneModelView;
-
-        #region Randoms
-
-        Random rnd = new Random();
-        public const float scale = 2f;
-
-        /// <summary>Returns a random Float in the range [-0.5*scale..+0.5*scale]</summary>
-        public float GetRandom()
-        {
-            return (float)(rnd.NextDouble() - 0.5) * scale;
-        }
-
-        /// <summary>Returns a random Float in the range [0..1]</summary>
-        public float GetRandom0to1()
-        {
-            return (float)rnd.NextDouble();
-        }
-
-        #endregion Randoms
 
         public static void RunExample()
         {
@@ -93,6 +77,8 @@ namespace BokehLab.DepthPeeling
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Back, PolygonMode.Fill);
 
+            CreateShaders();
+
             CreateLayerTextures(LayerCount, Width, Height);
 
             // Create a FBO and attach the textures
@@ -108,6 +94,11 @@ namespace BokehLab.DepthPeeling
         {
             // Clean up what we allocated before exiting
             DeallocateLayerTextures();
+
+            if (shaderProgram != 0)
+                GL.DeleteProgram(shaderProgram);
+            if (fragmentShaderObject != 0)
+                GL.DeleteShader(fragmentShaderObject);
 
             if (FBOHandle != 0)
                 GL.Ext.DeleteFramebuffers(1, ref FBOHandle);
@@ -296,9 +287,46 @@ namespace BokehLab.DepthPeeling
 
         #endregion
 
+        #region  Setting up shaders
+
+        private void CreateShaders()
+        {
+            // create depth-peeling fragment shader
+            using (StreamReader fs = new StreamReader("Data/Shaders/DepthPeeling.glsl"))
+            {
+                string fragmentSourceCode = fs.ReadToEnd();
+                CreateFragmentShader(fragmentSourceCode, out fragmentShaderObject, out shaderProgram);
+            }
+        }
+
+        void CreateFragmentShader(string sourceCode, out int shaderObject, out int program)
+        {
+            shaderObject = GL.CreateShader(ShaderType.FragmentShader);
+
+            GL.ShaderSource(shaderObject, sourceCode);
+            GL.CompileShader(shaderObject);
+            string info;
+            GL.GetShaderInfoLog(shaderObject, out info);
+            int statusCode;
+            GL.GetShader(shaderObject, ShaderParameter.CompileStatus, out statusCode);
+
+            if (statusCode != 1)
+            {
+                throw new ApplicationException(info);
+            }
+
+            program = GL.CreateProgram();
+            GL.AttachShader(program, shaderObject);
+
+            GL.LinkProgram(program);
+            //GL.UseProgram(program);
+        }
+
+        #endregion
+
         #region Drawing the scene and layers
 
-        private void DrawOriginalScene()
+        private void DrawOriginalScene(Scene scene)
         {
             //GL.MatrixMode(MatrixMode.Projection);
             //GL.LoadMatrix(ref scenePerspective);
@@ -325,15 +353,7 @@ namespace BokehLab.DepthPeeling
                 // smack 50 random triangles into the FBO's textures
                 GL.Begin(BeginMode.Triangles);
                 {
-                    for (int i = 0; i < 10; i++)
-                    {
-                        GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
-                        GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
-                        GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
-                        GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
-                        GL.Color3(GetRandom0to1(), GetRandom0to1(), GetRandom0to1());
-                        GL.Vertex3(GetRandom(), GetRandom(), GetRandom());
-                    }
+                    scene.Draw();
 
                     //GL.Color3(0.5, 0, 0); GL.Vertex3(0, 0, 0);
                     //GL.Color3(0, 0.5, 0); GL.Vertex3(1, 1, 0);
@@ -354,21 +374,31 @@ namespace BokehLab.DepthPeeling
 
         private void DrawIntoLayers()
         {
-            GL.Disable(EnableCap.Texture2D);
+            //GL.Disable(EnableCap.Texture2D);
 
+            Scene scene = Scene.CreateRandomTriangles(10);
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
             BindFramebufferWithLayerTextures(FBOHandle, 0);
-            DrawOriginalScene();
+            DrawOriginalScene(scene);
 
+            // enable peeling shader
+            GL.UseProgram(shaderProgram);
+
+            //GL.ActiveTexture(TextureUnit.Texture0);
             for (int i = 1; i < LayerCount; i++)
             {
-                // TODO: enable peeling shader
                 BindFramebufferWithLayerTextures(FBOHandle, i);
-                DrawOriginalScene();
-                // TODO: disable peeling shader
+                GL.BindTexture(TextureTarget.Texture2D, DepthTextures[i - 1]);
+                //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), (int)ColorTextures[i - 1]);
+                //GL.BindTexture(TextureTarget.Texture2D, ColorTextures[i - 1]);
+                DrawOriginalScene(scene);
             }
+            // disable peeling shader
+            GL.UseProgram(0);
 
             UnbindFramebuffer(); // disable rendering into the FBO
-            GL.Enable(EnableCap.Texture2D);
+            //GL.Enable(EnableCap.Texture2D);
         }
 
         private void DisplayLayers()
@@ -378,6 +408,8 @@ namespace BokehLab.DepthPeeling
 
             //GL.MatrixMode(MatrixMode.Modelview);
             //GL.LoadMatrix(ref sceneModelView);
+
+            GL.Enable(EnableCap.Texture2D);
 
             GL.Viewport(0, 0, Width, Height);
 
@@ -540,5 +572,49 @@ namespace BokehLab.DepthPeeling
 
         #endregion
 
+        private class Scene
+        {
+            int vertexCount;
+            Vector3[] colors;
+            Vector3[] vertices;
+
+            public static Scene CreateRandomTriangles(int triangleCount)
+            {
+                Scene scene = new Scene();
+                scene.vertexCount = 3 * triangleCount;
+                scene.colors = new Vector3[scene.vertexCount];
+                scene.vertices = new Vector3[scene.vertexCount];
+                for (int i = 0; i < scene.vertexCount; i++)
+                {
+                    scene.colors[i] = new Vector3(0, GetRandom0to1(), GetRandom0to1());
+                    scene.vertices[i] = new Vector3(GetRandom(), GetRandom(), GetRandom());
+                }
+                return scene;
+            }
+
+            public void Draw()
+            {
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    GL.Color3(colors[i]);
+                    GL.Vertex3(vertices[i]);
+                }
+            }
+
+            static Random rnd = new Random();
+            public const float scale = 2f;
+
+            /// <summary>Returns a random Float in the range [-0.5*scale..+0.5*scale]</summary>
+            public static float GetRandom()
+            {
+                return (float)(rnd.NextDouble() - 0.5) * scale;
+            }
+
+            /// <summary>Returns a random Float in the range [0..1]</summary>
+            public static float GetRandom0to1()
+            {
+                return (float)rnd.NextDouble();
+            }
+        }
     }
 }
