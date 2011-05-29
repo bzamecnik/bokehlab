@@ -23,7 +23,7 @@ namespace BokehLab.DepthPeeling
         /// <summary>
         /// Number of depth peeling layers (color and depth textures).
         /// </summary>
-        static readonly int LayerCount = 2;
+        static readonly int LayerCount = 5;
 
         // index of currently displayed layer [0; LayerCount - 1]
         int activeLayer = 0;
@@ -76,6 +76,8 @@ namespace BokehLab.DepthPeeling
 
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Back, PolygonMode.Fill);
+
+            GL.Enable(EnableCap.Texture2D);
 
             CreateShaders();
 
@@ -159,25 +161,22 @@ namespace BokehLab.DepthPeeling
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
-                // GL.Ext.GenerateMipmap( GenerateMipmapTarget.Texture2D );
 
                 // create and setup DEPTH texture
                 GL.GenTextures(LayerCount, out DepthTextures[i]);
 
                 GL.BindTexture(TextureTarget.Texture2D, DepthTextures[i]);
-                GL.TexImage2D(TextureTarget.Texture2D, 0, (PixelInternalFormat)All.DepthComponent32, width, height, 0, PixelFormat.DepthComponent, PixelType.UnsignedInt, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32f, width, height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
                 //GL.TexImage2D(TextureTarget.Texture2D, 0, (PixelInternalFormat)All.DepthComponent16, width, height, 0, PixelFormat.DepthComponent, PixelType.UnsignedShort, IntPtr.Zero);
                 // things go horribly wrong if DepthComponent's Bitcount does not match the main Framebuffer's Depth
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
                 // TODO: this must be enabled, find out why it leaves the depth buffer empty
                 //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
-
-                // GL.Ext.GenerateMipmap( GenerateMipmapTarget.Texture2D );
+                //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
             }
         }
 
@@ -374,9 +373,9 @@ namespace BokehLab.DepthPeeling
 
         private void DrawIntoLayers()
         {
-            //GL.Disable(EnableCap.Texture2D);
-
             Scene scene = Scene.CreateRandomTriangles(10);
+
+            GL.Disable(EnableCap.Blend);
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
             BindFramebufferWithLayerTextures(FBOHandle, 0);
@@ -390,15 +389,12 @@ namespace BokehLab.DepthPeeling
             {
                 BindFramebufferWithLayerTextures(FBOHandle, i);
                 GL.BindTexture(TextureTarget.Texture2D, DepthTextures[i - 1]);
-                //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), (int)ColorTextures[i - 1]);
-                //GL.BindTexture(TextureTarget.Texture2D, ColorTextures[i - 1]);
                 DrawOriginalScene(scene);
             }
             // disable peeling shader
             GL.UseProgram(0);
 
             UnbindFramebuffer(); // disable rendering into the FBO
-            //GL.Enable(EnableCap.Texture2D);
         }
 
         private void DisplayLayers()
@@ -409,7 +405,7 @@ namespace BokehLab.DepthPeeling
             //GL.MatrixMode(MatrixMode.Modelview);
             //GL.LoadMatrix(ref sceneModelView);
 
-            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Blend);
 
             GL.Viewport(0, 0, Width, Height);
 
@@ -438,7 +434,7 @@ namespace BokehLab.DepthPeeling
                 }
                 GL.Begin(BeginMode.Quads);
                 {
-                    GL.TexCoord2(0f, 1f); GL.Vertex2(-1.0f, 1.0f);
+                    GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-1.0f, 1.0f);
                     GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1.0f, -1.0f);
                     GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(1.0f, -1.0f);
                     GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(1.0f, 1.0f);
@@ -501,17 +497,19 @@ namespace BokehLab.DepthPeeling
 
         private void SaveColorScreenshot()
         {
-            Bitmap bmp = new Bitmap(Width, Height);
-            System.Drawing.Imaging.BitmapData data =
-                bmp.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
-                             System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                             System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            GL.BindTexture(TextureTarget.Texture2D, ColorTextures[activeLayer]);
-            GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-            bmp.UnlockBits(data);
-            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            bmp.Save("color_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
+            using (Bitmap bmp = new Bitmap(Width, Height))
+            {
+                System.Drawing.Imaging.BitmapData data =
+                    bmp.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
+                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                 System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                GL.BindTexture(TextureTarget.Texture2D, ColorTextures[activeLayer]);
+                GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                GL.BindTexture(TextureTarget.Texture2D, 0);
+                bmp.UnlockBits(data);
+                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                bmp.Save("color_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
+            }
         }
 
         private void SaveDepthScreenshot()
@@ -526,48 +524,52 @@ namespace BokehLab.DepthPeeling
             //   - for now the loss of precision doesn't matter)
             //   - later the buffer can be stored in a FloatMap without
             //     any precision loss
-            Bitmap bmp = new Bitmap(Width, Height);
-            System.Drawing.Imaging.BitmapData bmpDataPtr =
-                bmp.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
-                             System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                             System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            unsafe
+            using (Bitmap bmp = new Bitmap(Width, Height))
             {
-                int inputStride = Width;
-                float conversionFactor = 255 / (float)UInt32.MaxValue;
-                for (int y = 0; y < Height; y++)
+                System.Drawing.Imaging.BitmapData bmpDataPtr =
+                    bmp.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
+                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                 System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                unsafe
                 {
-                    byte* outputRow = (byte*)bmpDataPtr.Scan0 + (y * bmpDataPtr.Stride);
-                    UInt32* inputRow = (UInt32*)depthBufferUInt32Ptr + (y * inputStride);
-                    for (int x = 0; x < Width; x++)
+                    int inputStride = Width;
+                    float conversionFactor = 255 / (float)UInt32.MaxValue;
+                    for (int y = 0; y < Height; y++)
                     {
-                        byte color8bit = (byte)(inputRow[x] * conversionFactor);
-                        for (int band = 0; band < 3; band++)
+                        byte* outputRow = (byte*)bmpDataPtr.Scan0 + (y * bmpDataPtr.Stride);
+                        UInt32* inputRow = (UInt32*)depthBufferUInt32Ptr + (y * inputStride);
+                        for (int x = 0; x < Width; x++)
                         {
-                            outputRow[x * 3 + band] = color8bit;
+                            byte color8bit = (byte)(inputRow[x] * conversionFactor);
+                            for (int band = 0; band < 3; band++)
+                            {
+                                outputRow[x * 3 + band] = color8bit;
+                            }
                         }
                     }
                 }
+                bmp.UnlockBits(bmpDataPtr);
+                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                bmp.Save("depth_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
             }
-            bmp.UnlockBits(bmpDataPtr);
-            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            bmp.Save("depth_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
         }
 
         private void SaveScreenshot()
         {
-            Bitmap bmp = new Bitmap(this.Width, this.Height);
-            System.Drawing.Imaging.BitmapData data =
-                bmp.LockBits(new System.Drawing.Rectangle(0, 0, this.Width, this.Height),
-                             System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                             System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            GL.ReadPixels(0, 0, this.Width, this.Height,
-                          OpenTK.Graphics.OpenGL.PixelFormat.Bgr,
-                          OpenTK.Graphics.OpenGL.PixelType.UnsignedByte,
-                          data.Scan0);
-            bmp.UnlockBits(data);
-            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            bmp.Save("screenshot_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
+            using (Bitmap bmp = new Bitmap(this.Width, this.Height))
+            {
+                System.Drawing.Imaging.BitmapData data =
+                    bmp.LockBits(new System.Drawing.Rectangle(0, 0, this.Width, this.Height),
+                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                 System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                GL.ReadPixels(0, 0, this.Width, this.Height,
+                              OpenTK.Graphics.OpenGL.PixelFormat.Bgr,
+                              OpenTK.Graphics.OpenGL.PixelType.UnsignedByte,
+                              data.Scan0);
+                bmp.UnlockBits(data);
+                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                bmp.Save("screenshot_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
+            }
         }
 
         #endregion
