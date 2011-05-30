@@ -31,7 +31,7 @@ namespace BokehLab.DepthPeeling
         bool showColorTexture = true;
 
         public DepthPeeling()
-            : base(512, 512)
+            : base(800, 600)
         {
         }
 
@@ -159,8 +159,8 @@ namespace BokehLab.DepthPeeling
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
                 // create and setup DEPTH texture
                 GL.GenTextures(LayerCount, out DepthTextures[i]);
@@ -175,6 +175,7 @@ namespace BokehLab.DepthPeeling
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
                 // TODO: this must be enabled, find out why it leaves the depth buffer empty
+                // it seems to work only for rectangle textures (not 2D)
                 //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
                 //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareFunc, (int)DepthFunction.Lequal);
             }
@@ -422,24 +423,44 @@ namespace BokehLab.DepthPeeling
 
             GL.Color3(1f, 1f, 1f);
 
+            if (showColorTexture)
+            {
+                GL.BindTexture(TextureTarget.Texture2D, ColorTextures[activeLayer]);
+            }
+            else
+            {
+                GL.BindTexture(TextureTarget.Texture2D, DepthTextures[activeLayer]);
+            }
+
             GL.PushMatrix();
             {
-                if (showColorTexture)
-                {
-                    GL.BindTexture(TextureTarget.Texture2D, ColorTextures[activeLayer]);
-                }
-                else
-                {
-                    GL.BindTexture(TextureTarget.Texture2D, DepthTextures[activeLayer]);
-                }
+                //GL.Scale(0.9f, 0.9, 1);
                 GL.Begin(BeginMode.Quads);
                 {
-                    GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-1.0f, 1.0f);
-                    GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1.0f, -1.0f);
-                    GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(1.0f, -1.0f);
-                    GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(1.0f, 1.0f);
+                    GL.TexCoord2(0, 1); GL.Vertex2(-1.0f, 1.0f);
+                    GL.TexCoord2(0, 0); GL.Vertex2(-1.0f, -1.0f);
+                    GL.TexCoord2(1, 0); GL.Vertex2(1.0f, -1.0f);
+                    GL.TexCoord2(1, 1); GL.Vertex2(1.0f, 1.0f);
+
+                    // texture coords are not normalized
+                    //GL.TexCoord2(0.0f, Height); GL.Vertex2(-1.0f, 1.0f);
+                    //GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1.0f, -1.0f);
+                    //GL.TexCoord2(Width, 0.0f); GL.Vertex2(1.0f, -1.0f);
+                    //GL.TexCoord2(Width, Height); GL.Vertex2(1.0f, 1.0f);
                 }
                 GL.End();
+
+                //GL.Begin(BeginMode.Triangles);
+                //GL.Color3(0.5, 0, 0);
+                //GL.TexCoord2(0.0f, 0);
+                //GL.Vertex3(-1, -1, 0);
+                //GL.Color3(0, 0.5, 0);
+                //GL.TexCoord2(0.0, 100);
+                //GL.Vertex3(-1, 1, 0);
+                //GL.Color3(0, 0, 0.5);
+                //GL.TexCoord2(100, 0);
+                //GL.Vertex3(1, -1, 0);
+                //GL.End();
             }
             GL.PopMatrix();
 
@@ -517,6 +538,8 @@ namespace BokehLab.DepthPeeling
             // allocate 32-bit unit unmanaged array to grab the depth buffer
             IntPtr depthBufferUInt32Ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(UInt32)) * Width * Height);
             GL.BindTexture(TextureTarget.Texture2D, DepthTextures[activeLayer]);
+            // TODO:
+            // - specify PixelType.UnsignedByte in order to avoid the further conversion by hand!
             GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.DepthComponent, PixelType.UnsignedInt, depthBufferUInt32Ptr);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             // -convert 32-bit uints to (3x grayscale) 8-bit RGB values

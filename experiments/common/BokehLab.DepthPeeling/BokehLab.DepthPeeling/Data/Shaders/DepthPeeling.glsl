@@ -1,8 +1,8 @@
 ﻿//uniform sampler2DRectShadow depthTexture;
 //uniform sampler2DShadow depthTexture;
 //uniform sampler2DRect depthTexture;
+//uniform sampler2DRect depthTexture;
 uniform sampler2D depthTexture;
-//uniform sampler2D colorTexture;
 
 void main() {
 	// fetch depth of fragment from previous layer at the same position
@@ -22,7 +22,9 @@ void main() {
 	//}
 	
 	//// code for sampler2D
-	float depth = texture2D(depthTexture, gl_FragCoord.xy/(float)512);
+	
+	float depth = texture2D(depthTexture, gl_FragCoord.xy/textureSize(depthTexture, 0));
+	//float depth = texture2DRect(depthTexture, gl_FragCoord.xy);
 	if (depth >= gl_FragCoord.z) {
 		discard;
 	}
