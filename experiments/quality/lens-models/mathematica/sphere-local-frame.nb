@@ -1,0 +1,256 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      9522,        247]
+NotebookOptionsPosition[      9127,        229]
+NotebookOutlinePosition[      9470,        244]
+CellTagsIndexPosition[      9427,        241]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"rayToArrow", "[", 
+    RowBox[{"origin_", ",", " ", "direction_"}], "]"}], ":=", 
+   "\[IndentingNewLine]", 
+   RowBox[{"Arrow", "[", 
+    RowBox[{"{", 
+     RowBox[{"origin", ",", 
+      RowBox[{"origin", "+", "direction"}]}], "}"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"drawFrame", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"normal_", ",", "tangent_", ",", "bitangent_"}], "}"}], ",", 
+     "origin_"}], "]"}], ":=", " ", 
+   RowBox[{"{", 
+    RowBox[{"Red", ",", " ", 
+     RowBox[{"rayToArrow", "[", 
+      RowBox[{"origin", ",", "normal"}], "]"}], ",", " ", "Green", ",", " ", 
+     RowBox[{"rayToArrow", "[", 
+      RowBox[{"origin", ",", "tangent"}], "]"}], ",", " ", "Blue", ",", " ", 
+     RowBox[{"rayToArrow", "[", 
+      RowBox[{"origin", ",", "bitangent"}], "]"}]}], "}"}]}], ";"}]}], "Input",
+ CellChangeTimes->{{3.5159201317968597`*^9, 3.515920153737115*^9}, {
+  3.5159202112494044`*^9, 3.5159202165287066`*^9}, {3.515920347677208*^9, 
+  3.5159204736224113`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"frame", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"0", ",", "0", ",", "1"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"0", ",", "1", ",", "0"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"1", ",", "0", ",", "0"}], "}"}]}], "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.5159203193825893`*^9, 3.515920337969652*^9}, 
+   3.515922875892813*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"canonicalNormal", " ", "=", 
+     RowBox[{"frame", "[", 
+      RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+    RowBox[{"rotMatrix", " ", "=", " ", 
+     RowBox[{
+      RowBox[{"RotationMatrix", "[", 
+       RowBox[{"\[Theta]", ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"0", ",", "1", ",", "0"}], "}"}]}], "]"}], ".", 
+      RowBox[{"RotationMatrix", "[", 
+       RowBox[{"\[Phi]", ",", " ", 
+        RowBox[{"{", 
+         RowBox[{"0", ",", "0", ",", "1"}], "}"}]}], "]"}]}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{"normalRotMatrix", "=", 
+     RowBox[{"Transpose", "[", 
+      RowBox[{"Inverse", "[", "rotMatrix", "]"}], "]"}]}], ";", 
+    "\[IndentingNewLine]", 
+    RowBox[{"localPoint", " ", "=", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"radius", "*", "canonicalNormal"}], ")"}], ".", 
+      "normalRotMatrix"}]}], ";", "\[IndentingNewLine]", 
+    RowBox[{"localFrame", "=", 
+     RowBox[{"frame", ".", "normalRotMatrix"}]}], ";", "\[IndentingNewLine]", 
+    RowBox[{"Graphics3D", "[", 
+     RowBox[{
+      RowBox[{"{", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"drawFrame", "[", 
+         RowBox[{"frame", ",", 
+          RowBox[{"radius", "*", "canonicalNormal"}]}], "]"}], ",", 
+        "\[IndentingNewLine]", 
+        RowBox[{"drawFrame", "[", 
+         RowBox[{"localFrame", ",", "localPoint"}], "]"}], ",", 
+        "\[IndentingNewLine]", 
+        RowBox[{"Opacity", "[", "0.5", "]"}], ",", 
+        RowBox[{"Sphere", "[", 
+         RowBox[{
+          RowBox[{"{", 
+           RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", "radius"}], "]"}]}],
+        "}"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+      RowBox[{"AxesLabel", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"x", ",", "y", ",", "z"}], "}"}]}], ",", 
+      RowBox[{"PlotRange", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"-", "radius"}], "-", "1"}], ",", 
+           RowBox[{"radius", "+", "1"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"-", "radius"}], "-", "1"}], ",", 
+           RowBox[{"radius", "+", "1"}]}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"-", "radius"}], "-", "1"}], ",", 
+           RowBox[{"radius", "+", "1"}]}], "}"}]}], "}"}]}]}], "]"}]}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Theta]", ",", "0"}], "}"}], ",", 
+     RowBox[{
+      RowBox[{"-", "\[Pi]"}], "/", "2"}], ",", 
+     RowBox[{"\[Pi]", "/", "2"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"\[Phi]", ",", "0"}], "}"}], ",", "0", ",", 
+     RowBox[{"2", "\[Pi]"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"radius", ",", "1.5"}], "}"}], ",", " ", "0.1", ",", "5"}], 
+    "}"}]}], "]"}]], "Input",
+ CellChangeTimes->CompressedData["
+1:eJwdzlsog3EYBvAvmpKRMFNTbEbSSPMtk/NyDF+2UFuTMC7MMVzgy7HMISMy
+N1Zzh63oS3NMIVLjxu7IhUykaI3cWLLnf/H2q7fneXvFLT2atiCKopICA+/k
+j/kC+XvxYoKyFo4nz9ZB2+eSFhYF2Vpg47nKCIdeZvqh9nKPOMPdjMA84esE
+LGXoadi7qzJBf7rJDK+zDtegxzlkgyWbXRz8DdtwQov44Qx+LTqvYHtTgQum
+WSvfoMEh85J7f9n82IBu+UoEpATH0VDAqSVQV52aCa1/6cRTnl5BcmV0Ngyx
+WHOhR0GrYAlfXAm5k0QGamThDbBjK44Yec7qYJS+oRXyuCkjPLqN6YFGTfcA
+vIvvHoS3FtEwFPqMxHvJ7ijJj61PwH1zoQl+K6XzkF+/ZIUZPqkNFpgXdqCE
+2ebIn+5lL+nXMD/QwJP64aT6KVgYsNleHgpZ/RxRpf6IhPqqJhFk+tgE6Am9
+IMo6HVK47GMzIVfxTMOoFC/xoP5NSfarObmQ0roKId/uJv4DnlPkhA==
+  "]],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`radius$$ = 1.5, $CellContext`\[Theta]$$ = 
+    0, $CellContext`\[Phi]$$ = 0, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`\[Theta]$$], 0}, Rational[-1, 2] Pi, Rational[1, 2] 
+      Pi}, {{
+       Hold[$CellContext`\[Phi]$$], 0}, 0, 2 Pi}, {{
+       Hold[$CellContext`radius$$], 1.5}, 0.1, 5}}, Typeset`size$$ = {
+    360., {195., 200.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = True, $CellContext`\[Theta]$34108$$ = 
+    0, $CellContext`\[Phi]$34109$$ = 0, $CellContext`radius$34110$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`radius$$ = 1.5, $CellContext`\[Theta]$$ = 
+        0, $CellContext`\[Phi]$$ = 0}, "ControllerVariables" :> {
+        Hold[$CellContext`\[Theta]$$, $CellContext`\[Theta]$34108$$, 0], 
+        Hold[$CellContext`\[Phi]$$, $CellContext`\[Phi]$34109$$, 0], 
+        Hold[$CellContext`radius$$, $CellContext`radius$34110$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> ($CellContext`canonicalNormal = 
+        Part[$CellContext`frame, 1]; $CellContext`rotMatrix = Dot[
+          RotationMatrix[$CellContext`\[Theta]$$, {0, 1, 0}], 
+          
+          RotationMatrix[$CellContext`\[Phi]$$, {0, 0, 
+           1}]]; $CellContext`normalRotMatrix = Transpose[
+          Inverse[$CellContext`rotMatrix]]; $CellContext`localPoint = 
+        Dot[$CellContext`radius$$ $CellContext`canonicalNormal, \
+$CellContext`normalRotMatrix]; $CellContext`localFrame = 
+        Dot[$CellContext`frame, $CellContext`normalRotMatrix]; Graphics3D[{
+          $CellContext`drawFrame[$CellContext`frame, $CellContext`radius$$ \
+$CellContext`canonicalNormal], 
+          $CellContext`drawFrame[$CellContext`localFrame, \
+$CellContext`localPoint], 
+          Opacity[0.5], 
+          Sphere[{0, 0, 0}, $CellContext`radius$$]}, Axes -> True, 
+         AxesLabel -> {$CellContext`x, $CellContext`y, $CellContext`z}, 
+         PlotRange -> {{-$CellContext`radius$$ - 1, $CellContext`radius$$ + 
+            1}, {-$CellContext`radius$$ - 1, $CellContext`radius$$ + 
+            1}, {-$CellContext`radius$$ - 1, $CellContext`radius$$ + 1}}]), 
+      "Specifications" :> {{{$CellContext`\[Theta]$$, 0}, Rational[-1, 2] Pi, 
+         Rational[1, 2] Pi}, {{$CellContext`\[Phi]$$, 0}, 0, 2 
+         Pi}, {{$CellContext`radius$$, 1.5}, 0.1, 5}}, "Options" :> {}, 
+      "DefaultOptions" :> {}],
+     ImageSizeCache->{409., {268., 273.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellChangeTimes->{{3.515922793742114*^9, 3.515922820344636*^9}, {
+  3.515922943253666*^9, 3.515922968185092*^9}}]
+}, Open  ]]
+},
+WindowSize->{707, 787},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"8.0 for Microsoft Windows (64-bit) (November 13, 2010)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 1075, 28, 112, "Input"],
+Cell[1635, 50, 413, 12, 31, "Input"],
+Cell[CellGroupData[{
+Cell[2073, 66, 3677, 96, 292, "Input"],
+Cell[5753, 164, 3358, 62, 558, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
