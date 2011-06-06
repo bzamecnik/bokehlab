@@ -45,8 +45,8 @@
             //double curvatureRadius = 150;
             //double apertureRadius = 100;
             //return ComplexLens.CreateBiconvexLens(curvatureRadius, apertureRadius, 100);
-            //return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
-            return ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0);
+            return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            //return ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0);
         }
 
         private void Recompute()
@@ -86,16 +86,14 @@
             incomingRay.Direction = rayDirection;
 
             intersections = new List<Vector3d>();
-            Intersection backInt = complexLens.Intersect(incomingRay);
-            if (backInt != null)
+            outgoingRay = complexLens.TransferDebug(incomingRay, out intersections, true);
+            if (outgoingRay != null)
             {
-                outgoingRay = complexLens.TransferDebug(incomingRay.Origin, backInt.Position,
-                    out intersections, true);
+                Intersection backInt = complexLens.Intersect(incomingRay);
                 backLensPos = backInt.Position;
             }
             else
             {
-                outgoingRay = null;
                 backLensPos = Vector3d.Zero;
             }
             drawingPanel.Invalidate();

@@ -12,17 +12,21 @@
     /// </summary>
     public interface ILens
     {
-        // TODO:
-        // - better use signature: Ray Transfer(Ray incomingRay);
+        /// <summary>
+        /// Transfers an incoming ray through the lens.
+        /// </summary>
+        /// <param name="incomingRay">Incoming ray. In camera space.</param>
+        /// <returns>The outgoing ray or null if the ray cannot be transferred.</returns>
+        Ray Transfer(Ray incomingRay);
 
         /// <summary>
         /// Transfers an incoming ray through the lens.
         /// </summary>
         /// <remarks>
-        /// The ray start at objectPos and enters the lens at lensPos.
+        /// The ray starts at objectPos and enters the lens at lensPos.
         /// </remarks>
-        /// <param name="objectPos"></param>
-        /// <param name="lensPos"></param>
+        /// <param name="objectPos">Position of ray origin. In camera space.</param>
+        /// <param name="lensPos">Position on the lens. In camera space.</param>
         /// <returns>The outgoing ray or null if the ray cannot be transferred.
         /// </returns>
         Ray Transfer(Vector3d objectPos, Vector3d lensPos);

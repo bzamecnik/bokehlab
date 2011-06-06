@@ -82,6 +82,11 @@
 
         #region ILens Members
 
+        public Ray Transfer(Ray incomingRay)
+        {
+            return Transfer(incomingRay.Origin, incomingRay.Origin + incomingRay.Direction);
+        }
+
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
             //Console.WriteLine("Biconvex lens");

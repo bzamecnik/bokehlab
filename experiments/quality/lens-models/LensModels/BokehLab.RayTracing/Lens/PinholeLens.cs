@@ -7,6 +7,11 @@
     {
         #region ILens Members
 
+        public Ray Transfer(Ray incomingRay)
+        {
+            return new Ray(incomingRay);
+        }
+
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
             return new Ray(lensPos, lensPos - objectPos);

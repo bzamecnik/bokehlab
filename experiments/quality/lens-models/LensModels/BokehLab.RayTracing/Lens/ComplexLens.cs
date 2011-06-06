@@ -8,7 +8,6 @@
     using BokehLab.Math;
 
     // TODO:
-    // - create lens from surface definition list
     // - it would be great if the lens could be defined in XML
     // - complex lenses are not symetric in general
     //   - for light tracing (traced from front to back) a reversed definition
@@ -289,13 +288,20 @@
 
         #region ILens Members
 
+        public Ray Transfer(Ray incomingRay)
+        {
+            IList<Vector3d> intersections;
+            return TransferDebug(incomingRay, out intersections, false);
+        }
+
         public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
         {
             IList<Vector3d> intersections;
-            return TransferDebug(objectPos, lensPos, out intersections, false);
+            Ray incomingRay = new Ray(objectPos, lensPos - objectPos);
+            return TransferDebug(incomingRay, out intersections, false);
         }
 
-        internal Ray TransferDebug(Vector3d objectPos, Vector3d lensPos,
+        internal Ray TransferDebug(Ray incomingRay,
             out IList<Vector3d> intersections, bool saveIntersections)
         {
             //Console.WriteLine("Complex lens");
@@ -308,10 +314,9 @@
 
             double lastRefractiveIndex = MediumRefractiveIndex;
             Vector3d shiftFromLensCenter = Vector3d.Zero;
-            Ray incomingRay = new Ray(objectPos, lensPos - objectPos);
             //Console.WriteLine("Blue, {0}, ", incomingRay.ToLine());
             //Console.WriteLine("Incoming: {0}, ", Ray.NormalizeDirection(incomingRay).ToString());
-            Ray outgoingRay = new Ray(incomingRay.Origin, incomingRay.Direction);
+            Ray outgoingRay = new Ray(incomingRay);
 
             foreach (ElementSurface surface in ElementSurfaces)
             {

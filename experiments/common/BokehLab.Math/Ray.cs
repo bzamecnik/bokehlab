@@ -8,6 +8,12 @@
         public Vector3d Origin { get; set; }
         public Vector3d Direction { get; set; }
 
+        public Ray(Ray ray)
+        {
+            Origin = ray.Origin;
+            Direction = ray.Direction;
+        }
+
         public Ray(Vector3d origin, Vector3d direction)
         {
             Origin = origin;

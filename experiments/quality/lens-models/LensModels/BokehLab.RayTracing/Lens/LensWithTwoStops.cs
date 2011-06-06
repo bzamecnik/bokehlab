@@ -37,14 +37,13 @@
 
         #region ILens Members
 
-        public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
+        public Ray Transfer(Ray incomingRay)
         {
-            Ray incomingRay = new Ray(objectPos, lensPos - objectPos);
             if (BackStop.Intersect(incomingRay) == null)
             {
                 return null;
             }
-            Ray outgoingRay = Lens.Transfer(objectPos, lensPos);
+            Ray outgoingRay = Lens.Transfer(incomingRay);
             if (outgoingRay == null)
             {
                 return null;
@@ -54,6 +53,13 @@
                 return null;
             }
             return outgoingRay;
+        }
+
+
+        public Ray Transfer(Vector3d objectPos, Vector3d lensPos)
+        {
+            Ray incomingRay = new Ray(objectPos, lensPos - objectPos);
+            return Transfer(incomingRay);
         }
 
         public Vector3d GetBackSurfaceSample(Vector2d sample)
