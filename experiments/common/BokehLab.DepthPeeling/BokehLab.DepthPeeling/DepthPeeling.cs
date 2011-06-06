@@ -23,12 +23,17 @@ namespace BokehLab.DepthPeeling
         /// <summary>
         /// Number of depth peeling layers (color and depth textures).
         /// </summary>
-        static readonly int LayerCount = 5;
+        /// <remarks>
+        /// At most 7 works for me (NVidia Quadro NVS 140)
+        /// </remarks>
+        static readonly int LayerCount = 7;
 
         // index of currently displayed layer [0; LayerCount - 1]
         int activeLayer = 0;
         // show color (true) or depth texture?
         bool showColorTexture = true;
+        // show all layers blended or just the active layer?
+        bool showBlendedLayers = true;
 
         public DepthPeeling()
             : base(800, 600)
@@ -79,15 +84,17 @@ namespace BokehLab.DepthPeeling
 
             GL.Enable(EnableCap.Texture2D);
 
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusDstAlpha);
+
             CreateShaders();
 
-            CreateLayerTextures(LayerCount, Width, Height);
+            //CreateLayerTextures(LayerCount, Width, Height);
 
             // Create a FBO and attach the textures
             GL.Ext.GenFramebuffers(1, out FBOHandle);
-            BindFramebufferWithLayerTextures(FBOHandle, activeLayer);
+            //BindFramebufferWithLayerTextures(FBOHandle, activeLayer);
 
-            DrawIntoLayers();
+            //DrawIntoLayers();
 
             Keyboard.KeyUp += KeyUp;
         }
@@ -119,6 +126,11 @@ namespace BokehLab.DepthPeeling
             GL.MatrixMode(MatrixMode.Modelview);
             sceneModelView = Matrix4.LookAt(0, 0, 3, 0, 0, 0, 0, 1, 0);
             GL.LoadMatrix(ref sceneModelView);
+
+            DeallocateLayerTextures();
+            CreateLayerTextures(LayerCount, Width, Height);
+
+            DrawIntoLayers();
 
             base.OnResize(e);
         }
@@ -195,6 +207,7 @@ namespace BokehLab.DepthPeeling
 
         private void BindFramebufferWithLayerTextures(uint fboHandle, int layerIndex)
         {
+            Console.WriteLine("BindFramebufferWithLayerTextures");
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
             GL.Ext.FramebufferTexture2D(
                 FramebufferTarget.FramebufferExt,
@@ -206,7 +219,7 @@ namespace BokehLab.DepthPeeling
                 FramebufferAttachment.DepthAttachmentExt,
                 TextureTarget.Texture2D,
                 DepthTextures[layerIndex], 0);
-
+            Console.WriteLine("BindFramebufferWithLayerTextures: testing for error");
             #region Test for Error
 
             switch (GL.Ext.CheckFramebufferStatus(FramebufferTarget.FramebufferExt))
@@ -263,26 +276,39 @@ namespace BokehLab.DepthPeeling
                     }
             }
 
-            // using FBO might have changed states, e.g. the FBO might not support stereoscopic views or double buffering
-            int[] queryinfo = new int[6];
-            GL.GetInteger(GetPName.MaxColorAttachmentsExt, out queryinfo[0]);
-            GL.GetInteger(GetPName.AuxBuffers, out queryinfo[1]);
-            GL.GetInteger(GetPName.MaxDrawBuffers, out queryinfo[2]);
-            GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
-            GL.GetInteger(GetPName.Samples, out queryinfo[4]);
-            GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
-            Console.WriteLine("max. ColorBuffers: " + queryinfo[0] + " max. AuxBuffers: " + queryinfo[1] + " max. DrawBuffers: " + queryinfo[2] +
-                               "\nStereo: " + queryinfo[3] + " Samples: " + queryinfo[4] + " DoubleBuffer: " + queryinfo[5]);
+            //// using FBO might have changed states, e.g. the FBO might not support stereoscopic views or double buffering
+            //int[] queryinfo = new int[6];
+            //GL.GetInteger(GetPName.MaxColorAttachmentsExt, out queryinfo[0]);
+            //GL.GetInteger(GetPName.AuxBuffers, out queryinfo[1]);
+            //GL.GetInteger(GetPName.MaxDrawBuffers, out queryinfo[2]);
+            //GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
+            //GL.GetInteger(GetPName.Samples, out queryinfo[4]);
+            //GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
+            //Console.WriteLine("max. ColorBuffers: " + queryinfo[0] + " max. AuxBuffers: " + queryinfo[1] + " max. DrawBuffers: " + queryinfo[2] +
+            //                   "\nStereo: " + queryinfo[3] + " Samples: " + queryinfo[4] + " DoubleBuffer: " + queryinfo[5]);
 
-            Console.WriteLine("Last GL Error: " + GL.GetError());
+            //Console.WriteLine("Last GL Error: " + GL.GetError());
 
             #endregion Test for Error
-
+            Console.WriteLine("BindFramebufferWithLayerTextures: OK");
         }
 
         private void UnbindFramebuffer()
         {
+            Console.WriteLine("UnbindFramebuffer");
+            // detach textures - TODO: really needed?
+            GL.Ext.FramebufferTexture2D(
+                FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.ColorAttachment0Ext,
+                TextureTarget.Texture2D,
+                0, 0);
+            GL.Ext.FramebufferTexture2D(
+                FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.DepthAttachmentExt,
+                TextureTarget.Texture2D,
+                0, 0);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+            Console.WriteLine("UnbindFramebuffer: OK");
         }
 
         #endregion
@@ -334,6 +360,8 @@ namespace BokehLab.DepthPeeling
             //GL.MatrixMode(MatrixMode.Modelview);
             //GL.LoadMatrix(ref sceneModelView);
 
+            GL.Disable(EnableCap.Blend);
+
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
             GL.Ortho(-1, 1, -1, 1, 1, -1);
@@ -347,7 +375,8 @@ namespace BokehLab.DepthPeeling
                 GL.Viewport(0, 0, Width, Height);
 
                 // clear the screen in red, to make it very obvious what the clear affected. only the FBO, not the real framebuffer
-                GL.ClearColor(1f, 0f, 0f, 0f);
+                //GL.ClearColor(1f, 0f, 0f, 1f);
+                GL.ClearColor(0, 0, 0, 1);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                 // smack 50 random triangles into the FBO's textures
@@ -381,6 +410,7 @@ namespace BokehLab.DepthPeeling
             GL.BindTexture(TextureTarget.Texture2D, 0);
             BindFramebufferWithLayerTextures(FBOHandle, 0);
             DrawOriginalScene(scene);
+            //UnbindFramebuffer();
 
             // enable peeling shader
             GL.UseProgram(shaderProgram);
@@ -391,6 +421,7 @@ namespace BokehLab.DepthPeeling
                 BindFramebufferWithLayerTextures(FBOHandle, i);
                 GL.BindTexture(TextureTarget.Texture2D, DepthTextures[i - 1]);
                 DrawOriginalScene(scene);
+                //UnbindFramebuffer();
             }
             // disable peeling shader
             GL.UseProgram(0);
@@ -406,8 +437,6 @@ namespace BokehLab.DepthPeeling
             //GL.MatrixMode(MatrixMode.Modelview);
             //GL.LoadMatrix(ref sceneModelView);
 
-            GL.Enable(EnableCap.Blend);
-
             GL.Viewport(0, 0, Width, Height);
 
             GL.MatrixMode(MatrixMode.Projection);
@@ -418,53 +447,55 @@ namespace BokehLab.DepthPeeling
             Matrix4 lookat = Matrix4.LookAt(0, 0, 0, 0, 0, -1, 0, 1, 0);
             GL.LoadMatrix(ref lookat);
 
-            GL.ClearColor(.1f, .2f, .3f, 0f);
+            GL.ClearColor(0f, 0f, 0f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.Color3(1f, 1f, 1f);
 
-            if (showColorTexture)
+            if (showBlendedLayers)
             {
-                GL.BindTexture(TextureTarget.Texture2D, ColorTextures[activeLayer]);
+                GL.Disable(EnableCap.Blend);
+
+                // back-most layer must be fully opaque
+                GL.BindTexture(TextureTarget.Texture2D, ColorTextures[LayerCount - 1]);
+                DrawFullScreenQuad();
+
+                GL.Enable(EnableCap.Blend);
+
+                for (int i = LayerCount - 2; i >= 0; i--)
+                {
+                    GL.BindTexture(TextureTarget.Texture2D, ColorTextures[i]);
+                    DrawFullScreenQuad();
+                }
             }
             else
             {
-                GL.BindTexture(TextureTarget.Texture2D, DepthTextures[activeLayer]);
-            }
-
-            GL.PushMatrix();
-            {
-                //GL.Scale(0.9f, 0.9, 1);
-                GL.Begin(BeginMode.Quads);
+                GL.Disable(EnableCap.Blend);
+                if (showColorTexture)
                 {
-                    GL.TexCoord2(0, 1); GL.Vertex2(-1.0f, 1.0f);
-                    GL.TexCoord2(0, 0); GL.Vertex2(-1.0f, -1.0f);
-                    GL.TexCoord2(1, 0); GL.Vertex2(1.0f, -1.0f);
-                    GL.TexCoord2(1, 1); GL.Vertex2(1.0f, 1.0f);
-
-                    // texture coords are not normalized
-                    //GL.TexCoord2(0.0f, Height); GL.Vertex2(-1.0f, 1.0f);
-                    //GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1.0f, -1.0f);
-                    //GL.TexCoord2(Width, 0.0f); GL.Vertex2(1.0f, -1.0f);
-                    //GL.TexCoord2(Width, Height); GL.Vertex2(1.0f, 1.0f);
+                    GL.BindTexture(TextureTarget.Texture2D, ColorTextures[activeLayer]);
                 }
-                GL.End();
+                else
+                {
+                    GL.BindTexture(TextureTarget.Texture2D, DepthTextures[activeLayer]);
+                }
 
-                //GL.Begin(BeginMode.Triangles);
-                //GL.Color3(0.5, 0, 0);
-                //GL.TexCoord2(0.0f, 0);
-                //GL.Vertex3(-1, -1, 0);
-                //GL.Color3(0, 0.5, 0);
-                //GL.TexCoord2(0.0, 100);
-                //GL.Vertex3(-1, 1, 0);
-                //GL.Color3(0, 0, 0.5);
-                //GL.TexCoord2(100, 0);
-                //GL.Vertex3(1, -1, 0);
-                //GL.End();
+                DrawFullScreenQuad();
             }
-            GL.PopMatrix();
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
+        }
+
+        private static void DrawFullScreenQuad()
+        {
+            GL.Begin(BeginMode.Quads);
+            {
+                GL.TexCoord2(0, 1); GL.Vertex2(-1.0f, 1.0f);
+                GL.TexCoord2(0, 0); GL.Vertex2(-1.0f, -1.0f);
+                GL.TexCoord2(1, 0); GL.Vertex2(1.0f, -1.0f);
+                GL.TexCoord2(1, 1); GL.Vertex2(1.0f, 1.0f);
+            }
+            GL.End();
         }
 
         #endregion
@@ -493,30 +524,60 @@ namespace BokehLab.DepthPeeling
                 // show color or depth texture
                 showColorTexture = !showColorTexture;
             }
+            else if (e.Key == Key.B)
+            {
+                // show color or depth texture
+                showBlendedLayers = !showBlendedLayers;
+            }
             else if (e.Key == Key.F5)
             {
                 SaveScreenshot();
             }
             else if (e.Key == Key.F6)
             {
-                SaveColorScreenshot();
+                SaveColorScreenshot(activeLayer, GetScreenshotId());
             }
             else if (e.Key == Key.F7)
             {
-                SaveDepthScreenshot();
+                SaveDepthScreenshotByte(activeLayer, GetScreenshotId());
             }
             else if (e.Key == Key.F8)
             {
-                SaveColorScreenshot();
-                SaveDepthScreenshot();
+                string id = GetScreenshotId();
+                SaveColorScreenshot(activeLayer, id);
+                SaveDepthScreenshotByte(activeLayer, id);
             }
+            else if (e.Key == Key.F9)
+            {
+                string id = GetScreenshotId();
+                SaveScreenshotOfAllLayers(id);
+            }
+            else if (e.Key == Key.F11)
+            {
+                bool isFullscreen = (WindowState == WindowState.Fullscreen);
+                WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
+            }
+        }
+
+        private static string GetScreenshotId()
+        {
+            return DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss");
         }
 
         #endregion
 
         #region Saving images to files
 
-        private void SaveColorScreenshot()
+        private void SaveScreenshotOfAllLayers(string id)
+        {
+            for (int layer = 0; layer < LayerCount; layer++)
+            {
+                SaveColorScreenshot(layer, id);
+                SaveDepthScreenshotByte(layer, id);
+            }
+        }
+
+        private void SaveColorScreenshot(int layer, string id)
         {
             using (Bitmap bmp = new Bitmap(Width, Height))
             {
@@ -524,16 +585,53 @@ namespace BokehLab.DepthPeeling
                     bmp.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
                                  System.Drawing.Imaging.ImageLockMode.WriteOnly,
                                  System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                GL.BindTexture(TextureTarget.Texture2D, ColorTextures[activeLayer]);
+                GL.BindTexture(TextureTarget.Texture2D, ColorTextures[layer]);
                 GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
                 GL.BindTexture(TextureTarget.Texture2D, 0);
                 bmp.UnlockBits(data);
                 bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                bmp.Save("color_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                bmp.Save(string.Format("{0}_color_{1}.png", id, layer), System.Drawing.Imaging.ImageFormat.Png);
             }
         }
 
-        private void SaveDepthScreenshot()
+        private void SaveDepthScreenshotByte(int layer, string id)
+        {
+            // allocate 32-bit unit unmanaged array to grab the depth buffer
+            IntPtr depthBufferBytePtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Byte)) * Width * Height);
+            GL.BindTexture(TextureTarget.Texture2D, DepthTextures[layer]);
+            GL.GetTexImage(TextureTarget.Texture2D, 0, PixelFormat.DepthComponent, PixelType.UnsignedByte, depthBufferBytePtr);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            // - convert single bytes to byte RGB triplets with the same value
+            using (Bitmap bmp = new Bitmap(Width, Height))
+            {
+                System.Drawing.Imaging.BitmapData bmpDataPtr =
+                    bmp.LockBits(new System.Drawing.Rectangle(0, 0, Width, Height),
+                                 System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                 System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                unsafe
+                {
+                    int inputStride = Width;
+                    for (int y = 0; y < Height; y++)
+                    {
+                        byte* outputRow = (byte*)bmpDataPtr.Scan0 + (y * bmpDataPtr.Stride);
+                        byte* inputRow = (byte*)depthBufferBytePtr + (y * inputStride);
+                        for (int x = 0; x < Width; x++)
+                        {
+                            byte colorByte = inputRow[x];
+                            for (int band = 0; band < 3; band++)
+                            {
+                                outputRow[x * 3 + band] = colorByte;
+                            }
+                        }
+                    }
+                }
+                bmp.UnlockBits(bmpDataPtr);
+                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                bmp.Save(string.Format("{0}_depth_{1}.png", id, layer), System.Drawing.Imaging.ImageFormat.Png);
+            }
+        }
+
+        private void SaveDepthScreenshotUInt32(int layer, string id)
         {
             // allocate 32-bit unit unmanaged array to grab the depth buffer
             IntPtr depthBufferUInt32Ptr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(UInt32)) * Width * Height);
@@ -573,7 +671,7 @@ namespace BokehLab.DepthPeeling
                 }
                 bmp.UnlockBits(bmpDataPtr);
                 bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                bmp.Save("depth_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                bmp.Save(string.Format("{0}_depth_{1}.png", id, layer), System.Drawing.Imaging.ImageFormat.Png);
             }
         }
 
@@ -591,7 +689,7 @@ namespace BokehLab.DepthPeeling
                               data.Scan0);
                 bmp.UnlockBits(data);
                 bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-                bmp.Save("screenshot_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                bmp.Save(string.Format("{0}_screenshot.png", GetScreenshotId()), System.Drawing.Imaging.ImageFormat.Png);
             }
         }
 
@@ -600,18 +698,18 @@ namespace BokehLab.DepthPeeling
         private class Scene
         {
             int vertexCount;
-            Vector3[] colors;
+            Vector4[] colors;
             Vector3[] vertices;
 
             public static Scene CreateRandomTriangles(int triangleCount)
             {
                 Scene scene = new Scene();
                 scene.vertexCount = 3 * triangleCount;
-                scene.colors = new Vector3[scene.vertexCount];
+                scene.colors = new Vector4[scene.vertexCount];
                 scene.vertices = new Vector3[scene.vertexCount];
                 for (int i = 0; i < scene.vertexCount; i++)
                 {
-                    scene.colors[i] = new Vector3(0, GetRandom0to1(), GetRandom0to1());
+                    scene.colors[i] = new Vector4(0, GetRandom0to1(), GetRandom0to1(), 0.5f);
                     scene.vertices[i] = new Vector3(GetRandom(), GetRandom(), GetRandom());
                 }
                 return scene;
@@ -621,7 +719,7 @@ namespace BokehLab.DepthPeeling
             {
                 for (int i = 0; i < colors.Length; i++)
                 {
-                    GL.Color3(colors[i]);
+                    GL.Color4(colors[i]);
                     GL.Vertex3(vertices[i]);
                 }
             }
