@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[      9522,        247]
-NotebookOptionsPosition[      9127,        229]
-NotebookOutlinePosition[      9470,        244]
-CellTagsIndexPosition[      9427,        241]
+NotebookDataLength[     12984,        318]
+NotebookOptionsPosition[     12549,        299]
+NotebookOutlinePosition[     12892,        314]
+CellTagsIndexPosition[     12849,        311]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -67,72 +67,101 @@ Cell[CellGroupData[{
 Cell[BoxData[
  RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
   RowBox[{
-   RowBox[{
-    RowBox[{"canonicalNormal", " ", "=", 
-     RowBox[{"frame", "[", 
-      RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
-    RowBox[{"rotMatrix", " ", "=", " ", 
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{
+      "canonicalNormal", ",", "rotMatrix", ",", "normalRotMatrix", ",", 
+       "localPoint", ",", "localFrame", ",", "direction", ",", " ", 
+       "localDirection"}], "}"}], ",", "\[IndentingNewLine]", 
      RowBox[{
-      RowBox[{"RotationMatrix", "[", 
-       RowBox[{"\[Theta]", ",", " ", 
-        RowBox[{"{", 
-         RowBox[{"0", ",", "1", ",", "0"}], "}"}]}], "]"}], ".", 
-      RowBox[{"RotationMatrix", "[", 
-       RowBox[{"\[Phi]", ",", " ", 
-        RowBox[{"{", 
-         RowBox[{"0", ",", "0", ",", "1"}], "}"}]}], "]"}]}]}], ";", 
-    "\[IndentingNewLine]", 
-    RowBox[{"normalRotMatrix", "=", 
-     RowBox[{"Transpose", "[", 
-      RowBox[{"Inverse", "[", "rotMatrix", "]"}], "]"}]}], ";", 
-    "\[IndentingNewLine]", 
-    RowBox[{"localPoint", " ", "=", 
-     RowBox[{
-      RowBox[{"(", 
-       RowBox[{"radius", "*", "canonicalNormal"}], ")"}], ".", 
-      "normalRotMatrix"}]}], ";", "\[IndentingNewLine]", 
-    RowBox[{"localFrame", "=", 
-     RowBox[{"frame", ".", "normalRotMatrix"}]}], ";", "\[IndentingNewLine]", 
-    RowBox[{"Graphics3D", "[", 
-     RowBox[{
-      RowBox[{"{", "\[IndentingNewLine]", 
+      RowBox[{"canonicalNormal", " ", "=", 
+       RowBox[{"frame", "[", 
+        RowBox[{"[", "1", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"rotMatrix", " ", "=", " ", 
        RowBox[{
-        RowBox[{"drawFrame", "[", 
-         RowBox[{"frame", ",", 
-          RowBox[{"radius", "*", "canonicalNormal"}]}], "]"}], ",", 
-        "\[IndentingNewLine]", 
-        RowBox[{"drawFrame", "[", 
-         RowBox[{"localFrame", ",", "localPoint"}], "]"}], ",", 
-        "\[IndentingNewLine]", 
-        RowBox[{"Opacity", "[", "0.5", "]"}], ",", 
-        RowBox[{"Sphere", "[", 
-         RowBox[{
+        RowBox[{"RotationMatrix", "[", 
+         RowBox[{"\[Theta]", ",", " ", 
           RowBox[{"{", 
-           RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", "radius"}], "]"}]}],
-        "}"}], ",", "\[IndentingNewLine]", 
-      RowBox[{"Axes", "\[Rule]", "True"}], ",", 
-      RowBox[{"AxesLabel", "\[Rule]", 
-       RowBox[{"{", 
-        RowBox[{"x", ",", "y", ",", "z"}], "}"}]}], ",", 
-      RowBox[{"PlotRange", "\[Rule]", 
+           RowBox[{"0", ",", "1", ",", "0"}], "}"}]}], "]"}], ".", 
+        RowBox[{"RotationMatrix", "[", 
+         RowBox[{"\[Phi]", ",", " ", 
+          RowBox[{"{", 
+           RowBox[{"0", ",", "0", ",", "1"}], "}"}]}], "]"}]}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"normalRotMatrix", "=", 
+       RowBox[{"Transpose", "[", 
+        RowBox[{"Inverse", "[", "rotMatrix", "]"}], "]"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"localPoint", " ", "=", 
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{"radius", "*", "canonicalNormal"}], ")"}], ".", 
+        "rotMatrix"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"localFrame", "=", 
+       RowBox[{"frame", ".", "normalRotMatrix"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"direction", "=", 
        RowBox[{"{", 
         RowBox[{
+         RowBox[{
+          RowBox[{"Cos", "[", "dir\[Phi]", "]"}], "*", 
+          RowBox[{"Cos", "[", "dir\[Theta]", "]"}]}], ",", 
+         RowBox[{
+          RowBox[{"Sin", "[", "dir\[Phi]", "]"}], "*", 
+          RowBox[{"Cos", "[", "dir\[Theta]", "]"}]}], ",", 
+         RowBox[{"Sin", "[", "dir\[Theta]", "]"}]}], "}"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"localDirection", "=", 
+       RowBox[{"direction", ".", "normalRotMatrix"}]}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"Graphics3D", "[", 
+       RowBox[{
+        RowBox[{"{", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"drawFrame", "[", 
+           RowBox[{"frame", ",", 
+            RowBox[{"radius", "*", "canonicalNormal"}]}], "]"}], ",", 
+          "\[IndentingNewLine]", 
+          RowBox[{"drawFrame", "[", 
+           RowBox[{"localFrame", ",", "localPoint"}], "]"}], ",", 
+          "\[IndentingNewLine]", 
+          RowBox[{"rayToArrow", "[", 
+           RowBox[{
+            RowBox[{"radius", "*", "canonicalNormal"}], ",", "direction"}], 
+           "]"}], ",", "\[IndentingNewLine]", 
+          RowBox[{"rayToArrow", "[", 
+           RowBox[{"localPoint", ",", "localDirection"}], "]"}], ",", 
+          "\[IndentingNewLine]", 
+          RowBox[{"Opacity", "[", "0.5", "]"}], ",", 
+          RowBox[{"Sphere", "[", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", "radius"}], 
+           "]"}]}], "}"}], ",", "\[IndentingNewLine]", 
+        RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+        RowBox[{"AxesLabel", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{"x", ",", "y", ",", "z"}], "}"}]}], ",", 
+        RowBox[{"PlotRange", "\[Rule]", 
          RowBox[{"{", 
           RowBox[{
-           RowBox[{
-            RowBox[{"-", "radius"}], "-", "1"}], ",", 
-           RowBox[{"radius", "+", "1"}]}], "}"}], ",", 
-         RowBox[{"{", 
-          RowBox[{
-           RowBox[{
-            RowBox[{"-", "radius"}], "-", "1"}], ",", 
-           RowBox[{"radius", "+", "1"}]}], "}"}], ",", 
-         RowBox[{"{", 
-          RowBox[{
-           RowBox[{
-            RowBox[{"-", "radius"}], "-", "1"}], ",", 
-           RowBox[{"radius", "+", "1"}]}], "}"}]}], "}"}]}]}], "]"}]}], ",", 
-   "\[IndentingNewLine]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", "radius"}], "-", "1"}], ",", 
+             RowBox[{"radius", "+", "1"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", "radius"}], "-", "1"}], ",", 
+             RowBox[{"radius", "+", "1"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"-", "radius"}], "-", "1"}], ",", 
+             RowBox[{"radius", "+", "1"}]}], "}"}]}], "}"}]}]}], "]"}]}]}], 
+    "]"}], ",", "\[IndentingNewLine]", 
    RowBox[{"{", 
     RowBox[{
      RowBox[{"{", 
@@ -149,71 +178,106 @@ Cell[BoxData[
     RowBox[{
      RowBox[{"{", 
       RowBox[{"radius", ",", "1.5"}], "}"}], ",", " ", "0.1", ",", "5"}], 
-    "}"}]}], "]"}]], "Input",
+    "}"}], ",", "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"dir\[Theta]", ",", "0"}], "}"}], ",", "0", ",", 
+     RowBox[{"\[Pi]", "/", "2"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"dir\[Phi]", ",", "0"}], "}"}], ",", "0", ",", 
+     RowBox[{"2", "\[Pi]"}]}], "}"}]}], "]"}]], "Input",
  CellChangeTimes->CompressedData["
-1:eJwdzlsog3EYBvAvmpKRMFNTbEbSSPMtk/NyDF+2UFuTMC7MMVzgy7HMISMy
-N1Zzh63oS3NMIVLjxu7IhUykaI3cWLLnf/H2q7fneXvFLT2atiCKopICA+/k
-j/kC+XvxYoKyFo4nz9ZB2+eSFhYF2Vpg47nKCIdeZvqh9nKPOMPdjMA84esE
-LGXoadi7qzJBf7rJDK+zDtegxzlkgyWbXRz8DdtwQov44Qx+LTqvYHtTgQum
-WSvfoMEh85J7f9n82IBu+UoEpATH0VDAqSVQV52aCa1/6cRTnl5BcmV0Ngyx
-WHOhR0GrYAlfXAm5k0QGamThDbBjK44Yec7qYJS+oRXyuCkjPLqN6YFGTfcA
-vIvvHoS3FtEwFPqMxHvJ7ijJj61PwH1zoQl+K6XzkF+/ZIUZPqkNFpgXdqCE
-2ebIn+5lL+nXMD/QwJP64aT6KVgYsNleHgpZ/RxRpf6IhPqqJhFk+tgE6Am9
-IMo6HVK47GMzIVfxTMOoFC/xoP5NSfarObmQ0roKId/uJv4DnlPkhA==
+1:eJwdzl1oUnEYBvDDwsHotA03M9jAKW6McCGmaNo+lLW2tQ4paSiGzK0usnRj
+7cKyLQtyNVKxchAT7KaPbTA5hGVFkFIE5o3eNXYxZiSD6mDDXSQjn//Fyw9e
+nuflFTs9pkt1FEV11QbmFZu9AsWOPiTSnIO3O++fh/HfYSscqIs74cW0wQW9
+PxZmoPXza+IC++0mPCn86YenGOU9OJUwBGC1JxCEX4+nlmAx6Y3DwZfXWPjv
+4LMkjIo3PsG/oeQXeNnRl4VHYyMlOLkm48i9fTV9uGZB8agRUoL3LVDAGiXQ
+NtYth7H9HuJHnl1FckNKNayPxnSwqFIa4CAtHoHshw4GmmSHLPDKqyPE5rTP
+Bvl2ywTksXdd8F2u1QNdJvd1mG93z8JctO0GFJZdxO+SxBzJzy/74ZtgfwDu
+aqSLkDaHY/BYWRqHfcGH61DCrLDkz0KEI/2zTAVO8qRVeMe4dUBYc3z1dAP0
+2R8QDcZfzdB+xtEGmWmfCBYbMkTZ1TUpjJR9csgObyshv4sjvjWXNGT/5IQO
+UtZsP6RXC0TtH85SqanPaC/A/N7oLTj1nHsKnY+bXkCtcycF/wMcXP+Y
   "]],
 
 Cell[BoxData[
  TagBox[
   StyleBox[
-   DynamicModuleBox[{$CellContext`radius$$ = 1.5, $CellContext`\[Theta]$$ = 
-    0, $CellContext`\[Phi]$$ = 0, Typeset`show$$ = True, 
-    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
-    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
-    "\"untitled\"", Typeset`specs$$ = {{{
+   DynamicModuleBox[{$CellContext`dir\[Theta]$$ = 
+    0, $CellContext`dir\[Phi]$$ = 0, $CellContext`radius$$ = 
+    1.5, $CellContext`\[Theta]$$ = 0, $CellContext`\[Phi]$$ = 0, 
+    Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
+    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
+    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{{
        Hold[$CellContext`\[Theta]$$], 0}, Rational[-1, 2] Pi, Rational[1, 2] 
       Pi}, {{
        Hold[$CellContext`\[Phi]$$], 0}, 0, 2 Pi}, {{
-       Hold[$CellContext`radius$$], 1.5}, 0.1, 5}}, Typeset`size$$ = {
+       Hold[$CellContext`radius$$], 1.5}, 0.1, 5}, {{
+       Hold[$CellContext`dir\[Theta]$$], 0}, 0, Rational[1, 2] Pi}, {{
+       Hold[$CellContext`dir\[Phi]$$], 0}, 0, 2 Pi}}, Typeset`size$$ = {
     360., {195., 200.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`\[Theta]$34108$$ = 
-    0, $CellContext`\[Phi]$34109$$ = 0, $CellContext`radius$34110$$ = 0}, 
+    Typeset`skipInitDone$$ = True, $CellContext`\[Theta]$21940$$ = 
+    0, $CellContext`\[Phi]$21941$$ = 0, $CellContext`radius$21942$$ = 
+    0, $CellContext`dir\[Theta]$21943$$ = 0, $CellContext`dir\[Phi]$21944$$ = 
+    0}, 
     DynamicBox[Manipulate`ManipulateBoxes[
      1, StandardForm, 
-      "Variables" :> {$CellContext`radius$$ = 1.5, $CellContext`\[Theta]$$ = 
-        0, $CellContext`\[Phi]$$ = 0}, "ControllerVariables" :> {
-        Hold[$CellContext`\[Theta]$$, $CellContext`\[Theta]$34108$$, 0], 
-        Hold[$CellContext`\[Phi]$$, $CellContext`\[Phi]$34109$$, 0], 
-        Hold[$CellContext`radius$$, $CellContext`radius$34110$$, 0]}, 
+      "Variables" :> {$CellContext`dir\[Theta]$$ = 
+        0, $CellContext`dir\[Phi]$$ = 0, $CellContext`radius$$ = 
+        1.5, $CellContext`\[Theta]$$ = 0, $CellContext`\[Phi]$$ = 0}, 
+      "ControllerVariables" :> {
+        Hold[$CellContext`\[Theta]$$, $CellContext`\[Theta]$21940$$, 0], 
+        Hold[$CellContext`\[Phi]$$, $CellContext`\[Phi]$21941$$, 0], 
+        Hold[$CellContext`radius$$, $CellContext`radius$21942$$, 0], 
+        Hold[$CellContext`dir\[Theta]$$, $CellContext`dir\[Theta]$21943$$, 0], 
+        Hold[$CellContext`dir\[Phi]$$, $CellContext`dir\[Phi]$21944$$, 0]}, 
       "OtherVariables" :> {
        Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
         Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
         Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
-         Typeset`skipInitDone$$}, 
-      "Body" :> ($CellContext`canonicalNormal = 
-        Part[$CellContext`frame, 1]; $CellContext`rotMatrix = Dot[
-          RotationMatrix[$CellContext`\[Theta]$$, {0, 1, 0}], 
-          
-          RotationMatrix[$CellContext`\[Phi]$$, {0, 0, 
-           1}]]; $CellContext`normalRotMatrix = Transpose[
-          Inverse[$CellContext`rotMatrix]]; $CellContext`localPoint = 
-        Dot[$CellContext`radius$$ $CellContext`canonicalNormal, \
-$CellContext`normalRotMatrix]; $CellContext`localFrame = 
-        Dot[$CellContext`frame, $CellContext`normalRotMatrix]; Graphics3D[{
-          $CellContext`drawFrame[$CellContext`frame, $CellContext`radius$$ \
-$CellContext`canonicalNormal], 
-          $CellContext`drawFrame[$CellContext`localFrame, \
-$CellContext`localPoint], 
-          Opacity[0.5], 
-          Sphere[{0, 0, 0}, $CellContext`radius$$]}, Axes -> True, 
-         AxesLabel -> {$CellContext`x, $CellContext`y, $CellContext`z}, 
-         PlotRange -> {{-$CellContext`radius$$ - 1, $CellContext`radius$$ + 
-            1}, {-$CellContext`radius$$ - 1, $CellContext`radius$$ + 
-            1}, {-$CellContext`radius$$ - 1, $CellContext`radius$$ + 1}}]), 
+         Typeset`skipInitDone$$}, "Body" :> 
+      Module[{$CellContext`canonicalNormal$, $CellContext`rotMatrix$, \
+$CellContext`normalRotMatrix$, $CellContext`localPoint$, \
+$CellContext`localFrame$, $CellContext`direction$, \
+$CellContext`localDirection$}, $CellContext`canonicalNormal$ = 
+         Part[$CellContext`frame, 1]; $CellContext`rotMatrix$ = Dot[
+           RotationMatrix[$CellContext`\[Theta]$$, {0, 1, 0}], 
+           
+           RotationMatrix[$CellContext`\[Phi]$$, {0, 0, 
+            1}]]; $CellContext`normalRotMatrix$ = Transpose[
+           Inverse[$CellContext`rotMatrix$]]; $CellContext`localPoint$ = 
+         Dot[$CellContext`radius$$ $CellContext`canonicalNormal$, \
+$CellContext`rotMatrix$]; $CellContext`localFrame$ = 
+         Dot[$CellContext`frame, $CellContext`normalRotMatrix$]; \
+$CellContext`direction$ = {
+          Cos[$CellContext`dir\[Phi]$$] Cos[$CellContext`dir\[Theta]$$], 
+           Sin[$CellContext`dir\[Phi]$$] Cos[$CellContext`dir\[Theta]$$], 
+           Sin[$CellContext`dir\[Theta]$$]}; $CellContext`localDirection$ = 
+         Dot[$CellContext`direction$, $CellContext`normalRotMatrix$]; 
+        Graphics3D[{
+           $CellContext`drawFrame[$CellContext`frame, $CellContext`radius$$ \
+$CellContext`canonicalNormal$], 
+           $CellContext`drawFrame[$CellContext`localFrame$, \
+$CellContext`localPoint$], 
+           $CellContext`rayToArrow[$CellContext`radius$$ \
+$CellContext`canonicalNormal$, $CellContext`direction$], 
+           $CellContext`rayToArrow[$CellContext`localPoint$, \
+$CellContext`localDirection$], 
+           Opacity[0.5], 
+           Sphere[{0, 0, 0}, $CellContext`radius$$]}, Axes -> True, 
+          AxesLabel -> {$CellContext`x, $CellContext`y, $CellContext`z}, 
+          PlotRange -> {{-$CellContext`radius$$ - 1, $CellContext`radius$$ + 
+             1}, {-$CellContext`radius$$ - 1, $CellContext`radius$$ + 
+             1}, {-$CellContext`radius$$ - 1, $CellContext`radius$$ + 1}}]], 
       "Specifications" :> {{{$CellContext`\[Theta]$$, 0}, Rational[-1, 2] Pi, 
          Rational[1, 2] Pi}, {{$CellContext`\[Phi]$$, 0}, 0, 2 
-         Pi}, {{$CellContext`radius$$, 1.5}, 0.1, 5}}, "Options" :> {}, 
+         Pi}, {{$CellContext`radius$$, 1.5}, 0.1, 
+         5}, {{$CellContext`dir\[Theta]$$, 0}, 0, Rational[1, 2] 
+         Pi}, {{$CellContext`dir\[Phi]$$, 0}, 0, 2 Pi}}, "Options" :> {}, 
       "DefaultOptions" :> {}],
-     ImageSizeCache->{409., {268., 273.}},
+     ImageSizeCache->{409., {295., 300.}},
      SingleEvaluation->True],
     Deinitialization:>None,
     DynamicModuleValues:>{},
@@ -223,9 +287,15 @@ $CellContext`localPoint],
    Deployed->True,
    StripOnInput->False],
   Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{{3.515922793742114*^9, 3.515922820344636*^9}, {
-  3.515922943253666*^9, 3.515922968185092*^9}}]
-}, Open  ]]
+ CellChangeTimes->{
+  3.5163802612177796`*^9, {3.5163803758753376`*^9, 3.5163804010547776`*^9}, 
+   3.5163804327535906`*^9, 3.516380478579212*^9, {3.51638054376394*^9, 
+   3.516380623778517*^9}, {3.5163807488486705`*^9, 3.5163807634605064`*^9}}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"\[AliasDelimiter]", "\[AliasDelimiter]"}]], "Input",
+ CellChangeTimes->{{3.516380752089856*^9, 3.516380752794896*^9}}]
 },
 WindowSize->{707, 787},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
@@ -246,9 +316,10 @@ Notebook[{
 Cell[557, 20, 1075, 28, 112, "Input"],
 Cell[1635, 50, 413, 12, 31, "Input"],
 Cell[CellGroupData[{
-Cell[2073, 66, 3677, 96, 292, "Input"],
-Cell[5753, 164, 3358, 62, 558, "Output"]
-}, Open  ]]
+Cell[2073, 66, 5415, 136, 452, "Input"],
+Cell[7491, 204, 4897, 88, 612, "Output"]
+}, Open  ]],
+Cell[12403, 295, 142, 2, 31, "Input"]
 }
 ]
 *)

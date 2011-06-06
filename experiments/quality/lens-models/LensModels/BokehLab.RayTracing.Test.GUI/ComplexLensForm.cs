@@ -43,7 +43,7 @@
         private ComplexLens CreateLens()
         {
             //double curvatureRadius = 150;
-            //double apertureRadius = 100;
+            //double apertureRadius = 150;
             //return ComplexLens.CreateBiconvexLens(curvatureRadius, apertureRadius, 100);
             return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
             //return ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0);
@@ -57,10 +57,10 @@
             }
 
             directionPhi = (double)rayDirectionPhiNumeric.Value;
-            Vector3d rayDirection = new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi));
             if (inputLensPosDirectly)
             {
                 incomingRay.Origin = GetVectorFromControls(rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
+                incomingRay.Direction = new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi));
             }
             else
             {
@@ -73,17 +73,11 @@
                     lensPosU = 2.0 - lensPosU;
                     lensPosV = 0.0;
                 }
-                Vector3d lensPos = complexLens.GetBackSurfaceSample(new Vector2d(lensPosU, lensPosV));
-                lensPos.Z += 10e-6;
-                incomingRay.Origin = lensPos;
-                // update incoming ray direction with normal
-                // (convert from tangent space of lens position to camera space)
-                // normal at lensPos converts to (0,0,1)
-                // TODO: this is a bad computation
-                Vector3d normal = complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(lensPos);
-                incomingRay.Direction = rayDirection - normal;
+                incomingRay = complexLens.GetBackSurfaceSample(
+                    new Vector2d(lensPosU, lensPosV),
+                    new Vector2d(directionPhi * 0.5 * Math.PI, 0));
             }
-            incomingRay.Direction = rayDirection;
+
 
             intersections = new List<Vector3d>();
             outgoingRay = complexLens.TransferDebug(incomingRay, out intersections, true);
