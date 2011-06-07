@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Lens\LensRayTransferFunctionTest.cs" />
     <Compile Include="Lens\BiconvexLensTest.cs" />
     <Compile Include="Lens\ComplexLensTest.cs" />
     <Compile Include="SphereTest.cs" />
