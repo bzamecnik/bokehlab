@@ -74,17 +74,18 @@
                     lensPosU = 2.0 - lensPosU;
                     lensPosV = 0.0;
                 }
-                incomingRay = complexLens.GetBackSurfaceRayFromParameters(
+                incomingRay = complexLens.ConvertParametersToBackSurfaceRay(
                     new Vector2d(lensPosU, lensPosV),
                     new Vector2d(directionPhi, 0));
+                Console.WriteLine("IN: {0}", incomingRay);
             }
-
 
             intersections = new List<Vector3d>();
             outgoingRay = complexLens.TransferDebug(incomingRay, out intersections, true);
             if (!inputLensPosDirectly)
             {
                 backLensPos = incomingRay.Origin;
+                Console.WriteLine("OUT: {0}", outgoingRay);
             }
             else
             {

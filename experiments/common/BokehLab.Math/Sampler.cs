@@ -197,10 +197,10 @@
             double minSinTheta,
             double maxSinTheta)
         {
-            double angle = 0.5 * Math.PI * randomNumbers.X;
+            double theta = 0.5 * Math.PI * randomNumbers.X;
             minSinTheta = Math.Max(minSinTheta, -1);
             maxSinTheta = Math.Min(maxSinTheta, 1);
-            double sinTheta = Math.Sin(angle);
+            double sinTheta = Math.Sin(theta);
             sinTheta = minSinTheta + (maxSinTheta - minSinTheta) * sinTheta;
             //double cosTheta = Math.Cos(angle);
             double cosTheta = Math.Sqrt(1 - sinTheta * sinTheta);
@@ -210,6 +210,37 @@
                 Math.Sin(phi) * cosTheta,
                 sinTheta);
             return sphereSample;
+        }
+
+        /// <summary>
+        /// Convert a 3D point on a hemispherical cap surface to its
+        /// parametric representation. Inverse operation to
+        /// SampleSphereWithUniformSpacing().
+        /// </summary>
+        /// <param name="point">3D point in cartesian camera space, assumed to
+        /// be on the sphere surface.</param>
+        /// <param name="minSinTheta"></param>
+        /// <param name="maxSinTheta"></param>
+        /// <returns></returns>
+        public static Vector2d SampleSphereWithUniformSpacingInverse(
+            Vector3d point,
+            double minSinTheta,
+            double maxSinTheta)
+        {
+            Vector2d parameters = new Vector2d();
+
+            double cosTheta = Math.Sqrt(1 - point.Z * point.Z);
+
+            minSinTheta = Math.Max(minSinTheta, -1);
+            maxSinTheta = Math.Min(maxSinTheta, 1);
+            double sinTheta = (point.Z - minSinTheta) / (maxSinTheta - minSinTheta);
+            double theta = Math.Asin(sinTheta);
+            parameters.X = theta / (0.5 * Math.PI);
+
+            double phi = Math.Acos(point.X / cosTheta);
+            parameters.Y = phi / (2 * Math.PI);
+
+            return parameters;
         }
 
         /// <summary>

@@ -58,11 +58,11 @@
         /// </summary>
         /// <param name="sampleCount">Number of sample in each of the two
         /// variable dimensions.</param>
-        /// <returns>Table of </returns>
-        public Ray[] SampleLrtf(Vector2d position, Vector2d direction,
+        /// <returns>Table of rays in parametrized representation.</returns>
+        public Parameters[] SampleLrtf(Vector2d position, Vector2d direction,
             VariableParameter variableParam, int sampleCount)
         {
-            Ray[] table = new Ray[sampleCount];
+            Parameters[] table = new Parameters[sampleCount];
             double positionTheta = position.X;
             double positionPhi = position.Y;
             double directionTheta = direction.X;
@@ -107,11 +107,24 @@
                     default:
                         break;
                 }
-                Ray incomingRay = lens.GetBackSurfaceRayFromParameters(
+                Ray incomingRay = lens.ConvertParametersToBackSurfaceRay(
                     new Vector2d(positionTheta, positionPhi),
                     new Vector2d(directionTheta, directionPhi));
                 Ray outgoingRay = lens.Transfer(incomingRay);
-                table[i] = outgoingRay;
+                if (outgoingRay != null)
+                {
+                    Vector4d outgoingRayParameters = lens.ConvertFrontSurfaceRayToParameters(
+                        outgoingRay);
+                    table[i] = new Parameters(
+                        outgoingRayParameters.X,
+                        outgoingRayParameters.Y,
+                        outgoingRayParameters.Z,
+                        outgoingRayParameters.W);
+                }
+                else
+                {
+                    table[i] = null;
+                }
                 param += step;
             }
             return table;
@@ -123,6 +136,29 @@
             PositionPhi,
             DirectionTheta,
             DirectionPhi,
+        }
+
+        public class Parameters
+        {
+            public double PositionTheta { get; set; }
+            public double PositionPhi { get; set; }
+            public double DirectionTheta { get; set; }
+            public double DirectionPhi { get; set; }
+
+            public Parameters(double posTheta, double posPhi,
+                double dirTheta, double dirPhi)
+            {
+                PositionTheta = posTheta;
+                PositionPhi = posPhi;
+                DirectionTheta = dirTheta;
+                DirectionPhi = dirPhi;
+            }
+
+            public override string ToString()
+            {
+                return string.Format("[{0}, {1}, {2}, {3}]", PositionTheta,
+                    PositionPhi, DirectionTheta, DirectionPhi);
+            }
         }
     }
 }
