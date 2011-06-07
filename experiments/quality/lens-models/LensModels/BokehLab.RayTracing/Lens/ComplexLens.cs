@@ -408,28 +408,73 @@
         /// X = theta ... elevation (from plane to normal)
         /// Y = phi ... azimuth</param>
         /// <returns></returns>
-        public Ray GetBackSurfaceRayFromParameters(Vector2d positionSample, Vector2d direction)
+        public Ray GetBackSurfaceRayFromParameters(Vector2d position, Vector2d direction)
+        {
+            Vector3d canonicalNormal = Vector3d.UnitZ;
+            double surfaceSinTheta = backSurfaceSinTheta;
+            Sphere sphericalSurface = backSphericalSurface;
+            ElementSurface surface = ElementSurfaces.First();
+
+            return GetSurfaceRayFromParameters(position, direction,
+                canonicalNormal, surfaceSinTheta, sphericalSurface, surface);
+        }
+
+        public Ray GetFrontSurfaceRayFromParameters(Vector2d position, Vector2d direction)
+        {
+            Vector3d canonicalNormal = -Vector3d.UnitZ;
+            double surfaceSinTheta = frontSurfaceSinTheta;
+            Sphere sphericalSurface = frontSphericalSurface;
+            ElementSurface surface = ElementSurfaces.Last();
+
+            return GetSurfaceRayFromParameters(position, direction,
+                canonicalNormal, surfaceSinTheta, sphericalSurface, surface);
+        }
+
+        /// <summary>
+        /// Convert a ray with origin at the back or front lens surface from
+        /// its parametric representation.
+        /// </summary>
+        /// <param name="position">Position on lens surface in parameteric
+        /// representation (normalized hemispherical coordinates).</param>
+        /// <param name="direction">Direction of the ray with respect to the
+        /// local frame in parameteric representation (normalized hemispherical
+        /// coordinates).
+        /// </param>
+        /// <param name="canonicalNormal">Normal of the lens surface
+        /// hemisphere (typically (0,0,1) for the back surface or (0,0,-1) for
+        /// the front surface).</param>
+        /// <param name="surfaceSinTheta">Sine of the surface spherical cap
+        /// theta angle.</param>
+        /// <param name="sphericalSurface">Lens surface represented as a
+        /// sphere.</param>
+        /// <param name="surface">Lens surface with its normal field.</param>
+        /// <returns>Ray corresponding to its parametric representation.
+        /// </returns>
+        public Ray GetSurfaceRayFromParameters(
+            Vector2d position, Vector2d direction,
+            Vector3d canonicalNormal, double surfaceSinTheta,
+            Sphere sphericalSurface, ElementSurface surface)
         {
             // - get surface point P
             //Vector3d lensPos = GetBackSurfaceSample(sample);
 
-            // DEBUG: uniform spacing sampling for LRTF sampling
+            // uniform spacing sampling for LRTF sampling
             Vector3d unitSphereSample = Sampler.SampleSphereWithUniformSpacing(
-                positionSample, backSurfaceSinTheta, 1);
-            Vector3d lensPos = backSphericalSurface.Center + backSphericalSurface.Radius * unitSphereSample;
+                position, backSurfaceSinTheta, 1);
+            Vector3d lensPos = sphericalSurface.Center + sphericalSurface.Radius * unitSphereSample;
 
             // let the ray have an intersection with the back surface
-            lensPos.Z += 10e-6;
+            lensPos.Z += 10e-6 * canonicalNormal.Z;
             // - get normal N at P
-            Vector3d normalLocal = ElementSurfaces.First().SurfaceNormalField.GetNormal(lensPos);
-            // - compute direction D from spherical coordinates (wrt normal Z = (0,0,1))
+            Vector3d normalLocal = surface.SurfaceNormalField.GetNormal(lensPos);
+            // - compute direction D from spherical coordinates (wrt normal Z = (0,0,+/-1))
             double theta = 0.5 * Math.PI * direction.X;
             double phi = 2 * Math.PI * direction.Y;
             double cosTheta = Math.Cos(theta);
             Vector3d directionZ = new Vector3d(
                 Math.Cos(phi) * cosTheta,
                 Math.Sin(phi) * cosTheta,
-                Math.Sin(theta));
+                Math.Sin(theta) * canonicalNormal.Z);
             // - rotate D from Z to N frame
             //   - using a (normalized) quaternion Q
             //   - N and Z should be assumed to be already normalized
@@ -437,17 +482,12 @@
             //     rotate one vector to another [moller1999]
             normalLocal.Normalize();
             Quaterniond q = Quaterniond.FromAxisAngle(
-                Vector3d.Cross(Vector3d.UnitZ, normalLocal),
-                Math.Acos(Vector3d.Dot(Vector3d.UnitZ, normalLocal)));
+                Vector3d.Cross(canonicalNormal, normalLocal),
+                Math.Acos(Vector3d.Dot(canonicalNormal, normalLocal)));
             q.Normalize();
             Ray result = new Ray(lensPos, -Vector3d.Transform(directionZ, q));
             return result;
         }
-
-        //public Ray GetBackSurfaceRayFromParameters(Vector2d positionSample, Vector2d direction,
-        //    Vector3d canonicalNormal, Sphere sphericalSurface, ElementSurface surface)
-        //{
-        //}
 
         #region IIntersectable Members
 
