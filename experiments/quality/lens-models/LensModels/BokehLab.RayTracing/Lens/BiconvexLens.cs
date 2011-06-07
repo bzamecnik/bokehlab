@@ -132,13 +132,13 @@
 
         public Vector3d GetBackSurfaceSample(Vector2d sample)
         {
-            Vector3d unitSphereSample = Sampler.UniformSampleSphere(sample, sinTheta, 1);
+            Vector3d unitSphereSample = Sampler.UniformSampleSphereWithEqualArea(sample, sinTheta, 1);
             return backSurface.Center + backSurface.Radius * unitSphereSample;
         }
 
         public Vector3d GetFrontSurfaceSample(Vector2d sample)
         {
-            Vector3d unitSphereSample = Sampler.UniformSampleSphere(sample, sinTheta, 1);
+            Vector3d unitSphereSample = Sampler.UniformSampleSphereWithEqualArea(sample, sinTheta, 1);
             return frontSurface.Center + frontSurface.Radius * (-unitSphereSample);
         }
 

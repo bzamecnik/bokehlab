@@ -31,7 +31,8 @@
         {
             InitializeComponent();
             complexLens = CreateLens();
-            directionPhi = Math.PI;
+            //directionPhi = Math.PI;
+            directionPhi = 1.0;
             incomingRay = new Ray(new Vector3d(25, 0, 300), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
 
             rayDirectionPhiNumeric.Value = (decimal)directionPhi;
@@ -43,8 +44,8 @@
         private ComplexLens CreateLens()
         {
             //double curvatureRadius = 150;
-            //double apertureRadius = 150;
-            //return ComplexLens.CreateBiconvexLens(curvatureRadius, apertureRadius, 100);
+            //double apertureRadius = 100;
+            //return ComplexLens.CreateBiconvexLens(curvatureRadius, apertureRadius, 0);
             return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
             //return ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0);
         }
@@ -73,22 +74,29 @@
                     lensPosU = 2.0 - lensPosU;
                     lensPosV = 0.0;
                 }
-                incomingRay = complexLens.GetBackSurfaceSample(
+                incomingRay = complexLens.GetBackSurfaceRayFromParameters(
                     new Vector2d(lensPosU, lensPosV),
-                    new Vector2d(directionPhi * 0.5 * Math.PI, 0));
+                    new Vector2d(directionPhi, 0));
             }
 
 
             intersections = new List<Vector3d>();
             outgoingRay = complexLens.TransferDebug(incomingRay, out intersections, true);
-            if (outgoingRay != null)
+            if (!inputLensPosDirectly)
             {
-                Intersection backInt = complexLens.Intersect(incomingRay);
-                backLensPos = backInt.Position;
+                backLensPos = incomingRay.Origin;
             }
             else
             {
-                backLensPos = Vector3d.Zero;
+                if (outgoingRay != null)
+                {
+                    Intersection backInt = complexLens.Intersect(incomingRay);
+                    backLensPos = backInt.Position;
+                }
+                else
+                {
+                    backLensPos = Vector3d.Zero;
+                }
             }
             drawingPanel.Invalidate();
         }
@@ -199,6 +207,7 @@
 
         private Point Vector3dToPoint(Vector3d vector)
         {
+            //vector = Vector3d.Transform(vector, Matrix4d.CreateRotationX(1.0));
             return new Point((int)vector.Z, (int)vector.X);
         }
 

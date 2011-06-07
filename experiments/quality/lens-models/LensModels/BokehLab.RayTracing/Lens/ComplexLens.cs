@@ -384,14 +384,14 @@
 
         public Vector3d GetBackSurfaceSample(Vector2d sample)
         {
-            Vector3d unitSphereSample = Sampler.UniformSampleSphere(
+            Vector3d unitSphereSample = Sampler.UniformSampleSphereWithEqualArea(
                 sample, backSurfaceSinTheta, 1);
             return backSphericalSurface.Center + backSphericalSurface.Radius * unitSphereSample;
         }
 
         public Vector3d GetFrontSurfaceSample(Vector2d sample)
         {
-            Vector3d unitSphereSample = Sampler.UniformSampleSphere(
+            Vector3d unitSphereSample = Sampler.UniformSampleSphereWithEqualArea(
                 sample, frontSurfaceSinTheta, 1);
             return frontSphericalSurface.Center + frontSphericalSurface.Radius * (-unitSphereSample);
         }
@@ -401,25 +401,30 @@
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="sample">Sample in parametric UV space [0;1]^2</param>
+        /// <param name="sample">Sample in parametric UV space [0; 1]^2</param>
         /// <param name="direction">Direction relative to local frame on the
-        /// surface point in spherical coordinates - the same as in
-        /// Sampler.UniformSampleSphere().
-        /// X = theta [0; PI/2] ... elevation (from plane to normal)
-        /// Y = phi [0; 2*PI] ... azimuth</param>
+        /// surface point in normalized spherical coordinates [0; 1]^2, similar
+        /// to Sampler.UniformSampleSphere().
+        /// X = theta ... elevation (from plane to normal)
+        /// Y = phi ... azimuth</param>
         /// <returns></returns>
-        public Ray GetBackSurfaceSample(Vector2d sample, Vector2d directionSpherical)
+        public Ray GetBackSurfaceRayFromParameters(Vector2d positionSample, Vector2d direction)
         {
             // - get surface point P
-            Vector3d lensPos = GetBackSurfaceSample(sample);
-            // TODO: give a sufficient reason for this movement
-            // (probably let the ray have an intersection with the surface)
+            //Vector3d lensPos = GetBackSurfaceSample(sample);
+
+            // DEBUG: uniform spacing sampling for LRTF sampling
+            Vector3d unitSphereSample = Sampler.SampleSphereWithUniformSpacing(
+                positionSample, backSurfaceSinTheta, 1);
+            Vector3d lensPos = backSphericalSurface.Center + backSphericalSurface.Radius * unitSphereSample;
+
+            // let the ray have an intersection with the back surface
             lensPos.Z += 10e-6;
             // - get normal N at P
             Vector3d normalLocal = ElementSurfaces.First().SurfaceNormalField.GetNormal(lensPos);
             // - compute direction D from spherical coordinates (wrt normal Z = (0,0,1))
-            double theta = directionSpherical.X;
-            double phi = directionSpherical.Y;
+            double theta = 0.5 * Math.PI * direction.X;
+            double phi = 2 * Math.PI * direction.Y;
             double cosTheta = Math.Cos(theta);
             Vector3d directionZ = new Vector3d(
                 Math.Cos(phi) * cosTheta,
@@ -427,15 +432,22 @@
                 Math.Sin(theta));
             // - rotate D from Z to N frame
             //   - using a (normalized) quaternion Q
-            //   - N and Z should assumed to be already normalized
+            //   - N and Z should be assumed to be already normalized
+            //   - more efficient method: Efficiently building a matrix to
+            //     rotate one vector to another [moller1999]
             normalLocal.Normalize();
             Quaterniond q = Quaterniond.FromAxisAngle(
                 Vector3d.Cross(Vector3d.UnitZ, normalLocal),
                 Math.Acos(Vector3d.Dot(Vector3d.UnitZ, normalLocal)));
-            //q.Normalize();
+            q.Normalize();
             Ray result = new Ray(lensPos, -Vector3d.Transform(directionZ, q));
             return result;
         }
+
+        //public Ray GetBackSurfaceRayFromParameters(Vector2d positionSample, Vector2d direction,
+        //    Vector3d canonicalNormal, Sphere sphericalSurface, ElementSurface surface)
+        //{
+        //}
 
         #region IIntersectable Members
 

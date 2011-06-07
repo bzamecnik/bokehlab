@@ -23,7 +23,7 @@
             foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
             {
                 // shoot rays at the sphere center from a bigger concontric sphere
-                Vector3d unitSphereSample = Sampler.UniformSampleSphere(sample, -1, 1);
+                Vector3d unitSphereSample = Sampler.UniformSampleSphereWithEqualArea(sample, -1, 1);
                 Vector3d sourcePos = biggerSphereFactor * sphere.Radius * unitSphereSample;
                 Ray ray = new Ray(sourcePos, sphere.Center - sourcePos);
                 Intersection intersection = sphere.Intersect(ray);

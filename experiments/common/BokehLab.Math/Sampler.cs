@@ -144,6 +144,7 @@
         /// strip (truncated from poles no Z axis).
         /// </summary>
         /// <remarks>
+        /// <para>
         /// (minSinTheta, maxSinTheta):
         /// (-1,1) - full sphere
         /// (-1,0) - lower hemisphere
@@ -154,13 +155,27 @@
         /// -PI/2 = lower pole (-Z),
         /// 0     = XY plane,
         /// PI/2  = upper pole (Z)
+        /// </para>
+        /// <para>
+        /// This mapping is based on Achimedes' Theorem. See
+        /// Shao, Badler: Spherical Sampling by Archimedes' Theorem [shao1996]
+        /// http://repository.upenn.edu/cgi/viewcontent.cgi?article=1188&context=cis_reports
+        /// </para>
+        /// <para>
+        /// The mapping preserves uniform differential areas. It means the
+        /// samples are distributed less dense near poles. Thus it might not
+        /// be well suitable for LRTF sampling as the most important are the
+        /// areas around the poles. However, this is suitable to be used in
+        /// conjunction with stratified sampling, eg. later while evaluating the
+        /// LRTF.
+        /// </para>
         /// </remarks>
         /// <param name="randomNumbers">Random numbers from a square
         /// [0; 1] x [0; 1].</param>
         /// <param name="minSinTheta">Sine of minimum elevation angle.</param>
         /// <param name="maxSinTheta">Sine of maximum elevation angle.</param>
         /// <returns>Point on the sphere.</returns>
-        public static Vector3d UniformSampleSphere(
+        public static Vector3d UniformSampleSphereWithEqualArea(
             Vector2d randomNumbers,
             double minSinTheta,
             double maxSinTheta)
@@ -168,6 +183,26 @@
             minSinTheta = Math.Max(minSinTheta, -1);
             maxSinTheta = Math.Min(maxSinTheta, 1);
             double sinTheta = minSinTheta + (maxSinTheta - minSinTheta) * randomNumbers.X;
+            double cosTheta = Math.Sqrt(1 - sinTheta * sinTheta);
+            double phi = 2 * Math.PI * randomNumbers.Y;
+            Vector3d sphereSample = new Vector3d(
+                Math.Cos(phi) * cosTheta,
+                Math.Sin(phi) * cosTheta,
+                sinTheta);
+            return sphereSample;
+        }
+
+        public static Vector3d SampleSphereWithUniformSpacing(
+            Vector2d randomNumbers,
+            double minSinTheta,
+            double maxSinTheta)
+        {
+            double angle = 0.5 * Math.PI * randomNumbers.X;
+            minSinTheta = Math.Max(minSinTheta, -1);
+            maxSinTheta = Math.Min(maxSinTheta, 1);
+            double sinTheta = Math.Sin(angle);
+            sinTheta = minSinTheta + (maxSinTheta - minSinTheta) * sinTheta;
+            //double cosTheta = Math.Cos(angle);
             double cosTheta = Math.Sqrt(1 - sinTheta * sinTheta);
             double phi = 2 * Math.PI * randomNumbers.Y;
             Vector3d sphereSample = new Vector3d(
