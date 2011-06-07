@@ -75,8 +75,8 @@
                     lensPosV = 0.0;
                 }
                 incomingRay = complexLens.ConvertParametersToBackSurfaceRay(
-                    new Vector2d(lensPosU, lensPosV),
-                    new Vector2d(directionPhi, 0));
+                    new LensRayTransferFunction.Parameters(
+                        lensPosU, lensPosV, directionPhi, 0));
                 Console.WriteLine("IN: {0}", incomingRay);
             }
 

@@ -417,25 +417,27 @@
         /// X = theta ... elevation (from plane to normal)
         /// Y = phi ... azimuth</param>
         /// <returns></returns>
-        public Ray ConvertParametersToBackSurfaceRay(Vector2d position, Vector2d direction)
+        public Ray ConvertParametersToBackSurfaceRay(
+            LensRayTransferFunction.Parameters parameters)
         {
             Vector3d canonicalNormal = Vector3d.UnitZ;
             double surfaceSinTheta = backSurfaceSinTheta;
             Sphere sphericalSurface = backSphericalSurface;
             ElementSurface surface = ElementSurfaces.First();
 
-            return ConvertParametersToSurfaceRay(position, direction,
+            return ConvertParametersToSurfaceRay(parameters,
                 canonicalNormal, surfaceSinTheta, sphericalSurface, surface);
         }
 
-        public Ray ConvertParametersToFrontSurfaceRay(Vector2d position, Vector2d direction)
+        public Ray ConvertParametersToFrontSurfaceRay(
+            LensRayTransferFunction.Parameters parameters)
         {
             Vector3d canonicalNormal = -Vector3d.UnitZ;
             double surfaceSinTheta = frontSurfaceSinTheta;
             Sphere sphericalSurface = frontSphericalSurface;
             ElementSurface surface = ElementSurfaces.Last();
 
-            return ConvertParametersToSurfaceRay(position, direction,
+            return ConvertParametersToSurfaceRay(parameters,
                 canonicalNormal, surfaceSinTheta, sphericalSurface, surface);
         }
 
@@ -460,24 +462,21 @@
         /// <returns>Ray corresponding to its parametric representation.
         /// </returns>
         public Ray ConvertParametersToSurfaceRay(
-            Vector2d position, Vector2d direction,
+            LensRayTransferFunction.Parameters parameters,
             Vector3d canonicalNormal, double surfaceSinTheta,
             Sphere sphericalSurface, ElementSurface surface)
         {
-            // TODO:
-            // - create a struct for the parameters or use Vector4d
-
             // uniform spacing sampling for LRTF sampling
             Vector3d unitSpherePos = Sampler.SampleSphereWithUniformSpacing(
-                position, surfaceSinTheta, 1);
+                parameters.Position, surfaceSinTheta, 1);
             unitSpherePos.Z *= canonicalNormal.Z;
             Vector3d lensPos = sphericalSurface.Center + sphericalSurface.Radius * unitSpherePos;
 
             // - get normal N at P
             Vector3d normalLocal = surface.SurfaceNormalField.GetNormal(lensPos);
             // - compute direction D from spherical coordinates (wrt normal Z = (0,0,+/-1))
-            double theta = 0.5 * Math.PI * direction.X;
-            double phi = 2 * Math.PI * direction.Y;
+            double theta = 0.5 * Math.PI * parameters.DirectionTheta;
+            double phi = 2 * Math.PI * parameters.DirectionPhi;
             double cosTheta = Math.Cos(theta);
             Vector3d directionZ = new Vector3d(
                 Math.Cos(phi) * cosTheta,
@@ -497,7 +496,7 @@
             return result;
         }
 
-        public Vector4d ConvertBackSurfaceRayToParameters(Ray ray)
+        public LensRayTransferFunction.Parameters ConvertBackSurfaceRayToParameters(Ray ray)
         {
             Vector3d canonicalNormal = Vector3d.UnitZ;
             double surfaceSinTheta = backSurfaceSinTheta;
@@ -508,7 +507,7 @@
                 surfaceSinTheta, sphericalSurface, surface);
         }
 
-        public Vector4d ConvertFrontSurfaceRayToParameters(Ray ray)
+        public LensRayTransferFunction.Parameters ConvertFrontSurfaceRayToParameters(Ray ray)
         {
             Vector3d canonicalNormal = -Vector3d.UnitZ;
             double surfaceSinTheta = frontSurfaceSinTheta;
@@ -519,7 +518,7 @@
                 surfaceSinTheta, sphericalSurface, surface);
         }
 
-        public Vector4d ConvertSurfaceRayToParameters(
+        public LensRayTransferFunction.Parameters ConvertSurfaceRayToParameters(
             Ray ray,
             Vector3d canonicalNormal, double surfaceSinTheta,
             Sphere sphericalSurface, ElementSurface surface)
@@ -560,7 +559,8 @@
                 dirTheta / (0.5 * Math.PI),
                 dirPhi / (2 * Math.PI));
 
-            return new Vector4d(originParametric.X, originParametric.Y,
+            return new LensRayTransferFunction.Parameters(
+                originParametric.X, originParametric.Y,
                 directionParametric.X, directionParametric.Y);
         }
 

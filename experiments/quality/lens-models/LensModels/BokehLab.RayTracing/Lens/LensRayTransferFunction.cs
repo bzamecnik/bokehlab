@@ -59,28 +59,24 @@
         /// <param name="sampleCount">Number of sample in each of the two
         /// variable dimensions.</param>
         /// <returns>Table of rays in parametrized representation.</returns>
-        public Parameters[] SampleLrtf(Vector2d position, Vector2d direction,
+        public Parameters[] SampleLrtf(LensRayTransferFunction.Parameters parameters,
             VariableParameter variableParam, int sampleCount)
         {
             Parameters[] table = new Parameters[sampleCount];
-            double positionTheta = position.X;
-            double positionPhi = position.Y;
-            double directionTheta = direction.X;
-            double directionPhi = direction.Y;
 
             switch (variableParam)
             {
                 case VariableParameter.PositionTheta:
-                    positionTheta = 0;
+                    parameters.PositionTheta = 0;
                     break;
                 case VariableParameter.PositionPhi:
-                    positionPhi = 0;
+                    parameters.PositionPhi = 0;
                     break;
                 case VariableParameter.DirectionTheta:
-                    directionTheta = 0;
+                    parameters.DirectionTheta = 0;
                     break;
                 case VariableParameter.DirectionPhi:
-                    directionPhi = 0;
+                    parameters.DirectionPhi = 0;
                     break;
                 default:
                     break;
@@ -93,33 +89,25 @@
                 switch (variableParam)
                 {
                     case VariableParameter.PositionTheta:
-                        positionTheta += param;
+                        parameters.PositionTheta += param;
                         break;
                     case VariableParameter.PositionPhi:
-                        positionPhi += param;
+                        parameters.PositionPhi += param;
                         break;
                     case VariableParameter.DirectionTheta:
-                        directionTheta += param;
+                        parameters.DirectionTheta += param;
                         break;
                     case VariableParameter.DirectionPhi:
-                        directionPhi += param;
+                        parameters.DirectionPhi += param;
                         break;
                     default:
                         break;
                 }
-                Ray incomingRay = lens.ConvertParametersToBackSurfaceRay(
-                    new Vector2d(positionTheta, positionPhi),
-                    new Vector2d(directionTheta, directionPhi));
+                Ray incomingRay = lens.ConvertParametersToBackSurfaceRay(parameters);
                 Ray outgoingRay = lens.Transfer(incomingRay);
                 if (outgoingRay != null)
                 {
-                    Vector4d outgoingRayParameters = lens.ConvertFrontSurfaceRayToParameters(
-                        outgoingRay);
-                    table[i] = new Parameters(
-                        outgoingRayParameters.X,
-                        outgoingRayParameters.Y,
-                        outgoingRayParameters.Z,
-                        outgoingRayParameters.W);
+                    table[i] = lens.ConvertFrontSurfaceRayToParameters(outgoingRay);
                 }
                 else
                 {
@@ -144,6 +132,21 @@
             public double PositionPhi { get; set; }
             public double DirectionTheta { get; set; }
             public double DirectionPhi { get; set; }
+
+            public Vector2d Position
+            {
+                get
+                {
+                    return new Vector2d(PositionTheta, PositionPhi);
+                }
+            }
+            public Vector2d Direction
+            {
+                get
+                {
+                    return new Vector2d(DirectionTheta, DirectionPhi);
+                }
+            }
 
             public Parameters(double posTheta, double posPhi,
                 double dirTheta, double dirPhi)
