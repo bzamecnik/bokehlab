@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     12984,        318]
-NotebookOptionsPosition[     12549,        299]
-NotebookOutlinePosition[     12892,        314]
-CellTagsIndexPosition[     12849,        311]
+NotebookDataLength[     14948,        373]
+NotebookOptionsPosition[     14436,        351]
+NotebookOutlinePosition[     14779,        366]
+CellTagsIndexPosition[     14736,        363]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -293,9 +293,61 @@ $CellContext`localDirection$],
    3.516380623778517*^9}, {3.5163807488486705`*^9, 3.5163807634605064`*^9}}]
 }, Open  ]],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
- RowBox[{"\[AliasDelimiter]", "\[AliasDelimiter]"}]], "Input",
- CellChangeTimes->{{3.516380752089856*^9, 3.516380752794896*^9}}]
+ RowBox[{"Graphics3D", "[", 
+  RowBox[{
+   RowBox[{"{", "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"drawFrame", "[", 
+      RowBox[{"frame", ",", 
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "0"}], "}"}]}], "]"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"rayToArrow", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"-", "0.426766738255421"}], ",", "0", ",", 
+         RowBox[{"-", "0.90436173687238"}]}], "}"}]}], "]"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"Opacity", "[", "0.5", "]"}], ",", 
+     RowBox[{"Sphere", "[", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", "1"}], "]"}]}], "}"}], 
+   ",", 
+   RowBox[{"Axes", "\[Rule]", "True"}], ",", 
+   RowBox[{"AxesLabel", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"x", ",", "y", ",", "z"}], "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.516380752089856*^9, 3.516380752794896*^9}, {
+  3.516539947574339*^9, 3.5165401153209333`*^9}, {3.516540233929717*^9, 
+  3.516540253506837*^9}}],
+
+Cell[BoxData[
+ Graphics3DBox[{{
+    {RGBColor[1, 0, 0], Arrow3DBox[{{0, 0, 0}, {0, 0, 1}}]}, 
+    {RGBColor[0, 1, 0], Arrow3DBox[{{0, 0, 0}, {0, 1, 0}}]}, 
+    {RGBColor[0, 0, 1], Arrow3DBox[{{0, 0, 0}, {1, 0, 0}}]}}, 
+   Arrow3DBox[{{0, 0, 0}, {-0.426766738255421, 0, -0.90436173687238}}], 
+   {Opacity[0.5], SphereBox[{0, 0, 0}, 1]}},
+  AutomaticImageSize->True,
+  Axes->True,
+  AxesLabel->{
+    FormBox["x", TraditionalForm], 
+    FormBox["y", TraditionalForm], 
+    FormBox["z", TraditionalForm]},
+  ImageSize->{378.94970191327394`, 375.01157487351514`},
+  ViewPoint->{-0.3256199413879081, -3.358628354571261, 0.25216508410260796`},
+  ViewVertical->{-0.8385098101377023, -0.49750114398689743`, 
+   0.22224740726173325`}]], "Output",
+ CellChangeTimes->{{3.5165400133331*^9, 3.5165401160199733`*^9}, {
+  3.5165402519567485`*^9, 3.516540253791853*^9}}]
+}, Open  ]]
 },
 WindowSize->{707, 787},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
@@ -319,7 +371,10 @@ Cell[CellGroupData[{
 Cell[2073, 66, 5415, 136, 452, "Input"],
 Cell[7491, 204, 4897, 88, 612, "Output"]
 }, Open  ]],
-Cell[12403, 295, 142, 2, 31, "Input"]
+Cell[CellGroupData[{
+Cell[12425, 297, 1139, 31, 92, "Input"],
+Cell[13567, 330, 853, 18, 390, "Output"]
+}, Open  ]]
 }
 ]
 *)

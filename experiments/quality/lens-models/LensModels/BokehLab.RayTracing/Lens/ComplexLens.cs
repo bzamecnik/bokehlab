@@ -492,7 +492,12 @@
                 Vector3d.Cross(canonicalNormal, normalLocal),
                 Math.Acos(Vector3d.Dot(canonicalNormal, normalLocal)));
             q.Normalize();
-            Ray result = new Ray(lensPos, -Vector3d.Transform(directionZ, q));
+            Vector3d rotatedDir = Vector3d.Transform(directionZ, q);
+            if (surface.Convex)
+            {
+                rotatedDir = -rotatedDir;
+            }
+            Ray result = new Ray(lensPos, rotatedDir);
             return result;
         }
 
@@ -544,7 +549,12 @@
                 Vector3d.Cross(normalLocal, canonicalNormal),
                 Math.Acos(Vector3d.Dot(normalLocal, canonicalNormal)));
             //     *- rotate
-            Vector3d direction = -Vector3d.Transform(ray.Direction, q);
+            Vector3d direction = ray.Direction;
+            if (surface.Convex)
+            {
+                direction = -direction;
+            }
+            direction = Vector3d.Transform(ray.Direction, q);
             //   *- transform to hemispherical coordinates
             //     - find out if it is within the local hemisphere
             double sinTheta = direction.Z / canonicalNormal.Z;
