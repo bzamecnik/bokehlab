@@ -18,16 +18,31 @@
             LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
             var defaultParameters = new LensRayTransferFunction.Parameters(0.5, 0.5, 1.0, 0.0);
             var table = lrtf.SampleLrtf(defaultParameters,
-                LensRayTransferFunction.VariableParameter.DirectionTheta, 100);
+                LensRayTransferFunction.VariableParameter.DirectionTheta, 101);
             int i = 0;
             foreach (LensRayTransferFunction.Parameters rayParams in table)
             {
-                Console.WriteLine("[{0}]: {1}", i, rayParams);
+                //Console.WriteLine("[{0}]: {1}", i, rayParams);
                 if (rayParams != null)
                 {
-                    Console.WriteLine("  {0}", lens.ConvertParametersToFrontSurfaceRay(rayParams));
+                    //Console.WriteLine("  {0}", lens.ConvertParametersToFrontSurfaceRay(rayParams));
                 }
                 i++;
+            }
+        }
+
+        [Fact]
+        public void ComputeLrtf()
+        {
+            ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
+            var incomingParams = new LensRayTransferFunction.Parameters(0.5, 0.5, 0.7000000000000004, 0.0);
+            LensRayTransferFunction.Parameters outgoingParams = lrtf.ComputeLrtf(incomingParams);
+            Console.WriteLine("IN: {0}", incomingParams);
+            Console.WriteLine("OUT: {0}", outgoingParams);
+            if (outgoingParams != null)
+            {
+                Console.WriteLine("  {0}", lens.ConvertParametersToFrontSurfaceRay(outgoingParams));
             }
         }
 

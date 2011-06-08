@@ -552,8 +552,12 @@
 
             double cosTheta = Math.Sqrt(1 - sinTheta * sinTheta);
             // clamp to [-1; 1] to battle numerical inaccuracies
-            double cosPhi = BokehLab.Math.MathHelper.Clamp(direction.X / cosTheta, -1, 1);
-            double dirPhi = (cosTheta != 0) ? Math.Acos(cosPhi) : 0.0;
+            double dirPhi = 0.0;
+            if (cosTheta != 0)
+            {
+                double cosPhi = BokehLab.Math.MathHelper.Clamp(direction.X / cosTheta, -1, 1);
+                dirPhi = Math.Acos(cosPhi);
+            }
             //   *- normalize
             Vector2d directionParametric = new Vector2d(
                 dirTheta / (0.5 * Math.PI),

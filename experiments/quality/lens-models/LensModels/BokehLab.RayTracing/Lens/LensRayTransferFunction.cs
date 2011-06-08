@@ -89,33 +89,40 @@
                 switch (variableParam)
                 {
                     case VariableParameter.PositionTheta:
-                        parameters.PositionTheta += param;
+                        parameters.PositionTheta = param;
                         break;
                     case VariableParameter.PositionPhi:
-                        parameters.PositionPhi += param;
+                        parameters.PositionPhi = param;
                         break;
                     case VariableParameter.DirectionTheta:
-                        parameters.DirectionTheta += param;
+                        parameters.DirectionTheta = param;
                         break;
                     case VariableParameter.DirectionPhi:
-                        parameters.DirectionPhi += param;
+                        parameters.DirectionPhi = param;
                         break;
                     default:
                         break;
                 }
-                Ray incomingRay = lens.ConvertParametersToBackSurfaceRay(parameters);
-                Ray outgoingRay = lens.Transfer(incomingRay);
-                if (outgoingRay != null)
-                {
-                    table[i] = lens.ConvertFrontSurfaceRayToParameters(outgoingRay);
-                }
-                else
-                {
-                    table[i] = null;
-                }
+                table[i] = ComputeLrtf(parameters);
                 param += step;
             }
             return table;
+        }
+
+        public Parameters ComputeLrtf(Parameters incomingParams)
+        {
+            Ray incomingRay = lens.ConvertParametersToBackSurfaceRay(incomingParams);
+            Ray outgoingRay = lens.Transfer(incomingRay);
+            Parameters outgoingParams = null;
+            //Console.WriteLine("IN: {0}", incomingParams);
+            //Console.WriteLine("IN: {0}", incomingRay);
+            if (outgoingRay != null)
+            {
+                outgoingParams = lens.ConvertFrontSurfaceRayToParameters(outgoingRay);
+            }
+            //Console.WriteLine("OUT: {0}", outgoingParams);
+            //Console.WriteLine("OUT: {0}", outgoingRay);
+            return outgoingParams;
         }
 
         public enum VariableParameter
