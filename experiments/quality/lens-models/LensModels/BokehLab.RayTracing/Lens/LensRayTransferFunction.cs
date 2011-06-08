@@ -156,6 +156,26 @@
                 }
             }
 
+            public double this[VariableParameter param]
+            {
+                get
+                {
+                    switch (param)
+                    {
+                        case LensRayTransferFunction.VariableParameter.PositionTheta:
+                            return PositionTheta;
+                        case LensRayTransferFunction.VariableParameter.PositionPhi:
+                            return PositionPhi;
+                        case LensRayTransferFunction.VariableParameter.DirectionTheta:
+                            return DirectionTheta;
+                        case LensRayTransferFunction.VariableParameter.DirectionPhi:
+                            return DirectionPhi;
+                        default:
+                            throw new InvalidOperationException();
+                    }
+                }
+            }
+
             public Parameters(double posTheta, double posPhi,
                 double dirTheta, double dirPhi)
             {

@@ -77,7 +77,7 @@
                 incomingRay = complexLens.ConvertParametersToBackSurfaceRay(
                     new LensRayTransferFunction.Parameters(
                         lensPosU, lensPosV, directionPhi, 0));
-                Console.WriteLine("IN: {0}", incomingRay);
+                //Console.WriteLine("IN: {0}", incomingRay);
             }
 
             intersections = new List<Vector3d>();
@@ -85,7 +85,7 @@
             if (!inputLensPosDirectly)
             {
                 backLensPos = incomingRay.Origin;
-                Console.WriteLine("OUT: {0}", outgoingRay);
+                //Console.WriteLine("OUT: {0}", outgoingRay);
             }
             else
             {
