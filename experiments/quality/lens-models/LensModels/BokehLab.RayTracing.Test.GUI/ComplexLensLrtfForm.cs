@@ -12,7 +12,7 @@
 
     public partial class ComplexLensLrtfForm : Form
     {
-        private ComplexLens complexLens;
+        private IList<ComplexLens> complexLenses;
         private LensRayTransferFunction lrtf;
         private int sampleCount;
 
@@ -24,16 +24,20 @@
         {
             InitializeComponent();
 
-            SetDoubleBuffered(drawingPanel);
+            SetDoubleBuffered(posThetaPanel);
+            SetDoubleBuffered(posPhiPanel);
+            SetDoubleBuffered(dirThetaPanel);
+            SetDoubleBuffered(dirPhiPanel);
 
             variableParameterComboBox.DataSource = Enum.GetValues(
                 typeof(LensRayTransferFunction.VariableParameter));
             variableParameterComboBox.SelectedItem = LensRayTransferFunction.VariableParameter.DirectionTheta;
-            shownParameterComboBox.DataSource = Enum.GetValues(
-                typeof(LensRayTransferFunction.VariableParameter));
 
-            complexLens = CreateLens();
-            lrtf = new LensRayTransferFunction(complexLens);
+            complexLenses = CreateLenses();
+            lrtf = new LensRayTransferFunction(complexLenses[0]);
+
+            lensComboBox.Items.AddRange(new[] { "Double Gauss", "Petzval", "Biconvex" });
+            lensComboBox.SelectedIndex = 0;
 
             sampleCountNumeric.Value = 256;
 
@@ -41,13 +45,14 @@
             Recompute();
         }
 
-        private ComplexLens CreateLens()
+        private IList<ComplexLens> CreateLenses()
         {
-            //double curvatureRadius = 150;
-            //double apertureRadius = 100;
-            //return ComplexLens.CreateBiconvexLens(curvatureRadius, apertureRadius, 0);
-            return ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
-            //return ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0);
+            return new List<ComplexLens>(
+                new[] {
+                ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0),
+                ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0),
+                ComplexLens.CreateBiconvexLens(150, 100, 0)}
+            );
         }
 
         private void Recompute()
@@ -69,7 +74,15 @@
 
             outgoingRays = lrtf.SampleLrtf(inputRay, variableParam, sampleCount);
 
-            drawingPanel.Invalidate();
+            InvalidatePanels();
+        }
+
+        private void InvalidatePanels()
+        {
+            posThetaPanel.Invalidate();
+            posPhiPanel.Invalidate();
+            dirThetaPanel.Invalidate();
+            dirPhiPanel.Invalidate();
         }
 
         /// <summary>
@@ -87,38 +100,38 @@
             return rays.Select((ray) => (ray != null) ? (double?)ray[dimension] : null);
         }
 
-        private void drawingPanel_Paint(object sender, PaintEventArgs e)
-        {
-            var shownParam = (LensRayTransferFunction.VariableParameter)
-                shownParameterComboBox.SelectedValue;
-            PlotPanel(e, shownParam);
-        }
-
         private void PlotPanel(PaintEventArgs e, LensRayTransferFunction.VariableParameter shownParam)
         {
             base.OnPaint(e);
 
             Graphics g = e.Graphics;
-            //g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             // scale drawing area to [0; sampleCount-1] x [0; 1]
             g.ScaleTransform(e.ClipRectangle.Width / (float)sampleCount, -e.ClipRectangle.Height);
             g.TranslateTransform(0, -1);
 
             g.Clear(Color.White);
 
-            var values = SelectRayParameterDimension(outgoingRays, shownParam);
-            int x = 0;
-            foreach (var value in values)
+            var values = SelectRayParameterDimension(outgoingRays, shownParam).ToList();
+            double? lastValue = null;
+            Pen linePen = new Pen(Color.Black, 40 / (float)e.ClipRectangle.Height);
+            for (int i = 0; i < values.Count; i++)
             {
+                var value = values[i];
                 if (value.HasValue)
                 {
-                    g.FillRectangle(Brushes.Blue, x, 0, 1, (float)value.Value);
+                    g.FillRectangle(Brushes.LightBlue, i, 0, 1, (float)value.Value);
                 }
                 else
                 {
-                    g.FillRectangle(Brushes.LightSalmon, x, 0, 1, 1);
+                    g.FillRectangle(Brushes.LightSalmon, i, 0, 1, 1);
                 }
-                x++;
+                if ((lastValue != null) && (value != null))
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    g.DrawLine(linePen, i - 0.5f, (float)lastValue.Value, i + 0.5f, (float)value.Value);
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+                }
+                lastValue = value;
             }
         }
 
@@ -132,9 +145,9 @@
             Recompute();
         }
 
-        private void complexLensForm_Resize(object sender, EventArgs e)
+        private void complexLensLrtfForm_Resize(object sender, EventArgs e)
         {
-            Recompute();
+            InvalidatePanels();
         }
 
         private void variableParameterComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -164,17 +177,13 @@
                 default:
                     break;
             }
+            Recompute();
         }
 
         private void sampleCountNumeric_ValueChanged(object sender, EventArgs e)
         {
             sampleCount = (int)sampleCountNumeric.Value;
             Recompute();
-        }
-
-        private void shownParameterComboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            drawingPanel.Invalidate();
         }
 
         public static void SetDoubleBuffered(System.Windows.Forms.Control c)
@@ -193,6 +202,41 @@
                         System.Reflection.BindingFlags.Instance);
 
             aProp.SetValue(c, true, null);
+        }
+
+        private void posThetaPanel_Paint(object sender, PaintEventArgs e)
+        {
+            PlotPanel(e, LensRayTransferFunction.VariableParameter.PositionTheta);
+        }
+
+        private void posPhiPanel_Paint(object sender, PaintEventArgs e)
+        {
+            PlotPanel(e, LensRayTransferFunction.VariableParameter.PositionPhi);
+        }
+
+        private void dirThetaPanel_Paint(object sender, PaintEventArgs e)
+        {
+            PlotPanel(e, LensRayTransferFunction.VariableParameter.DirectionTheta);
+        }
+
+        private void dirPhiPanel_Paint(object sender, PaintEventArgs e)
+        {
+            PlotPanel(e, LensRayTransferFunction.VariableParameter.DirectionPhi);
+        }
+
+        private void DrawingPanel_Resize(object sender, EventArgs e)
+        {
+            ((Control)sender).Invalidate();
+        }
+
+        private void lensComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = lensComboBox.SelectedIndex;
+            if ((index >= 0) && (index < complexLenses.Count))
+            {
+                lrtf.Lens = complexLenses[index];
+            }
+            Recompute();
         }
     }
 }

@@ -46,11 +46,11 @@
     /// </remarks>
     public class LensRayTransferFunction
     {
-        ComplexLens lens;
+        public ComplexLens Lens { get; set; }
 
         public LensRayTransferFunction(ComplexLens lens)
         {
-            this.lens = lens;
+            this.Lens = lens;
         }
 
         /// <summary>
@@ -112,14 +112,14 @@
 
         public Parameters ComputeLrtf(Parameters incomingParams)
         {
-            Ray incomingRay = lens.ConvertParametersToBackSurfaceRay(incomingParams);
-            Ray outgoingRay = lens.Transfer(incomingRay);
+            Ray incomingRay = Lens.ConvertParametersToBackSurfaceRay(incomingParams);
+            Ray outgoingRay = Lens.Transfer(incomingRay);
             Parameters outgoingParams = null;
             //Console.WriteLine("IN: {0}", incomingParams);
             //Console.WriteLine("IN: {0}", incomingRay);
             if (outgoingRay != null)
             {
-                outgoingParams = lens.ConvertFrontSurfaceRayToParameters(outgoingRay);
+                outgoingParams = Lens.ConvertFrontSurfaceRayToParameters(outgoingRay);
             }
             //Console.WriteLine("OUT: {0}", outgoingParams);
             //Console.WriteLine("OUT: {0}", outgoingRay);
