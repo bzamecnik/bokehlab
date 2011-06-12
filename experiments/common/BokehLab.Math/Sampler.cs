@@ -238,6 +238,11 @@
             parameters.X = theta / (0.5 * Math.PI);
 
             double phi = Math.Atan2(point.Y, point.X);
+            if (phi < 0)
+            {
+                // map [-PI; PI] to [0; 2*PI]
+                phi += 2 * Math.PI;
+            }
             parameters.Y = phi / (2 * Math.PI);
 
             return parameters;

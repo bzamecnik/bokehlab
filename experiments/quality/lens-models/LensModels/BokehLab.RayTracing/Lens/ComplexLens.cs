@@ -601,6 +601,11 @@
 
             double cosTheta = Math.Sqrt(1 - sinTheta * sinTheta);
             double dirPhi = Math.Atan2(direction.Y, direction.X);
+            if (dirPhi < 0)
+            {
+                // map [-PI; PI] to [0; 2*PI]
+                dirPhi += 2 * Math.PI;
+            }
             //   *- normalize
             Vector2d directionParametric = new Vector2d(
                 dirTheta / (0.5 * Math.PI),
