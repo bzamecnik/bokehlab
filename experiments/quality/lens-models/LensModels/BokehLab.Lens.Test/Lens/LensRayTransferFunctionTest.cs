@@ -19,7 +19,7 @@
             var defaultParameters = new LensRayTransferFunction.Parameters(0.5, 0.5, 1.0, 0.5);
             var table = lrtf.SampleLrtf(defaultParameters,
                 LensRayTransferFunction.VariableParameter.DirectionTheta, 101);
-            int i = 0;
+            //int i = 0;
             //foreach (LensRayTransferFunction.Parameters rayParams in table)
             //{
             //    Console.WriteLine("[{0}]: {1}", i, rayParams);
@@ -116,6 +116,29 @@
             Assert.Equal(inputParams.PositionPhi, outputParams.PositionPhi, 5);
             Assert.Equal(inputParams.DirectionTheta, outputParams.DirectionTheta, 5);
             Assert.Equal(inputParams.DirectionPhi, outputParams.DirectionPhi, 5);
+        }
+
+        [Fact]
+        private void ConvertToHemisphericalPositionAndBack()
+        {
+            Vector2d origParams = new Vector2d(0.897631192121816, 0.0200000000000735);
+            double sinTheta = 0.96780557421958624;
+            Vector3d pos = Sampler.SampleSphereWithUniformSpacing(origParams, sinTheta, 1);
+            Vector2d recoveredParams = Sampler.SampleSphereWithUniformSpacingInverse(pos, sinTheta, 1);
+            Assert.Equal(origParams.X, recoveredParams.X, 5);
+            Assert.Equal(origParams.Y, recoveredParams.Y, 5);
+        }
+
+        [Fact]
+        private void ConvertFromHemisphericalPositionAndBack()
+        {
+            double sinTheta = 0.96780557421958624;
+            Vector3d origPos = new Vector3d(0.0488656908648108, -0.00932162907092131, 0.998761859247623);
+            Vector2d parameters = Sampler.SampleSphereWithUniformSpacingInverse(origPos, sinTheta, 1);
+            Vector3d recoveredPos = Sampler.SampleSphereWithUniformSpacing(parameters, sinTheta, 1);
+            Assert.Equal(origPos.X, recoveredPos.X, 5);
+            Assert.Equal(origPos.Y, recoveredPos.Y, 5);
+            Assert.Equal(origPos.Z, recoveredPos.Z, 5);
         }
     }
 }

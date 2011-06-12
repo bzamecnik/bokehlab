@@ -18,8 +18,6 @@
         private Vector3d backLensPos;
         private IList<Vector3d> intersections;
         double directionPhi;
-        // lens position parameter (sample for back surface sampling, 0.0-1.0)
-        double lensPosU;
 
         // directly provide the position on lens back surface or derive it by
         // intersecting the incoming ray with the lens
@@ -65,19 +63,21 @@
             }
             else
             {
-                // compute lens position from lens position parameter
-                // (with Y = 0)
-                double lensPosV = 0.5;
-                lensPosU = (double)lensPosTNumeric.Value;
-                if (lensPosU > 1.0)
-                {
-                    lensPosU = 2.0 - lensPosU;
-                    lensPosV = 0.0;
-                }
-                incomingRay = complexLens.ConvertParametersToBackSurfaceRay(
-                    new LensRayTransferFunction.Parameters(
-                        lensPosU, lensPosV, directionPhi, 0));
-                //Console.WriteLine("IN: {0}", incomingRay);
+                //// compute lens position from lens position parameter
+                //// (with Y = 0)
+                //double lensPosV = 0.5;
+                //lensPosU = (double)lensPosTNumeric.Value;
+                //if (lensPosU > 1.0)
+                //{
+                //    lensPosU = 2.0 - lensPosU;
+                //    lensPosV = 0.0;
+                //}
+                //incomingRay = complexLens.ConvertParametersToBackSurfaceRay(
+                //    new LensRayTransferFunction.Parameters(
+                //        lensPosU, lensPosV, directionPhi, 0));
+                ////Console.WriteLine("IN: {0}", incomingRay);
+                var incompingParams = GetIncomingParams();
+                incomingRay = complexLens.ConvertParametersToBackSurfaceRay(incompingParams);
             }
 
             intersections = new List<Vector3d>();
@@ -99,17 +99,80 @@
                     backLensPos = Vector3d.Zero;
                 }
             }
-            drawingPanel.Invalidate();
+            drawingYProjectionPanel.Invalidate();
+            drawingXProjectionPanel.Invalidate();
+            drawingZProjectionPanel.Invalidate();
         }
 
-        private void drawingPanel_Paint(object sender, PaintEventArgs e)
+        private LensRayTransferFunction.Parameters GetIncomingParams()
+        {
+            double posTheta = (double)positionThetaNumeric.Value;
+            double posPhi = (double)positionPhiNumeric.Value;
+            double dirTheta = (double)directionThetaNumeric.Value;
+            double dirPhi = (double)directionPhiNumeric.Value;
+            return new LensRayTransferFunction.Parameters(
+                posTheta, posPhi, dirTheta, dirPhi);
+        }
+
+        private void drawingYProjectionPanel_Paint(object sender, PaintEventArgs e)
         {
             base.OnPaint(e);
 
             Graphics g = e.Graphics;
+            g.TranslateTransform(-e.ClipRectangle.Width * 0.25f, 0);
+            PrepareDrawingPanel(e);
+
+            PaintScene(g, Vector3dToPointY);
+        }
+
+
+        private void drawingXProjectionPanel_Paint(object sender, PaintEventArgs e)
+        {
+            base.OnPaint(e);
+
+            Graphics g = e.Graphics;
+            g.TranslateTransform(-e.ClipRectangle.Width * 0.25f, 0);
+            PrepareDrawingPanel(e);
+
+            PaintScene(g, Vector3dToPointX);
+        }
+
+        private void drawingZProjectionPanel_Paint(object sender, PaintEventArgs e)
+        {
+            base.OnPaint(e);
+
+            Graphics g = e.Graphics;
+            PrepareDrawingPanel(e);
+
+            ComplexLens.ElementSurface backSurface = complexLens.ElementSurfaces.First();
+            float radius = (float)backSurface.ApertureRadius;
+
+            DrawCircle(g, Pens.Blue, new Point(), radius);
+
+            if (incomingRay.Direction != Vector3d.Zero)
+            {
+                Point origin = Vector3dToPointZ(incomingRay.Origin);
+                Point target = Vector3dToPointZ(incomingRay.Origin - 100 * Vector3d.Normalize(incomingRay.Direction));
+                g.DrawLine(Pens.Green, origin, target);
+            }
+
+            if (backLensPos != Vector3d.Zero)
+            {
+                Vector3d normalLocal = backSurface.SurfaceNormalField.GetNormal(backLensPos);
+                Point origin = Vector3dToPointZ(backLensPos);
+                Point target = Vector3dToPointZ(backLensPos + 100 * Vector3d.Normalize(normalLocal));
+                g.DrawLine(Pens.Crimson, origin, target);
+
+                FillSquare(g, Brushes.Red, Vector3dToPointZ(backLensPos), 3);
+            }
+        }
+
+        private static Graphics PrepareDrawingPanel(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
             g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-            float panelHalfWidth = e.ClipRectangle.Width / 2.0f;
-            float panelHalfHeight = e.ClipRectangle.Height / 2.0f;
+            float panelHalfWidth = e.ClipRectangle.Width * 0.5f;
+            float panelHalfHeight = e.ClipRectangle.Height * 0.5f;
             g.TranslateTransform(panelHalfWidth, panelHalfHeight);
             g.ScaleTransform(1.0f, -1.0f);
             float scale = 1.0f;
@@ -123,52 +186,78 @@
 
             //g.ScaleTransform(-1.0f, 1.0f);
             //g.TranslateTransform(200.0f, 0.0f);
-
-            PaintScene(g);
+            return g;
         }
 
-        private void PaintScene(Graphics g)
+        private void PaintScene(Graphics g, Func<Vector3d, Point> projFunc)
         {
-            DrawComplexLens(g, complexLens);
-            DrawRays(g);
+            DrawComplexLens(g, projFunc, complexLens);
+            DrawRays(g, projFunc);
         }
 
-        private void DrawRays(Graphics g)
+        private void DrawRays(Graphics g, Func<Vector3d, Point> projFunc)
         {
             // draw incoming ray
             if (incomingRay.Direction != Vector3d.Zero)
             {
-                Point origin = Vector3dToPoint(incomingRay.Origin);
+                Point origin = projFunc(incomingRay.Origin);
                 Point target;
-                if (outgoingRay != null)
+                if (inputLensPosDirectly)
                 {
-                    target = Vector3dToPoint(backLensPos);
+                    if (outgoingRay != null)
+                    {
+                        target = projFunc(backLensPos);
+                    }
+                    else
+                    {
+                        target = projFunc(incomingRay.Origin + 1000 * Vector3d.Normalize(incomingRay.Direction));
+                    }
                 }
                 else
                 {
-                    target = Vector3dToPoint(incomingRay.Origin + 1000 * Vector3d.Normalize(incomingRay.Direction));
+                    target = projFunc(incomingRay.Origin - 100 * Vector3d.Normalize(incomingRay.Direction));
+
                 }
                 g.DrawLine(Pens.Green, origin, target);
+
+                var parameters = complexLens.ConvertBackSurfaceRayToParameters(incomingRay);
+                var recoveredRay = complexLens.ConvertParametersToBackSurfaceRay(parameters);
+                if (recoveredRay.Direction != Vector3d.Zero)
+                {
+                    origin = projFunc(recoveredRay.Origin);
+                    target = projFunc(recoveredRay.Origin + 1000 * Vector3d.Normalize(recoveredRay.Direction));
+                    //g.DrawLine(Pens.Orange, origin, target);
+                }
             }
 
             if (backLensPos != Vector3d.Zero)
             {
-                FillSquare(g, Brushes.Red, Vector3dToPoint(backLensPos), 3);
+                FillSquare(g, Brushes.Red, projFunc(backLensPos), 3);
             }
 
             // draw outgoing ray
             if ((outgoingRay != null) && (outgoingRay.Direction != Vector3d.Zero))
             {
-                Point origin = Vector3dToPoint(outgoingRay.Origin);
-                Point target = Vector3dToPoint(outgoingRay.Origin + 1000 * Vector3d.Normalize(outgoingRay.Direction));
+                Point origin = projFunc(outgoingRay.Origin);
+                Point target = projFunc(outgoingRay.Origin + 1000 * Vector3d.Normalize(outgoingRay.Direction));
                 g.DrawLine(Pens.Brown, origin, target);
-                //g.DrawLine(Pens.DarkGreen, Vector3dToPoint(backLensPos), origin);
+                //g.DrawLine(Pens.DarkGreen, projFunc(backLensPos), origin);
 
                 //// draw normal
-                //g.DrawLine(Pens.Purple, origin, Vector3dToPoint(outgoingRay.Origin + 20 * -complexLens.ElementSurfaces.Last().SurfaceNormalField.GetNormal(outgoingRay.Origin)));
+                //g.DrawLine(Pens.Purple, origin, projFunc(outgoingRay.Origin + 20 * -complexLens.ElementSurfaces.Last().SurfaceNormalField.GetNormal(outgoingRay.Origin)));
 
                 //// draw normal
-                //g.DrawLine(Pens.Purple, Vector3dToPoint(backLensPos), Vector3dToPoint(backLensPos + 20 * -complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(backLensPos)));
+                //g.DrawLine(Pens.Purple, projFunc(backLensPos), projFunc(backLensPos + 20 * -complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(backLensPos)));
+
+                // test ray->parameters->ray:
+                var parameters = complexLens.ConvertFrontSurfaceRayToParameters(outgoingRay);
+                var recoveredRay = complexLens.ConvertParametersToFrontSurfaceRay(parameters);
+                if (recoveredRay.Direction != Vector3d.Zero)
+                {
+                    origin = projFunc(recoveredRay.Origin);
+                    target = projFunc(recoveredRay.Origin + 1000 * Vector3d.Normalize(recoveredRay.Direction));
+                    g.DrawLine(Pens.Orange, origin, target);
+                }
             }
 
             // draw ray inside lens
@@ -176,14 +265,14 @@
             {
                 for (int i = 0; i < intersections.Count - 1; i++)
                 {
-                    Point origin = Vector3dToPoint(intersections[i]);
-                    Point target = Vector3dToPoint(intersections[i + 1]);
+                    Point origin = projFunc(intersections[i]);
+                    Point target = projFunc(intersections[i + 1]);
                     g.DrawLine(Pens.Brown, origin, target);
                 }
             }
         }
 
-        private void DrawComplexLens(Graphics g, ComplexLens lens)
+        private void DrawComplexLens(Graphics g, Func<Vector3d, Point> projFunc, ComplexLens lens)
         {
             float maxApertureRadius = (float)lens.ElementSurfaces.Select(
                 surface => surface.ApertureRadius).Max();
@@ -193,23 +282,32 @@
                 if (surface.Surface is Sphere)
                 {
                     Sphere sphere = (Sphere)surface.Surface;
-                    //DrawCircle(g, Pens.Blue, Vector3dToPoint(sphere.Center), (float)sphere.Radius);
-                    //FillSquare(g, Brushes.Aquamarine, Vector3dToPoint(sphere.Center), 3);
+                    //DrawCircle(g, Pens.Blue, projFunc(sphere.Center), (float)sphere.Radius);
+                    //FillSquare(g, Brushes.Aquamarine, projFunc(sphere.Center), 3);
                     DrawSphericalCap(g, sphere, surface.ApertureRadius, surface.Convex);
                 }
                 else if (surface.Surface is Circle)
                 {
                     Circle circle = (Circle)surface.Surface;
-                    DrawCircularStop(g, Pens.Violet, Vector3dToPoint(
+                    DrawCircularStop(g, Pens.Violet, projFunc(
                         new Vector3d(0, 0, circle.Z)), (float)circle.Radius, maxApertureRadius);
                 }
             }
         }
 
-        private Point Vector3dToPoint(Vector3d vector)
+        private Point Vector3dToPointX(Vector3d vector)
         {
-            //vector = Vector3d.Transform(vector, Matrix4d.CreateRotationX(1.0));
+            return new Point((int)vector.Z, (int)vector.Y);
+        }
+
+        private Point Vector3dToPointY(Vector3d vector)
+        {
             return new Point((int)vector.Z, (int)vector.X);
+        }
+
+        private Point Vector3dToPointZ(Vector3d vector)
+        {
+            return new Point((int)vector.X, (int)vector.Y);
         }
 
         private void DrawCircle(Graphics g, Pen pen, Point center, float radius)
@@ -289,18 +387,6 @@
         {
             Recompute();
         }
-
-        //private void curvatureRadiusNumeric_ValueChanged(object sender, EventArgs e)
-        //{
-        //    complexLens.CurvatureRadius = (double)curvatureRadiusNumeric.Value;
-        //    Recompute();
-        //}
-
-        //private void apertureRadiusNumeric_ValueChanged(object sender, EventArgs e)
-        //{
-        //    complexLens.ApertureRadius = (double)apertureRadiusNumeric.Value;
-        //    Recompute();
-        //}
 
         private void complexLensForm_Resize(object sender, EventArgs e)
         {
