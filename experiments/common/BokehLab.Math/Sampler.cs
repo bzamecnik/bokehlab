@@ -237,13 +237,7 @@
             double theta = Math.Asin(sinTheta);
             parameters.X = theta / (0.5 * Math.PI);
 
-            // clamp to [-1; 1] to battle numerical inaccuracies
-            double phi = 0.0;
-            if (cosTheta != 0)
-            {
-                double cosPhi = BokehLab.Math.MathHelper.Clamp(point.X / cosTheta, -1, 1);
-                phi = Math.Acos(cosPhi);
-            }
+            double phi = Math.Atan2(point.Y, point.X);
             parameters.Y = phi / (2 * Math.PI);
 
             return parameters;
