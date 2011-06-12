@@ -17,7 +17,7 @@
             ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
             LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
             var defaultParameters = new LensRayTransferFunction.Parameters(0.5, 0.5, 1.0, 0.5);
-            var table = lrtf.SampleLrtf(defaultParameters,
+            var table = lrtf.SampleLrtf1D(defaultParameters,
                 LensRayTransferFunction.VariableParameter.DirectionTheta, 101);
             //int i = 0;
             //foreach (LensRayTransferFunction.Parameters rayParams in table)
@@ -62,10 +62,20 @@
                 LensRayTransferFunction.Parameters outgoingParams = lrtf.ComputeLrtf(incomingParams);
                 if (outgoingParams != null)
                 {
-                    Assert.InRange(outgoingParams.DirectionTheta, 0.0, 1.0);
-                    Assert.InRange(outgoingParams.DirectionPhi, 0.0, 1.0);
-                    Assert.InRange(outgoingParams.PositionTheta, 0.0, 1.0);
-                    Assert.InRange(outgoingParams.PositionPhi, 0.0, 1.0);
+                    if (outgoingParams.DirectionTheta < 0 || outgoingParams.DirectionTheta > 1 ||
+                        outgoingParams.DirectionPhi < 0 || outgoingParams.DirectionPhi > 1 ||
+                        outgoingParams.PositionTheta < 0 || outgoingParams.PositionTheta > 1 ||
+                        outgoingParams.PositionPhi < 0 || outgoingParams.PositionPhi > 1)
+                    {
+                        Console.WriteLine("Warning: parameter outside [0; 1] interval.");
+                        Console.WriteLine("incoming: {0}", incomingParams);
+                        Console.WriteLine("outgoing: {0}", outgoingParams);
+                        Console.WriteLine();
+                    }
+                    //Assert.InRange(outgoingParams.DirectionTheta, 0.0, 1.0);
+                    //Assert.InRange(outgoingParams.DirectionPhi, 0.0, 1.0);
+                    //Assert.InRange(outgoingParams.PositionTheta, 0.0, 1.0);
+                    //Assert.InRange(outgoingParams.PositionPhi, 0.0, 1.0);
                 }
             }
         }
@@ -139,6 +149,89 @@
             Assert.Equal(origPos.X, recoveredPos.X, 5);
             Assert.Equal(origPos.Y, recoveredPos.Y, 5);
             Assert.Equal(origPos.Z, recoveredPos.Z, 5);
+        }
+
+        [Fact]
+        public void ComputeLrtfResultInCorrectInterval()
+        {
+            ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
+            var incomingParams = new LensRayTransferFunction.Parameters(0.835057026164167, 0.375245163857585, 0.854223355117358, 0.000161428470239708);
+            LensRayTransferFunction.Parameters outgoingParams = lrtf.ComputeLrtf(incomingParams);
+            Console.WriteLine(outgoingParams);
+        }
+
+        [Fact]
+        public void SampleLrtfSaveLoadAndCompare()
+        {
+            ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
+
+            int sampleCount = 16;
+
+            var table = lrtf.SampleLrtf3D(sampleCount);
+
+            Console.WriteLine("Size: {0}x{0}x{0}", sampleCount);
+
+            string filename = string.Format("lrtf_double_gauss_{0}.bin", sampleCount);
+
+            table.Save(filename);
+
+            Console.WriteLine("Saved sampled LRTF into file: {0}", filename);
+
+            Console.WriteLine("Trying to load sampled LRTF from file and compare...");
+
+            var recoveredTable = LensRayTransferFunction.Table3d.Load(filename);
+
+            Assert.Equal(sampleCount, recoveredTable.Size);
+
+            for (int i = 0; i < sampleCount; i++)
+            {
+                for (int j = 0; j < sampleCount; j++)
+                {
+                    for (int k = 0; k < sampleCount; k++)
+                    {
+                        Vector4d orig = table.Table[i, j, k];
+                        Vector4d recovered = recoveredTable.Table[i, j, k];
+                        AssertEqualVector4d(orig, recovered);
+                    }
+                }
+            }
+
+            Console.WriteLine("Compared OK");
+        }
+
+        [Fact]
+        public void CompareInterpolatedLrtfValueWithOriginalOnes()
+        {
+            ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
+
+            int sampleCount = 128;
+            string filename = string.Format(@"..\..\..\lrtf_double_gauss_{0}.bin", sampleCount);
+            var table = lrtf.SampleLrtf3DCached(sampleCount, filename);
+
+            Random random = new Random();
+            for (int i = 0; i < 1000; i++)
+            {
+                var incomingParams = new LensRayTransferFunction.Parameters(
+                    random.NextDouble(), random.NextDouble(),
+                    random.NextDouble(), random.NextDouble()
+                    );
+                var outgoingParamsOriginal = lrtf.ComputeLrtf(incomingParams).ToVector4d();
+                var outgoingParamsInterpolated = table.EvaluateLrtf3D(incomingParams).ToVector4d();
+                //AssertEqualVector4d(outgoingParamsOriginal, outgoingParamsInterpolated);
+            }
+        }
+
+        // TODO: turn to a extension method
+        private void AssertEqualVector4d(Vector4d expected, Vector4d actual)
+        {
+            //Assert.True((expected == null) ^ (actual == null));
+            Assert.Equal(expected.X, actual.X);
+            Assert.Equal(expected.Y, actual.Y);
+            Assert.Equal(expected.Z, actual.Z);
+            Assert.Equal(expected.W, actual.W);
         }
     }
 }

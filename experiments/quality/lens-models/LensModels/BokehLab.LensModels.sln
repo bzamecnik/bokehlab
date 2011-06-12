@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.RayTracing", "Boke
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.RayTracing.Test.GUI", "BokehLab.RayTracing.Test.GUI\BokehLab.RayTracing.Test.GUI.csproj", "{8B66227E-B281-460B-B35A-947731138AEE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.LrtfSampler", "BokehLab.LrtfSampler\BokehLab.LrtfSampler.csproj", "{042A9512-FE6D-4158-9664-00C6045E6FA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,16 @@ Global
 		{8B66227E-B281-460B-B35A-947731138AEE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{8B66227E-B281-460B-B35A-947731138AEE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8B66227E-B281-460B-B35A-947731138AEE}.Release|x86.ActiveCfg = Release|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -72,7 +72,7 @@
             var variableParam = (LensRayTransferFunction.VariableParameter)
                 variableParameterComboBox.SelectedValue;
 
-            outgoingRays = lrtf.SampleLrtf(inputRay, variableParam, sampleCount);
+            outgoingRays = lrtf.SampleLrtf1D(inputRay, variableParam, sampleCount);
 
             InvalidatePanels();
         }

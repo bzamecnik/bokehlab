@@ -13,6 +13,8 @@
     public partial class ComplexLensForm : Form
     {
         private ComplexLens complexLens;
+        private LensRayTransferFunction lrtf;
+        private LensRayTransferFunction.Table3d lrtfTable;
         private Ray incomingRay;
         private Ray outgoingRay;
         private Vector3d backLensPos;
@@ -29,6 +31,7 @@
         {
             InitializeComponent();
             complexLens = CreateLens();
+            PrepareLrtf(complexLens, 128);
             //directionPhi = Math.PI;
             directionPhi = 1.0;
             incomingRay = new Ray(new Vector3d(25, 0, 300), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
@@ -37,6 +40,14 @@
             FillVectorToControls(incomingRay.Origin, rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
             initialized = true;
             Recompute();
+        }
+
+        private void PrepareLrtf(ComplexLens lens, int sampleCount)
+        {
+            lrtf = new LensRayTransferFunction(lens);
+            // load precomputed LRTF from a file or compute it and save to file
+            string filename = string.Format(@"..\..\..\lrtf_double_gauss_{0}.bin", sampleCount);
+            lrtfTable = lrtf.SampleLrtf3DCached(sampleCount, filename);
         }
 
         private ComplexLens CreateLens()
@@ -76,8 +87,8 @@
                 //    new LensRayTransferFunction.Parameters(
                 //        lensPosU, lensPosV, directionPhi, 0));
                 ////Console.WriteLine("IN: {0}", incomingRay);
-                var incompingParams = GetIncomingParams();
-                incomingRay = complexLens.ConvertParametersToBackSurfaceRay(incompingParams);
+                var incomingParams = GetIncomingParams();
+                incomingRay = complexLens.ConvertParametersToBackSurfaceRay(incomingParams);
             }
 
             intersections = new List<Vector3d>();
@@ -220,14 +231,14 @@
                 }
                 g.DrawLine(Pens.Green, origin, target);
 
-                var parameters = complexLens.ConvertBackSurfaceRayToParameters(incomingRay);
-                var recoveredRay = complexLens.ConvertParametersToBackSurfaceRay(parameters);
-                if (recoveredRay.Direction != Vector3d.Zero)
-                {
-                    origin = projFunc(recoveredRay.Origin);
-                    target = projFunc(recoveredRay.Origin + 1000 * Vector3d.Normalize(recoveredRay.Direction));
-                    //g.DrawLine(Pens.Orange, origin, target);
-                }
+                //var parameters = complexLens.ConvertBackSurfaceRayToParameters(incomingRay);
+                //var recoveredRay = complexLens.ConvertParametersToBackSurfaceRay(parameters);
+                //if (recoveredRay.Direction != Vector3d.Zero)
+                //{
+                //    origin = projFunc(recoveredRay.Origin);
+                //    target = projFunc(recoveredRay.Origin + 1000 * Vector3d.Normalize(recoveredRay.Direction));
+                //    //g.DrawLine(Pens.Orange, origin, target);
+                //}
             }
 
             if (backLensPos != Vector3d.Zero)
@@ -250,12 +261,44 @@
                 //g.DrawLine(Pens.Purple, projFunc(backLensPos), projFunc(backLensPos + 20 * -complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(backLensPos)));
 
                 // test ray->parameters->ray:
-                var parameters = complexLens.ConvertFrontSurfaceRayToParameters(outgoingRay);
-                var recoveredRay = complexLens.ConvertParametersToFrontSurfaceRay(parameters);
-                if (recoveredRay.Direction != Vector3d.Zero)
+                //var parameters = complexLens.ConvertFrontSurfaceRayToParameters(outgoingRay);
+                //var recoveredRay = complexLens.ConvertParametersToFrontSurfaceRay(parameters);
+                //if (recoveredRay.Direction != Vector3d.Zero)
+                //{
+                //    origin = projFunc(recoveredRay.Origin);
+                //    target = projFunc(recoveredRay.Origin + 1000 * Vector3d.Normalize(recoveredRay.Direction));
+                //    g.DrawLine(Pens.Orange, origin, target);
+                //}
+
+                // test LRTF without rotation:
+
+                //var outgoingParams = lrtf.ComputeLrtf(GetIncomingParams());
+                //var outgoingRayFromLrtf = complexLens.ConvertParametersToFrontSurfaceRay(outgoingParams);
+                //if (outgoingRayFromLrtf.Direction != Vector3d.Zero)
+                //{
+                //    origin = projFunc(outgoingRayFromLrtf.Origin);
+                //    target = projFunc(outgoingRayFromLrtf.Origin + 1000 * Vector3d.Normalize(outgoingRayFromLrtf.Direction));
+                //    g.DrawLine(Pens.Orange, origin, target);
+                //}
+
+                var incomingParams = GetIncomingParams();
+
+                // test LRTF with rotation:
+                //var positionPhi = incomingParams.PositionPhi;
+                //incomingParams.PositionPhi = 0;
+
+                //var outgoingParams = lrtf.ComputeLrtf(incomingParams);
+
+                //outgoingParams.PositionPhi += positionPhi;
+
+                // test LRTF evaluated from a precomputed table
+                var outgoingParams = lrtfTable.EvaluateLrtf3D(incomingParams);
+
+                var outgoingRayFromLrtf = complexLens.ConvertParametersToFrontSurfaceRay(outgoingParams);
+                if (outgoingRayFromLrtf.Direction != Vector3d.Zero)
                 {
-                    origin = projFunc(recoveredRay.Origin);
-                    target = projFunc(recoveredRay.Origin + 1000 * Vector3d.Normalize(recoveredRay.Direction));
+                    origin = projFunc(outgoingRayFromLrtf.Origin);
+                    target = projFunc(outgoingRayFromLrtf.Origin + 1000 * Vector3d.Normalize(outgoingRayFromLrtf.Direction));
                     g.DrawLine(Pens.Orange, origin, target);
                 }
             }

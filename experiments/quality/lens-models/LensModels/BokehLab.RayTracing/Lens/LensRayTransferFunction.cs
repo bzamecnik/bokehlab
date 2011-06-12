@@ -8,6 +8,7 @@
     using BokehLab.Math;
     using BokehLab.RayTracing;
     using OpenTK;
+    using System.IO;
 
     /// <summary>
     /// Represents the Lens Ray Transfer Function (LRTF).
@@ -60,7 +61,7 @@
         /// <param name="sampleCount">Number of sample in each of the two
         /// variable dimensions.</param>
         /// <returns>Table of rays in parametrized representation.</returns>
-        public Parameters[] SampleLrtf(LensRayTransferFunction.Parameters parameters,
+        public Parameters[] SampleLrtf1D(LensRayTransferFunction.Parameters parameters,
             VariableParameter variableParam, int sampleCount)
         {
             Parameters[] table = new Parameters[sampleCount];
@@ -104,8 +105,59 @@
                     default:
                         break;
                 }
-                table[i] = ComputeLrtf(parameters);
+                var outputParams = ComputeLrtf(parameters);
+                if (!outputParams.IsDefined)
+                {
+                    outputParams = null;
+                }
+                table[i] = outputParams;
                 param += step;
+            }
+            return table;
+        }
+
+        /// <summary>
+        /// Uniformly sample the LRTF into a 3D table.
+        /// </summary>
+        /// <param name="sampleCount">Number of samples in each dimension</param>
+        /// <returns>3D table of LRTF: [position phi, direction theta, direction phi]
+        /// </returns>
+        public Table3d SampleLrtf3D(int sampleCount)
+        {
+            Table3d table = new Table3d(sampleCount);
+
+            // position phi is always 0.0 as it is separable
+            Parameters inputParams = new Parameters(0, 0, 0, 0);
+            double step = 1 / (double)(sampleCount - 1);
+            for (int i = 0; i < sampleCount; i++)
+            {
+                inputParams.DirectionTheta = 0.0;
+                for (int j = 0; j < sampleCount; j++)
+                {
+                    inputParams.DirectionPhi = 0.0;
+                    for (int k = 0; k < sampleCount; k++)
+                    {
+                        table.Table[i, j, k] = ComputeLrtf(inputParams).ToVector4d();
+                        inputParams.DirectionPhi += step;
+                    }
+                    inputParams.DirectionTheta += step;
+                }
+                inputParams.PositionTheta += step;
+            }
+            return table;
+        }
+
+        public Table3d SampleLrtf3DCached(int sampleCount, string filename)
+        {
+            Table3d table;
+            if (File.Exists(filename))
+            {
+                table = Table3d.Load(filename);
+            }
+            else
+            {
+                table = SampleLrtf3D(sampleCount);
+                table.Save(filename);
             }
             return table;
         }
@@ -123,6 +175,10 @@
             }
             //Console.WriteLine("OUT: {0}", outgoingParams);
             //Console.WriteLine("OUT: {0}", outgoingRay);
+            if (outgoingParams == null)
+            {
+                outgoingParams = new Parameters(Vector4d.Zero);
+            }
             return outgoingParams;
         }
 
@@ -156,6 +212,11 @@
                 }
             }
 
+            public bool IsDefined
+            {
+                get { return PositionTheta != 0; }
+            }
+
             public double this[VariableParameter param]
             {
                 get
@@ -185,11 +246,149 @@
                 DirectionPhi = dirPhi;
             }
 
+            public Parameters(Vector4d p)
+            {
+                PositionTheta = p.X;
+                PositionPhi = p.Y;
+                DirectionTheta = p.Z;
+                DirectionPhi = p.W;
+            }
+
+            public Vector4d ToVector4d()
+            {
+                return new Vector4d(PositionTheta, PositionPhi, DirectionTheta, DirectionPhi);
+            }
+
             public override string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture.NumberFormat,
                     "{{ {0}, {1}, {2}, {3} }}", PositionTheta,
                     PositionPhi, DirectionTheta, DirectionPhi);
+            }
+        }
+
+        public class Table3d
+        {
+            public Vector4d[, ,] Table { get; private set; }
+            public int Size { get; private set; }
+
+            public Table3d(int size)
+            {
+                Table = new Vector4d[size, size, size];
+                Size = size;
+            }
+
+
+            /// <summary>
+            /// Evaluate tabulated LRTF by trilinear interpolation.
+            /// </summary>
+            /// <param name="table"></param>
+            /// <param name="incomingParams"></param>
+            /// <returns></returns>
+            public Parameters EvaluateLrtf3D(Parameters incomingParams)
+            {
+                double step = Size - 1;
+                double x = incomingParams.PositionTheta * step;
+                double y = incomingParams.DirectionTheta * step;
+                double z = incomingParams.DirectionPhi * step;
+
+                int xFloor = (int)Math.Floor(x);
+                int yFloor = (int)Math.Floor(y);
+                int zFloor = (int)Math.Floor(z);
+                int xCeil = (int)Math.Ceiling(x);
+                int yCeil = (int)Math.Ceiling(y);
+                int zCeil = (int)Math.Ceiling(z);
+
+                double xFloat = x - xFloor;
+                double yFloat = y - yFloor;
+                double zFloat = z - zFloor;
+
+                // trilinear interpolation over position theta, direction theta, direction phi:
+                // position phi is ignored here
+
+                // first linear interpolation
+                Vector4d i0 = Vector4d.Lerp(
+                    Table[xFloor, yFloor, zFloor],
+                    Table[xFloor, yFloor, zCeil], zFloat);
+                Vector4d i1 = Vector4d.Lerp(
+                    Table[xFloor, yCeil, zFloor],
+                    Table[xFloor, yCeil, zCeil], zFloat);
+                Vector4d i2 = Vector4d.Lerp(
+                    Table[xCeil, yFloor, zFloor],
+                    Table[xCeil, yFloor, zCeil], zFloat);
+                Vector4d i3 = Vector4d.Lerp(
+                    Table[xCeil, yCeil, zFloor],
+                    Table[xCeil, yCeil, zCeil], zFloat);
+
+                // second linear interpolation
+                Vector4d j0 = Vector4d.Lerp(i0, i1, yFloat);
+                Vector4d j1 = Vector4d.Lerp(i2, i3, yFloat);
+
+                // third linear interpolation
+                Vector4d k = Vector4d.Lerp(j0, j1, xFloat);
+
+                var outgoingParams = new Parameters(k);
+
+                // rotate the resulting ray as rotation is separated from the 3D table
+                outgoingParams.PositionPhi += incomingParams.PositionPhi;
+                return outgoingParams;
+            }
+
+            public void Save(string filename)
+            {
+                // format:
+                // NUMBER_OF_SAMPLES (as unsigned short integer)
+                // table of values (stream of doubles in binary)
+                // - ordering by input parameters: {posTheta {dirTheta {dirPhi}}
+                // - each value consists four doubles (output parameters):
+                //   {posTheta, posPhi, dirTheta, dirPhi}
+
+                using (BinaryWriter bw = new BinaryWriter(File.Open(filename, FileMode.Create, FileAccess.Write)))
+                {
+                    bw.Write((ushort)Size);
+
+                    for (int i = 0; i < Size; i++)
+                    {
+                        for (int j = 0; j < Size; j++)
+                        {
+                            for (int k = 0; k < Size; k++)
+                            {
+                                Vector4d value = Table[i, j, k];
+                                bw.Write(value.X);
+                                bw.Write(value.Y);
+                                bw.Write(value.Z);
+                                bw.Write(value.W);
+                            }
+                        }
+                    }
+                }
+            }
+
+            public static Table3d Load(string filename)
+            {
+                using (BinaryReader bw = new BinaryReader(File.Open(filename, FileMode.Open, FileAccess.Read)))
+                {
+                    int size = bw.ReadUInt16();
+
+                    Table3d table = new Table3d(size);
+
+                    for (int i = 0; i < size; i++)
+                    {
+                        for (int j = 0; j < size; j++)
+                        {
+                            for (int k = 0; k < size; k++)
+                            {
+                                Vector4d value = new Vector4d();
+                                value.X = bw.ReadDouble();
+                                value.Y = bw.ReadDouble();
+                                value.Z = bw.ReadDouble();
+                                value.W = bw.ReadDouble();
+                                table.Table[i, j, k] = value;
+                            }
+                        }
+                    }
+                    return table;
+                }
             }
         }
     }
