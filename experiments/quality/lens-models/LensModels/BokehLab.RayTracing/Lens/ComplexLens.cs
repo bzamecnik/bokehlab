@@ -466,11 +466,17 @@
             Vector3d canonicalNormal, double surfaceSinTheta,
             Sphere sphericalSurface, ElementSurface surface)
         {
+            //Console.WriteLine("parameters->ray");
+
+            //Console.WriteLine("position parameters: {0}", parameters.Position);
             // uniform spacing sampling for LRTF sampling
             Vector3d unitSpherePos = Sampler.SampleSphereWithUniformSpacing(
                 parameters.Position, surfaceSinTheta, 1);
+            //Console.WriteLine("unit sphere position: {0}", unitSpherePos);
             unitSpherePos.Z *= canonicalNormal.Z;
+
             Vector3d lensPos = sphericalSurface.Center + sphericalSurface.Radius * unitSpherePos;
+            //Console.WriteLine("ray origin: {0}", lensPos);
 
             // - get normal N at P
             Vector3d normalLocal = surface.SurfaceNormalField.GetNormal(lensPos);
@@ -487,16 +493,31 @@
             //   - N and Z should be assumed to be already normalized
             //   - more efficient method: Efficiently building a matrix to
             //     rotate one vector to another [moller1999]
+
             normalLocal.Normalize(); // TODO: check if it is unnecessary
-            Quaterniond q = Quaterniond.FromAxisAngle(
-                Vector3d.Cross(canonicalNormal, normalLocal),
-                Math.Acos(Vector3d.Dot(canonicalNormal, normalLocal)));
-            q.Normalize();
-            Vector3d rotatedDir = Vector3d.Transform(directionZ, q);
+            //Console.WriteLine("abs. direction: {0}", directionZ);
+            //Console.WriteLine("local normal: {0}", normalLocal);
+            Vector3d rotationAxis = Vector3d.Cross(canonicalNormal, normalLocal);
+            //Console.WriteLine("rotation axis: {0}", rotationAxis);
+
+            Vector3d rotatedDir = directionZ;
+            if (rotationAxis.Length > 0)
+            {
+                double angle = Math.Acos(Vector3d.Dot(canonicalNormal, normalLocal));
+                //Console.WriteLine("angle: {0}", angle);
+                // first the local direction must be rotated around using the position phi!
+                //Console.WriteLine("position phi: {0}", parameters.PositionPhi);
+                Matrix4d rotMatrix = Matrix4d.CreateRotationZ(2 * Math.PI * parameters.PositionPhi);
+                // only then can be transformed to the frame of the local normal
+                rotMatrix = rotMatrix * Matrix4d.CreateFromAxisAngle(rotationAxis, angle);
+                rotatedDir = Vector3d.Transform(directionZ, rotMatrix);
+            }
             if (surface.Convex)
             {
                 rotatedDir = -rotatedDir;
             }
+            //Console.WriteLine("local direction: {0}", rotatedDir);
+
             Ray result = new Ray(lensPos, rotatedDir);
             return result;
         }
@@ -528,6 +549,7 @@
             Vector3d canonicalNormal, double surfaceSinTheta,
             Sphere sphericalSurface, ElementSurface surface)
         {
+            //Console.WriteLine("ray->parameters");
             // - convert origin
             //   *- transform to hemispherical coordinates
             //     - find out if it is on the surface
@@ -535,26 +557,43 @@
             //   *- normalize
             Vector3d unitSpherePos = (ray.Origin - sphericalSurface.Center) / sphericalSurface.Radius;
             unitSpherePos.Z *= canonicalNormal.Z;
+            //Console.WriteLine("unit sphere position: {0}", unitSpherePos);
             Vector2d originParametric = Sampler.SampleSphereWithUniformSpacingInverse(
                 unitSpherePos, surfaceSinTheta, 1);
 
             // - convert direction
             //   *- transform from camera space to local frame
             //     *- compute normal at origin
+
+            //Console.WriteLine("ray origin: {0}", ray.Origin);
             Vector3d normalLocal = surface.SurfaceNormalField.GetNormal(ray.Origin);
             normalLocal.Normalize(); // TODO: check if it is unnecessary
+            //Console.WriteLine("local normal: {0}", normalLocal);
             //     *- create rotation quaternion from canonical normal to local
             //       normal
-            Quaterniond q = Quaterniond.FromAxisAngle(
-                Vector3d.Cross(normalLocal, canonicalNormal),
-                Math.Acos(Vector3d.Dot(normalLocal, canonicalNormal)));
-            //     *- rotate
             Vector3d direction = ray.Direction;
+            //Console.WriteLine("local direction: {0}", direction);
             if (surface.Convex)
             {
                 direction = -direction;
             }
-            direction = Vector3d.Transform(ray.Direction, q);
+            Vector3d rotationAxis = Vector3d.Cross(canonicalNormal, normalLocal);
+
+            //Console.WriteLine("rotation axis: {0}", rotationAxis);
+            if (rotationAxis.Length > 0)
+            {
+                double angle = Math.Acos(Vector3d.Dot(normalLocal, canonicalNormal));
+                //Console.WriteLine("angle: {0}", angle);
+                double positionPhi = originParametric.Y;
+                // first transformed to the frame of the local normal
+                //Console.WriteLine("position phi: {0}", positionPhi);
+                Matrix4d rotMatrix = Matrix4d.CreateFromAxisAngle(rotationAxis, -angle);
+                // then rotate the local direction around Z using the position phi
+                rotMatrix = rotMatrix * Matrix4d.CreateRotationZ(2 * Math.PI * -positionPhi);
+                direction = Vector3d.Transform(direction, rotMatrix);
+            }
+            //Console.WriteLine("abs. direction: {0}", direction);
+
             //   *- transform to hemispherical coordinates
             //     - find out if it is within the local hemisphere
             double sinTheta = direction.Z / canonicalNormal.Z;
@@ -566,6 +605,9 @@
             Vector2d directionParametric = new Vector2d(
                 dirTheta / (0.5 * Math.PI),
                 dirPhi / (2 * Math.PI));
+
+            //Console.WriteLine("position parameters: {0}", new Vector2d(
+            //    originParametric.X, originParametric.Y));
 
             return new LensRayTransferFunction.Parameters(
                 originParametric.X, originParametric.Y,
