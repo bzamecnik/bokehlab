@@ -7,34 +7,41 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using OpenTK;
-using OpenTK.Input;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace BokehLab.LrtfVisualizer
 {
     public class LrtfVisualizerGpu : GameWindow
     {
-        int textureSize = 128;
+        int textureSize;
 
         public LrtfVisualizerGpu()
             : base(512, 512)
         {
         }
 
-        int Texture;
-        float UniformZCoord = 0;
+        int lrtf3dTexture;
+        int colorMap1dTexture;
+
+        float UniformZCoord = 1;
         float zCoordStep = 0;
 
         Vector4 UniformValueMask = Vector4.UnitX;
         LrtfComponent selectedLrtfComponent = LrtfComponent.PositionTheta;
 
+        bool useLerpForLrtf = false;
+
         string lrtfFilename = @"..\..\..\lrtf_double_gauss_128.bin";
+        //string lrtfFilename = @"..\..\..\lrtf_double_gauss_256.bin";
+        //string lrtfFilename = @"..\..\..\lrtf_biconvex_128.bin";
+        //string lrtfFilename = @"..\..\..\lrtf_petzval_128.bin";
+        string colorMapFilename = @"..\..\..\rainbow-512_white-zero.png";
 
         int vertexShaderObject, fragmentShaderObject, shaderProgram;
 
@@ -69,13 +76,10 @@ namespace BokehLab.LrtfVisualizer
                     out vertexShaderObject, out fragmentShaderObject,
                     out shaderProgram);
 
-            //Create2dTexture(Width, Height);
-
-            //Create3dTexture(textureSize, textureSize, textureSize);
-
             textureSize = Create3dTextureFromLrtf(lrtfFilename);
-
             zCoordStep = 1 / (float)textureSize;
+
+            colorMap1dTexture = CreateColorMapTexture(colorMapFilename);
 
             Keyboard.KeyUp += KeyUp;
         }
@@ -83,8 +87,10 @@ namespace BokehLab.LrtfVisualizer
         protected override void OnUnload(EventArgs e)
         {
             // Clean up what we allocated before exiting
-            if (Texture != 0)
-                GL.DeleteTexture(Texture);
+            if (lrtf3dTexture != 0)
+                GL.DeleteTexture(lrtf3dTexture);
+            if (colorMap1dTexture != 0)
+                GL.DeleteTexture(colorMap1dTexture);
 
             if (shaderProgram != 0)
                 GL.DeleteProgram(shaderProgram);
@@ -134,9 +140,34 @@ namespace BokehLab.LrtfVisualizer
 
         #region Setting up layer textures
 
+        private int CreateColorMapTexture(string filename)
+        {
+            using (Bitmap colorMapImage = (Bitmap)Bitmap.FromFile(filename))
+            {
+                var imageData = colorMapImage.LockBits(
+                    new Rectangle(0, 0, colorMapImage.Width, colorMapImage.Height),
+                    System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                    System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+                int textureId = GL.GenTexture();
+
+                GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.Rgb8,
+                    colorMapImage.Width, 0,
+                    PixelFormat.Bgr, PixelType.UnsignedByte, imageData.Scan0);
+
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+
+                colorMapImage.UnlockBits(imageData);
+
+                return textureId;
+            }
+        }
+
         private void Create2dTexture(int width, int height)
         {
-            Texture = GL.GenTexture();
+            lrtf3dTexture = GL.GenTexture();
 
             //// one-channel byte 2D texture
             //IntPtr texturePtr = CreateOneChannel2dTexture(width, height);
@@ -197,7 +228,7 @@ namespace BokehLab.LrtfVisualizer
 
         private void Create3dTexture(int width, int height, int depth)
         {
-            Texture = GL.GenTexture();
+            lrtf3dTexture = GL.GenTexture();
 
             //// one-channel byte 2D texture
             //IntPtr texturePtr = CreateOneChannel3dTexture(width, height, depth);
@@ -365,9 +396,9 @@ namespace BokehLab.LrtfVisualizer
 
         private void DeallocateTextures()
         {
-            if (Texture != 0)
+            if (lrtf3dTexture != 0)
             {
-                GL.DeleteTexture(Texture);
+                GL.DeleteTexture(lrtf3dTexture);
             }
         }
 
@@ -442,13 +473,15 @@ namespace BokehLab.LrtfVisualizer
             //GL.Disable(EnableCap.Blend);
 
             // back-most layer must be fully opaque
-            GL.BindTexture(TextureTarget.Texture2D, Texture);
+            GL.BindTexture(TextureTarget.Texture2D, lrtf3dTexture);
             GL.UseProgram(shaderProgram);
 
             //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "foo2dTexture"), Texture);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "foo3dTexture"), Texture);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lrtf3dTexture"), lrtf3dTexture);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "zCoord"), UniformZCoord);
             GL.Uniform4(GL.GetUniformLocation(shaderProgram, "valueMask"), UniformValueMask);
+
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorMapTexture"), colorMap1dTexture);
 
             DrawFullScreenQuad();
             GL.UseProgram(0);
@@ -477,7 +510,31 @@ namespace BokehLab.LrtfVisualizer
 
         private void KeyUp(object sender, KeyboardKeyEventArgs e)
         {
-            if (e.Key == Key.F5)
+            if (e.Key == Key.F1)
+            {
+                MessageBox.Show(
+@"===== Program help =====
+
+Visualization of precomputed Lens Ray Transfer Function
+of a complex lens.
+
+==== Key controls ====
+
+C - choose next value component
+  (position theta & phi, direction theta & phi)
+I - toggle interpolation - nearest neighbor or linear
+
+F1 - show help
+F11 - toggle full screen
+F12 - save screen shot
+
+==== Credits ====
+
+Implementation - Bohumír Zamečník, 2011, MFF UK
+Program skeleton - OpenTK Library Examples
+", "Visualization of precomputed Lens Ray Transfer Function");
+            }
+            else if (e.Key == Key.F5)
             {
                 SaveScreenshot();
             }
@@ -529,6 +586,23 @@ namespace BokehLab.LrtfVisualizer
                         break;
                     default:
                         break;
+                }
+            }
+            else if (e.Key == Key.I)
+            {
+                useLerpForLrtf = !useLerpForLrtf;
+
+                // change LRTF table interpolation
+                GL.BindTexture(TextureTarget.Texture3D, lrtf3dTexture);
+                if (useLerpForLrtf)
+                {
+                    GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                    GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                }
+                else
+                {
+                    GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                    GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
                 }
             }
         }
