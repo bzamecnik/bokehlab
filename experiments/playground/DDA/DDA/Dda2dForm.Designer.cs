@@ -1,6 +1,6 @@
 ﻿namespace DDA
 {
-    partial class Form1
+    partial class Dda2dForm
     {
         /// <summary>
         /// Required designer variable.
@@ -43,15 +43,16 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.pictureBox1.Resize += new System.EventHandler(this.pictureBox1_Resize);
             // 
-            // Form1
+            // Dda2dForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 262);
             this.Controls.Add(this.pictureBox1);
-            this.Name = "Form1";
-            this.Text = "DDA line rasterization";
+            this.Name = "Dda2dForm";
+            this.Text = "2D DDA line rasterization";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 

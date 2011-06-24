@@ -9,13 +9,13 @@ using System.Windows.Forms;
 
 namespace DDA
 {
-    public partial class Form1 : Form
+    public partial class Dda2dForm : Form
     {
         Bitmap image;
 
         Random rnd = new Random();
 
-        public Form1()
+        public Dda2dForm()
         {
             InitializeComponent();
             image = new Bitmap(pictureBox1.Width, pictureBox1.Height);
@@ -29,10 +29,15 @@ namespace DDA
 
         private void Draw()
         {
+            pictureBox1.Image = null;
+
             int width = pictureBox1.Width;
             int height = pictureBox1.Height;
 
-            pictureBox1.Image = null;
+            if ((image == null) || (image.Width != width) || (image.Height != height))
+            {
+                image = new Bitmap(width, height);
+            }
 
             using (Graphics g = Graphics.FromImage(image))
             {
@@ -76,6 +81,11 @@ namespace DDA
         private Point GetRandomPoint(int width, int height)
         {
             return new Point(rnd.Next(width - 1), rnd.Next(height - 1));
+        }
+
+        private void pictureBox1_Resize(object sender, EventArgs e)
+        {
+            Draw();
         }
     }
 }
