@@ -1,4 +1,5 @@
-﻿#extension GL_EXT_gpu_shader4 : enable
+// extension for textureSize2D()
+#extension GL_EXT_gpu_shader4 : enable
 
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
@@ -11,6 +12,7 @@ void main() {
 	vec2 iPos = gl_FragCoord;
 	
 	float radius = 10;
+	// variable blur radius:
 	//radius *= abs(texture2D(depthTexture, nPos).r - 0.5);
 	
 	vec2 iPosStart = iPos;
@@ -30,6 +32,7 @@ void main() {
 			count++;
 		}
 	}
+
 	gl_FragColor.rgb = colorSum / float(count);
-	gl_FragColor.a = 1.0;
+	gl_FragColor.a = 1.0;	
 }
