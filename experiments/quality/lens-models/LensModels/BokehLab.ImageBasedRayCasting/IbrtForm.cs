@@ -31,8 +31,8 @@
         {
             InitializeComponent();
 
-            complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
-            //complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
+            //complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
+            complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
             //complexLens = ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 2.0);
 
             thinLens.FocalLength = 10;

@@ -1,0 +1,556 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     21405,        547]
+NotebookOptionsPosition[     20014,        497]
+NotebookOutlinePosition[     20357,        512]
+CellTagsIndexPosition[     20314,        509]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{
+   RowBox[{"splitVectorsIntoComponents", "[", 
+    RowBox[{"list_", ",", "vectorSize_"}], "]"}], ":=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"list", "[", 
+      RowBox[{"[", 
+       RowBox[{"#1", ";;", " ", ";;", " ", "vectorSize"}], "]"}], "]"}], 
+     "&"}], "/@", 
+    RowBox[{"Range", "[", "vectorSize", "]"}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"makeVectorTable3d", "[", 
+    RowBox[{"list_", ",", "vectorSize_", ",", " ", "size_"}], "]"}], " ", ":=", 
+   RowBox[{"Nest", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Partition", "[", 
+       RowBox[{"#", ",", "size"}], "]"}], "&"}], ",", 
+     RowBox[{"Partition", "[", 
+      RowBox[{"list", ",", "vectorSize"}], "]"}], ",", "2"}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"makeScalarTable3d", "[", 
+    RowBox[{"list_", ",", "vectorSize_", ",", " ", "size_"}], "]"}], " ", ":=", 
+   RowBox[{"Nest", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Partition", "[", 
+       RowBox[{"#", ",", "size"}], "]"}], "&"}], ",", "list", ",", "2"}], 
+    "]"}]}], ";"}]}], "Input",
+ CellChangeTimes->{
+  3.5169690300372667`*^9, {3.5169691103718615`*^9, 3.516969152968298*^9}, {
+   3.5169694425178595`*^9, 3.51696947050146*^9}, {3.5169695075155773`*^9, 
+   3.516969507979604*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+  "filename", " ", "=", " ", 
+   "\"\<c:/Users/bzamecnik/Documents/data/mff/diplomka/bokehlab/repos/\
+experiments/experiments/quality/lens-models/LensModels/lrtf_biconvex_128.bin\>\
+\""}], ";"}]], "Input",
+ CellChangeTimes->{{3.5169614171988373`*^9, 3.516961430953624*^9}, {
+  3.516961493103179*^9, 3.516961503209757*^9}, {3.516961672800457*^9, 
+  3.516961715292887*^9}, {3.516962268377522*^9, 3.516962282925354*^9}, {
+  3.516970145978095*^9, 3.5169701514804096`*^9}, {3.516970482858363*^9, 
+  3.5169704836794105`*^9}, {3.516970858830868*^9, 3.5169708599789333`*^9}, {
+  3.5170450499914865`*^9, 3.5170450510095444`*^9}, {3.517045334379752*^9, 
+  3.5170453373349214`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"vectorSize", " ", "=", " ", "4"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"stream", "=", 
+   RowBox[{"OpenRead", "[", 
+    RowBox[{"filename", ",", 
+     RowBox[{"BinaryFormat", "\[Rule]", "True"}]}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{"size", "=", 
+  RowBox[{"BinaryRead", "[", 
+   RowBox[{"stream", ",", " ", "\"\<UnsignedInteger16\>\""}], 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"listOfVectors", "=", 
+   RowBox[{"BinaryReadList", "[", 
+    RowBox[{"stream", ",", " ", "\"\<Real64\>\""}], "]"}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"Close", "[", "stream", "]"}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"tablesOfComponents", " ", "=", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"makeScalarTable3d", "[", 
+      RowBox[{"#", ",", "vectorSize", ",", "size"}], "]"}], "&"}], "/@", " ", 
+    RowBox[{"splitVectorsIntoComponents", "[", 
+     RowBox[{"listOfVectors", ",", "vectorSize"}], "]"}]}]}], 
+  ";"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{"tableOfVectors", "=", 
+   RowBox[{"makeVectorTable3d", "[", 
+    RowBox[{"listOfVectors", ",", "vectorSize", ",", "size"}], "]"}]}], 
+  ";"}]}], "Input",
+ CellChangeTimes->{{3.516961849826582*^9, 3.5169618945201387`*^9}, {
+   3.516961962843046*^9, 3.5169619687413836`*^9}, {3.5169620748254514`*^9, 
+   3.5169620774256*^9}, {3.5169623558335238`*^9, 3.5169624149119034`*^9}, {
+   3.516962461520569*^9, 3.5169624627896414`*^9}, {3.516962494109433*^9, 
+   3.516962494999484*^9}, {3.516962526415281*^9, 3.5169625329966574`*^9}, {
+   3.516962802613078*^9, 3.5169628319417562`*^9}, {3.516965180938111*^9, 
+   3.516965208572692*^9}, {3.516965917030213*^9, 3.516965970232256*^9}, {
+   3.516969044675104*^9, 3.5169691080667295`*^9}, {3.516969161294774*^9, 
+   3.5169692479847326`*^9}, {3.516969283235749*^9, 3.516969286249921*^9}, {
+   3.5169693411190596`*^9, 3.5169693536947784`*^9}, 3.5169694603308783`*^9, {
+   3.516969557600442*^9, 3.5169695585344954`*^9}}],
+
+Cell[BoxData["128"], "Output",
+ CellChangeTimes->{
+  3.5169625420571756`*^9, 3.5169627794467535`*^9, {3.5169628253213773`*^9, 
+   3.516962832237773*^9}, {3.5169651830462313`*^9, 3.5169652442467318`*^9}, 
+   3.516965962060788*^9, {3.516969196816806*^9, 3.5169692499958477`*^9}, 
+   3.516969286905959*^9, {3.5169693300954294`*^9, 3.5169693554168777`*^9}, {
+   3.5169695591865325`*^9, 3.5169695617896814`*^9}, 3.516970153266512*^9, 
+   3.5169704854625125`*^9, 3.5169708623220673`*^9, 3.5170018095474663`*^9, 
+   3.517002448572016*^9, 3.517045059219014*^9, 3.5170453405531054`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"Length", "[", "listOfVectors", "]"}], "\[IndentingNewLine]", 
+ RowBox[{"Length", "[", "tablesOfComponents", "]"}]}], "Input",
+ CellChangeTimes->{{3.516962546735443*^9, 3.516962551730729*^9}, {
+  3.5169626821911907`*^9, 3.516962683000237*^9}, {3.516965251838166*^9, 
+  3.5169652575744944`*^9}, {3.5169659479429812`*^9, 3.5169659495360723`*^9}, {
+  3.516970165444208*^9, 3.516970179688023*^9}, {3.51697293872593*^9, 
+  3.5169729442152443`*^9}}],
+
+Cell[BoxData["8388608"], "Output",
+ CellChangeTimes->{
+  3.516970180056044*^9, {3.516972929181384*^9, 3.5169729412860765`*^9}, {
+   3.516972995568181*^9, 3.5169729955981827`*^9}}],
+
+Cell[BoxData["4"], "Output",
+ CellChangeTimes->{
+  3.516970180056044*^9, {3.516972929181384*^9, 3.5169729412860765`*^9}, {
+   3.516972995568181*^9, 3.516972995600183*^9}}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"Module", "[", 
+    RowBox[{
+     RowBox[{"{", "slice", "}"}], ",", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"slice", "=", 
+       RowBox[{
+        RowBox[{"tablesOfComponents", "[", 
+         RowBox[{"[", "component", "]"}], "]"}], "[", 
+        RowBox[{"[", "posTheta", "]"}], "]"}]}], ";", "\[IndentingNewLine]", 
+      RowBox[{"ListDensityPlot", "[", 
+       RowBox[{"slice", ",", 
+        RowBox[{"InterpolationOrder", "\[Rule]", "0"}], ",", 
+        RowBox[{"ColorFunction", "\[Rule]", "\"\<Rainbow\>\""}], ",", 
+        RowBox[{"PerformanceGoal", "\[Rule]", "pg"}], ",", 
+        RowBox[{"PlotRange", "\[Rule]", "Full"}]}], "]"}]}]}], 
+    "\[IndentingNewLine]", "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"component", ",", "1", ",", "vectorSize", ",", "1"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"posTheta", ",", "1", ",", "size", ",", "1"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"pg", ",", 
+     RowBox[{"{", 
+      RowBox[{"\"\<Speed\>\"", ",", "\"\<Quality\>\""}], "}"}]}], "}"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.516965974688511*^9, 3.5169660183280067`*^9}, {
+   3.516966092700261*^9, 3.516966202728554*^9}, {3.516969298339613*^9, 
+   3.5169693237390656`*^9}, {3.5169696970804195`*^9, 3.516969698336491*^9}, {
+   3.516969761832123*^9, 3.5169697705806236`*^9}, 3.516969806462676*^9, {
+   3.516971105444973*^9, 3.516971105597982*^9}, {3.516995596769929*^9, 
+   3.5169955971009474`*^9}, 3.5169958549856977`*^9, {3.5169960725441413`*^9, 
+   3.5169960860829153`*^9}, {3.516996171141781*^9, 3.516996175268017*^9}, {
+   3.516996214997289*^9, 3.516996248702217*^9}, {3.51699628633737*^9, 
+   3.5169963433766317`*^9}, {3.516997576799367*^9, 3.5169976044779496`*^9}, {
+   3.5169976490695*^9, 3.5169976503655744`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"ListContourPlot3D", "[", 
+    RowBox[{
+     RowBox[{"tablesOfComponents", "[", 
+      RowBox[{"[", "component", "]"}], "]"}], ",", 
+     RowBox[{"Contours", "\[Rule]", 
+      RowBox[{"{", "threshold", "}"}]}]}], "]"}], ",", "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{"component", ",", "1", ",", "vectorSize", ",", "1"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"threshold", ",", "0.5"}], "}"}], ",", "0", ",", "1"}], "}"}]}],
+   "]"}]], "Input",
+ CellChangeTimes->{{3.5169699005640583`*^9, 3.516969911546686*^9}, {
+  3.5169699506379223`*^9, 3.5169699887631025`*^9}, {3.5169700414171143`*^9, 
+  3.5169700504046288`*^9}, {3.5169701990061283`*^9, 3.51697020114025*^9}, {
+  3.5169702649819016`*^9, 3.5169702923594675`*^9}, {3.516970364577598*^9, 
+  3.5169703656046567`*^9}, {3.5169835985816717`*^9, 3.5169836023608875`*^9}, {
+  3.516994607717358*^9, 3.5169946089844303`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Export", "[", 
+   RowBox[{"\"\<lrtf-gauss-128-posTheta.avi\>\"", ",", 
+    RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"Module", "[", 
+       RowBox[{
+        RowBox[{"{", "slice", "}"}], ",", "\[IndentingNewLine]", 
+        RowBox[{
+         RowBox[{"slice", "=", 
+          RowBox[{
+           RowBox[{"tablesOfComponents", "[", 
+            RowBox[{"[", "1", "]"}], "]"}], "[", 
+           RowBox[{"[", "posTheta", "]"}], "]"}]}], ";", 
+         "\[IndentingNewLine]", 
+         RowBox[{"ListDensityPlot", "[", 
+          RowBox[{"slice", ",", 
+           RowBox[{"InterpolationOrder", "\[Rule]", "0"}], ",", 
+           RowBox[{"ColorFunction", "\[Rule]", "\"\<Rainbow\>\""}], ",", 
+           RowBox[{"PlotRange", "\[Rule]", "Full"}], ",", 
+           RowBox[{"PerformanceGoal", "\[Rule]", "\"\<Quality\>\""}]}], 
+          "]"}]}]}], "\[IndentingNewLine]", "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"posTheta", ",", "1", ",", "size", ",", "1"}], "}"}]}], 
+     "]"}]}], "]"}], "\[IndentingNewLine]"}]], "Input",
+ CellChangeTimes->{{3.5169978906343164`*^9, 3.516997937970024*^9}, {
+   3.5169980937879367`*^9, 3.516998143161761*^9}, 3.51699849369281*^9}],
+
+Cell[BoxData["\<\"lrtf-gauss-128-posTheta.avi\"\>"], "Output",
+ CellChangeTimes->{{3.5169979046481185`*^9, 3.5169979389500804`*^9}, 
+   3.5169981122649937`*^9, 3.5169982912262297`*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Import", "[", 
+  RowBox[{"\"\<lrtf-gauss-128-posTheta.avi\>\"", ",", "\"\<Animation\>\""}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.5169983162456603`*^9, 3.516998346216375*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"plots", "=", 
+  RowBox[{"Table", "[", 
+   RowBox[{
+    RowBox[{"ListDensityPlot", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"tablesOfComponents", "[", 
+        RowBox[{"[", "1", "]"}], "]"}], "[", 
+       RowBox[{"[", "posTheta", "]"}], "]"}], ",", 
+      RowBox[{"InterpolationOrder", "\[Rule]", "0"}], ",", 
+      RowBox[{"ColorFunction", "\[Rule]", "\"\<Rainbow\>\""}], ",", 
+      RowBox[{"PlotRange", "\[Rule]", "Full"}], ",", 
+      RowBox[{"DataRange", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"0", ",", "1"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"0", ",", "1"}], "}"}]}], "}"}]}], ",", 
+      RowBox[{"PerformanceGoal", "\[Rule]", "\"\<Quality\>\""}], ",", 
+      RowBox[{"FrameTicks", "\[Rule]", "None"}], ",", 
+      RowBox[{"Frame", "\[Rule]", "None"}]}], "]"}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{"{", 
+     RowBox[{"posTheta", ",", "1", ",", "3"}], "}"}]}], 
+   "]"}]}], "\[IndentingNewLine]", 
+ RowBox[{"Export", "[", 
+  RowBox[{"\"\<plots.avi\>\"", ",", "plots"}], "]"}]}], "Input",
+ CellChangeTimes->{{3.516998568956115*^9, 3.516998637965062*^9}, {
+  3.5169986763282557`*^9, 3.516998690178048*^9}, {3.516998764536301*^9, 
+  3.516998888965418*^9}}],
+
+Cell[BoxData["\<\"plots.avi\"\>"], "Output",
+ CellChangeTimes->{{3.516998586860139*^9, 3.5169986394091444`*^9}, {
+   3.5169986828906317`*^9, 3.5169986915631275`*^9}, 3.5169987674574685`*^9, {
+   3.516998803423526*^9, 3.51699881818137*^9}, 3.516998848595109*^9, 
+   3.51699889249162*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Import", "[", 
+  RowBox[{"\"\<plots.avi\>\"", ",", "\"\<Animation\>\""}], "]"}]], "Input",
+ CellChangeTimes->{{3.516998834495303*^9, 3.516998834499303*^9}, {
+  3.5169989095055933`*^9, 3.5169989202172055`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"GraphicsGrid", "[", 
+  RowBox[{
+   RowBox[{"Partition", "[", 
+    RowBox[{
+     RowBox[{"Table", "[", 
+      RowBox[{
+       RowBox[{"ListDensityPlot", "[", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"tablesOfComponents", "[", 
+           RowBox[{"[", "component", "]"}], "]"}], "[", 
+          RowBox[{"[", "1", "]"}], "]"}], ",", 
+         RowBox[{"InterpolationOrder", "\[Rule]", "0"}], ",", 
+         RowBox[{"ColorFunction", "\[Rule]", "\"\<Rainbow\>\""}], ",", 
+         RowBox[{"PlotRange", "\[Rule]", "Full"}], ",", 
+         RowBox[{"DataRange", "\[Rule]", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{"0", ",", "1"}], "}"}], ",", 
+            RowBox[{"{", 
+             RowBox[{"0", ",", "1"}], "}"}]}], "}"}]}], ",", 
+         RowBox[{"PerformanceGoal", "\[Rule]", "\"\<Speed\>\""}], ",", 
+         RowBox[{"FrameTicks", "\[Rule]", "None"}], ",", 
+         RowBox[{"Frame", "\[Rule]", "None"}]}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{
+        "component", ",", " ", "1", ",", " ", "vectorSize", ",", " ", "1"}], 
+        "}"}]}], "]"}], ",", "2"}], "]"}], ",", 
+   RowBox[{"Frame", "\[Rule]", "All"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.516999049335591*^9, 3.516999073864994*^9}, {
+  3.5169991354725175`*^9, 3.516999182578212*^9}, {3.5169992245146103`*^9, 
+  3.5169992471439047`*^9}, {3.516999280489812*^9, 3.5169993298216333`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"For", "[", 
+   RowBox[{
+    RowBox[{"posTheta", "=", "16"}], ",", 
+    RowBox[{"posTheta", "\[LessEqual]", "16"}], ",", 
+    RowBox[{"posTheta", "++"}], ",", "\[IndentingNewLine]", 
+    RowBox[{"Export", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"ToString", "[", "posTheta", "]"}], "<>", "\"\<.png\>\""}], 
+      ",", 
+      RowBox[{"GraphicsGrid", "[", 
+       RowBox[{
+        RowBox[{"Partition", "[", 
+         RowBox[{
+          RowBox[{"Table", "[", 
+           RowBox[{
+            RowBox[{"ListDensityPlot", "[", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"tablesOfComponents", "[", 
+                RowBox[{"[", "component", "]"}], "]"}], "[", 
+               RowBox[{"[", "posTheta", "]"}], "]"}], ",", 
+              RowBox[{"InterpolationOrder", "\[Rule]", "0"}], ",", 
+              RowBox[{"ColorFunction", "\[Rule]", "\"\<Rainbow\>\""}], ",", 
+              RowBox[{"PlotRange", "\[Rule]", "Full"}], ",", 
+              RowBox[{"DataRange", "\[Rule]", 
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"{", 
+                  RowBox[{"0", ",", "1"}], "}"}], ",", 
+                 RowBox[{"{", 
+                  RowBox[{"0", ",", "1"}], "}"}]}], "}"}]}], ",", 
+              RowBox[{"PerformanceGoal", "\[Rule]", "\"\<Quality\>\""}], ",", 
+              RowBox[{"FrameTicks", "\[Rule]", "None"}], ",", 
+              RowBox[{"Frame", "\[Rule]", "None"}], ",", 
+              RowBox[{"ImageSize", "\[Rule]", 
+               RowBox[{"{", 
+                RowBox[{"256", ",", "256"}], "}"}]}]}], "]"}], ",", 
+            RowBox[{"{", 
+             RowBox[{
+             "component", ",", " ", "1", ",", " ", "vectorSize", ",", " ", 
+              "1"}], "}"}]}], "]"}], ",", "2"}], "]"}], ",", 
+        RowBox[{"Frame", "\[Rule]", "All"}]}], "]"}]}], "]"}]}], "]"}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.5169993766233106`*^9, 3.516999389868068*^9}, {
+  3.516999524960795*^9, 3.51699960756552*^9}, {3.5169997057261343`*^9, 
+  3.5169997132865667`*^9}, {3.517000613974083*^9, 3.5170006352673006`*^9}, {
+  3.5170009517904053`*^9, 3.5170009939848185`*^9}, {3.517001058155489*^9, 
+  3.5170010624517345`*^9}, {3.517001107614318*^9, 3.51700110992745*^9}, {
+  3.5170014801916275`*^9, 3.517001504210002*^9}, {3.5170018384271173`*^9, 
+  3.5170018810305543`*^9}, {3.517001949614477*^9, 3.517001963175253*^9}, {
+  3.517002028374982*^9, 3.517002028912013*^9}, {3.5170021164350185`*^9, 
+  3.517002121949334*^9}, {3.517002382285225*^9, 3.5170023996922207`*^9}, {
+  3.517002788660468*^9, 3.5170027921536674`*^9}, {3.5170450850304904`*^9, 
+  3.517045087439628*^9}, {3.51704516825325*^9, 3.5170452160889864`*^9}, {
+  3.5170453482275443`*^9, 3.517045418124542*^9}, {3.517045468594429*^9, 
+  3.5170454795470552`*^9}}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{3.517045529420908*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"images", "=", 
+   RowBox[{"Table", "[", 
+    RowBox[{
+     RowBox[{"Import", "[", 
+      RowBox[{
+       RowBox[{"ToString", "[", "i", "]"}], "<>", "\"\<.png\>\""}], "]"}], 
+     ",", 
+     RowBox[{"{", 
+      RowBox[{"i", ",", "128"}], "}"}]}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.517003243653492*^9, 3.5170032613005013`*^9}, {
+  3.5170032979315968`*^9, 3.5170033515666647`*^9}, {3.517003535733198*^9, 
+  3.517003555790345*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Export", "[", 
+  RowBox[{"\"\<lrtf-double-gauss-128.mov\>\"", ",", "images"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.5170033543968267`*^9, 3.5170034056427574`*^9}, {
+  3.5170035754064674`*^9, 3.517003579511702*^9}, {3.517003813966112*^9, 
+  3.517003815383193*^9}}],
+
+Cell[BoxData["\<\"lrtf-double-gauss-128.mov\"\>"], "Output",
+ CellChangeTimes->{{3.5170033726328692`*^9, 3.5170034106940465`*^9}, 
+   3.517003603808092*^9, 3.517003836795418*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Import", "[", 
+  RowBox[{"\"\<lrtf-double-gauss-128.avi\>\"", ",", "\"\<Animation\>\""}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.517003412736163*^9, 3.5170034223887153`*^9}, {
+  3.5170035859150686`*^9, 3.5170035874401555`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"Export", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"ToString", "[", "#", "]"}], "<>", "\"\<.png\>\""}], ",", 
+     RowBox[{"GraphicsGrid", "[", 
+      RowBox[{
+       RowBox[{"Partition", "[", 
+        RowBox[{
+         RowBox[{"Table", "[", 
+          RowBox[{
+           RowBox[{"ListDensityPlot", "[", 
+            RowBox[{
+             RowBox[{
+              RowBox[{"tablesOfComponents", "[", 
+               RowBox[{"[", "component", "]"}], "]"}], "[", 
+              RowBox[{"[", "#", "]"}], "]"}], ",", 
+             RowBox[{"InterpolationOrder", "\[Rule]", "0"}], ",", 
+             RowBox[{"ColorFunction", "\[Rule]", "\"\<Rainbow\>\""}], ",", 
+             RowBox[{"PlotRange", "\[Rule]", "Full"}], ",", 
+             RowBox[{"DataRange", "\[Rule]", 
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"{", 
+                 RowBox[{"0", ",", "1"}], "}"}], ",", 
+                RowBox[{"{", 
+                 RowBox[{"0", ",", "1"}], "}"}]}], "}"}]}], ",", 
+             RowBox[{"PerformanceGoal", "\[Rule]", "\"\<Quality\>\""}], ",", 
+             RowBox[{"FrameTicks", "\[Rule]", "None"}], ",", 
+             RowBox[{"Frame", "\[Rule]", "None"}], ",", 
+             RowBox[{"ImageSize", "\[Rule]", 
+              RowBox[{"{", 
+               RowBox[{"256", ",", "256"}], "}"}]}]}], "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+            "component", ",", " ", "1", ",", " ", "vectorSize", ",", " ", 
+             "1"}], "}"}]}], "]"}], ",", "2"}], "]"}], ",", 
+       RowBox[{"Frame", "\[Rule]", "All"}]}], "]"}]}], "]"}], "&"}], "/@", 
+  RowBox[{"{", "8", "}"}]}]], "Input",
+ CellChangeTimes->{{3.517045571208298*^9, 3.5170456206201243`*^9}, 
+   3.5170457126073856`*^9}],
+
+Cell[BoxData[
+ RowBox[{"{", "\<\"8.png\"\>", "}"}]], "Output",
+ CellChangeTimes->{3.517045650825852*^9, 3.5170457189467487`*^9}]
+}, Open  ]]
+},
+WindowSize->{707, 781},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+FrontEndVersion->"8.0 for Microsoft Windows (64-bit) (November 13, 2010)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 1335, 38, 112, "Input"],
+Cell[1895, 60, 706, 13, 72, "Input"],
+Cell[CellGroupData[{
+Cell[2626, 77, 2012, 44, 172, "Input"],
+Cell[4641, 123, 577, 8, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5255, 136, 467, 7, 52, "Input"],
+Cell[5725, 145, 179, 3, 30, "Output"],
+Cell[5907, 150, 171, 3, 30, "Output"]
+}, Open  ]],
+Cell[6093, 156, 1838, 37, 132, "Input"],
+Cell[7934, 195, 1006, 21, 72, "Input"],
+Cell[CellGroupData[{
+Cell[8965, 220, 1234, 27, 152, "Input"],
+Cell[10202, 249, 184, 2, 30, "Output"]
+}, Open  ]],
+Cell[10401, 254, 203, 4, 31, "Input"],
+Cell[CellGroupData[{
+Cell[10629, 262, 1275, 31, 132, "Input"],
+Cell[11907, 295, 286, 4, 30, "Output"]
+}, Open  ]],
+Cell[12208, 302, 233, 4, 31, "Input"],
+Cell[12444, 308, 1444, 33, 112, "Input"],
+Cell[CellGroupData[{
+Cell[13913, 345, 2813, 58, 172, "Input"],
+Cell[16729, 405, 77, 1, 30, "Output"]
+}, Open  ]],
+Cell[16821, 409, 476, 13, 31, "Input"],
+Cell[CellGroupData[{
+Cell[17322, 426, 292, 6, 31, "Input"],
+Cell[17617, 434, 178, 2, 30, "Output"]
+}, Open  ]],
+Cell[17810, 439, 254, 5, 31, "Input"],
+Cell[CellGroupData[{
+Cell[18089, 448, 1778, 42, 152, "Input"],
+Cell[19870, 492, 128, 2, 30, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

@@ -11,10 +11,18 @@
     {
         static void Main(string[] args)
         {
-            ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            //ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            //string lensName = "double_gauss";
+
+            ComplexLens lens = ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 4.0);
+            string lensName = "petzval";
+
+            //ComplexLens lens = ComplexLens.CreateBiconvexLens(150, 100, 0);
+            //string lensName = "biconvex";
+
             LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
 
-            int sampleCount = 16;
+            int sampleCount = 128;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -37,7 +45,7 @@
 
             Console.WriteLine("Size: {0}x{0}x{0}, elapsed time: {1} ms", sampleCount, stopwatch.ElapsedMilliseconds);
 
-            string filename = string.Format("lrtf_double_gauss_{0}.bin", sampleCount);
+            string filename = string.Format(@"..\..\..\lrtf_{0}_{1}.bin", lensName, sampleCount);
 
             stopwatch.Reset();
             stopwatch.Start();

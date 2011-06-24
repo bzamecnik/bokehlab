@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using BokehLab.Math;
@@ -222,6 +223,46 @@
                 var outgoingParamsInterpolated = table.EvaluateLrtf3D(incomingParams).ToVector4d();
                 //AssertEqualVector4d(outgoingParamsOriginal, outgoingParamsInterpolated);
             }
+        }
+
+        [Fact]
+        public void CompareEvaluationTime()
+        {
+            ComplexLens lens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 4.0);
+            LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
+
+            int sampleCount = 128;
+            Console.WriteLine("LRTF table size: {0}x{0}x{0}", sampleCount);
+            string filename = string.Format(@"..\..\..\lrtf_double_gauss_{0}.bin", sampleCount);
+            var table = lrtf.SampleLrtf3DCached(sampleCount, filename);
+
+            int valueCount = 1000000;
+            Console.WriteLine("Number of values to evaluate: {0}", valueCount);
+
+            Random random = new Random();
+            var inParams = new List<LensRayTransferFunction.Parameters>();
+            for (int i = 0; i < valueCount; i++)
+            {
+                inParams.Add(new LensRayTransferFunction.Parameters(
+                    random.NextDouble(), random.NextDouble(),
+                    random.NextDouble(), random.NextDouble()
+                    ));
+            }
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            foreach (var inParam in inParams)
+            {
+                lrtf.ComputeLrtf(inParam);
+            }
+            stopwatch.Stop();
+            Console.WriteLine("Ray tracing: {0} ms", stopwatch.ElapsedMilliseconds);
+            stopwatch.Reset();
+            stopwatch.Start();
+            foreach (var inParam in inParams)
+            {
+                table.EvaluateLrtf3D(inParam);
+            }
+            stopwatch.Stop();
+            Console.WriteLine("LRTF table interpolation: {0} ms", stopwatch.ElapsedMilliseconds);
         }
 
         // TODO: turn to a extension method
