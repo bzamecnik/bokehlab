@@ -34,3 +34,4 @@ Ogre.log
 *.sdf
 
 *.ipch
+*.bin
