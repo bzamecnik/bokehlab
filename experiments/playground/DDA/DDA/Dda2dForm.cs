@@ -50,25 +50,28 @@ namespace DDA
 
                 DrawGrid(g);
 
-                //Point lineStart = new Point(200, 100);
-                //Point lineEnd = new Point(0, 0);
-                //for (int i = 0; i < 100; i++)
-                //{
-                float scaledWidth = width / scale;
-                float scaledHeight = height / scale;
+                float scaledWidth = (int)(width / scale);
+                float scaledHeight = (int)(height / scale);
                 //Point lineStart = GetRandomPoint((int)scaledWidth, (int)scaledHeight);
                 //Point lineEnd = GetRandomPoint((int)scaledWidth, (int)scaledHeight);
 
-                Vector2 lineStart = GetRandomVector2Int((int)scaledWidth, (int)scaledHeight);
-                Vector2 lineEnd = GetRandomVector2Int((int)scaledWidth, (int)scaledHeight);
-                lineStart += HalfPixel;
-                lineEnd += HalfPixel;
+                //Vector2 lineStart = GetRandomVector2Int((int)scaledWidth, (int)scaledHeight);
+                //Vector2 lineEnd = GetRandomVector2Int((int)scaledWidth, (int)scaledHeight);
+                //lineStart += HalfPixel;
+                //lineEnd += HalfPixel;
 
-                //Vector2 lineStart = GetRandomVector2(scaledWidth, scaledHeight);
-                //Vector2 lineEnd = GetRandomVector2(scaledWidth, scaledHeight);
+                Vector2 lineStart = GetRandomVector2(scaledWidth, scaledHeight);
+                Vector2 lineEnd = GetRandomVector2(scaledWidth, scaledHeight);
 
                 //Vector2 lineStart = new Vector2(8.5f, 8.5f);
                 //Vector2 lineEnd = new Vector2(3.5f, 8.5f);
+
+                //Vector2 lineStart = new Vector2(10.14768f, 4.474112f);
+                //Vector2 lineEnd = new Vector2(7.743159f, 6.267795f);
+                //Vector2 lineStart = new Vector2(10.1f, 4.5f);
+                //Vector2 lineEnd = new Vector2(8.1f, 6.5f);
+                //Vector2 lineStart = new Vector2(0f, 3f);
+                //Vector2 lineEnd = new Vector2(13f, 3f);
 
                 Console.WriteLine("lineStart: {0}, lineEnd: {1}", lineStart, lineEnd);
 
@@ -76,11 +79,9 @@ namespace DDA
                 DrawVariableScale(lineStart, lineEnd, g);
 
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                //g.DrawLine(new Pen(Color.FromArgb(128, 255, 255, 255), 1),
-                //    lineStart.X * scale, lineStart.Y * scale,
-                //    lineEnd.X * scale, lineEnd.Y * scale);
-
-                //}
+                g.DrawLine(new Pen(Color.FromArgb(128, 255, 255, 255), 1),
+                    lineStart.X * scale, lineStart.Y * scale,
+                    lineEnd.X * scale, lineEnd.Y * scale);
             }
 
             pictureBox1.Image = image;
@@ -273,7 +274,7 @@ namespace DDA
             float squareSize = scale;
             float squareRadius = scale / 2.0f;
 
-            g.FillRectangle(Brushes.GreenYellow, pos.X, pos.Y, squareSize, squareSize);
+            g.FillRectangle(Brushes.MediumSpringGreen, pos.X, pos.Y, squareSize, squareSize);
             g.FillRectangle(Brushes.Red, start.X * scale, start.Y * scale, 1, 1);
 
             pos = start;
@@ -288,6 +289,8 @@ namespace DDA
             }
         }
 
+        // TODO:
+        // - try to simplify the code (esp. for singular cases)
         private void DrawLineFullDDAVariableScale(
             Vector2 start, Vector2 end,
             Brush brush, Graphics g, float scale)
@@ -296,13 +299,24 @@ namespace DDA
             float squareRadius = scale / 2.0f;
 
             Vector2 lineDir = end - start;
+            // singular case: zero length line segment
             if (lineDir.LengthSquared < Epsilon)
             {
                 return;
             }
+            // singular cases: line segment starts or end at a gridline
+            if ((Math.Floor(start.X) == start.X) || (Math.Floor(start.Y) == start.Y))
+            {
+                start += lineDir * Epsilon;
+            }
+            if ((Math.Floor(end.X) == end.X) || (Math.Floor(end.Y) == end.Y))
+            {
+                end -= lineDir * Epsilon;
+            }
 
             // distances between ray intersections with neighbor pixel
             // in axes X and Y
+            // singular cases: line parallel to X or Y axis
             Vector2 d = new Vector2(
                 (lineDir.Y != 0) ? (lineDir.X / Math.Abs(lineDir.Y)) : Math.Sign(lineDir.X),
                 (lineDir.X != 0) ? (lineDir.Y / Math.Abs(lineDir.X)) : Math.Sign(lineDir.Y));
@@ -311,13 +325,14 @@ namespace DDA
             float dt = 1 / lineDir.Length;
 
             // distances between X and Y grid intersections along the ray
+            // singular cases: line parallel to X or Y axis
             Vector2 dist = new Vector2();
-            if (Math.Abs(lineDir.Y) < Epsilon)
+            if (Math.Abs(lineDir.Y) < Epsilon) // y != 0
             {
                 dist.X = Math.Abs(d.X);
                 dist.Y = float.PositiveInfinity;
             }
-            else if (Math.Abs(lineDir.X) < Epsilon)
+            else if (Math.Abs(lineDir.X) < Epsilon) // x != 0
             {
                 dist.X = float.PositiveInfinity;
                 dist.Y = Math.Abs(d.Y);
@@ -333,9 +348,13 @@ namespace DDA
             {
                 // NOTE: when start.X or Y is 0 it has to be rounded up to 1, not to 0
                 float distToNextX = (float)(Math.Ceiling(start.X) - start.X);
+                //distToNextX += ((distToNextX < 0) && (lineDir.X > 0)) ? 0 : 1;
                 distToNextX = (distToNextX > 0) ? distToNextX : 1;
+                distToNextX = (lineDir.X >= 0) ? distToNextX : 1 - distToNextX;
                 float distToNextY = (float)(Math.Ceiling(start.Y) - start.Y);
+                //distToNextY += ((distToNextX < 0) && (lineDir.Y > 0)) ? 0 : 1;
                 distToNextY = (distToNextY > 0) ? distToNextY : 1;
+                distToNextY = (lineDir.Y >= 0) ? distToNextY : 1 - distToNextY;
                 distToNext = new Vector2(distToNextX * dist.X, distToNextY * dist.Y);
             }
 
@@ -343,16 +362,18 @@ namespace DDA
             int x = (int)Math.Floor(start.X);
             int y = (int)Math.Floor(start.Y);
 
+            // TODO: this is not needed for pixel computation
+            // it is useful only for visualization
             Vector2 pos = start;
 
-            g.FillRectangle(Brushes.GreenYellow, x * scale, y * scale, squareSize, squareSize);
+            g.FillRectangle(Brushes.DarkGreen, x * scale, y * scale, squareSize, squareSize);
             g.FillRectangle(Brushes.Red, start.X * scale, start.Y * scale, 2, 2);
 
             int endX = (int)Math.Floor(end.X);
             int endY = (int)Math.Floor(end.Y);
 
-            int stepX = Math.Sign(d.X);
-            int stepY = Math.Sign(d.Y);
+            int stepX = Math.Sign(lineDir.X);
+            int stepY = Math.Sign(lineDir.Y);
 
             bool finished = false;
             int i = 0;
@@ -360,6 +381,7 @@ namespace DDA
             while (!finished)
             {
                 float currentDistToNext;
+                bool lastCameVertically = false;
                 if (distToNext.X < distToNext.Y)
                 {
                     currentDistToNext = distToNext.X;
@@ -373,13 +395,16 @@ namespace DDA
                     distToNext.X -= currentDistToNext;
                     distToNext.Y = dist.Y;
                     y += stepY;
+                    lastCameVertically = true;
                 }
                 pos += lineDir * currentDistToNext * dt;
                 //Console.WriteLine("pos: {0}", pos);
 
                 g.FillRectangle(brush, x * scale, y * scale, squareSize, squareSize);
-                g.FillRectangle(Brushes.Red, pos.X * scale, pos.Y * scale, 2, 2);
+                g.FillRectangle(lastCameVertically ? Brushes.Red : Brushes.Cyan,
+                    pos.X * scale, pos.Y * scale, 2, 2);
                 finished = (x == endX) && (y == endY);
+                // TODO: this loop condition should be useless
                 if (i >= maxIterations)
                 {
                     Console.WriteLine("Too long loop");
@@ -387,8 +412,8 @@ namespace DDA
                 }
                 i++;
             }
-            g.FillRectangle(Brushes.GreenYellow, end.X * scale, end.Y * scale, 2, 2);
-            g.FillRectangle(Brushes.HotPink, endX * scale, endY * scale, 2, 2);
+            g.FillRectangle(Brushes.Yellow, end.X * scale, end.Y * scale, 2, 2);
+            //g.FillRectangle(Brushes.HotPink, endX * scale, endY * scale, 2, 2);
         }
 
         private Point GetRandomPoint(int width, int height)
