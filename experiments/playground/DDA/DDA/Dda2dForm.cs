@@ -304,7 +304,7 @@ namespace DDA
             {
                 return;
             }
-            // singular cases: line segment starts or end at a gridline
+            // singular cases: line segment starts or ends at a gridline
             if ((Math.Floor(start.X) == start.X) || (Math.Floor(start.Y) == start.Y))
             {
                 start += lineDir * Epsilon;
@@ -314,13 +314,6 @@ namespace DDA
                 end -= lineDir * Epsilon;
             }
 
-            // distances between ray intersections with neighbor pixel
-            // in axes X and Y
-            // singular cases: line parallel to X or Y axis
-            Vector2 d = new Vector2(
-                (lineDir.Y != 0) ? (lineDir.X / Math.Abs(lineDir.Y)) : Math.Sign(lineDir.X),
-                (lineDir.X != 0) ? (lineDir.Y / Math.Abs(lineDir.X)) : Math.Sign(lineDir.Y));
-
             // ray parameter span of segment of a single pixel length
             float dt = 1 / lineDir.Length;
 
@@ -329,18 +322,21 @@ namespace DDA
             Vector2 dist = new Vector2();
             if (Math.Abs(lineDir.Y) < Epsilon) // y != 0
             {
-                dist.X = Math.Abs(d.X);
+                dist.X = 1;
                 dist.Y = float.PositiveInfinity;
             }
             else if (Math.Abs(lineDir.X) < Epsilon) // x != 0
             {
                 dist.X = float.PositiveInfinity;
-                dist.Y = Math.Abs(d.Y);
+                dist.Y = 1;
             }
             else
             {
-                dist.X = (float)Math.Sqrt(1 + d.Y * d.Y);
-                dist.Y = (float)Math.Sqrt(1 + d.X * d.X);
+                // distances between ray intersections with neighbor pixel in axes X and Y
+                float dX = lineDir.X / lineDir.Y;
+                float dY = lineDir.Y / lineDir.X;
+                dist.X = (float)Math.Sqrt(1 + dY * dY);
+                dist.Y = (float)Math.Sqrt(1 + dX * dX);
             }
 
             // distance from current point to the nearest grid intersection
