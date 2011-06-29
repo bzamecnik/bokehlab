@@ -15,7 +15,7 @@ namespace DDA
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Dda3dForm());
+            Application.Run(new Dda2dForm());
         }
     }
 }
