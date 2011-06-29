@@ -13,7 +13,10 @@ namespace DDA
     public partial class Dda2dForm : Form
     {
         Bitmap image;
-        float scale = 2.0f;
+        float scale = 32.0f;
+
+        private static readonly Vector2 HalfPixel = new Vector2(0.5f, 0.5f);
+        private static readonly float Epsilon = 10e-6f;
 
         Random rnd = new Random();
 
@@ -45,20 +48,57 @@ namespace DDA
             {
                 g.Clear(Color.Black);
 
+                DrawGrid(g);
+
                 //Point lineStart = new Point(200, 100);
                 //Point lineEnd = new Point(0, 0);
                 //for (int i = 0; i < 100; i++)
                 //{
-                Point lineStart = GetRandomPoint(width, height);
-                Point lineEnd = GetRandomPoint(width, height);
+                float scaledWidth = width / scale;
+                float scaledHeight = height / scale;
+                //Point lineStart = GetRandomPoint((int)scaledWidth, (int)scaledHeight);
+                //Point lineEnd = GetRandomPoint((int)scaledWidth, (int)scaledHeight);
 
-                DrawOrigScale(lineStart, lineEnd, g);
-                //DrawVariableScale(lineStart, lineEnd, g);
+                Vector2 lineStart = GetRandomVector2Int((int)scaledWidth, (int)scaledHeight);
+                Vector2 lineEnd = GetRandomVector2Int((int)scaledWidth, (int)scaledHeight);
+                lineStart += HalfPixel;
+                lineEnd += HalfPixel;
+
+                //Vector2 lineStart = GetRandomVector2(scaledWidth, scaledHeight);
+                //Vector2 lineEnd = GetRandomVector2(scaledWidth, scaledHeight);
+
+                //Vector2 lineStart = new Vector2(8.5f, 8.5f);
+                //Vector2 lineEnd = new Vector2(3.5f, 8.5f);
+
+                Console.WriteLine("lineStart: {0}, lineEnd: {1}", lineStart, lineEnd);
+
+                //DrawOrigScale(lineStart, lineEnd, g);
+                DrawVariableScale(lineStart, lineEnd, g);
+
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                //g.DrawLine(new Pen(Color.FromArgb(128, 255, 255, 255), 1),
+                //    lineStart.X * scale, lineStart.Y * scale,
+                //    lineEnd.X * scale, lineEnd.Y * scale);
 
                 //}
             }
 
             pictureBox1.Image = image;
+        }
+
+        private void DrawGrid(Graphics g)
+        {
+            float xLines = image.Width / scale;
+            float yLines = image.Height / scale;
+
+            for (int y = 0; y < yLines; y++)
+            {
+                g.DrawLine(Pens.DarkOliveGreen, 0, y * scale, image.Width - 1, y * scale);
+            }
+            for (int x = 0; x < xLines; x++)
+            {
+                g.DrawLine(Pens.DarkOliveGreen, x * scale, 0, x * scale, image.Height - 1);
+            }
         }
 
         private void DrawOrigScale(Point lineStart, Point lineEnd, Graphics g)
@@ -144,12 +184,77 @@ namespace DDA
                 image.SetPixel(x, y, color);
             }
         }
+        private void DrawLineFullDDAOrigScaleVector2(Vector2 start, Vector2 end, Color color)
+        {
+            // distances between ray intersections with neighbor pixel
+            // in axes X and Y
+            Vector2 d = new Vector2(
+                (end.X - start.X) / Math.Abs(end.Y - start.Y),
+                (end.Y - start.Y) / Math.Abs(end.X - start.X));
+
+            // distances between X and Y grid intersections along the ray
+            Vector2 dist = new Vector2(
+                (float)Math.Sqrt(1 + d.Y * d.Y),
+                (float)Math.Sqrt(1 + d.X * d.X));
+
+            // distance from current point to the nearest grid intersection
+            Vector2 distToNext;
+            {
+                float distToNextX = dist.X * (float)(Math.Ceiling(start.X) - start.X);
+                distToNextX = (distToNextX > 0) ? distToNextX : dist.X;
+                float distToNextY = dist.Y * (float)(Math.Ceiling(start.Y) - start.Y);
+                distToNextY = (distToNextY > 0) ? distToNextY : dist.Y;
+                distToNext = new Vector2(distToNextX, distToNextY);
+            }
+
+            // current grid cell (pixel) coordinates
+            int x = (int)Math.Floor(start.X);
+            int y = (int)Math.Floor(start.Y);
+
+            image.SetPixel(x, y, color);
+
+            int endX = (int)Math.Ceiling(end.X);
+            int endY = (int)Math.Ceiling(end.Y);
+
+            int stepX = Math.Sign(d.X);
+            int stepY = Math.Sign(d.Y);
+
+            while ((x != endX) && (y != endY))
+            {
+                if (distToNext.X < distToNext.Y)
+                {
+                    distToNext.Y -= distToNext.X;
+                    distToNext.X = dist.X;
+                    x += stepX;
+                }
+                else
+                {
+                    distToNext.X -= distToNext.Y;
+                    distToNext.Y = dist.Y;
+                    y += stepY;
+                }
+                if ((x < 0) || (x >= image.Width) ||
+                    (y < 0) || (y >= image.Height))
+                {
+                    // NOTE: if end point is inside the image
+                    // this condition is useless
+                    break;
+                }
+                image.SetPixel(x, y, color);
+            }
+        }
 
         private void DrawVariableScale(PointF lineStart, PointF lineEnd, Graphics g)
         {
             Vector2 start = new Vector2(lineStart.X, lineStart.Y);
             Vector2 end = new Vector2(lineEnd.X, lineEnd.Y);
-            DrawLineDDAVariableScale(start, end, Brushes.Black, g, scale);
+            DrawVariableScale(start, end, g);
+        }
+
+        private void DrawVariableScale(Vector2 lineStart, Vector2 lineEnd, Graphics g)
+        {
+            //DrawLineDDAVariableScale(lineStart, lineEnd, Brushes.Green, g, scale);
+            DrawLineFullDDAVariableScale(lineStart, lineEnd, Brushes.Green, g, scale);
         }
 
         private void DrawLineDDAVariableScale(
@@ -158,31 +263,142 @@ namespace DDA
         {
             Vector2 d = end - start;
 
-            float steps = Math.Max(Math.Abs(d.X), Math.Abs(d.Y));
+            int steps = (int)Math.Max(Math.Abs(d.X), Math.Abs(d.Y));
             float stepsInv = 1.0f / (float)steps;
 
             Vector2 increment = d * stepsInv;
 
-            Vector2 pos = scale * new Vector2((float)Math.Round(start.X), (float)Math.Round(start.Y));
+            Vector2 pos = scale * new Vector2((float)Math.Round(start.X - 0.499999f), (float)Math.Round(start.Y - 0.499999f));
 
-            g.FillRectangle(Brushes.Red, pos.X, pos.Y, 1, 1);
-            g.FillRectangle(brush, pos.X, pos.Y, scale, scale);
+            float squareSize = scale;
+            float squareRadius = scale / 2.0f;
+
+            g.FillRectangle(Brushes.GreenYellow, pos.X, pos.Y, squareSize, squareSize);
+            g.FillRectangle(Brushes.Red, start.X * scale, start.Y * scale, 1, 1);
 
             pos = start;
 
             for (int i = 0; i < steps; i++)
             {
                 pos += increment;
-                float x = (float)Math.Round(pos.X) * scale;
-                float y = (float)Math.Round(pos.Y) * scale;
-                g.FillRectangle(Brushes.Red, pos.X, pos.Y, 1, 1);
-                g.FillRectangle(brush, x, y, scale, scale);
+                float x = (float)Math.Round(pos.X - 0.499999f) * scale;
+                float y = (float)Math.Round(pos.Y - 0.499999f) * scale;
+                g.FillRectangle(brush, x, y, squareSize, squareSize);
+                g.FillRectangle(Brushes.Red, scale * pos.X, scale * pos.Y, 1, 1);
             }
+        }
+
+        private void DrawLineFullDDAVariableScale(
+            Vector2 start, Vector2 end,
+            Brush brush, Graphics g, float scale)
+        {
+            float squareSize = scale;
+            float squareRadius = scale / 2.0f;
+
+            Vector2 lineDir = end - start;
+            if (lineDir.LengthSquared < Epsilon)
+            {
+                return;
+            }
+
+            // distances between ray intersections with neighbor pixel
+            // in axes X and Y
+            Vector2 d = new Vector2(
+                (lineDir.Y != 0) ? (lineDir.X / Math.Abs(lineDir.Y)) : Math.Sign(lineDir.X),
+                (lineDir.X != 0) ? (lineDir.Y / Math.Abs(lineDir.X)) : Math.Sign(lineDir.Y));
+
+            // ray parameter span of segment of a single pixel length
+            float dt = 1 / lineDir.Length;
+
+            // distances between X and Y grid intersections along the ray
+            Vector2 dist = new Vector2();
+            if (Math.Abs(lineDir.Y) < Epsilon)
+            {
+                dist.X = Math.Abs(d.X);
+                dist.Y = float.PositiveInfinity;
+            }
+            else if (Math.Abs(lineDir.X) < Epsilon)
+            {
+                dist.X = float.PositiveInfinity;
+                dist.Y = Math.Abs(d.Y);
+            }
+            else
+            {
+                dist.X = (float)Math.Sqrt(1 + d.Y * d.Y);
+                dist.Y = (float)Math.Sqrt(1 + d.X * d.X);
+            }
+
+            // distance from current point to the nearest grid intersection
+            Vector2 distToNext;
+            {
+                // NOTE: when start.X or Y is 0 it has to be rounded up to 1, not to 0
+                float distToNextX = (float)(Math.Ceiling(start.X) - start.X);
+                distToNextX = (distToNextX > 0) ? distToNextX : 1;
+                float distToNextY = (float)(Math.Ceiling(start.Y) - start.Y);
+                distToNextY = (distToNextY > 0) ? distToNextY : 1;
+                distToNext = new Vector2(distToNextX * dist.X, distToNextY * dist.Y);
+            }
+
+            // current grid cell (pixel) coordinates
+            int x = (int)Math.Floor(start.X);
+            int y = (int)Math.Floor(start.Y);
+
+            Vector2 pos = start;
+
+            g.FillRectangle(Brushes.GreenYellow, x * scale, y * scale, squareSize, squareSize);
+            g.FillRectangle(Brushes.Red, start.X * scale, start.Y * scale, 2, 2);
+
+            int endX = (int)Math.Floor(end.X);
+            int endY = (int)Math.Floor(end.Y);
+
+            int stepX = Math.Sign(d.X);
+            int stepY = Math.Sign(d.Y);
+
+            bool finished = false;
+            int i = 0;
+            int maxIterations = (int)(2 * lineDir.Length);
+            while (!finished)
+            {
+                float currentDistToNext;
+                if (distToNext.X < distToNext.Y)
+                {
+                    currentDistToNext = distToNext.X;
+                    distToNext.Y -= currentDistToNext;
+                    distToNext.X = dist.X;
+                    x += stepX;
+                }
+                else
+                {
+                    currentDistToNext = distToNext.Y;
+                    distToNext.X -= currentDistToNext;
+                    distToNext.Y = dist.Y;
+                    y += stepY;
+                }
+                pos += lineDir * currentDistToNext * dt;
+                //Console.WriteLine("pos: {0}", pos);
+
+                g.FillRectangle(brush, x * scale, y * scale, squareSize, squareSize);
+                g.FillRectangle(Brushes.Red, pos.X * scale, pos.Y * scale, 2, 2);
+                finished = (x == endX) && (y == endY);
+                if (i >= maxIterations)
+                {
+                    Console.WriteLine("Too long loop");
+                    break;
+                }
+                i++;
+            }
+            g.FillRectangle(Brushes.GreenYellow, end.X * scale, end.Y * scale, 2, 2);
+            g.FillRectangle(Brushes.HotPink, endX * scale, endY * scale, 2, 2);
         }
 
         private Point GetRandomPoint(int width, int height)
         {
             return new Point(rnd.Next(width - 1), rnd.Next(height - 1));
+        }
+
+        private Vector2 GetRandomVector2Int(int width, int height)
+        {
+            return new Vector2(rnd.Next(width - 1), rnd.Next(height - 1));
         }
 
         private Vector2 GetRandomVector2(float width, float height)
