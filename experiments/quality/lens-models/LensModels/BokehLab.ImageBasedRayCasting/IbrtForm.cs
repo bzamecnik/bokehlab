@@ -22,6 +22,8 @@
 
         ComplexLens complexLens;
 
+        PrecomputedComplexLens precomputedComplexLens;
+
         FloatMapImage layerImage;
         FloatMapImage outputImage;
 
@@ -34,6 +36,9 @@
             //complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
             complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
             //complexLens = ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 2.0);
+            //precomputedComplexLens = new PrecomputedComplexLens(complexLens,
+            //    @"..\..\..\lrtf_double_gauss_{0}.bin", 128);
+            //@"..\..\..\lrtf_petzval_{0}.bin", 128);
 
             thinLens.FocalLength = 10;
 
@@ -51,6 +56,7 @@
             //rayTracer.Camera.Lens = biconvexLens;
             //rayTracer.Scene.Layer.Depth = -biconvexLens.FocalLength;
             rayTracer.Camera.Lens = complexLens;
+            //rayTracer.Camera.Lens = precomputedComplexLens;
 
             //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
 

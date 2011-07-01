@@ -55,6 +55,7 @@
     <Compile Include="IRenderer.cs" />
     <Compile Include="Lens\BiconvexLens.cs" />
     <Compile Include="Lens\ComplexLens.cs" />
+    <Compile Include="Lens\PrecomputedComplexLens.cs" />
     <Compile Include="Lens\LensRayTransferFunction.cs" />
     <Compile Include="Lens\Materials.cs" />
     <Compile Include="Lens\ILens.cs" />
