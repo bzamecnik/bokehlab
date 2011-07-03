@@ -6,13 +6,12 @@ uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
 
 // precomputed pseudo-random senzor and lens sample positions
-// a 2D vector - lens position (x,y) in camera space
-//// precomputed pseudo-random senzor and lens sample positions
-//// two 2D vectors packed into one 4D vector
-//// (x,y) = lens position (x,y) in camera space
-//// (z,w) = senzor position jitter (x,y) in normalized senzor space
-uniform sampler1D samples;
-// number of samples - allowed values: [0; length(samples)]
+// - a 2D vector - lens position (x,y) in camera space
+// - samples for one fragment stored in R dimension
+// - samples for neighbor pixel tiled in S and T dimensions
+// TODO: two 2D vectors could be packed into one 4D vector
+uniform sampler3D lensSamples;
+// number of samples - allowed values: [0; length(lensSamples)]
 uniform int sampleCount;
 uniform float sampleCountInv;
 
@@ -142,7 +141,7 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
 	//return vec4(0.5, 0, 0, 1);
 	//return vec4(senzorPos.x, senzorPos.y, 0, 1);
 	//return texture2D(colorTexture, senzorPos);
-	//vec2 lens = texture1D(samples, senzorPos.x).st;
+	//vec2 lens = texture1D(lensSamples, senzorPos.x).st;
 	//vec2 lens = (lensPos / (lensApertureRadius * 2.0)) + 0.5;
 	//return texture2D(colorTexture, senzorPos + 0.01 * lensPos);
 	//return vec4(lens.s, lens.t, 0, 1);
@@ -150,7 +149,7 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
 
 vec3 getSenzorPos() {
 	vec2 senzorPosNorm = gl_TexCoord[0].st;
-	float senzorDepth = 1;
+	float senzorDepth = 1.0;
 	ivec2 size = textureSize2D(colorTexture, 0);
 	float aspectRatio = float(size.y) / float(size.x);
 	
@@ -170,20 +169,27 @@ vec4 estimateRadiance() {
 	vec4 colorAccum = vec4(0, 0, 0, 0);
 	// current pixel position on a senzor (at the pixel center)
 	vec3 senzorPos = getSenzorPos();
-	float samplesIndex = 0.0;
-	float samplesIndexStep = 1.0 / float(sampleCount - 1);
+	
+	ivec3 lensJitterSize = textureSize3D(lensSamples, 0);
+	ivec2 screenSize = textureSize2D(colorTexture, 0);
+	vec2 jitterCoords = gl_FragCoord.st;
+	jitterCoords.t = screenSize.y - jitterCoords.t;
+	//vec3 samplesIndex = vec3(mod(gl_FragCoord.st / vec2(lensJitterSize.st), 1.0), 0.0);
+	vec3 samplesIndex = vec3(jitterCoords / vec2(lensJitterSize.st), 0.0);
+	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(lensJitterSize.r) - 1.0));
 	for (int i = 0; i < sampleCount; i += 1) {
-		//vec4 params = texture1D(samples, samplesIndex);
+		//vec4 params = texture1D(lensSamples, samplesIndex);
 		//vec2 lensPos = params.xy;
 		//vec2 senzorJitter = params.zw;
 		//float samplesIndex = 0.0;
-		vec2 lensPos = texture1D(samples, samplesIndex).st;
+		vec2 lensPos = texture3D(lensSamples, samplesIndex).st;
 		//vec2 lensPos = vec2(0, 0);
 		colorAccum += traceRay(senzorPos, vec3(lensPos, 0));
 		//return colorAccum;
 		samplesIndex += samplesIndexStep;
 	}
 	return colorAccum * sampleCountInv;
+	//return colorAccum;
 }
 
 //void blurGather() {
@@ -219,4 +225,15 @@ vec4 estimateRadiance() {
 
 void main() {
 	gl_FragColor = estimateRadiance();
+	//ivec3 lensJitterSize = textureSize3D(lensSamples, 0);
+	////vec2 jitterCoords = gl_FragCoord.st / textureSize2D(colorTexture, 0);
+	////jitterCoords.t = 1 - jitterCoords.t;
+	//ivec2 screenSize = textureSize2D(colorTexture, 0);
+	//vec2 jitterCoords = gl_FragCoord.st;
+	//jitterCoords.t = screenSize.y - jitterCoords.t;
+	//vec2 lensPos = texture3D(lensSamples, vec3(jitterCoords / vec2(lensJitterSize.st), 0.9)).st;
+	////vec2 lensPos = texture3D(lensSamples, vec3(gl_TexCoord[0].st, 0.5)).st;
+	//gl_FragColor = vec4((lensPos + 1) * 0.5, 0, 1);
+	////gl_FragColor = vec4(jitterCoords / vec2(lensJitterSize.st), 0, 1);
+	////gl_FragColor = vec4(jitterCoords, 0, 1);
 }

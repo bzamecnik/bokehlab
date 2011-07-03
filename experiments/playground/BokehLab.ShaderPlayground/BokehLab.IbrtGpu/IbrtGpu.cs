@@ -29,7 +29,11 @@ namespace BokehLab.IbrtGpu
 
         int color2dTexture = 0;
         int depth2dTexture = 0;
-        int samples1dTexture = 0;
+        // jittered sample lens positions
+        // - samples for a pixel in Z axis
+        // - grouped into repeatable tiles in XY axes
+        // - pairs of values can be grouped to fit a 4-channel texture value
+        int lensSamplesTexture = 0;
         //int noise2dTexture = 0;
 
         private float lensFocalLength;
@@ -74,6 +78,7 @@ namespace BokehLab.IbrtGpu
         protected override void OnLoad(EventArgs e)
         {
             GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Texture3DExt);
 
             using (StreamReader vs = new StreamReader("Data/Shaders/VertexShader.glsl"))
             using (StreamReader fs = new StreamReader("Data/Shaders/FragmentShader.glsl"))
@@ -96,7 +101,7 @@ namespace BokehLab.IbrtGpu
                 depth2dTexture = Load2dColorTexture(image, false);
             }
             //noise2dTexture = GenerateRandom2dTexture(Width, Height);
-            RegenerateSamples1dTexture(16, 0.005f);
+            RegenerateLensSamplesTexture(32, 16, 0.01f);
 
             Keyboard.KeyUp += KeyUp;
         }
@@ -110,8 +115,8 @@ namespace BokehLab.IbrtGpu
                 GL.DeleteTexture(depth2dTexture);
             //if (noise2dTexture != 0)
             //    GL.DeleteTexture(noise2dTexture);
-            if (samples1dTexture != 0)
-                GL.DeleteTexture(samples1dTexture);
+            if (lensSamplesTexture != 0)
+                GL.DeleteTexture(lensSamplesTexture);
 
             if (shaderProgram != 0)
                 GL.DeleteProgram(shaderProgram);
@@ -210,49 +215,64 @@ namespace BokehLab.IbrtGpu
             return textureId;
         }
 
-        private void GenerateSamples1dTexture(int textureId, int sqrtSampleCount, int totalSampleCount, float lensApertureRadius)
+        private void GenerateLensSamplesTexture(int textureId, int tileSize, int sqrtSampleCount, int totalSampleCount, float lensApertureRadius)
         {
-            GL.BindTexture(TextureTarget.Texture1D, textureId);
-            int textureSize = 2 * totalSampleCount;
+            GL.BindTexture(TextureTarget.Texture3D, textureId);
+            // size of a group of samples for a single pixel
+            int bands = 2;
+            int groupSize = bands * totalSampleCount;
+            int textureSize = groupSize * tileSize * tileSize;
 
             Sampler sampler = new Sampler();
             IntPtr texturePtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(float)) * textureSize);
             unsafe
             {
-                float* row = (float*)texturePtr;
-                //for (int x = 0; x < sampleCount; x++)
-                int x = 0;
-                foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
+                int zStride = bands * tileSize * tileSize;
+                for (int y = 0; y < tileSize; y++)
                 {
-                    //Vector2d sample = new Vector2d(random.NextDouble(), random.NextDouble());
-                    Vector2d lensPos = lensApertureRadius * Sampler.ConcentricSampleDisk(sample);
-                    row[x] = (float)lensPos.X;
-                    x++;
-                    row[x] = (float)lensPos.Y;
-                    x++;
+                    for (int x = 0; x < tileSize; x++)
+                    {
+                        float* row = (float*)texturePtr + bands * (y * tileSize + x);
+                        int index = 0;
+                        // Z dimension, totalSampleCount times
+                        foreach (Vector2d sample in
+                            sampler.GenerateJitteredSamples(sqrtSampleCount))
+                        {
+                            Vector2d lensPos = lensApertureRadius *
+                                Sampler.ConcentricSampleDisk(sample);
+                            row[index] = (float)lensPos.X;
+                            row[index + 1] = (float)lensPos.Y;
+                            index += zStride;
+                        }
+                    }
                 }
             }
 
-            GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.Rg32f,
-                totalSampleCount, 0, PixelFormat.Rg, PixelType.Float, texturePtr);
+            // TODO: could be an unsigned byte instead of a float
+            // TODO: two sample pair could be stored in one 4-channel value
+            GL.TexImage3D(TextureTarget.Texture3D, 0, PixelInternalFormat.Rg32f,
+                tileSize, tileSize, totalSampleCount, 0,
+                PixelFormat.Rg, PixelType.Float, texturePtr);
 
-            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Clamp);
         }
 
-        private void RegenerateSamples1dTexture(int sampleCount, float lensApertureRadius)
+        private void RegenerateLensSamplesTexture(int tileSize, int sampleCount, float lensApertureRadius)
         {
             int sqrtSampleCount = (int)Math.Sqrt(sampleCount);
             int totalSampleCount = sqrtSampleCount * sqrtSampleCount;
 
             UniformSampleCount = totalSampleCount;
             UniformLensApertureRadius = lensApertureRadius;
-            if (samples1dTexture == 0)
+            if (lensSamplesTexture == 0)
             {
-                samples1dTexture = GL.GenTexture();
+                lensSamplesTexture = GL.GenTexture();
             }
-            GenerateSamples1dTexture(samples1dTexture, sqrtSampleCount, totalSampleCount, lensApertureRadius);
+            GenerateLensSamplesTexture(lensSamplesTexture, tileSize, sqrtSampleCount, totalSampleCount, lensApertureRadius);
         }
 
         #endregion
@@ -317,7 +337,7 @@ namespace BokehLab.IbrtGpu
             //GL.ActiveTexture(TextureUnit.Texture2);
             //GL.BindTexture(TextureTarget.Texture2D, noise2dTexture);
             GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture1D, samples1dTexture);
+            GL.BindTexture(TextureTarget.Texture3D, lensSamplesTexture);
 
             //GL.ActiveTexture(TextureUnit.Texture0);
 
@@ -328,7 +348,7 @@ namespace BokehLab.IbrtGpu
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), 0);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture"), 1);
             //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "noiseTexture"), 2);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "samples"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensSamples"), 2);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), UniformSampleCount);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), UniformSampleCountInv);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensApertureRadius"), UniformLensApertureRadius);
