@@ -6,27 +6,55 @@
  */
 #endregion
 
-using System;
-using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Input;
-
 namespace BokehLab.IbrtGpu
 {
+    using System;
+    using System.Drawing;
+    using System.IO;
+    using System.Runtime.InteropServices;
+    using System.Windows.Forms;
+    using BokehLab.Math;
+    using OpenTK;
+    using OpenTK.Graphics.OpenGL;
+    using OpenTK.Input;
+
     public class IbrtGpu : GameWindow
     {
         public IbrtGpu()
             : base(800, 600)
         {
+            UniformSampleCount = 1;
+            UniformLensFocalLength = 1;
         }
 
-        int color2dTexture;
-        int depth2dTexture;
-        //int noise2dTexture;
+        int color2dTexture = 0;
+        int depth2dTexture = 0;
+        int samples1dTexture = 0;
+        //int noise2dTexture = 0;
+
+        private float lensFocalLength;
+        float UniformLensFocalLength
+        {
+            get { return lensFocalLength; }
+            set
+            {
+                lensFocalLength = value;
+                uniformThinLensMatrix = new Matrix4(
+                    1, 0, 0, 0,
+                    0, 1, 0, 0,
+                    0, 0, 1, -1 / lensFocalLength,
+                    0, 0, 0, 1
+                );
+
+            }
+        }
+
+        private float AspectRatio { get { return Height / (float)Width; } }
+
+        int UniformSampleCount { get; set; }
+        float UniformSampleCountInv { get { return 1.0f / (float)UniformSampleCount; } }
+        float UniformLensApertureRadius { get; set; }
+        Matrix4 uniformThinLensMatrix;
 
         string colorTextureFilename = @"..\..\..\color_0.png";
         string depthTextureFilename = @"..\..\..\depth_0.png";
@@ -55,7 +83,7 @@ namespace BokehLab.IbrtGpu
 
             using (Bitmap image = (Bitmap)Bitmap.FromFile(colorTextureFilename))
             {
-                color2dTexture = Load2dColorTexture(image);
+                color2dTexture = Load2dColorTexture(image, true);
                 this.Width = image.Width;
                 this.Height = image.Height;
             }
@@ -65,9 +93,10 @@ namespace BokehLab.IbrtGpu
                 {
                     throw new ArgumentException("bad depth texture size");
                 }
-                depth2dTexture = Load2dColorTexture(image);
+                depth2dTexture = Load2dColorTexture(image, false);
             }
             //noise2dTexture = GenerateRandom2dTexture(Width, Height);
+            RegenerateSamples1dTexture(16, 0.005f);
 
             Keyboard.KeyUp += KeyUp;
         }
@@ -81,6 +110,8 @@ namespace BokehLab.IbrtGpu
                 GL.DeleteTexture(depth2dTexture);
             //if (noise2dTexture != 0)
             //    GL.DeleteTexture(noise2dTexture);
+            if (samples1dTexture != 0)
+                GL.DeleteTexture(samples1dTexture);
 
             if (shaderProgram != 0)
                 GL.DeleteProgram(shaderProgram);
@@ -119,7 +150,7 @@ namespace BokehLab.IbrtGpu
 
         #region Setting up layer textures
 
-        private int Load2dColorTexture(Bitmap image)
+        private int Load2dColorTexture(Bitmap image, bool enableLerp)
         {
             var imageData = image.LockBits(
                 new Rectangle(0, 0, image.Width, image.Height),
@@ -134,8 +165,10 @@ namespace BokehLab.IbrtGpu
                 image.Width, image.Height, 0,
                 PixelFormat.Bgr, PixelType.UnsignedByte, imageData.Scan0);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+                (int)(enableLerp ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+                (int)(enableLerp ? TextureMagFilter.Linear : TextureMagFilter.Nearest));
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
@@ -175,6 +208,51 @@ namespace BokehLab.IbrtGpu
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
             return textureId;
+        }
+
+        private void GenerateSamples1dTexture(int textureId, int sqrtSampleCount, int totalSampleCount, float lensApertureRadius)
+        {
+            GL.BindTexture(TextureTarget.Texture1D, textureId);
+            int textureSize = 2 * totalSampleCount;
+
+            Sampler sampler = new Sampler();
+            IntPtr texturePtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(float)) * textureSize);
+            unsafe
+            {
+                float* row = (float*)texturePtr;
+                //for (int x = 0; x < sampleCount; x++)
+                int x = 0;
+                foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
+                {
+                    //Vector2d sample = new Vector2d(random.NextDouble(), random.NextDouble());
+                    Vector2d lensPos = lensApertureRadius * Sampler.ConcentricSampleDisk(sample);
+                    row[x] = (float)lensPos.X;
+                    x++;
+                    row[x] = (float)lensPos.Y;
+                    x++;
+                }
+            }
+
+            GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.Rg32f,
+                totalSampleCount, 0, PixelFormat.Rg, PixelType.Float, texturePtr);
+
+            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        }
+
+        private void RegenerateSamples1dTexture(int sampleCount, float lensApertureRadius)
+        {
+            int sqrtSampleCount = (int)Math.Sqrt(sampleCount);
+            int totalSampleCount = sqrtSampleCount * sqrtSampleCount;
+
+            UniformSampleCount = totalSampleCount;
+            UniformLensApertureRadius = lensApertureRadius;
+            if (samples1dTexture == 0)
+            {
+                samples1dTexture = GL.GenTexture();
+            }
+            GenerateSamples1dTexture(samples1dTexture, sqrtSampleCount, totalSampleCount, lensApertureRadius);
         }
 
         #endregion
@@ -238,6 +316,8 @@ namespace BokehLab.IbrtGpu
             GL.BindTexture(TextureTarget.Texture2D, depth2dTexture);
             //GL.ActiveTexture(TextureUnit.Texture2);
             //GL.BindTexture(TextureTarget.Texture2D, noise2dTexture);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture1D, samples1dTexture);
 
             //GL.ActiveTexture(TextureUnit.Texture0);
 
@@ -248,6 +328,12 @@ namespace BokehLab.IbrtGpu
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), 0);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture"), 1);
             //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "noiseTexture"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "samples"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), UniformSampleCount);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), UniformSampleCountInv);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensApertureRadius"), UniformLensApertureRadius);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), UniformLensFocalLength);
+            GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "thinLens"), false, ref uniformThinLensMatrix);
 
             DrawFullScreenQuad();
 
