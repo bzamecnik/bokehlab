@@ -25,7 +25,13 @@ uniform mat3 senzorToCamera;
 // matrix for transforming from camera space to normalized image layer space
 uniform mat3 cameraToImage;
 
+uniform float aspectRatio;
+uniform float senzorDepth;
+
 const float epsilon = 1e-6;
+
+uniform float imageLayerDepth;
+const float senzorWidth = 5.0;
 
 //vec3 intersectPlane(vec3 rayOrigin, vec3 rayDir, vec3 planeOrigin, vec3 planeNormal)
 //{
@@ -90,18 +96,14 @@ const float epsilon = 1e-6;
 // precomputation step. Two precomputed 2D vectors for each ray are enough.
 
 vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
-	// TODO
-	
-	ivec2 size = textureSize2D(colorTexture, 0);
-	float aspectRatio = float(size.y) / float(size.x);
-
 	// transfer the ray through the lens
+	//vec4 transformedPos = vec4(-senzorPos, 1);
 	vec4 transformedPos = thinLens * vec4(senzorPos, 1.0);
+	vec3 outputDir = transformedPos.xyz;
 	if (abs(transformedPos.w) > epsilon)
     {
-		transformedPos /= transformedPos.w;
+		outputDir /= transformedPos.w;
     }
-    vec3 outputDir = transformedPos.xyz;
     if (abs(transformedPos.w) > epsilon)
     {
         outputDir -= lensPos;
@@ -116,11 +118,12 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
     // intersect planar image layer plane
     vec3 rayOrigin = lensPos;
     vec3 rayDir = outputDir - rayOrigin;
-    float imageLayerDepth = -1000.0;
-    vec3 planeOrigin = vec3(0, 0, imageLayerDepth);
-    vec3 planeNormal = normalize(vec3(0, 0, 1));
+    //vec3 planeOrigin = vec3(0, 0, imageLayerDepth);
+	//vec3 planeNormal = vec3(0, 0, 1);
     
-    float t = dot((planeOrigin - rayOrigin), planeNormal) / dot(rayDir, planeNormal);
+    //float t = dot((planeOrigin - rayOrigin), planeNormal) / dot(rayDir, planeNormal);
+    // when plane normal is (0,0,1) only z component is used:
+    float t = (imageLayerDepth - rayOrigin.z) / rayDir.z;
     if (t < 0.0)
     {
 		return vec4(1, 0, 1, 0); // no intersection
@@ -129,8 +132,13 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
     
     // TODO: transform to normalized image coordinates
     
-    intersectionPos /= vec3(imageLayerDepth, imageLayerDepth, 1);
-    vec2 imagePos = intersectionPos.xy / vec2(1, aspectRatio) + vec2(0.5, 0.5);
+    vec2 imagePos = intersectionPos.xy;
+    //imagePos /= abs(imageLayerDepth);
+    //imagePos = imagePos / vec2(1, aspectRatio) + vec2(0.5, 0.5);
+    //imagePos += vec2(0.5, 0.5 * aspectRatio);
+    imagePos /= abs(imageLayerDepth);
+    imagePos += vec2(0.5, 0.5);
+    
     //return vec4(imagePos, 0, 1);
     
     // retrieve color
@@ -149,18 +157,20 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
 
 vec3 getSenzorPos() {
 	vec2 senzorPosNorm = gl_TexCoord[0].st;
-	float senzorDepth = 1.0;
-	ivec2 size = textureSize2D(colorTexture, 0);
-	float aspectRatio = float(size.y) / float(size.x);
+	//ivec2 size = textureSize2D(colorTexture, 0);
 	
 	// shift half a pixel to pixel center
-	senzorPosNorm += 0.5 / vec2(size);
+	//senzorPosNorm += 0.5 / vec2(size);
 	// TODO: senzor position should probably be flipped as the image projected
 	// onto it is flipped and we want to display it normally
-	//senzorPosNorm = vec2(1, 1) - senzorPosNorm;
+	senzorPosNorm = vec2(1, 1) - senzorPosNorm;
 	
 	// transform senzor position from normalized senzor space to camera space
-	senzorPosNorm = (senzorPosNorm - vec2(0.5, 0.5)) * vec2(1, aspectRatio);
+	//senzorPosNorm = (senzorPosNorm - vec2(0.5, 0.5)) * vec2(1, aspectRatio);
+	//senzorPosNorm = senzorPosNorm - vec2(0.5, 0.5 * aspectRatio);
+	senzorPosNorm -= vec2(0.5, 0.5);
+	senzorPosNorm *= senzorDepth;
+	//senzorPosNorm *= senzorWidth;
 	vec3 senzorPos = vec3(senzorPosNorm, senzorDepth);
 	return senzorPos;
 }
@@ -183,7 +193,7 @@ vec4 estimateRadiance() {
 		//vec2 senzorJitter = params.zw;
 		//float samplesIndex = 0.0;
 		vec2 lensPos = texture3D(lensSamples, samplesIndex).st;
-		//vec2 lensPos = vec2(0, 0);
+		//vec2 lensPos = vec2(1, 0);
 		colorAccum += traceRay(senzorPos, vec3(lensPos, 0));
 		//return colorAccum;
 		samplesIndex += samplesIndexStep;
@@ -225,6 +235,7 @@ vec4 estimateRadiance() {
 
 void main() {
 	gl_FragColor = estimateRadiance();
+	
 	//ivec3 lensJitterSize = textureSize3D(lensSamples, 0);
 	////vec2 jitterCoords = gl_FragCoord.st / textureSize2D(colorTexture, 0);
 	////jitterCoords.t = 1 - jitterCoords.t;

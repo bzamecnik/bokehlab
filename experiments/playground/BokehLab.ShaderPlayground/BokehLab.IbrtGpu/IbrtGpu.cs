@@ -24,8 +24,13 @@ namespace BokehLab.IbrtGpu
             : base(800, 600)
         {
             UniformSampleCount = 1;
-            UniformLensFocalLength = 1;
+            UniformLensFocalLength = 10;
+            UniformSenzorDepth = 11.1f;
+            UniformImageLayerDepth = -100.0f;
         }
+
+        int lensSampleCount = 4 * 4;
+        int lensSampleTileSize = 32;
 
         int color2dTexture = 0;
         int depth2dTexture = 0;
@@ -49,7 +54,7 @@ namespace BokehLab.IbrtGpu
                     0, 0, 1, -1 / lensFocalLength,
                     0, 0, 0, 1
                 );
-
+                //uniformThinLensMatrix.Transpose(); // DEBUG
             }
         }
 
@@ -59,8 +64,15 @@ namespace BokehLab.IbrtGpu
         float UniformSampleCountInv { get { return 1.0f / (float)UniformSampleCount; } }
         float UniformLensApertureRadius { get; set; }
         Matrix4 uniformThinLensMatrix;
+        float UniformSenzorDepth { get; set; }
+        float UniformImageLayerDepth { get; set; }
 
-        string colorTextureFilename = @"..\..\..\color_0.png";
+        //string colorTextureFilename = @"..\..\..\color_0.png";
+        //string colorTextureFilename = @"..\..\..\testpattern-hd-720.png";
+        string colorTextureFilename = @"..\..\..\kamelot.jpg";
+        //string colorTextureFilename = @"..\..\..\stars.png";
+        //string colorTextureFilename = @"..\..\..\white-dot_small.png";
+        //string colorTextureFilename = @"..\..\..\dot.png";
         string depthTextureFilename = @"..\..\..\depth_0.png";
 
         int vertexShaderObject, fragmentShaderObject, shaderProgram;
@@ -92,16 +104,43 @@ namespace BokehLab.IbrtGpu
                 this.Width = image.Width;
                 this.Height = image.Height;
             }
-            using (Bitmap image = (Bitmap)Bitmap.FromFile(depthTextureFilename))
-            {
-                if ((image.Width != Width) || (image.Height != Height))
-                {
-                    throw new ArgumentException("bad depth texture size");
-                }
-                depth2dTexture = Load2dColorTexture(image, false);
-            }
+            //using (Bitmap image = (Bitmap)Bitmap.FromFile(depthTextureFilename))
+            //{
+            //    if ((image.Width != Width) || (image.Height != Height))
+            //    {
+            //        throw new ArgumentException("bad depth texture size");
+            //    }
+            //    depth2dTexture = Load2dColorTexture(image, false);
+            //}
             //noise2dTexture = GenerateRandom2dTexture(Width, Height);
-            RegenerateLensSamplesTexture(32, 16, 0.01f);
+            RegenerateLensSamplesTexture(lensSampleTileSize, lensSampleCount, 1f);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, color2dTexture);
+            //GL.ActiveTexture(TextureUnit.Texture1);
+            //GL.BindTexture(TextureTarget.Texture2D, depth2dTexture);
+            //GL.ActiveTexture(TextureUnit.Texture2);
+            //GL.BindTexture(TextureTarget.Texture2D, noise2dTexture);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture3D, lensSamplesTexture);
+
+            //GL.ActiveTexture(TextureUnit.Texture0);
+
+            // texture unit numbers must be passed here, not texture ids!
+            // texture units are numered from 0
+            // Texture0 = 0
+            // Texture1 = 1
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), 0);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture"), 1);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "noiseTexture"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensSamples"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), UniformSampleCount);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), UniformSampleCountInv);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensApertureRadius"), UniformLensApertureRadius);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), UniformLensFocalLength);
+            GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "thinLens"), false, ref uniformThinLensMatrix);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "aspectRatio"), AspectRatio);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "senzorDepth"), UniformSenzorDepth);
 
             Keyboard.KeyUp += KeyUp;
         }
@@ -206,7 +245,6 @@ namespace BokehLab.IbrtGpu
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.One,
                 width, height, 0, PixelFormat.Luminance, PixelType.Float, texturePtr);
 
-
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
@@ -239,7 +277,8 @@ namespace BokehLab.IbrtGpu
                             sampler.GenerateJitteredSamples(sqrtSampleCount))
                         {
                             Vector2d lensPos = lensApertureRadius *
-                                Sampler.ConcentricSampleDisk(sample);
+                                sample;
+                            //Sampler.ConcentricSampleDisk(sample);
                             row[index] = (float)lensPos.X;
                             row[index + 1] = (float)lensPos.Y;
                             index += zStride;
@@ -330,30 +369,8 @@ namespace BokehLab.IbrtGpu
 
             GL.UseProgram(shaderProgram);
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, color2dTexture);
-            GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, depth2dTexture);
-            //GL.ActiveTexture(TextureUnit.Texture2);
-            //GL.BindTexture(TextureTarget.Texture2D, noise2dTexture);
-            GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture3D, lensSamplesTexture);
-
-            //GL.ActiveTexture(TextureUnit.Texture0);
-
-            // texture unit numbers must be passed here, not texture ids!
-            // texture units are numered from 0
-            // Texture0 = 0
-            // Texture1 = 1
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), 0);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture"), 1);
-            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "noiseTexture"), 2);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensSamples"), 2);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), UniformSampleCount);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), UniformSampleCountInv);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensApertureRadius"), UniformLensApertureRadius);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), UniformLensFocalLength);
-            GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "thinLens"), false, ref uniformThinLensMatrix);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "senzorDepth"), UniformSenzorDepth);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "imageLayerDepth"), UniformImageLayerDepth);
 
             DrawFullScreenQuad();
 
@@ -406,6 +423,26 @@ Program skeleton - OpenTK Library Examples
             {
                 bool isFullscreen = (WindowState == WindowState.Fullscreen);
                 WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
+            }
+            else if (e.Key == Key.P)
+            {
+                UniformSenzorDepth /= 0.9f;
+                Console.WriteLine("senzor depth: {0}", UniformSenzorDepth);
+            }
+            else if (e.Key == Key.N)
+            {
+                UniformSenzorDepth *= 0.9f;
+                Console.WriteLine("senzor depth: {0}", UniformSenzorDepth);
+            }
+            else if (e.Key == Key.F)
+            {
+                UniformImageLayerDepth /= 0.9f;
+                Console.WriteLine("image layer depth: {0}", UniformImageLayerDepth);
+            }
+            else if (e.Key == Key.B)
+            {
+                UniformImageLayerDepth *= 0.9f;
+                Console.WriteLine("image layer depth: {0}", UniformImageLayerDepth);
             }
         }
 
