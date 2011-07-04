@@ -17,6 +17,7 @@ uniform float sampleCountInv;
 
 uniform float lensApertureRadius;
 uniform float lensFocalLength;
+uniform float lensFocusDistance;
 
 // thin lens matrix for transforming from senzor space to object space
 uniform mat4 thinLens;
@@ -96,10 +97,29 @@ uniform float imageLayerDepth;
 // number and transformed in the shader or the transform can be done in the
 // precomputation step. Two precomputed 2D vectors for each ray are enough.
 
+// Computes the radius of circle of confusion for a given point using
+// the thin-lens model.
+//
+// Focus plane must not be at the same depth as focal length.
+//
+// objectZ - object depth
+// focusPlaneZ - focus plane depth
+// aperture - radius of lens aperture
+// focalLength - focal length of the lens
+float circleOfConfusion(
+	float objectZ, float focusPlaneZ,
+	float aperture, float focalLength)
+{
+  return abs(objectZ - focusPlaneZ) * focalLength * aperture /
+	(objectZ * (focusPlaneZ - focalLength));
+}
+
 vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
 	// transfer the ray through the lens
 	//vec4 transformedPos = vec4(-senzorPos, 1);
 	vec4 transformedPos = thinLens * vec4(senzorPos, 1.0);
+	// thick lens simulation
+	//lensPos.z -= 10;
 	vec3 outputDir = transformedPos.xyz;
 	if (abs(transformedPos.w) > epsilon)
     {
@@ -145,7 +165,18 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
     
     // retrieve color
     
-    vec4 color = texture2D(colorTexture, imagePos);
+    // ordinary color retrieval
+    //vec4 color = texture2D(colorTexture, imagePos);
+    
+    // approximate cone tracing using a mip-map
+    // TODO: get the formula for computing mip-map level right
+    float avgSampleDist = 3; // 0.137 for 32 samples
+    float invLog2 = 3.321928;
+    float mipMapLevel = log(avgSampleDist * 2.0 * circleOfConfusion(
+		abs(intersectionPos.z), lensFocusDistance, lensApertureRadius, lensFocalLength))
+		* invLog2;
+    vec4 color = texture2DLod(colorTexture, imagePos, mipMapLevel);
+    //vec4 color = vec4(mipMapLevel, 0, 0, 1);
     return color;
 	
 	//return vec4(0.5, 0, 0, 1);
@@ -186,6 +217,7 @@ vec4 estimateRadiance() {
 	vec2 jitterCoords = gl_FragCoord.st;
 	jitterCoords.t = screenSize.y - jitterCoords.t;
 	vec3 samplesIndex = vec3(jitterCoords / vec2(lensJitterSize.st), 0.0);
+	// TODO: check dFdx(texcoord.x) out
 	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(sampleCount) - 1.0));
 	for (int i = 0; i < sampleCount; i += 1) {
 		vec2 lensPos = texture3D(lensSamples, samplesIndex).st;

@@ -29,7 +29,7 @@ namespace BokehLab.IbrtGpu
             UniformImageLayerDepth = -100.0f;
         }
 
-        int lensSampleCount = 6 * 6;
+        int lensSampleCount = 7 * 7;
         int lensSampleTileSize = 32;
 
         int color2dTexture = 0;
@@ -64,9 +64,19 @@ namespace BokehLab.IbrtGpu
         float UniformSampleCountInv { get { return 1.0f / (float)UniformSampleCount; } }
         float UniformLensApertureRadius { get; set; }
         Matrix4 uniformThinLensMatrix;
-        float UniformSenzorDepth { get; set; }
+        float uniformSenzorDepth;
+        float UniformSenzorDepth
+        {
+            get { return uniformSenzorDepth; }
+            set
+            {
+                uniformSenzorDepth = value;
+                uniformFocusDistance = 1 / (1 / lensFocalLength - 1 / uniformSenzorDepth);
+            }
+        }
         float UniformImageLayerDepth { get; set; }
         Vector2 UniformScreenSize { get; set; }
+        float uniformFocusDistance;
 
         //string colorTextureFilename = @"..\..\..\color_0.png";
         //string colorTextureFilename = @"..\..\..\testpattern-hd-720.png";
@@ -77,6 +87,12 @@ namespace BokehLab.IbrtGpu
         string depthTextureFilename = @"..\..\..\depth_0.png";
 
         int vertexShaderObject, fragmentShaderObject, shaderProgram;
+
+        private bool dragging = false;
+
+        private int lastX, lastY;
+
+        MouseButton? lastButton;
 
         public static void RunExample()
         {
@@ -101,7 +117,7 @@ namespace BokehLab.IbrtGpu
 
             using (Bitmap image = (Bitmap)Bitmap.FromFile(colorTextureFilename))
             {
-                color2dTexture = Load2dColorTexture(image, true);
+                color2dTexture = Load2dColorTexture(image);
                 this.Width = image.Width;
                 this.Height = image.Height;
             }
@@ -111,7 +127,7 @@ namespace BokehLab.IbrtGpu
             //    {
             //        throw new ArgumentException("bad depth texture size");
             //    }
-            //    depth2dTexture = Load2dColorTexture(image, false);
+            //    depth2dTexture = Load2dDepthTexture(image);
             //}
             //noise2dTexture = GenerateRandom2dTexture(Width, Height);
             RegenerateLensSamplesTexture(lensSampleTileSize, lensSampleCount, 2f);
@@ -139,11 +155,16 @@ namespace BokehLab.IbrtGpu
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), UniformSampleCountInv);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensApertureRadius"), UniformLensApertureRadius);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), UniformLensFocalLength);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocusDistance"), uniformFocusDistance);
             GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "thinLens"), false, ref uniformThinLensMatrix);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "aspectRatio"), AspectRatio);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "senzorDepth"), UniformSenzorDepth);
 
+
             Keyboard.KeyUp += KeyUp;
+            Mouse.ButtonDown += MouseButtonDown;
+            Mouse.ButtonUp += MouseButtonUp;
+            Mouse.Move += MouseMove;
         }
 
         protected override void OnUnload(EventArgs e)
@@ -196,7 +217,36 @@ namespace BokehLab.IbrtGpu
 
         #region Setting up layer textures
 
-        private int Load2dColorTexture(Bitmap image, bool enableLerp)
+        private int Load2dColorTexture(Bitmap image)
+        {
+            var imageData = image.LockBits(
+                new Rectangle(0, 0, image.Width, image.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            int textureId = GL.GenTexture();
+
+            GL.BindTexture(TextureTarget.Texture2D, textureId);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8,
+                image.Width, image.Height, 0,
+                PixelFormat.Bgr, PixelType.UnsignedByte, imageData.Scan0);
+
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
+                (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
+                (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+
+            image.UnlockBits(imageData);
+
+            return textureId;
+        }
+
+        private int Load2dDepthTexture(Bitmap image)
         {
             var imageData = image.LockBits(
                 new Rectangle(0, 0, image.Width, image.Height),
@@ -212,11 +262,13 @@ namespace BokehLab.IbrtGpu
                 PixelFormat.Bgr, PixelType.UnsignedByte, imageData.Scan0);
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-                (int)(enableLerp ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
+                (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
-                (int)(enableLerp ? TextureMagFilter.Linear : TextureMagFilter.Nearest));
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+                (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS,
+                (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT,
+                (int)TextureWrapMode.ClampToBorder);
 
             image.UnlockBits(imageData);
 
@@ -430,23 +482,53 @@ Program skeleton - OpenTK Library Examples
             }
             else if (e.Key == Key.P)
             {
-                UniformSenzorDepth /= 0.9f;
+                UniformSenzorDepth /= 0.95f;
                 Console.WriteLine("senzor depth: {0}", UniformSenzorDepth);
             }
             else if (e.Key == Key.N)
             {
-                UniformSenzorDepth *= 0.9f;
+                UniformSenzorDepth *= 0.95f;
                 Console.WriteLine("senzor depth: {0}", UniformSenzorDepth);
             }
             else if (e.Key == Key.F)
             {
-                UniformImageLayerDepth /= 0.9f;
+                UniformImageLayerDepth /= 0.95f;
                 Console.WriteLine("image layer depth: {0}", UniformImageLayerDepth);
             }
             else if (e.Key == Key.B)
             {
-                UniformImageLayerDepth *= 0.9f;
+                UniformImageLayerDepth *= 0.95f;
                 Console.WriteLine("image layer depth: {0}", UniformImageLayerDepth);
+            }
+        }
+
+        void MouseButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Button == MouseButton.Left ||
+                 e.Button == MouseButton.Right)
+            {
+                dragging = true;
+                lastX = e.X;
+                lastY = e.Y;
+                lastButton = e.Button;
+            }
+        }
+
+        void MouseButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            dragging = false;
+            lastButton = null;
+        }
+
+        void MouseMove(object sender, MouseMoveEventArgs e)
+        {
+            if (!dragging || !lastButton.HasValue) return;
+
+            if (lastButton.Value == MouseButton.Left)
+            {
+                UniformImageLayerDepth *= (float)Math.Exp(0.005 * (e.Y - lastY));
+                lastX = e.X;
+                lastY = e.Y;
             }
         }
 
