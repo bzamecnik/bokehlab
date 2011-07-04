@@ -28,10 +28,11 @@ uniform mat3 cameraToImage;
 uniform float aspectRatio;
 uniform float senzorDepth;
 
+uniform vec2 screenSize;
+
 const float epsilon = 1e-6;
 
 uniform float imageLayerDepth;
-const float senzorWidth = 5.0;
 
 //vec3 intersectPlane(vec3 rayOrigin, vec3 rayDir, vec3 planeOrigin, vec3 planeNormal)
 //{
@@ -118,12 +119,12 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
     // intersect planar image layer plane
     vec3 rayOrigin = lensPos;
     vec3 rayDir = outputDir - rayOrigin;
-    //vec3 planeOrigin = vec3(0, 0, imageLayerDepth);
-	//vec3 planeNormal = vec3(0, 0, 1);
+    vec3 planeOrigin = vec3(0, 0, imageLayerDepth);
+	vec3 planeNormal = normalize(vec3(0.25, 0, 1));
     
-    //float t = dot((planeOrigin - rayOrigin), planeNormal) / dot(rayDir, planeNormal);
+    float t = dot((planeOrigin - rayOrigin), planeNormal) / dot(rayDir, planeNormal);
     // when plane normal is (0,0,1) only z component is used:
-    float t = (imageLayerDepth - rayOrigin.z) / rayDir.z;
+    //float t = (imageLayerDepth - rayOrigin.z) / rayDir.z;
     if (t < 0.0)
     {
 		return vec4(1, 0, 1, 0); // no intersection
@@ -136,7 +137,8 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
     //imagePos /= abs(imageLayerDepth);
     //imagePos = imagePos / vec2(1, aspectRatio) + vec2(0.5, 0.5);
     //imagePos += vec2(0.5, 0.5 * aspectRatio);
-    imagePos /= abs(imageLayerDepth);
+    vec2 imageLayerSize = vec2(1, aspectRatio) * abs(imageLayerDepth);
+    imagePos /= imageLayerSize;
     imagePos += vec2(0.5, 0.5);
     
     //return vec4(imagePos, 0, 1);
@@ -157,7 +159,7 @@ vec4 traceRay(vec3 senzorPos, vec3 lensPos) {
 
 vec3 getSenzorPos() {
 	vec2 senzorPosNorm = gl_TexCoord[0].st;
-	//ivec2 size = textureSize2D(colorTexture, 0);
+	ivec2 size = textureSize2D(colorTexture, 0);
 	
 	// shift half a pixel to pixel center
 	//senzorPosNorm += 0.5 / vec2(size);
@@ -169,8 +171,8 @@ vec3 getSenzorPos() {
 	//senzorPosNorm = (senzorPosNorm - vec2(0.5, 0.5)) * vec2(1, aspectRatio);
 	//senzorPosNorm = senzorPosNorm - vec2(0.5, 0.5 * aspectRatio);
 	senzorPosNorm -= vec2(0.5, 0.5);
-	senzorPosNorm *= senzorDepth;
-	//senzorPosNorm *= senzorWidth;
+	vec2 senzorSize = vec2(1, aspectRatio) * senzorDepth;
+	senzorPosNorm *= senzorSize;
 	vec3 senzorPos = vec3(senzorPosNorm, senzorDepth);
 	return senzorPos;
 }
@@ -181,25 +183,17 @@ vec4 estimateRadiance() {
 	vec3 senzorPos = getSenzorPos();
 	
 	ivec3 lensJitterSize = textureSize3D(lensSamples, 0);
-	ivec2 screenSize = textureSize2D(colorTexture, 0);
 	vec2 jitterCoords = gl_FragCoord.st;
 	jitterCoords.t = screenSize.y - jitterCoords.t;
-	//vec3 samplesIndex = vec3(mod(gl_FragCoord.st / vec2(lensJitterSize.st), 1.0), 0.0);
 	vec3 samplesIndex = vec3(jitterCoords / vec2(lensJitterSize.st), 0.0);
-	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(lensJitterSize.r) - 1.0));
+	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(sampleCount) - 1.0));
 	for (int i = 0; i < sampleCount; i += 1) {
-		//vec4 params = texture1D(lensSamples, samplesIndex);
-		//vec2 lensPos = params.xy;
-		//vec2 senzorJitter = params.zw;
-		//float samplesIndex = 0.0;
 		vec2 lensPos = texture3D(lensSamples, samplesIndex).st;
-		//vec2 lensPos = vec2(1, 0);
 		colorAccum += traceRay(senzorPos, vec3(lensPos, 0));
-		//return colorAccum;
 		samplesIndex += samplesIndexStep;
 	}
+	//return vec4(samplesIndex.b, 0, 0, 1);
 	return colorAccum * sampleCountInv;
-	//return colorAccum;
 }
 
 //void blurGather() {

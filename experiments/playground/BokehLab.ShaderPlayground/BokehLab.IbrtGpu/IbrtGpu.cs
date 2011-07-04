@@ -25,11 +25,11 @@ namespace BokehLab.IbrtGpu
         {
             UniformSampleCount = 1;
             UniformLensFocalLength = 10;
-            UniformSenzorDepth = 11.1f;
+            UniformSenzorDepth = 11;
             UniformImageLayerDepth = -100.0f;
         }
 
-        int lensSampleCount = 4 * 4;
+        int lensSampleCount = 6 * 6;
         int lensSampleTileSize = 32;
 
         int color2dTexture = 0;
@@ -66,6 +66,7 @@ namespace BokehLab.IbrtGpu
         Matrix4 uniformThinLensMatrix;
         float UniformSenzorDepth { get; set; }
         float UniformImageLayerDepth { get; set; }
+        Vector2 UniformScreenSize { get; set; }
 
         //string colorTextureFilename = @"..\..\..\color_0.png";
         //string colorTextureFilename = @"..\..\..\testpattern-hd-720.png";
@@ -113,7 +114,7 @@ namespace BokehLab.IbrtGpu
             //    depth2dTexture = Load2dColorTexture(image, false);
             //}
             //noise2dTexture = GenerateRandom2dTexture(Width, Height);
-            RegenerateLensSamplesTexture(lensSampleTileSize, lensSampleCount, 1f);
+            RegenerateLensSamplesTexture(lensSampleTileSize, lensSampleCount, 2f);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, color2dTexture);
@@ -166,7 +167,8 @@ namespace BokehLab.IbrtGpu
         protected override void OnResize(EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);
-            Draw();
+            UniformScreenSize = new Vector2(Width, Height);
+            //Draw();
 
             base.OnResize(e);
         }
@@ -213,8 +215,8 @@ namespace BokehLab.IbrtGpu
                 (int)(enableLerp ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
                 (int)(enableLerp ? TextureMagFilter.Linear : TextureMagFilter.Nearest));
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
 
             image.UnlockBits(imageData);
 
@@ -277,8 +279,8 @@ namespace BokehLab.IbrtGpu
                             sampler.GenerateJitteredSamples(sqrtSampleCount))
                         {
                             Vector2d lensPos = lensApertureRadius *
-                                sample;
-                            //Sampler.ConcentricSampleDisk(sample);
+                                //2 * (sample - new Vector2d(0.5, 0.5));
+                            Sampler.ConcentricSampleDisk(sample);
                             row[index] = (float)lensPos.X;
                             row[index + 1] = (float)lensPos.Y;
                             index += zStride;
@@ -371,6 +373,8 @@ namespace BokehLab.IbrtGpu
 
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "senzorDepth"), UniformSenzorDepth);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "imageLayerDepth"), UniformImageLayerDepth);
+            GL.Uniform2(GL.GetUniformLocation(shaderProgram, "screenSize"), UniformScreenSize);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "aspectRatio"), AspectRatio);
 
             DrawFullScreenQuad();
 
