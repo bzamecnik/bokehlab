@@ -555,7 +555,7 @@
             //     - find out if it is on the surface
             //   *- scale with respect to the spherical cap
             //   *- normalize
-            Vector3d unitSpherePos = (ray.Origin - sphericalSurface.Center) / sphericalSurface.Radius;
+            Vector3d unitSpherePos = (ray.Origin - sphericalSurface.Center) * sphericalSurface.RadiusInv;
             unitSpherePos.Z *= canonicalNormal.Z;
             //Console.WriteLine("unit sphere position: {0}", unitSpherePos);
             Vector2d originParametric = Sampler.SampleSphereWithUniformSpacingInverse(

@@ -44,6 +44,7 @@
             Sampler sampler = new Sampler();
             int sqrtSampleCount = (int)Math.Sqrt(SampleCount);
             int totalSampleCount = sqrtSampleCount * sqrtSampleCount;
+            float totalSampleCountInv = 1 / (float)totalSampleCount;
 
             // NOTE: It is not useful to directly use the same lens samples
             // for each pixel in the whole image. This leads to ugly artifacts
@@ -88,7 +89,7 @@
                     }
                     for (int i = 0; i < outputImage.ColorChannelsCount; i++)
                     {
-                        outputImage.Image[x, y, i] = color[i] / (float)totalSampleCount;
+                        outputImage.Image[x, y, i] = color[i] * totalSampleCountInv;
                         color[i] = 0;
                     }
                 }

@@ -6,7 +6,17 @@
 
     public class Sphere : IIntersectable, INormalField
     {
-        public double Radius { get; set; }
+        private double radius;
+        private double radiusInv;
+        public double Radius
+        {
+            get { return radius; }
+            set { radius = value; radiusInv = 1 / radius; }
+        }
+        public double RadiusInv
+        {
+            get { return radiusInv; }
+        }
 
         public Vector3d Center { get; set; }
 
@@ -95,7 +105,7 @@
 
         public Vector3d GetNormal(Vector3d surfacePoint)
         {
-            return (surfacePoint - Center) / Radius;
+            return (surfacePoint - Center) * radiusInv;
         }
 
         #endregion
@@ -105,7 +115,7 @@
             // theta is the elevation angle from the base plane to the start
             // of the spherical cap
             // cos(theta) = sin(pi/2 - theta)
-            double cosTheta = baseRadius / Radius;
+            double cosTheta = baseRadius * radiusInv;
             double sinTheta = Math.Sqrt(1 - cosTheta * cosTheta);
             return sinTheta;
         }
