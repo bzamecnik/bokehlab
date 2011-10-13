@@ -8,37 +8,93 @@ namespace BokehLab.Pinhole
 {
     class Camera
     {
-        public Matrix4 Modelview;
-        public Vector3 Position { get; private set; }
-        public Vector3 View { get { return Modelview.Column2.Xyz; } }
-        public Vector3 Up { get { return Modelview.Column1.Xyz; } }
-        public Vector3 Right { get { return Modelview.Column0.Xyz; } }
+        private Vector3 position;
+
+        public Vector3 Position
+        {
+            get { return position; }
+            set { position = value; modelViewDirty = true; }
+        }
+        private Vector3 view;
+
+        public Vector3 View
+        {
+            get { return view; }
+            set { view = value; modelViewDirty = true; }
+        }
+        private Vector3 up;
+
+        public Vector3 Up
+        {
+            get { return up; }
+            set { up = value; modelViewDirty = true; }
+        }
+        private Vector3 right;
+
+        public Vector3 Right
+        {
+            get { return right; }
+            set { right = value; modelViewDirty = true; }
+        }
+
+        private Matrix4 modelView;
+
+        public Matrix4 ModelView
+        {
+            get
+            {
+                if (modelViewDirty)
+                {
+                    modelView = ComputeModelView();
+                    modelViewDirty = false;
+                }
+                return modelView;
+            }
+        }
+        bool modelViewDirty = true;
 
         public Camera()
         {
             Position = Vector3.Zero;
-            Modelview = Matrix4.Identity;
+            View = -Vector3.UnitZ;
+            Up = Vector3.UnitY;
+            Right = Vector3.UnitX;
+
+            modelView = ComputeModelView();
         }
 
-        public void Translate(Vector3 shift)
+        /// <summary>
+        /// Produce a first-person shooter model view matrix.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The goal is a comfortable control witout rotation around the view vector.
+        /// </para>
+        /// <para>
+        /// The formulas were inspired by Kevin R. Harris: http://www.codesampler.com/
+        /// </para>
+        /// </remarks>
+        /// <returns></returns>
+        private Matrix4 ComputeModelView()
         {
-            Position += shift;
-            Modelview *= Matrix4.CreateTranslation(shift);
-        }
+            view.Normalize();
+            right = Vector3.Cross(view, Up);
+            right.Normalize();
+            up = Vector3.Cross(right, View);
+            up.Normalize();
 
-        public void Roll(float angle)
-        {
-            Modelview *= Matrix4.CreateFromAxisAngle(View, -angle);
-        }
+            Vector4 lastRow = new Vector4(
+                Vector3.Dot(position, right),
+                Vector3.Dot(position, up),
+                Vector3.Dot(position, view),
+                1);
 
-        public void Yaw(float angle)
-        {
-            Modelview *= Matrix4.CreateFromAxisAngle(Up, angle);
-        }
-
-        public void Pitch(float angle)
-        {
-            Modelview *= Matrix4.CreateFromAxisAngle(Right, angle);
+            Matrix4 m = new Matrix4(
+                right.X, up.X, view.X, 0,
+                right.Y, up.Y, view.Y, 0,
+                right.Z, up.Z, view.Z, 0,
+                lastRow.X, lastRow.Y, lastRow.Z, lastRow.W);
+            return m;
         }
     }
 }

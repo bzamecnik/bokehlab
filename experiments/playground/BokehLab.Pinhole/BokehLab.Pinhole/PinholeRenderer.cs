@@ -16,11 +16,6 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System.Runtime.InteropServices;
 
-// TODO:
-// - with mouse movements only control the derivative of rotation (pitch, yaw)
-// - construct the model-view matrix from the camera position and pitch, yaw
-// - do not modify the right vector
-
 namespace BokehLab.Pinhole
 {
     public class PinholeRenderer : GameWindow
@@ -33,6 +28,11 @@ namespace BokehLab.Pinhole
 
         Matrix4 scenePerspective;
         Matrix4 sceneModelView;
+
+        float fieldOfView = MathHelper.PiOver4;
+        float near = 0.1f;
+        float far = 1000f;
+
         Camera camera = new Camera();
 
         Scene scene;
@@ -53,9 +53,16 @@ namespace BokehLab.Pinhole
         protected override void OnLoad(EventArgs e)
         {
             Keyboard.KeyUp += KeyUp;
+            Keyboard.KeyRepeat = true;
             Mouse.Move += MouseMove;
             Mouse.ButtonDown += MouseButtonHandler;
             Mouse.ButtonUp += MouseButtonHandler;
+
+            //GL.Enable(EnableCap.Lighting);
+            //GL.Enable(EnableCap.Light0);
+            //GL.Light(LightName.Light0, LightParameter.Ambient, new Color4(0.5f, 0.5f, 0.5f, 1));
+            //GL.Light(LightName.Light0, LightParameter.Diffuse, new Color4(0.8f, 0.8f, 0.8f, 1));
+            //GL.Light(LightName.Light0, LightParameter.Position, new Vector4(1, 5, 1, 1));
         }
 
         protected override void OnUnload(EventArgs e)
@@ -66,16 +73,9 @@ namespace BokehLab.Pinhole
         {
             GL.Viewport(0, 0, Width, Height);
 
-            float aspectRatio = Width / (float)Height;
+            UpdatePerspective();
 
-            GL.MatrixMode(MatrixMode.Projection);
-            scenePerspective = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver4, aspectRatio, 1, 64);
-            GL.LoadMatrix(ref scenePerspective);
-
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //sceneModelView = Matrix4.LookAt(0, 0, 3, 0, 0, 0, 0, 1, 0);
-            //GL.LoadMatrix(ref sceneModelView);
-            camera.Translate(new Vector3(0, 0, 3));
+            camera.Position = new Vector3(0, 0, 3);
 
             DrawScene();
 
@@ -86,10 +86,72 @@ namespace BokehLab.Pinhole
         {
             base.OnUpdateFrame(e);
 
+            float deltaShift = 0.1f;
+
             if (Keyboard[Key.Escape])
             {
                 this.Exit();
+                return;
             }
+
+            if (Keyboard[Key.W])
+            {
+                camera.Position += deltaShift * camera.View;
+            }
+            else if (Keyboard[Key.S])
+            {
+                camera.Position -= deltaShift * camera.View;
+            }
+
+            if (Keyboard[Key.D])
+            {
+                camera.Position -= deltaShift * camera.Right;
+            }
+            else if (Keyboard[Key.A])
+            {
+                camera.Position += deltaShift * camera.Right;
+            }
+
+            if (Keyboard[Key.E])
+            {
+                camera.Position -= deltaShift * camera.Up;
+            }
+            else if (Keyboard[Key.Q])
+            {
+                camera.Position += deltaShift * camera.Up;
+            }
+
+            bool fovChanged = false;
+            if (Keyboard[Key.PageUp])
+            {
+                fieldOfView /= 1.1f;
+                fovChanged = true;
+            }
+            else if (Keyboard[Key.PageDown])
+            {
+                fieldOfView *= 1.1f;
+                fovChanged = true;
+            }
+            if (fovChanged)
+            {
+                UpdatePerspective();
+            }
+        }
+
+        private void UpdatePerspective()
+        {
+            if (fieldOfView > (MathHelper.Pi - 0.1f))
+            {
+                fieldOfView = MathHelper.Pi - 0.1f;
+            }
+            else if (fieldOfView < 0.0000001f)
+            {
+                fieldOfView = 0.0000001f;
+            }
+            float aspectRatio = Width / (float)Height;
+            scenePerspective = Matrix4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, near, far);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadMatrix(ref scenePerspective);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -104,22 +166,9 @@ namespace BokehLab.Pinhole
 
         private void DrawScene()
         {
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadMatrix(ref scenePerspective);
-
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //GL.LoadMatrix(ref sceneModelView);
-
-            //GL.MatrixMode(MatrixMode.Projection);
-            //GL.LoadIdentity();
-            //GL.Ortho(-1, 1, -1, 1, 1, -1);
-
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //Matrix4 lookat = Matrix4.LookAt(0, 0, 0, 0, 0, -1, 0, 1, 0);
-            //GL.LoadMatrix(ref lookat);
-
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref camera.Modelview);
+            Matrix4 modelView = camera.ModelView;
+            GL.LoadMatrix(ref modelView);
 
             GL.PushAttrib(AttribMask.ViewportBit);
             {
@@ -130,7 +179,41 @@ namespace BokehLab.Pinhole
                 GL.ClearColor(0, 0, 0, 1);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-                scene.Draw();
+                GL.Begin(BeginMode.Lines);
+
+                GL.Color3(Color.Red);
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(1, 0, 0);
+
+                GL.Color3(Color.Green);
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(0, 1, 0);
+
+                GL.Color3(Color.Blue);
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(0, 0, 1);
+
+                GL.End();
+
+                GL.Color3(Color.Gray);
+                GL.Begin(BeginMode.Triangles);
+
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(0.5, 0, 0);
+                GL.Vertex3(0, 0.5, 0);
+
+
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(0.5, 0, 0);
+                GL.Vertex3(0, 0, 0.5);
+
+                GL.Vertex3(0, 0, 0);
+                GL.Vertex3(0, 0.5, 0);
+                GL.Vertex3(0, 0, 0.5);
+
+                GL.End();
+
+                //scene.Draw();
             }
             GL.PopAttrib();
         }
@@ -141,7 +224,6 @@ namespace BokehLab.Pinhole
 
         private void KeyUp(object sender, KeyboardKeyEventArgs e)
         {
-            float rotationAngle = 0.2f;
             if (e.Key == Key.R)
             {
                 // recompute geometry and redraw layers
@@ -153,42 +235,6 @@ namespace BokehLab.Pinhole
                 bool isFullscreen = (WindowState == WindowState.Fullscreen);
                 WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
             }
-            else if (e.Key == Key.W)
-            {
-                camera.Translate(Vector3.UnitZ);
-            }
-            else if (e.Key == Key.S)
-            {
-                camera.Translate(-Vector3.UnitZ);
-            }
-            else if (e.Key == Key.D)
-            {
-                camera.Translate(-Vector3.UnitX);
-            }
-            else if (e.Key == Key.A)
-            {
-                camera.Translate(Vector3.UnitX);
-            }
-            else if (e.Key == Key.Right)
-            {
-                camera.Yaw(rotationAngle);
-            }
-            else if (e.Key == Key.Left)
-            {
-                camera.Yaw(-rotationAngle);
-            }
-            else if (e.Key == Key.Up)
-            {
-                camera.Pitch(rotationAngle);
-            }
-            else if (e.Key == Key.Down)
-            {
-                camera.Pitch(-rotationAngle);
-            }
-            Console.WriteLine("Position: {0}", camera.Position);
-            Console.WriteLine("View: {0}", camera.View);
-            Console.WriteLine("Up: {0}", camera.Up);
-            Console.WriteLine("Right: {0}", camera.Right);
         }
 
         private void MouseMove(object sender, MouseMoveEventArgs e)
@@ -197,11 +243,18 @@ namespace BokehLab.Pinhole
             {
                 if (e.XDelta != 0)
                 {
-                    camera.Yaw(MathHelper.Pi * e.XDelta / (float)Width);
+                    float angle = 2 * fieldOfView * e.XDelta / (float)Width;
+                    Matrix4 rot = Matrix4.CreateRotationY(angle);
+                    camera.View = Vector3.TransformVector(camera.View, rot);
+                    camera.Up = Vector3.TransformVector(camera.Up, rot);
                 }
+
                 if (e.YDelta != 0)
                 {
-                    camera.Pitch(MathHelper.Pi * e.YDelta / (float)Width);
+                    float angle = 2 * fieldOfView * e.YDelta / (float)Height;
+                    Matrix4 rot = Matrix4.CreateFromAxisAngle(camera.Right, angle);
+                    camera.View = Vector3.TransformVector(camera.View, rot);
+                    camera.Up = Vector3.TransformVector(camera.Up, rot);
                 }
             }
         }
