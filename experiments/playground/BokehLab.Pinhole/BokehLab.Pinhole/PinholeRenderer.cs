@@ -275,10 +275,10 @@ namespace BokehLab.Pinhole
             {
                 GL.Viewport(0, 0, Width, Height);
 
-                GL.Clear(ClearBufferMask.AccumBufferBit);
-
                 if (enableDofAccumulation)
                 {
+                    GL.Clear(ClearBufferMask.AccumBufferBit);
+
                     int iterations = unitDiskSamples.Length;
                     float iterationsInv = 1f / iterations;
                     for (int i = 0; i < iterations; i++)
