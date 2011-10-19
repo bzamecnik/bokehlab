@@ -23,7 +23,6 @@ namespace BokehLab.Pinhole
         public PinholeRenderer()
             : base(800, 600)
         {
-            scene = GenerateScene();
         }
 
         Matrix4 scenePerspective;
@@ -32,6 +31,10 @@ namespace BokehLab.Pinhole
         float fieldOfView = MathHelper.PiOver4;
         float near = 0.1f;
         float far = 1000f;
+
+        float apertureRadius;
+        Vector2 pinholePos = Vector2.Zero; // position of the pinhole on the lens aperture
+        float zFocal = 5; // focal plane depth
 
         Camera camera = new Camera();
 
@@ -52,12 +55,15 @@ namespace BokehLab.Pinhole
 
         protected override void OnLoad(EventArgs e)
         {
+            scene = GenerateScene();
+
             Keyboard.KeyUp += KeyUp;
             Keyboard.KeyRepeat = true;
             Mouse.Move += MouseMove;
             Mouse.ButtonDown += MouseButtonHandler;
             Mouse.ButtonUp += MouseButtonHandler;
 
+            camera.Position = new Vector3(0, 0, 3);
             //GL.Enable(EnableCap.Lighting);
             //GL.Enable(EnableCap.Light0);
             //GL.Light(LightName.Light0, LightParameter.Ambient, new Color4(0.5f, 0.5f, 0.5f, 1));
@@ -74,8 +80,6 @@ namespace BokehLab.Pinhole
             GL.Viewport(0, 0, Width, Height);
 
             UpdatePerspective();
-
-            camera.Position = new Vector3(0, 0, 3);
 
             DrawScene();
 
@@ -121,18 +125,48 @@ namespace BokehLab.Pinhole
                 camera.Position += deltaShift * camera.Up;
             }
 
-            bool fovChanged = false;
+            bool perspectiveChanged = false;
             if (Keyboard[Key.PageUp])
             {
                 fieldOfView /= 1.1f;
-                fovChanged = true;
+                perspectiveChanged = true;
             }
             else if (Keyboard[Key.PageDown])
             {
                 fieldOfView *= 1.1f;
-                fovChanged = true;
+                perspectiveChanged = true;
             }
-            if (fovChanged)
+            if (Keyboard[Key.T])
+            {
+                pinholePos += new Vector2(0, 0.1f);
+                perspectiveChanged = true;
+            }
+            else if (Keyboard[Key.G])
+            {
+                pinholePos += new Vector2(0, -0.1f);
+                perspectiveChanged = true;
+            }
+            else if (Keyboard[Key.H])
+            {
+                pinholePos += new Vector2(0.1f, 0);
+                perspectiveChanged = true;
+            }
+            else if (Keyboard[Key.F])
+            {
+                pinholePos += new Vector2(-0.1f, 0);
+                perspectiveChanged = true;
+            }
+            if (Keyboard[Key.R])
+            {
+                // reset camera configuration
+                pinholePos = Vector2.Zero;
+                zFocal = 5;
+                fieldOfView = MathHelper.PiOver4;
+                camera = new Camera();
+                camera.Position = new Vector3(0, 0, 3);
+                perspectiveChanged = true;
+            }
+            if (perspectiveChanged)
             {
                 UpdatePerspective();
             }
@@ -149,9 +183,31 @@ namespace BokehLab.Pinhole
                 fieldOfView = 0.0000001f;
             }
             float aspectRatio = Width / (float)Height;
-            scenePerspective = Matrix4.CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, near, far);
+            scenePerspective = CreatePerspectiveFieldOfViewOffCenter(fieldOfView, aspectRatio, near, far, pinholePos, zFocal);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadMatrix(ref scenePerspective);
+        }
+
+        Matrix4 CreatePerspectiveFieldOfViewOffCenter(
+            float fovy,
+            float aspect,
+            float zNear,
+            float zFar,
+            Vector2 lensShift,
+            float zFocal)
+        {
+            float yMax = zNear * (float)System.Math.Tan(0.5f * fovy);
+            float yMin = -yMax;
+            float xMin = yMin * aspect;
+            float xMax = yMax * aspect;
+
+            float mag = -near / zFocal;
+            float right = xMax + lensShift.X * mag;
+            float left = xMin + lensShift.X * mag;
+            float top = yMax + lensShift.Y * mag;
+            float bottom = yMin + lensShift.Y * mag;
+
+            return Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, zNear, zFar);
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -179,41 +235,41 @@ namespace BokehLab.Pinhole
                 GL.ClearColor(0, 0, 0, 1);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-                GL.Begin(BeginMode.Lines);
+                //GL.Begin(BeginMode.Lines);
 
-                GL.Color3(Color.Red);
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(1, 0, 0);
+                //GL.Color3(Color.Red);
+                //GL.Vertex3(0, 0, 0);
+                //GL.Vertex3(1, 0, 0);
 
-                GL.Color3(Color.Green);
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0, 1, 0);
+                //GL.Color3(Color.Green);
+                //GL.Vertex3(0, 0, 0);
+                //GL.Vertex3(0, 1, 0);
 
-                GL.Color3(Color.Blue);
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0, 0, 1);
+                //GL.Color3(Color.Blue);
+                //GL.Vertex3(0, 0, 0);
+                //GL.Vertex3(0, 0, 1);
 
-                GL.End();
+                //GL.End();
 
-                GL.Color3(Color.Gray);
-                GL.Begin(BeginMode.Triangles);
+                //GL.Color3(Color.Gray);
+                //GL.Begin(BeginMode.Triangles);
 
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.5, 0, 0);
-                GL.Vertex3(0, 0.5, 0);
+                //GL.Vertex3(0, 0, 0);
+                //GL.Vertex3(0.5, 0, 0);
+                //GL.Vertex3(0, 0.5, 0);
 
 
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0.5, 0, 0);
-                GL.Vertex3(0, 0, 0.5);
+                //GL.Vertex3(0, 0, 0);
+                //GL.Vertex3(0.5, 0, 0);
+                //GL.Vertex3(0, 0, 0.5);
 
-                GL.Vertex3(0, 0, 0);
-                GL.Vertex3(0, 0.5, 0);
-                GL.Vertex3(0, 0, 0.5);
+                //GL.Vertex3(0, 0, 0);
+                //GL.Vertex3(0, 0.5, 0);
+                //GL.Vertex3(0, 0, 0.5);
 
-                GL.End();
+                //GL.End();
 
-                //scene.Draw();
+                scene.Draw();
             }
             GL.PopAttrib();
         }
@@ -224,13 +280,14 @@ namespace BokehLab.Pinhole
 
         private void KeyUp(object sender, KeyboardKeyEventArgs e)
         {
-            if (e.Key == Key.R)
-            {
-                // recompute geometry and redraw layers
-                scene = GenerateScene();
-                DrawScene();
-            }
-            else if (e.Key == Key.F11)
+            //if (e.Key == Key.R)
+            //{
+            //    // recompute geometry and redraw layers
+            //    scene = GenerateScene();
+            //    DrawScene();
+            //}
+            //else
+            if (e.Key == Key.F11)
             {
                 bool isFullscreen = (WindowState == WindowState.Fullscreen);
                 WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
