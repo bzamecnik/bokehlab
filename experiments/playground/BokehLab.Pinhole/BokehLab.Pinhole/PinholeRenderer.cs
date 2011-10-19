@@ -6,18 +6,21 @@
  */
 #endregion
 
-using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using OpenTK;
-using OpenTK.Input;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
-using System.Runtime.InteropServices;
-
 namespace BokehLab.Pinhole
 {
+    using System;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.IO;
+    using OpenTK;
+    using OpenTK.Input;
+    using OpenTK.Graphics;
+    using OpenTK.Graphics.OpenGL;
+    using System.Runtime.InteropServices;
+    using BokehLab.Math;
+    using System.Collections.Generic;
+    using System.Linq;
+
     public class PinholeRenderer : GameWindow
     {
         public PinholeRenderer()
@@ -28,11 +31,11 @@ namespace BokehLab.Pinhole
         Matrix4 scenePerspective;
         Matrix4 sceneModelView;
 
-        float fieldOfView = MathHelper.PiOver4;
+        float fieldOfView = OpenTK.MathHelper.PiOver4;
         float near = 0.1f;
         float far = 1000f;
 
-        float apertureRadius;
+        float apertureRadius = 0.05f;
         Vector2 pinholePos = Vector2.Zero; // position of the pinhole on the lens aperture
         float zFocal = 5; // focal plane depth
 
@@ -40,7 +43,11 @@ namespace BokehLab.Pinhole
 
         Scene scene;
 
+        Vector2[] unitDiskSamples;
+
         bool mouseButtonLeftPressed = false;
+
+        bool enableDofAccumulation = false;
 
         public static void RunExample()
         {
@@ -62,13 +69,28 @@ namespace BokehLab.Pinhole
             Mouse.Move += MouseMove;
             Mouse.ButtonDown += MouseButtonHandler;
             Mouse.ButtonUp += MouseButtonHandler;
+            Mouse.WheelChanged += MouseWheelChanged;
 
             camera.Position = new Vector3(0, 0, 3);
+
+            unitDiskSamples = CreateLensSamples(6).ToArray();
+
             //GL.Enable(EnableCap.Lighting);
             //GL.Enable(EnableCap.Light0);
             //GL.Light(LightName.Light0, LightParameter.Ambient, new Color4(0.5f, 0.5f, 0.5f, 1));
             //GL.Light(LightName.Light0, LightParameter.Diffuse, new Color4(0.8f, 0.8f, 0.8f, 1));
             //GL.Light(LightName.Light0, LightParameter.Position, new Vector4(1, 5, 1, 1));
+        }
+
+        /// <summary>
+        /// Generate a set of jittered uniform samples of a unit circle.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<Vector2> CreateLensSamples(int sampleCount)
+        {
+            Sampler sampler = new Sampler();
+            var jitteredSamples = sampler.GenerateJitteredSamples(sampleCount);
+            return jitteredSamples.Select((sample) => (Vector2)Sampler.ConcentricSampleDisk(sample));
         }
 
         protected override void OnUnload(EventArgs e)
@@ -161,9 +183,30 @@ namespace BokehLab.Pinhole
                 // reset camera configuration
                 pinholePos = Vector2.Zero;
                 zFocal = 5;
-                fieldOfView = MathHelper.PiOver4;
+                apertureRadius = 0.01f;
+                fieldOfView = OpenTK.MathHelper.PiOver4;
                 camera = new Camera();
                 camera.Position = new Vector3(0, 0, 3);
+                perspectiveChanged = true;
+            }
+            if (Keyboard[Key.Home])
+            {
+                apertureRadius *= 1.1f;
+                perspectiveChanged = true;
+            }
+            else if (Keyboard[Key.End])
+            {
+                apertureRadius /= 1.1f;
+                perspectiveChanged = true;
+            }
+            if (Keyboard[Key.Up])
+            {
+                zFocal *= 1.1f;
+                perspectiveChanged = true;
+            }
+            else if (Keyboard[Key.Down])
+            {
+                zFocal /= 1.1f;
                 perspectiveChanged = true;
             }
             if (perspectiveChanged)
@@ -174,9 +217,9 @@ namespace BokehLab.Pinhole
 
         private void UpdatePerspective()
         {
-            if (fieldOfView > (MathHelper.Pi - 0.1f))
+            if (fieldOfView > (OpenTK.MathHelper.Pi - 0.1f))
             {
-                fieldOfView = MathHelper.Pi - 0.1f;
+                fieldOfView = OpenTK.MathHelper.Pi - 0.1f;
             }
             else if (fieldOfView < 0.0000001f)
             {
@@ -226,50 +269,43 @@ namespace BokehLab.Pinhole
             Matrix4 modelView = camera.ModelView;
             GL.LoadMatrix(ref modelView);
 
+            GL.ClearColor(0, 0, 0, 1);
+
             GL.PushAttrib(AttribMask.ViewportBit);
             {
                 GL.Viewport(0, 0, Width, Height);
 
-                // clear the screen in red, to make it very obvious what the clear affected. only the FBO, not the real framebuffer
-                //GL.ClearColor(1f, 0f, 0f, 1f);
-                GL.ClearColor(0, 0, 0, 1);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                GL.Clear(ClearBufferMask.AccumBufferBit);
 
-                //GL.Begin(BeginMode.Lines);
+                if (enableDofAccumulation)
+                {
+                    int iterations = unitDiskSamples.Length;
+                    float iterationsInv = 1f / iterations;
+                    for (int i = 0; i < iterations; i++)
+                    {
+                        GL.PushMatrix();
+                        //pinholePos = new Vector2(
+                        //    apertureRadius * (float)random.NextDouble(),
+                        //    apertureRadius * (float)random.NextDouble());
+                        pinholePos = apertureRadius * unitDiskSamples[i];
+                        UpdatePerspective();
+                        GL.Translate(-pinholePos.X, -pinholePos.Y, 0);
 
-                //GL.Color3(Color.Red);
-                //GL.Vertex3(0, 0, 0);
-                //GL.Vertex3(1, 0, 0);
+                        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                        scene.Draw();
 
-                //GL.Color3(Color.Green);
-                //GL.Vertex3(0, 0, 0);
-                //GL.Vertex3(0, 1, 0);
+                        GL.PopMatrix();
+                        GL.Accum(AccumOp.Accum, iterationsInv);
+                    }
 
-                //GL.Color3(Color.Blue);
-                //GL.Vertex3(0, 0, 0);
-                //GL.Vertex3(0, 0, 1);
+                    GL.Accum(AccumOp.Return, 1f);
 
-                //GL.End();
-
-                //GL.Color3(Color.Gray);
-                //GL.Begin(BeginMode.Triangles);
-
-                //GL.Vertex3(0, 0, 0);
-                //GL.Vertex3(0.5, 0, 0);
-                //GL.Vertex3(0, 0.5, 0);
-
-
-                //GL.Vertex3(0, 0, 0);
-                //GL.Vertex3(0.5, 0, 0);
-                //GL.Vertex3(0, 0, 0.5);
-
-                //GL.Vertex3(0, 0, 0);
-                //GL.Vertex3(0, 0.5, 0);
-                //GL.Vertex3(0, 0, 0.5);
-
-                //GL.End();
-
-                scene.Draw();
+                }
+                else
+                {
+                    GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+                    scene.Draw();
+                }
             }
             GL.PopAttrib();
         }
@@ -291,6 +327,12 @@ namespace BokehLab.Pinhole
             {
                 bool isFullscreen = (WindowState == WindowState.Fullscreen);
                 WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
+            }
+            else if (e.Key == Key.F2)
+            {
+                enableDofAccumulation = !enableDofAccumulation;
+                pinholePos = Vector2.Zero;
+                UpdatePerspective();
             }
         }
 
@@ -322,6 +364,11 @@ namespace BokehLab.Pinhole
             {
                 mouseButtonLeftPressed = e.IsPressed;
             }
+        }
+
+        private void MouseWheelChanged(object sender, MouseWheelEventArgs e)
+        {
+            zFocal *= (float)Math.Pow(1.1, e.DeltaPrecise);
         }
 
         private Scene GenerateScene()
