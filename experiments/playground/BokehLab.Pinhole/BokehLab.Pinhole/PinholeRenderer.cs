@@ -46,8 +46,16 @@ namespace BokehLab.Pinhole
         Vector2[] unitDiskSamples;
 
         bool mouseButtonLeftPressed = false;
+        bool mouseButtonRightPressed = false;
 
         bool enableDofAccumulation = false;
+
+        // Indicates that previously accumulated DoF is obsolete,
+        // in other words the scene or the parameters fo the view changed.
+        bool isAccumulationObsolete = true;
+        int accumIterations = 0;
+
+        Sampler sampler = new Sampler();
 
         public static void RunExample()
         {
@@ -73,7 +81,7 @@ namespace BokehLab.Pinhole
 
             camera.Position = new Vector3(0, 0, 3);
 
-            unitDiskSamples = CreateLensSamples(6).ToArray();
+            unitDiskSamples = CreateLensSamples(16).ToArray();
 
             //GL.Enable(EnableCap.Lighting);
             //GL.Enable(EnableCap.Light0);
@@ -88,9 +96,11 @@ namespace BokehLab.Pinhole
         /// <returns></returns>
         private IEnumerable<Vector2> CreateLensSamples(int sampleCount)
         {
-            Sampler sampler = new Sampler();
             var jitteredSamples = sampler.GenerateJitteredSamples(sampleCount);
-            return jitteredSamples.Select((sample) => (Vector2)Sampler.ConcentricSampleDisk(sample));
+            var diskSamples = jitteredSamples.Select((sample) => (Vector2)Sampler.ConcentricSampleDisk(sample));
+            var diskSamplesList = diskSamples.ToList();
+            Shuffle<Vector2>(diskSamplesList);
+            return diskSamplesList;
         }
 
         protected override void OnUnload(EventArgs e)
@@ -123,28 +133,34 @@ namespace BokehLab.Pinhole
             if (Keyboard[Key.W])
             {
                 camera.Position += deltaShift * camera.View;
+                isAccumulationObsolete = true;
             }
             else if (Keyboard[Key.S])
             {
                 camera.Position -= deltaShift * camera.View;
+                isAccumulationObsolete = true;
             }
 
             if (Keyboard[Key.D])
             {
                 camera.Position -= deltaShift * camera.Right;
+                isAccumulationObsolete = true;
             }
             else if (Keyboard[Key.A])
             {
                 camera.Position += deltaShift * camera.Right;
+                isAccumulationObsolete = true;
             }
 
             if (Keyboard[Key.E])
             {
                 camera.Position -= deltaShift * camera.Up;
+                isAccumulationObsolete = true;
             }
             else if (Keyboard[Key.Q])
             {
                 camera.Position += deltaShift * camera.Up;
+                isAccumulationObsolete = true;
             }
 
             bool perspectiveChanged = false;
@@ -212,6 +228,7 @@ namespace BokehLab.Pinhole
             if (perspectiveChanged)
             {
                 UpdatePerspective();
+                isAccumulationObsolete = true;
             }
         }
 
@@ -277,17 +294,28 @@ namespace BokehLab.Pinhole
 
                 if (enableDofAccumulation)
                 {
-                    GL.Clear(ClearBufferMask.AccumBufferBit);
-
-                    int iterations = unitDiskSamples.Length;
-                    float iterationsInv = 1f / iterations;
-                    for (int i = 0; i < iterations; i++)
+                    if (isAccumulationObsolete)
                     {
+                        GL.Clear(ClearBufferMask.AccumBufferBit);
+                        isAccumulationObsolete = false;
+                        accumIterations = 0;
+                    }
+                    int maxIterations = unitDiskSamples.Length;
+
+                    for (int i = 0; i < 16; i++)
+                    {
+                        if (accumIterations >= maxIterations)
+                        {
+                            break;
+                        }
+                        //int maxIterations = 16;
+                        //float iterationsInv = 1f / maxIterations;
+                        float iterationsInv = 1f / accumIterations;
+                        //for (int i = 0; i < iterations; i++)
+                        //{
                         GL.PushMatrix();
-                        //pinholePos = new Vector2(
-                        //    apertureRadius * (float)random.NextDouble(),
-                        //    apertureRadius * (float)random.NextDouble());
-                        pinholePos = apertureRadius * unitDiskSamples[i];
+                        //pinholePos = apertureRadius * (Vector2)Sampler.ConcentricSampleDisk(sampler.GenerateUniformPoint());
+                        pinholePos = apertureRadius * unitDiskSamples[accumIterations];
                         UpdatePerspective();
                         GL.Translate(-pinholePos.X, -pinholePos.Y, 0);
 
@@ -295,11 +323,15 @@ namespace BokehLab.Pinhole
                         scene.Draw();
 
                         GL.PopMatrix();
-                        GL.Accum(AccumOp.Accum, iterationsInv);
+
+                        //GL.Accum(AccumOp.Accum, 1f / maxIterations);
+                        GL.Accum(AccumOp.Mult, 1 - 1f / (accumIterations + 1));
+                        GL.Accum(AccumOp.Accum, 1f / (accumIterations + 1));
+                        accumIterations++;
                     }
 
+                    //GL.Accum(AccumOp.Return, maxIterations / (float)accumIterations);
                     GL.Accum(AccumOp.Return, 1f);
-
                 }
                 else
                 {
@@ -346,6 +378,7 @@ namespace BokehLab.Pinhole
                     Matrix4 rot = Matrix4.CreateRotationY(angle);
                     camera.View = Vector3.TransformVector(camera.View, rot);
                     camera.Up = Vector3.TransformVector(camera.Up, rot);
+                    isAccumulationObsolete = true;
                 }
 
                 if (e.YDelta != 0)
@@ -354,6 +387,15 @@ namespace BokehLab.Pinhole
                     Matrix4 rot = Matrix4.CreateFromAxisAngle(camera.Right, angle);
                     camera.View = Vector3.TransformVector(camera.View, rot);
                     camera.Up = Vector3.TransformVector(camera.Up, rot);
+                    isAccumulationObsolete = true;
+                }
+            }
+            if (mouseButtonRightPressed)
+            {
+                if (e.YDelta != 0)
+                {
+                    zFocal += (e.YDelta / (float)Height);
+                    isAccumulationObsolete = true;
                 }
             }
         }
@@ -364,11 +406,16 @@ namespace BokehLab.Pinhole
             {
                 mouseButtonLeftPressed = e.IsPressed;
             }
+            if (e.Button == MouseButton.Right)
+            {
+                mouseButtonRightPressed = e.IsPressed;
+            }
         }
 
         private void MouseWheelChanged(object sender, MouseWheelEventArgs e)
         {
             zFocal *= (float)Math.Pow(1.1, e.DeltaPrecise);
+            isAccumulationObsolete = true;
         }
 
         private Scene GenerateScene()
@@ -377,6 +424,21 @@ namespace BokehLab.Pinhole
         }
 
         #endregion
+
+        //http://stackoverflow.com/questions/273313/randomize-a-listt-in-c-sharp
+        public static void Shuffle<T>(IList<T> list)
+        {
+            Random rng = new Random();
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
 
     }
 }
