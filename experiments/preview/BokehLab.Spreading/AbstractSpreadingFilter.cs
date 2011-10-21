@@ -38,6 +38,10 @@ namespace BokehLab.Spreading
             FloatMapImage spreadingTable = new FloatMapImage(width, height, inputImage.PixelFormat);
             FloatMapImage normalizationTable = new FloatMapImage(width, height, PixelFormat.Greyscale);
 
+            //var blurMap = GetBlurMap(width, height);
+            //blurMap.ToBitmap(true).Save("blurmap.png");
+            //blurMap.Differentiate().ToBitmap(true).Save("blurmap-diff.png");
+
             Filter(inputImage, spreadingTable, normalizationTable);
 
             Normalize(spreadingTable, normalizationTable, outputImage);
@@ -138,6 +142,20 @@ namespace BokehLab.Spreading
             //spreadingTable.ToBitmap(true).Save("unnormalized.png");
 
             //Console.WriteLine("Normalizing to output image: {0} ms", sw.ElapsedMilliseconds);
+        }
+
+        private FloatMapImage GetBlurMap(uint width, uint height)
+        {
+            FloatMapImage blurMap = new FloatMapImage(width, height, PixelFormat.Greyscale);
+            var blurMapImage = blurMap.Image;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    blurMapImage[x, y, 0] = Blur.GetPSFRadius(x, y);
+                }
+            }
+            return blurMap;
         }
     }
 }
