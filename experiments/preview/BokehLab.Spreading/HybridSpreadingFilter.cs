@@ -62,9 +62,10 @@
             IntegrateHorizontally(spreadingTable, normalizationTable);
         }
 
-        internal class FilterSelectionCriterion {
+        internal class FilterSelectionCriterion
+        {
             public FloatMapImage OriginalImage { get; set; }
-            
+
             /// <summary>
             /// Summed area table of the original image.
             /// Useful for quick computing of an avergave intensity over a rectangle.
@@ -105,7 +106,8 @@
             /// <param name="x">pixel coordinate X</param>
             /// <param name="y">pixel coordinate Y</param>
             /// <returns>Chosen spreading filter index</returns>
-            public int SelectFilter(int x, int y, int psfRadius) {
+            public int SelectFilter(int x, int y, int psfRadius)
+            {
                 if (psfRadius > MaxRadiusForQualityFilter)
                 {
                     return 0;
@@ -114,11 +116,14 @@
                 float[, ,] sat = OriginalImageSAT.Image;
                 int width = (int)OriginalImageSAT.Width;
                 int height = (int)OriginalImageSAT.Height;
-                // TODO:
-                // - use all RGB values (probably sum of them), not just red
-                // - better use brightness (weighted sum)
-                
-                float sourceIntensity = OriginalImage.Image[x, y, 0];
+
+                // TODO: better use brightness (a weighted sum)
+                float sourceIntensity = 0;
+                for (int band = 0; band < OriginalImage.ColorChannelsCount; band++)
+                {
+                    sourceIntensity += OriginalImage.Image[x, y, band];
+                }
+                sourceIntensity /= OriginalImage.ColorChannelsCount;
 
                 int left = MathHelper.Clamp<int>(x - psfRadius - 1, 0, width - 1);
                 int right = MathHelper.Clamp<int>(x + psfRadius, 0, width - 1);
@@ -134,7 +139,7 @@
                 float averageOverPsf = (psfSum - sourceIntensity) / (psfArea - 1);
                 //float averageOverPsf = psfSum / psfArea;
                 //return (sourceIntensity > averageOverPsf) ? (FilterCount - 1) : 0;
-                
+
                 // thresholding the absolute difference [Kosloff08]
                 //return (Math.Abs(sourceIntensity - averageOverPsf) > Threshold) ? (FilterCount - 1) : 0;
                 // thresholding the difference
