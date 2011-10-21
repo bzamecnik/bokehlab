@@ -111,6 +111,11 @@
             0,
             0,
             0});
+        this.blurRadiusNumeric.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
         this.blurRadiusNumeric.Name = "blurRadiusNumeric";
         this.blurRadiusNumeric.Size = new System.Drawing.Size(144, 20);
         this.blurRadiusNumeric.TabIndex = 10;

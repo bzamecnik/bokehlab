@@ -37,8 +37,12 @@ namespace BokehLab.Spreading
                 outputImage = new FloatMapImage(width, height, inputImage.PixelFormat);
             }
 
-            FloatMapImage spreadingTable = new FloatMapImage(width + 1, height + 1, inputImage.PixelFormat);
-            FloatMapImage normalizationTable = new FloatMapImage(width + 1, height + 1, PixelFormat.Greyscale);
+            FloatMapImage spreadingTable = new FloatMapImage(width, height, inputImage.PixelFormat);
+            FloatMapImage normalizationTable = new FloatMapImage(width, height, PixelFormat.Greyscale);
+
+            //FloatMapImage spreadingTable = new FloatMapImage(width + 1, height + 1, inputImage.PixelFormat);
+            //FloatMapImage normalizationTable = new FloatMapImage(width + 1, height + 1, PixelFormat.Greyscale);
+
 
             //InitializeTables(spreadingTable, normalizationTable);
 
@@ -48,6 +52,12 @@ namespace BokehLab.Spreading
 
             spreadingTable.Dispose();
             normalizationTable.Dispose();
+
+            //inputImage = inputImage.ExtractColorChannels();
+            //outputImage = inputImage.DifferentiateHorizontally();
+            //outputImage = outputImage.IntegrateHorizontally();
+            //outputImage = inputImage.DifferentiateVertically();
+            //outputImage = outputImage.IntegrateVertically();
 
             return outputImage;
         }
@@ -61,7 +71,7 @@ namespace BokehLab.Spreading
             //sw.Start();
 
             uint bands = spreadingTable.TotalChannelsCount;
-            
+
             // NOTE: the following properties are stored as an optimization
             float[, ,] spreadingImage = spreadingTable.Image;
             float[, ,] normalizationImage = normalizationTable.Image;
@@ -80,6 +90,17 @@ namespace BokehLab.Spreading
                     normalizationImage[x, y, 0] = 0;
                 }
             }
+
+            //for (int y = 0; y < tableHeight; y++)
+            //{
+            //    normalizationImage[tableWidth - 1, y, 0] = 1;
+            //}
+
+            //for (int x = 0; x < tableWidth; x++)
+            //{
+            //    normalizationImage[x, tableHeight - 1, 0] = 1;
+            //}
+
             //Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
         }
 
@@ -166,7 +187,7 @@ namespace BokehLab.Spreading
             //sw.Start();
 
             outputImage = spreadingTable.DivideBy(normalizationTable, outputImage, true);
-            
+
             //normalizationTable.ToBitmap(true).Save("normalization.png");
             //spreadingTable.ToBitmap(true).Save("unnormalized.png");
 
