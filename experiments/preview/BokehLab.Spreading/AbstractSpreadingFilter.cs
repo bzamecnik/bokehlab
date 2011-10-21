@@ -1,6 +1,4 @@
 ﻿// TODO:
-// - shouldn't the table be of the same size as the input image?
-//   - now it seems it has to be larger by 1px
 // - should the spreading table and normalization channel be squashed into
 //   one image for better locality?
 // - could alpha channel be used as a normalization channel?
@@ -40,12 +38,6 @@ namespace BokehLab.Spreading
             FloatMapImage spreadingTable = new FloatMapImage(width, height, inputImage.PixelFormat);
             FloatMapImage normalizationTable = new FloatMapImage(width, height, PixelFormat.Greyscale);
 
-            //FloatMapImage spreadingTable = new FloatMapImage(width + 1, height + 1, inputImage.PixelFormat);
-            //FloatMapImage normalizationTable = new FloatMapImage(width + 1, height + 1, PixelFormat.Greyscale);
-
-
-            //InitializeTables(spreadingTable, normalizationTable);
-
             Filter(inputImage, spreadingTable, normalizationTable);
 
             Normalize(spreadingTable, normalizationTable, outputImage);
@@ -53,56 +45,10 @@ namespace BokehLab.Spreading
             spreadingTable.Dispose();
             normalizationTable.Dispose();
 
-            //inputImage = inputImage.ExtractColorChannels();
-            //outputImage = inputImage.DifferentiateHorizontally();
-            //outputImage = outputImage.IntegrateHorizontally();
-            //outputImage = inputImage.DifferentiateVertically();
-            //outputImage = outputImage.IntegrateVertically();
-
             return outputImage;
         }
 
         protected abstract void Filter(FloatMapImage inputImage, FloatMapImage spreadingTable, FloatMapImage normalizationTable);
-
-        private static void InitializeTables(FloatMapImage spreadingTable, FloatMapImage normalizationTable)
-        {
-            //Stopwatch sw = new Stopwatch();
-            //sw.Reset();
-            //sw.Start();
-
-            uint bands = spreadingTable.TotalChannelsCount;
-
-            // NOTE: the following properties are stored as an optimization
-            float[, ,] spreadingImage = spreadingTable.Image;
-            float[, ,] normalizationImage = normalizationTable.Image;
-            int tableWidth = (int)spreadingTable.Width;
-            int tableHeight = (int)spreadingTable.Height;
-
-            // initialize the spreading table and the normalization table to 0.0
-            for (int x = 0; x < tableWidth; x++)
-            {
-                for (int y = 0; y < tableHeight; y++)
-                {
-                    for (int band = 0; band < bands; band++)
-                    {
-                        spreadingImage[x, y, band] = 0;
-                    }
-                    normalizationImage[x, y, 0] = 0;
-                }
-            }
-
-            //for (int y = 0; y < tableHeight; y++)
-            //{
-            //    normalizationImage[tableWidth - 1, y, 0] = 1;
-            //}
-
-            //for (int x = 0; x < tableWidth; x++)
-            //{
-            //    normalizationImage[x, tableHeight - 1, 0] = 1;
-            //}
-
-            //Console.WriteLine("Initializing spreading and normalization tables: {0} ms", sw.ElapsedMilliseconds);
-        }
 
         protected void Spread(FloatMapImage inputImage, FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
