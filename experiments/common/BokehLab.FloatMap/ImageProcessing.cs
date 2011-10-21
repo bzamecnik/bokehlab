@@ -268,17 +268,19 @@
             float[, ,] input = inputImage.Image;
             float[, ,] output = outputImage.Image;
 
+            float[] sum = new float[bands];
             for (int y = 0; y < height; y++)
             {
                 for (int band = 0; band < bands; band++)
                 {
-                    output[0, y, band] = input[0, y, band];
+                    sum[band] = 0;
                 }
-                for (int x = 1; x < width; x++)
+                for (int x = 0; x < width; x++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        output[x, y, band] = output[x - 1, y, band] + input[x, y, band];
+                        sum[band] += input[x, y, band];
+                        output[x, y, band] = sum[band];
                     }
                 }
             }
@@ -302,17 +304,19 @@
             float[, ,] input = inputImage.Image;
             float[, ,] output = outputImage.Image;
 
+            float[] sum = new float[bands];
             for (int x = 0; x < width; x++)
             {
                 for (int band = 0; band < bands; band++)
                 {
-                    output[x, 0, band] = input[x, 0, band];
+                    sum[band] = 0;
                 }
-                for (int y = 1; y < height; y++)
+                for (int y = 0; y < height; y++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        output[x, y, band] = output[x, y - 1, band] + input[x, y, band];
+                        sum[band] += input[x, y, band];
+                        output[x, y, band] = sum[band];
                     }
                 }
             }
