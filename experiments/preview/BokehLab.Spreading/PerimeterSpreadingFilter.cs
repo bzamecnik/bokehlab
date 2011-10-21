@@ -26,7 +26,7 @@
                 // could be generated and added to the Psf description
 
                 //Console.WriteLine("Warning: Trying to spread a PSF with larger radius ({0}) than is available {1}.", radius, Psf.MaxRadius);
-                
+
                 // visualize where the PSF of requested radius is unavalable
                 radius = 0; // Psf.MaxRadius;
             }
@@ -35,21 +35,31 @@
             for (int i = 0; i < deltas.Length; i++)
             {
                 Delta delta = deltas[i];
-                int u = MathHelper.Clamp<int>(x + delta.x, 0, tableWidth - 1);
-                int v = MathHelper.Clamp<int>(y + delta.y, 0, tableHeight - 1);
+                int u = MathHelper.ClampMin<int>(x + delta.x, 0);
+                int v = MathHelper.ClampMin<int>(y + delta.y, 0);
                 float value = weight * delta.value;
-                for (int band = 0; band < bands; band++)
+                if ((u < tableWidth) && (v < tableHeight))
                 {
-                    spreadingImage[u, v, band] += value * origImage[x, y, band];
+                    for (int band = 0; band < bands; band++)
+                    {
+                        spreadingImage[u, v, band] += value * origImage[x, y, band];
+                    }
+                    normalizationImage[u, v, 0] += value;
                 }
-                normalizationImage[u, v, 0] += value;
             }
         }
 
         protected override void Filter(FloatMapImage inputImage, FloatMapImage spreadingTable, FloatMapImage normalizationTable)
         {
             Spread(inputImage, spreadingTable, normalizationTable);
+
+            //spreadingTable.ToBitmap(true).Save("spreading-diffs.png");
+            //normalizationTable.ToBitmap(true).Save("normalization-diffs.png");
+
             IntegrateHorizontally(spreadingTable, normalizationTable);
+
+            //spreadingTable.ToBitmap(true).Save("spreading-horiz.png");
+            //normalizationTable.ToBitmap(true).Save("normalization-horiz.png");
         }
     }
 }

@@ -13,6 +13,18 @@
             return number;
         }
 
+        public static T ClampMax<T>(T number, T max)
+            where T : IComparable<T>
+        {
+            return (number.CompareTo(max) > 0) ? max : number;
+        }
+
+        public static T ClampMin<T>(T number, T min)
+            where T : IComparable<T>
+        {
+            return (number.CompareTo(min) < 0) ? min : number;
+        }
+
         public static double Clamp(double number)
         {
             return Clamp(number, 0.0, 1.0);

@@ -14,15 +14,10 @@
             float psfSide = radius * 2 + 1; // side of a square PSF
             float areaInv = weight / (psfSide * psfSide);
 
-            int top = MathHelper.Clamp<int>(y - radius, 0, tableHeight);
-            int bottom = MathHelper.Clamp<int>(y + radius + 1, 0, tableHeight);
-            int left = MathHelper.Clamp<int>(x - radius, 0, tableWidth);
-            int right = MathHelper.Clamp<int>(x + radius + 1, 0, tableWidth);
-
-            //int top = MathHelper.Clamp<int>(y - radius, 0, tableHeight - 1);
-            //int bottom = MathHelper.Clamp<int>(y + radius + 1, 0, tableHeight - 1);
-            //int left = MathHelper.Clamp<int>(x - radius, 0, tableWidth - 1);
-            //int right = MathHelper.Clamp<int>(x + radius + 1, 0, tableWidth - 1);
+            int top = MathHelper.ClampMin<int>(y - radius, 0);
+            int bottom = MathHelper.ClampMin<int>(y + radius + 1, 0);
+            int left = MathHelper.ClampMin<int>(x - radius, 0);
+            int right = MathHelper.ClampMin<int>(x + radius + 1, 0);
 
             for (int band = 0; band < bands; band++)
             {
