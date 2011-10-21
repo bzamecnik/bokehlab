@@ -26,7 +26,7 @@ namespace BokehLab.Spreading.GLIntegration
             : base(1100, 600)
         {
             spreadingFilter = new RectangleSpreadingFilter();
-            thinLensBlur = new ThinLensDepthMapBlur(50, 20, 100, 1000, 260);
+            thinLensBlur = new ThinLensDepthMapBlur(2, 5, 1, -1, 0);
             spreadingFilter.Blur = thinLensBlur;
         }
 
@@ -34,12 +34,15 @@ namespace BokehLab.Spreading.GLIntegration
 
         uint ColorTexture;
         uint DepthTexture;
+        uint SpreadedTexture;
         uint FBOHandle;
 
         const int TextureSize = 512;
 
         AbstractSpreadingFilter spreadingFilter;
         ThinLensDepthMapBlur thinLensBlur;
+
+        Bitmap spreaded;
 
         #region Randoms
 
@@ -98,6 +101,16 @@ namespace BokehLab.Spreading.GLIntegration
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+
+            // Create spreaded image texture
+            GL.GenTextures(1, out SpreadedTexture);
+            GL.BindTexture(TextureTarget.Texture2D, SpreadedTexture);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, TextureSize, TextureSize, 0, OpenTK.Graphics.OpenGL.PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+
 
             //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureCompareMode, (int)TextureCompareMode.CompareRToTexture);
 
@@ -181,6 +194,7 @@ namespace BokehLab.Spreading.GLIntegration
             #endregion Test for Error
 
             DrawRandomScene();
+            Spread();
 
             Keyboard.KeyUp += KeyUp;
         }
@@ -190,13 +204,20 @@ namespace BokehLab.Spreading.GLIntegration
             if (e.Key == Key.R)
             {
                 DrawRandomScene();
+                Spread();
             }
             if (e.Key == Key.F5)
             {
-                FloatMapImage color = GetColorTexture();
-                FloatMapImage depth = GetDepthTexture();
-                SpreadFrame(color, depth).ToBitmap().Save("spreaded.png", System.Drawing.Imaging.ImageFormat.Png);
+                spreaded.Save("spreaded.png", System.Drawing.Imaging.ImageFormat.Png);
             }
+        }
+
+        private void Spread()
+        {
+            FloatMapImage color = GetColorTexture();
+            FloatMapImage depth = GetDepthTexture();
+            spreaded = SpreadFrame(color, depth).ToBitmap();
+            LoadSpreadedImageTexture(spreaded);
         }
 
         private FloatMapImage GetColorTexture()
@@ -210,7 +231,7 @@ namespace BokehLab.Spreading.GLIntegration
             GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             bmp.UnlockBits(data);
-            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+            //bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
             return bmp.ToFloatMap();
         }
 
@@ -221,38 +242,42 @@ namespace BokehLab.Spreading.GLIntegration
             GL.BindTexture(TextureTarget.Texture2D, DepthTexture);
             GL.GetTexImage(TextureTarget.Texture2D, 0, OpenTK.Graphics.OpenGL.PixelFormat.DepthComponent, PixelType.UnsignedInt, depthBufferUInt32Ptr);
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            // -convert 32-bit uints to (3x grayscale) 8-bit RGB values
-            //   in order to store the pixels to an ordinary image file
-            //   - for now the loss of precision doesn't matter)
-            //   - later the buffer can be stored in a FloatMap without
-            //     any precision loss
-            Bitmap bmp = new Bitmap(TextureSize, TextureSize);
-            System.Drawing.Imaging.BitmapData bmpDataPtr =
-                bmp.LockBits(new System.Drawing.Rectangle(0, 0, TextureSize, TextureSize),
-                             System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                             System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            FloatMapImage depthImage = new FloatMapImage(TextureSize, TextureSize, BokehLab.FloatMap.PixelFormat.Greyscale);
+            var image = depthImage.Image;
+
             unsafe
             {
                 int inputStride = TextureSize;
-                float conversionFactor = 255 / (float)UInt32.MaxValue;
+                float conversionFactor = 1 / (float)UInt32.MaxValue;
                 for (int y = 0; y < TextureSize; y++)
                 {
-                    byte* outputRow = (byte*)bmpDataPtr.Scan0 + (y * bmpDataPtr.Stride);
                     UInt32* inputRow = (UInt32*)depthBufferUInt32Ptr + (y * inputStride);
                     for (int x = 0; x < TextureSize; x++)
                     {
-                        byte color8bit = (byte)(inputRow[x] * conversionFactor);
-                        for (int band = 0; band < 3; band++)
-                        {
-                            outputRow[x * 3 + band] = color8bit;
-                        }
+                        image[x, y, 0] = inputRow[x] * conversionFactor;
                     }
                 }
             }
-            bmp.UnlockBits(bmpDataPtr);
-            bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
-            return bmp.ToFloatMap();
+            return depthImage;
         }
+
+        private void LoadSpreadedImageTexture(Bitmap image)
+        {
+            var imageData = image.LockBits(
+                new Rectangle(0, 0, image.Width, image.Height),
+                System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            GL.BindTexture(TextureTarget.Texture2D, SpreadedTexture);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8,
+                image.Width, image.Height, 0,
+                OpenTK.Graphics.OpenGL.PixelFormat.Bgr, PixelType.UnsignedByte, imageData.Scan0);
+
+            image.UnlockBits(imageData);
+        }
+
 
         private FloatMapImage SpreadFrame(FloatMapImage color, FloatMapImage depth)
         {
@@ -282,7 +307,7 @@ namespace BokehLab.Spreading.GLIntegration
                         GL.Viewport(0, 0, TextureSize, TextureSize);
 
                         // clear the screen in red, to make it very obvious what the clear affected. only the FBO, not the real framebuffer
-                        GL.ClearColor(1f, 0f, 0f, 0f);
+                        //GL.ClearColor(1f, 0f, 0f, 0f);
                         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                         // smack 50 random triangles into the FBO's textures
@@ -392,7 +417,7 @@ namespace BokehLab.Spreading.GLIntegration
 
                 // Draw the Depth Texture
                 GL.Translate(+2.2f, 0f, 0f);
-                GL.BindTexture(TextureTarget.Texture2D, DepthTexture);
+                GL.BindTexture(TextureTarget.Texture2D, SpreadedTexture);
                 GL.Begin(BeginMode.Quads);
                 {
                     GL.TexCoord2(0f, 1f);
