@@ -57,6 +57,21 @@
             return colorImage;
         }
 
+        public static FloatMapImage ExtractChannel(this FloatMapImage inputImage, int band)
+        {
+            int width = (int)inputImage.Width;
+            int height = (int)inputImage.Height;
+            FloatMapImage outputImage = new FloatMapImage((uint)width, (uint)height, PixelFormat.Greyscale, inputImage.Scale);
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    outputImage.Image[x, y, 0] = inputImage.Image[x, y, band];
+                }
+            }
+            return outputImage;
+        }
+
         public static FloatMapImage Integrate(this FloatMapImage inputImage)
         {
             return Integrate(inputImage, false);
@@ -153,6 +168,90 @@
             return outputImage;
         }
 
+        public static FloatMapImage DifferentiateHorizontally(this FloatMapImage inputImage)
+        {
+            return DifferentiateHorizontally(inputImage, false);
+        }
+
+        /// <summary>
+        /// Differentiate an image.
+        /// </summary>
+        /// <param name="inputFloatMap"></param>
+        /// <returns></returns>
+        public static FloatMapImage DifferentiateHorizontally(this FloatMapImage inputImage, bool inPlace)
+        {
+            uint bands = inputImage.TotalChannelsCount;
+            int width = (int)inputImage.Width;
+            int height = (int)inputImage.Height;
+
+            FloatMapImage outputImage;
+            PrepareOutputImage(inputImage, inPlace, out outputImage);
+            float[, ,] input = inputImage.Image;
+            float[, ,] output = outputImage.Image;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int band = 0; band < bands; band++)
+                {
+                    output[0, y, band] = input[0, y, band];
+                }
+                for (int x = 1; x < width; x++)
+                {
+                    for (int band = 0; band < bands; band++)
+                    {
+                        float intensity = input[x, y, band];
+                        output[x, y, band] = input[x, y, band] - input[x - 1, y, band];
+                    }
+                }
+            }
+            return outputImage;
+        }
+
+        public static FloatMapImage DifferentiateVertically(this FloatMapImage inputImage)
+        {
+            return DifferentiateVertically(inputImage, false);
+        }
+
+        /// <summary>
+        /// Differentiate an image.
+        /// </summary>
+        /// <param name="inputFloatMap"></param>
+        /// <returns></returns>
+        public static FloatMapImage DifferentiateVertically(this FloatMapImage inputImage, bool inPlace)
+        {
+            uint bands = inputImage.TotalChannelsCount;
+            int width = (int)inputImage.Width;
+            int height = (int)inputImage.Height;
+
+            FloatMapImage outputImage;
+            PrepareOutputImage(inputImage, inPlace, out outputImage);
+            float[, ,] input = inputImage.Image;
+            float[, ,] output = outputImage.Image;
+
+            // TODO: consider momoizing the previous pixel value
+            //float[] previous = new float[bands];
+            for (int x = 0; x < width; x++)
+            {
+                for (int band = 0; band < bands; band++)
+                {
+                    output[x, 0, band] = input[x, 0, band];
+                    //previous[band] = input[x, 0, band];
+                    //output[x, 0, band] = previous[band];
+                }
+                for (int y = 1; y < height; y++)
+                {
+                    for (int band = 0; band < bands; band++)
+                    {
+                        output[x, y, band] = input[x, y, band] - input[x, y - 1, band];
+                        //float current = input[x, y, band];
+                        //output[x, y, band] = current - previous[band];
+                        //previous[band] = current;
+                    }
+                }
+            }
+            return outputImage;
+        }
+
         public static FloatMapImage IntegrateHorizontally(this FloatMapImage inputImage)
         {
             return IntegrateHorizontally(inputImage, false);
@@ -171,11 +270,15 @@
 
             for (int y = 0; y < height; y++)
             {
+                for (int band = 0; band < bands; band++)
+                {
+                    output[0, y, band] = input[0, y, band];
+                }
                 for (int x = 1; x < width; x++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        output[x, y, band] += input[x - 1, y, band];
+                        output[x, y, band] = output[x - 1, y, band] + input[x, y, band];
                     }
                 }
             }
@@ -201,11 +304,15 @@
 
             for (int x = 0; x < width; x++)
             {
+                for (int band = 0; band < bands; band++)
+                {
+                    output[x, 0, band] = input[x, 0, band];
+                }
                 for (int y = 1; y < height; y++)
                 {
                     for (int band = 0; band < bands; band++)
                     {
-                        output[x, y, band] += input[x, y - 1, band];
+                        output[x, y, band] = output[x, y - 1, band] + input[x, y, band];
                     }
                 }
             }
