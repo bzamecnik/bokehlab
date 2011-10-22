@@ -68,9 +68,10 @@
             while (currentPixel != endPixel)
             {
                 Vector2 corner = currentPixel + relCorner;
-                float crossLength = Vector3.Cross(
-                    new Vector3(corner - current),
-                    new Vector3(rayEnd - current)).Z;
+                //float crossLength = Vector3.Cross(
+                //    new Vector3(corner - current),
+                //    new Vector3(rayEnd - current)).Z;
+                float crossLength = Cross2d(corner - current, rayEnd - current);
 
                 Vector2 nextDir = relDir;
                 if (Math.Abs(crossLength) > Epsilon)
@@ -118,6 +119,11 @@
         private static Vector2 GetPixelCorner(Vector2 position)
         {
             return new Vector2((float)Math.Floor(position.X), (float)Math.Floor(position.Y));
+        }
+
+        private static float Cross2d(Vector2 a, Vector2 b)
+        {
+            return a.X * b.Y - a.Y * b.X;
         }
     }
 }
