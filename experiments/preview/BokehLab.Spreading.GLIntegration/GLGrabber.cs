@@ -9,14 +9,14 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
-
-using OpenTK;
-using OpenTK.Input;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
+using System.IO;
 using System.Runtime.InteropServices;
 using BokehLab.FloatMap;
 using BokehLab.Spreading;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace BokehLab.Spreading.GLIntegration
 {
@@ -30,14 +30,14 @@ namespace BokehLab.Spreading.GLIntegration
             spreadingFilter.Blur = thinLensBlur;
         }
 
-        Font sans = new Font(System.Drawing.FontFamily.GenericSansSerif, 16.0f);
-
         uint ColorTexture;
         uint DepthTexture;
         uint SpreadedTexture;
         uint FBOHandle;
 
         Size TextureSize = new Size(512, 512);//(int)(0.75 * 512));
+
+        int vertexShaderObject, fragmentShaderObject, shaderProgram;
 
         AbstractSpreadingFilter spreadingFilter;
         ThinLensDepthMapBlur thinLensBlur;
@@ -193,6 +193,13 @@ namespace BokehLab.Spreading.GLIntegration
 
             #endregion Test for Error
 
+            using (StreamReader vs = new StreamReader("VertexShader.glsl"))
+            using (StreamReader fs = new StreamReader("FragmentShader.glsl"))
+                CreateShaders(vs.ReadToEnd(), fs.ReadToEnd(),
+                    out vertexShaderObject, out fragmentShaderObject,
+                    out shaderProgram);
+
+
             DrawRandomScene();
             Spread();
 
@@ -322,6 +329,8 @@ namespace BokehLab.Spreading.GLIntegration
 
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBOHandle);
 
+            GL.UseProgram(shaderProgram);
+
             GL.MatrixMode(MatrixMode.Projection);
             GL.PushMatrix();
             {
@@ -378,6 +387,8 @@ namespace BokehLab.Spreading.GLIntegration
             GL.PopMatrix();
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // disable rendering into the FBO
 
+            GL.UseProgram(0);
+
             GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
         }
 
@@ -392,6 +403,11 @@ namespace BokehLab.Spreading.GLIntegration
 
             if (FBOHandle != 0)
                 GL.Ext.DeleteFramebuffers(1, ref FBOHandle);
+
+            if (shaderProgram != 0)
+                GL.DeleteProgram(shaderProgram);
+            if (fragmentShaderObject != 0)
+                GL.DeleteShader(fragmentShaderObject);
         }
 
         protected override void OnResize(EventArgs e)
@@ -471,6 +487,46 @@ namespace BokehLab.Spreading.GLIntegration
 
             this.SwapBuffers();
         }
+
+        #region  Setting up shaders
+
+        void CreateShaders(string vs, string fs,
+            out int vertexObject, out int fragmentObject,
+            out int program)
+        {
+            int statusCode;
+            string info;
+
+            vertexObject = GL.CreateShader(ShaderType.VertexShader);
+            fragmentObject = GL.CreateShader(ShaderType.FragmentShader);
+
+            // Compile vertex shader
+            GL.ShaderSource(vertexObject, vs);
+            GL.CompileShader(vertexObject);
+            GL.GetShaderInfoLog(vertexObject, out info);
+            GL.GetShader(vertexObject, ShaderParameter.CompileStatus, out statusCode);
+
+            if (statusCode != 1)
+                throw new ApplicationException(info);
+
+            // Compile vertex shader
+            GL.ShaderSource(fragmentObject, fs);
+            GL.CompileShader(fragmentObject);
+            GL.GetShaderInfoLog(fragmentObject, out info);
+            GL.GetShader(fragmentObject, ShaderParameter.CompileStatus, out statusCode);
+
+            if (statusCode != 1)
+                throw new ApplicationException(info);
+
+            program = GL.CreateProgram();
+            GL.AttachShader(program, fragmentObject);
+            GL.AttachShader(program, vertexObject);
+
+            GL.LinkProgram(program);
+            //GL.UseProgram(program);
+        }
+
+        #endregion
 
         public static void RunExample()
         {
