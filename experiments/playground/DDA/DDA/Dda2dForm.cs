@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using OpenTK;
+using BokehLab.Math;
 
 namespace DDA
 {
@@ -255,7 +256,8 @@ namespace DDA
         private void DrawVariableScale(Vector2 lineStart, Vector2 lineEnd, Graphics g)
         {
             //DrawLineDDAVariableScale(lineStart, lineEnd, Brushes.Green, g, scale);
-            DrawLineFullDDAVariableScale(lineStart, lineEnd, Brushes.Green, g, scale);
+            //DrawLineFullDDAVariableScale(lineStart, lineEnd, Brushes.Green, g, scale);
+            DrawLineMyFullDDAVariableScale(lineStart, lineEnd, new SolidBrush(Color.FromArgb(128, 0, 100, 0)), g, scale);
         }
 
         private void DrawLineDDAVariableScale(
@@ -410,6 +412,19 @@ namespace DDA
             }
             g.FillRectangle(Brushes.Yellow, end.X * scale, end.Y * scale, 2, 2);
             //g.FillRectangle(Brushes.HotPink, endX * scale, endY * scale, 2, 2);
+        }
+
+        private void DrawLineMyFullDDAVariableScale(
+            Vector2 start, Vector2 end,
+            Brush brush, Graphics g, float scale)
+        {
+            IList<Vector2> pixels = LineFootprint.TraverseFootprint(start, end);
+            foreach (var pixel in pixels)
+            {
+                g.FillRectangle(brush, scale * pixel.X + 1, scale * pixel.Y + 1, scale - 1, scale - 1);
+            }
+            g.FillRectangle(Brushes.Blue, start.X * scale - 1, start.Y * scale - 1, 3, 3);
+            g.FillRectangle(Brushes.Red, end.X * scale - 1, end.Y * scale - 1, 3, 3);
         }
 
         private Point GetRandomPoint(int width, int height)

@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DDA", "DDA\DDA.csproj", "{6437A6DB-110C-4752-8638-D85532A3F2F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Math", "..\..\common\BokehLab.Math\BokehLab.Math.csproj", "{26E431BD-7267-4A7F-914E-229072AAC363}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{6437A6DB-110C-4752-8638-D85532A3F2F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6437A6DB-110C-4752-8638-D85532A3F2F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6437A6DB-110C-4752-8638-D85532A3F2F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26E431BD-7267-4A7F-914E-229072AAC363}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26E431BD-7267-4A7F-914E-229072AAC363}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26E431BD-7267-4A7F-914E-229072AAC363}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26E431BD-7267-4A7F-914E-229072AAC363}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
