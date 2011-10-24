@@ -67,6 +67,12 @@
     <Compile Include="ComplexLensLrtfForm.Designer.cs">
       <DependentUpon>ComplexLensLrtfForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="HeighFieldForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HeighFieldForm.Designer.cs">
+      <DependentUpon>HeighFieldForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SphereIntersectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,6 +89,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ComplexLensLrtfForm.resx">
       <DependentUpon>ComplexLensLrtfForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HeighFieldForm.resx">
+      <DependentUpon>HeighFieldForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SphereIntersectionForm.resx">
       <DependentUpon>SphereIntersectionForm.cs</DependentUpon>

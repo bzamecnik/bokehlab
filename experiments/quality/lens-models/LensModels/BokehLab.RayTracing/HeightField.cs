@@ -4,6 +4,7 @@
     using BokehLab.FloatMap;
     using BokehLab.Math;
     using OpenTK;
+    using System.Diagnostics;
 
     // TODO: project the ray into the frustum space to match it with the depth map
 
@@ -13,19 +14,31 @@
         // layers ordered from near to far depth
         private FloatMapImage[] depthLayers;
 
-        public int layerCount;
+        private int width = 0;
+        private int height = 0;
 
-        public float epsilon;
+        private int layerCount;
+
+        private float epsilon;
 
         public HeightField(FloatMapImage[] depthLayers)
         {
             this.epsilon = 0.001f;
+            Debug.Assert(depthLayers != null);
+            Debug.Assert(depthLayers.Length > 0);
             this.depthLayers = depthLayers;
             this.layerCount = depthLayers.Length;
+            this.width = (int)depthLayers[0].Width;
+            this.height = (int)depthLayers[0].Height;
         }
 
         public float GetDepth(int x, int y, int layer)
         {
+            Debug.Assert(layer < layerCount);
+            Debug.Assert(x >= 0);
+            Debug.Assert(y >= 0);
+            Debug.Assert(x < width);
+            Debug.Assert(x < height);
             return depthLayers[layer].Image[x, y, 0];
         }
 
@@ -61,6 +74,11 @@
         /// - if the was an intersection; null otherwise</returns>
         public Intersection Intersect(Ray ray)
         {
+            if (Math.Abs(ray.Direction.Z) < epsilon)
+            {
+                return null;
+            }
+
             // 2D ray projection onto the height-field plane
             Vector2 rayEnd = (Vector2)(ray.Origin + ray.Direction).Xy;
             Vector2 dir = (Vector2)ray.Direction.Xy;
@@ -82,6 +100,11 @@
 
             while (currentPixel != endPixel)
             {
+                Debug.Assert(currentPixel.X >= 0);
+                Debug.Assert(currentPixel.X < width);
+                Debug.Assert(currentPixel.Y >= 0);
+                Debug.Assert(currentPixel.Y < height);
+
                 // Get a direction of a vector perpendicular to directions
                 // from the current position both to the nearest corner and
                 // the end of the ray (it is aligned with the Z axis).

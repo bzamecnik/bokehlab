@@ -15,7 +15,15 @@ namespace BokehLab.RayTracing.Test.GUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ComplexLensLrtfForm());
+            //Application.Run(new ComplexLensLrtfForm());
+            try
+            {
+                Application.Run(new HeighFieldForm());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }
