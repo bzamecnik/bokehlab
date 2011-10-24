@@ -15,8 +15,8 @@
     public partial class HeighFieldForm : Form
     {
         HeightField heightField = new HeightField(new[] { new FloatMapImage(1, 1, PixelFormat.Greyscale) });
-        FloatMapImage layer;
-        Bitmap layerBitmap;
+        List<FloatMapImage> layers = new List<FloatMapImage>();
+        List<Bitmap> layerBitmaps = new List<Bitmap>();
 
         Point rayStartPoint;
         Point rayEndPoint;
@@ -33,10 +33,6 @@
 
             SetDoubleBuffered(heightFieldPanel);
 
-            //rayStart = new Vector3d(20.5, 30.5, 0);
-            //rayEnd = new Vector3d(25.5, 31.5, 0);
-            rayStartPoint = new Point(82, 76);
-            rayEndPoint = new Point(94, 66);
             rayStart.Z = (double)rayStartZNumeric.Value;
             rayEnd.Z = (double)rayEndZNumeric.Value;
         }
@@ -59,26 +55,45 @@
             aProp.SetValue(c, true, null);
         }
 
-        private void openHeightfieldToolStripMenuItem_Click(object sender, EventArgs e)
+        private void addLayerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                layerBitmap = (Bitmap)Bitmap.FromFile(openFileDialog.FileName);
-                layer = layerBitmap.ToFloatMap();
-                heightField = new HeightField(new FloatMapImage[] { layer });
-                heightFieldPanel.Invalidate();
+                foreach (var fileName in openFileDialog.FileNames)
+                {
+                    Bitmap newLayerBitmap = (Bitmap)Bitmap.FromFile(fileName);
+                    layerBitmaps.Add(newLayerBitmap);
+                    layers.Add(newLayerBitmap.ToFloatMap());
+                }
+                heightField = new HeightField(layers.ToArray());
+                UpdateHeightfieldPanel();
             }
+        }
+
+        private void UpdateHeightfieldPanel()
+        {
+            heightFieldPanel.Size = new Size(heightField.Width, heightField.Height);
+            heightFieldPanel.Invalidate();
+            layerCountLabel.Text = heightField.LayerCount.ToString();
+        }
+
+        private void clearAllLayersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            layerBitmaps.Clear();
+            layers.Clear();
+            heightField = new HeightField(new[] { new FloatMapImage(1, 1, PixelFormat.Greyscale) });
+            UpdateHeightfieldPanel();
         }
 
         private void heightFieldPanel_MouseDown(object sender, MouseEventArgs e)
         {
-            if (layerBitmap == null)
+            if (layers.Count == 0)
             {
                 return;
             }
 
-            if ((e.Location.X < 0) || (e.Location.X > layerBitmap.Width) ||
-                (e.Location.Y < 0) || (e.Location.Y > layerBitmap.Height))
+            if ((e.Location.X < 0) || (e.Location.X > heightField.Width) ||
+                (e.Location.Y < 0) || (e.Location.Y > heightField.Height))
             {
                 return;
             }
@@ -99,13 +114,13 @@
 
         private void heightFieldPanel_MouseMove(object sender, MouseEventArgs e)
         {
-            if ((layerBitmap == null) || !editingRay)
+            if ((layerBitmaps == null) || !editingRay)
             {
                 return;
             }
 
-            if ((e.Location.X < 0) || (e.Location.X >= layerBitmap.Width) ||
-                (e.Location.Y < 0) || (e.Location.Y >= layerBitmap.Height))
+            if ((e.Location.X < 0) || (e.Location.X >= heightField.Width) ||
+                (e.Location.Y < 0) || (e.Location.Y >= heightField.Height))
             {
                 return;
             }
@@ -153,9 +168,9 @@
         private void heightFieldPanel_Paint(object sender, PaintEventArgs e)
         {
             var g = e.Graphics;
-            if (layerBitmap != null)
+            if (layerBitmaps.Count > 0)
             {
-                g.DrawImage(layerBitmap, 0, 0, layerBitmap.Width, layerBitmap.Height);
+                g.DrawImage(layerBitmaps[0], 0, 0, heightField.Width, heightField.Height);
                 g.DrawLine(Pens.DarkGreen, rayStartPoint, rayEndPoint);
                 if (intersection != null)
                 {

@@ -17,7 +17,11 @@
         private int width = 0;
         private int height = 0;
 
+        public int Width { get { return width; } }
+        public int Height { get { return height; } }
+
         private int layerCount;
+        public int LayerCount { get { return layerCount; } }
 
         private float epsilon;
 
@@ -176,32 +180,10 @@
                     }
                 }
 
-                //Console.WriteLine("entry: {0}", entry);
-                //Console.WriteLine("entry: {0}", exit);
-                //Console.WriteLine("current pixel: {0}", currentPixel);
-                //Console.WriteLine("entry corner: {0}", GetPixelCorner(entry.Xy));
-                //Console.WriteLine("exit corner: {0}", GetPixelCorner(entry.Xy));
-                //Console.WriteLine("next dir: {0}", nextDir);
-                //Console.WriteLine();
-
                 entry = exit;
                 currentPixel += nextDir;
                 corner += nextDir;
             }
-
-            //// There remained a little bit of the ray which can intersect the
-            //// current pixel or the ray is perpendicular to the heightfield.
-            //// For the last fragment of the ray the exit point is the ray end
-            //// which might not intersect a pixel edge.
-            //float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
-            //for (int layer = 0; layer < layerCount; layer++)
-            //{
-            //    float pixelZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
-            //    if (IntersectsHeightFieldPixel(entry.Z, endZ, pixelZ))
-            //    {
-            //        return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, pixelZ));
-            //    }
-            //}
 
             return null;
         }

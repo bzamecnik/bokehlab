@@ -30,8 +30,11 @@
         {
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openHeightfieldToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addLayerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearAllLayersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.layerCountLabel = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.rayEndZNumeric = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.intersectionLabel = new System.Windows.Forms.Label();
@@ -65,26 +68,38 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openHeightfieldToolStripMenuItem});
+            this.addLayerToolStripMenuItem,
+            this.clearAllLayersToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "&File";
             // 
-            // openHeightfieldToolStripMenuItem
+            // addLayerToolStripMenuItem
             // 
-            this.openHeightfieldToolStripMenuItem.Name = "openHeightfieldToolStripMenuItem";
-            this.openHeightfieldToolStripMenuItem.Size = new System.Drawing.Size(209, 22);
-            this.openHeightfieldToolStripMenuItem.Text = "&Open height-field layer(s)";
-            this.openHeightfieldToolStripMenuItem.Click += new System.EventHandler(this.openHeightfieldToolStripMenuItem_Click);
+            this.addLayerToolStripMenuItem.Name = "addLayerToolStripMenuItem";
+            this.addLayerToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.addLayerToolStripMenuItem.Text = "&Add height-field layer";
+            this.addLayerToolStripMenuItem.Click += new System.EventHandler(this.addLayerToolStripMenuItem_Click);
+            // 
+            // clearAllLayersToolStripMenuItem
+            // 
+            this.clearAllLayersToolStripMenuItem.Name = "clearAllLayersToolStripMenuItem";
+            this.clearAllLayersToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.clearAllLayersToolStripMenuItem.Text = "&Clear all layers";
+            this.clearAllLayersToolStripMenuItem.Click += new System.EventHandler(this.clearAllLayersToolStripMenuItem_Click);
             // 
             // splitContainer1
             // 
+            this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer1.Location = new System.Drawing.Point(0, 24);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.layerCountLabel);
+            this.splitContainer1.Panel1.Controls.Add(this.label6);
             this.splitContainer1.Panel1.Controls.Add(this.rayEndZNumeric);
             this.splitContainer1.Panel1.Controls.Add(this.label2);
             this.splitContainer1.Panel1.Controls.Add(this.intersectionLabel);
@@ -98,10 +113,28 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.AutoScroll = true;
             this.splitContainer1.Panel2.Controls.Add(this.heightFieldPanel);
             this.splitContainer1.Size = new System.Drawing.Size(685, 400);
-            this.splitContainer1.SplitterDistance = 202;
+            this.splitContainer1.SplitterDistance = 200;
             this.splitContainer1.TabIndex = 1;
+            // 
+            // layerCountLabel
+            // 
+            this.layerCountLabel.AutoSize = true;
+            this.layerCountLabel.Location = new System.Drawing.Point(105, 12);
+            this.layerCountLabel.Name = "layerCountLabel";
+            this.layerCountLabel.Size = new System.Drawing.Size(0, 13);
+            this.layerCountLabel.TabIndex = 3;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(11, 12);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(89, 13);
+            this.label6.TabIndex = 2;
+            this.label6.Text = "Number of layers:";
             // 
             // rayEndZNumeric
             // 
@@ -111,7 +144,7 @@
             0,
             0,
             131072});
-            this.rayEndZNumeric.Location = new System.Drawing.Point(109, 53);
+            this.rayEndZNumeric.Location = new System.Drawing.Point(108, 82);
             this.rayEndZNumeric.Maximum = new decimal(new int[] {
             1,
             0,
@@ -135,7 +168,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 55);
+            this.label2.Location = new System.Drawing.Point(11, 84);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(60, 13);
             this.label2.TabIndex = 0;
@@ -144,7 +177,7 @@
             // intersectionLabel
             // 
             this.intersectionLabel.AutoSize = true;
-            this.intersectionLabel.Location = new System.Drawing.Point(106, 100);
+            this.intersectionLabel.Location = new System.Drawing.Point(105, 129);
             this.intersectionLabel.Name = "intersectionLabel";
             this.intersectionLabel.Size = new System.Drawing.Size(0, 13);
             this.intersectionLabel.TabIndex = 0;
@@ -152,7 +185,7 @@
             // rayEndXYZLabel
             // 
             this.rayEndXYZLabel.AutoSize = true;
-            this.rayEndXYZLabel.Location = new System.Drawing.Point(106, 76);
+            this.rayEndXYZLabel.Location = new System.Drawing.Point(105, 105);
             this.rayEndXYZLabel.Name = "rayEndXYZLabel";
             this.rayEndXYZLabel.Size = new System.Drawing.Size(0, 13);
             this.rayEndXYZLabel.TabIndex = 0;
@@ -160,7 +193,7 @@
             // rayStartXYZLabel
             // 
             this.rayStartXYZLabel.AutoSize = true;
-            this.rayStartXYZLabel.Location = new System.Drawing.Point(106, 31);
+            this.rayStartXYZLabel.Location = new System.Drawing.Point(105, 60);
             this.rayStartXYZLabel.Name = "rayStartXYZLabel";
             this.rayStartXYZLabel.Size = new System.Drawing.Size(0, 13);
             this.rayStartXYZLabel.TabIndex = 0;
@@ -168,7 +201,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 100);
+            this.label5.Location = new System.Drawing.Point(11, 129);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(65, 13);
             this.label5.TabIndex = 0;
@@ -177,7 +210,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 76);
+            this.label4.Location = new System.Drawing.Point(11, 105);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(86, 13);
             this.label4.TabIndex = 0;
@@ -186,7 +219,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 31);
+            this.label3.Location = new System.Drawing.Point(11, 60);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(88, 13);
             this.label3.TabIndex = 0;
@@ -200,7 +233,7 @@
             0,
             0,
             131072});
-            this.rayStartZNumeric.Location = new System.Drawing.Point(109, 3);
+            this.rayStartZNumeric.Location = new System.Drawing.Point(108, 32);
             this.rayStartZNumeric.Maximum = new decimal(new int[] {
             1,
             0,
@@ -219,7 +252,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 5);
+            this.label1.Location = new System.Drawing.Point(11, 34);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(62, 13);
             this.label1.TabIndex = 0;
@@ -227,13 +260,10 @@
             // 
             // heightFieldPanel
             // 
-            this.heightFieldPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.heightFieldPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.heightFieldPanel.Location = new System.Drawing.Point(3, 3);
             this.heightFieldPanel.Name = "heightFieldPanel";
-            this.heightFieldPanel.Size = new System.Drawing.Size(473, 394);
+            this.heightFieldPanel.Size = new System.Drawing.Size(473, 392);
             this.heightFieldPanel.TabIndex = 0;
             this.heightFieldPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.heightFieldPanel_Paint);
             this.heightFieldPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.heightFieldPanel_MouseMove);
@@ -243,6 +273,7 @@
             // openFileDialog
             // 
             this.openFileDialog.Filter = "PNG files|*.png|All files|*.*";
+            this.openFileDialog.Multiselect = true;
             // 
             // HeighFieldForm
             // 
@@ -253,7 +284,7 @@
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "HeighFieldForm";
-            this.Text = "HeighFieldForm";
+            this.Text = "BokehLab - ray height-field intersection";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -271,7 +302,7 @@
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openHeightfieldToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addLayerToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.NumericUpDown rayEndZNumeric;
@@ -285,5 +316,8 @@
         private System.Windows.Forms.Panel heightFieldPanel;
         private System.Windows.Forms.Label intersectionLabel;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ToolStripMenuItem clearAllLayersToolStripMenuItem;
+        private System.Windows.Forms.Label layerCountLabel;
+        private System.Windows.Forms.Label label6;
     }
 }
