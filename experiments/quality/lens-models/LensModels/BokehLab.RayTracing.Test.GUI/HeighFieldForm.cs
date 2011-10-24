@@ -33,8 +33,10 @@
 
             SetDoubleBuffered(heightFieldPanel);
 
-            rayStart = new Vector3d(20.5, 30.5, 0);
-            rayEnd = new Vector3d(25.5, 31.5, 0);
+            //rayStart = new Vector3d(20.5, 30.5, 0);
+            //rayEnd = new Vector3d(25.5, 31.5, 0);
+            rayStartPoint = new Point(82, 76);
+            rayEndPoint = new Point(94, 66);
             rayStart.Z = (double)rayStartZNumeric.Value;
             rayEnd.Z = (double)rayEndZNumeric.Value;
         }
@@ -85,8 +87,8 @@
             {
                 editingRay = true;
                 rayStartPoint = e.Location;
-                rayStart.X = rayStartPoint.X;
-                rayStart.Y = rayStartPoint.Y;
+                //rayStart.X = rayStartPoint.X;
+                //rayStart.Y = rayStartPoint.Y;
             }
         }
 
@@ -102,15 +104,15 @@
                 return;
             }
 
-            if ((e.Location.X < 0) || (e.Location.X > layerBitmap.Width) ||
-                (e.Location.Y < 0) || (e.Location.Y > layerBitmap.Height))
+            if ((e.Location.X < 0) || (e.Location.X >= layerBitmap.Width) ||
+                (e.Location.Y < 0) || (e.Location.Y >= layerBitmap.Height))
             {
                 return;
             }
 
             rayEndPoint = e.Location;
-            rayEnd.X = rayEndPoint.X;
-            rayEnd.Y = rayEndPoint.Y;
+            //rayEnd.X = rayEndPoint.X;
+            //rayEnd.Y = rayEndPoint.Y;
 
             ComputeIntersection();
         }
@@ -123,6 +125,12 @@
 
         private void ComputeIntersection()
         {
+            rayEnd.X = rayEndPoint.X;
+            rayEnd.Y = rayEndPoint.Y;
+
+            rayStart.X = rayStartPoint.X;
+            rayStart.Y = rayStartPoint.Y;
+
             intersection = heightField.Intersect(new Ray(rayStart, rayEnd - rayStart));
             intersectionLabel.Text = (intersection != null) ? intersection.Position.ToString() : "none";
 
@@ -148,12 +156,11 @@
             if (layerBitmap != null)
             {
                 g.DrawImage(layerBitmap, 0, 0, layerBitmap.Width, layerBitmap.Height);
-            }
-            g.DrawLine(Pens.DarkGreen, rayStartPoint, rayEndPoint);
-
-            if (intersection != null)
-            {
-                g.DrawRectangle(Pens.Red, (int)intersection.Position.X, (int)intersection.Position.Y, 1, 1);
+                g.DrawLine(Pens.DarkGreen, rayStartPoint, rayEndPoint);
+                if (intersection != null)
+                {
+                    g.DrawRectangle(Pens.Red, (int)intersection.Position.X, (int)intersection.Position.Y, 1, 1);
+                }
             }
         }
     }

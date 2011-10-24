@@ -38,7 +38,7 @@
             Debug.Assert(x >= 0);
             Debug.Assert(y >= 0);
             Debug.Assert(x < width);
-            Debug.Assert(x < height);
+            Debug.Assert(y < height);
             return depthLayers[layer].Image[x, y, 0];
         }
 
@@ -90,52 +90,69 @@
             Vector2 relDir = new Vector2(Math.Sign(dir.X), Math.Sign(dir.Y));
             // converted to a single pixel: [1,1], [1,0], [0,1] or [0,0]
             Vector2 relCorner = 0.5f * (relDir + new Vector2(1, 1));
+            bool isDirectionAxisAligned = Math.Sign(relDir.X) * Math.Sign(relDir.Y) == 0;
 
             // point where the 2D ray projection enters the current pixel
             Vector3 entry = (Vector3)ray.Origin;
+            // note that current pixel
             Vector2 currentPixel = GetPixelCorner(entry.Xy);
-            Vector2 endPixel = GetPixelCorner(rayEnd);
-            // absolute position of the nearest corner
-            Vector2 corner = currentPixel + relCorner;
-
-            while (currentPixel != endPixel)
+            if ((entry.X % 1.0f < epsilon) || (entry.Y % 1.0f < epsilon))
             {
-                Debug.Assert(currentPixel.X >= 0);
-                Debug.Assert(currentPixel.X < width);
-                Debug.Assert(currentPixel.Y >= 0);
-                Debug.Assert(currentPixel.Y < height);
+                // In case the ray entry point is on a pixel edge
+                // move it a bit forward.
+                currentPixel = GetPixelCorner(entry.Xy + epsilon * Vector2.NormalizeFast((Vector2)ray.Direction.Xy));
+            }
+            Vector2 endPixel = GetPixelCorner(rayEnd);
 
-                // Get a direction of a vector perpendicular to directions
-                // from the current position both to the nearest corner and
-                // the end of the ray (it is aligned with the Z axis).
+            // absolute position of the nearest corner
+            Vector2 corner = currentPixel;
+            if (isDirectionAxisAligned)
+            {
+                corner += relCorner;
+            }
 
-                float crossLength = Cross2d(corner - entry.Xy, rayEnd - entry.Xy);
-                // it is equavalent to:
-                // float crossLength = Vector3.Cross(new Vector3(corner - entry.Xy), new Vector3(rayEnd - entry.Xy)).Z;
-
-                // The direction of the cross vector determines the relative
-                // orientation of the two examined vectors:
-                // 0 (+- epsilon) -> go across the corner
-                // 1 -> go to the clockwise edge
-                // -1 -> go to the counter-clockwise edge
+            while ((entry.Xy - endPixel).LengthFast > epsilon)
+            {
+                if ((currentPixel.X < 0) || (currentPixel.X >= width) ||
+                    (currentPixel.Y < 0) || (currentPixel.Y >= height))
+                {
+                    return null;
+                }
 
                 Vector2 nextDir = relDir; // across the corner by default
-                if (Math.Abs(crossLength) > epsilon)
+                if (!isDirectionAxisAligned)
                 {
-                    // add a vector perpendicular in one or another direction
-                    // to get a vector 45 degrees apart from the corner
-                    Vector2 ccw = new Vector2(-relDir.Y, relDir.X);
-                    if (crossLength > 0)
+                    // Get a direction of a vector perpendicular to directions
+                    // from the current position both to the nearest corner and
+                    // the end of the ray (it is aligned with the Z axis).
+
+                    float crossLength = Cross2d(corner - entry.Xy, rayEnd - entry.Xy);
+                    // it is equavalent to:
+                    // float crossLength = Vector3.Cross(new Vector3(corner - entry.Xy), new Vector3(rayEnd - entry.Xy)).Z;
+
+                    // The direction of the cross vector determines the relative
+                    // orientation of the two examined vectors:
+                    // 0 (+- epsilon) -> go across the corner
+                    // > 0 -> go to the clockwise edge
+                    // < 0 -> go to the counter-clockwise edge
+
+                    if (Math.Abs(crossLength) > epsilon)
                     {
-                        // (relDir + ccw) / 2 -> clockwise edge
-                        nextDir += ccw;
+                        // add a vector perpendicular in one or another direction
+                        // to get a vector 45 degrees apart from the corner
+                        Vector2 cw = new Vector2(-relDir.Y, relDir.X);
+                        if (crossLength > 0)
+                        {
+                            // (relDir + ccw) / 2 -> clockwise edge
+                            nextDir += cw;
+                        }
+                        else
+                        {
+                            // (relDir - ccw) / 2 -> counter-clockwise edge
+                            nextDir -= cw;
+                        }
+                        nextDir *= 0.5f;
                     }
-                    else
-                    {
-                        // (relDir - ccw) / 2 -> counter-clockwise edge
-                        nextDir -= ccw;
-                    }
-                    nextDir *= 0.5f;
                 }
 
                 // point where the 2D ray projection exits the current pixel
@@ -159,24 +176,32 @@
                     }
                 }
 
+                //Console.WriteLine("entry: {0}", entry);
+                //Console.WriteLine("entry: {0}", exit);
+                //Console.WriteLine("current pixel: {0}", currentPixel);
+                //Console.WriteLine("entry corner: {0}", GetPixelCorner(entry.Xy));
+                //Console.WriteLine("exit corner: {0}", GetPixelCorner(entry.Xy));
+                //Console.WriteLine("next dir: {0}", nextDir);
+                //Console.WriteLine();
+
                 entry = exit;
                 currentPixel += nextDir;
                 corner += nextDir;
             }
 
-            // There remained a little bit of the ray which can intersect the
-            // current pixel or the ray is perpendicular to the heightfield.
-            // For the last fragment of the ray the exit point is the ray end
-            // which might not intersect a pixel edge.
-            float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
-            for (int layer = 0; layer < layerCount; layer++)
-            {
-                float pixelZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
-                if (IntersectsHeightFieldPixel(entry.Z, endZ, pixelZ))
-                {
-                    return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, pixelZ));
-                }
-            }
+            //// There remained a little bit of the ray which can intersect the
+            //// current pixel or the ray is perpendicular to the heightfield.
+            //// For the last fragment of the ray the exit point is the ray end
+            //// which might not intersect a pixel edge.
+            //float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
+            //for (int layer = 0; layer < layerCount; layer++)
+            //{
+            //    float pixelZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
+            //    if (IntersectsHeightFieldPixel(entry.Z, endZ, pixelZ))
+            //    {
+            //        return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, pixelZ));
+            //    }
+            //}
 
             return null;
         }
