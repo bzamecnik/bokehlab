@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HeightFieldTest.cs" />
     <Compile Include="Lens\LensRayTransferFunctionTest.cs" />
     <Compile Include="Lens\BiconvexLensTest.cs" />
     <Compile Include="Lens\ComplexLensTest.cs" />
@@ -59,6 +60,10 @@
     <Compile Include="Lens\ThinLensTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\common\BokehLab.FloatMap\BokehLab.FloatMap.csproj">
+      <Project>{A742CC09-6F5E-436F-A4F5-EB3153E00710}</Project>
+      <Name>BokehLab.FloatMap</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\common\BokehLab.Math\BokehLab.Math.csproj">
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>

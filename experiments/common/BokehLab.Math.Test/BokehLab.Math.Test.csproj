@@ -51,7 +51,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LineFootprintTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SamplingTest.cs" />
   </ItemGroup>
