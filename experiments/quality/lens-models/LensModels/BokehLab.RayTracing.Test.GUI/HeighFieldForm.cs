@@ -14,7 +14,8 @@
 
     public partial class HeighFieldForm : Form
     {
-        HeightField heightField = new HeightField(new[] { new FloatMapImage(1, 1, PixelFormat.Greyscale) });
+        static readonly HeightField emptyHeightField = new HeightField(new FloatMapImage[] { }) { Width = 15, Height = 10 };
+        HeightField heightField = emptyHeightField;
         List<FloatMapImage> layers = new List<FloatMapImage>();
         List<Bitmap> layerBitmaps = new List<Bitmap>();
 
@@ -25,16 +26,25 @@
 
         bool editingRay = false;
 
+        bool updatingGuiVectors = false;
+
         Intersection intersection;
+        List<Vector2> visitedPixels;
+        List<Vector2> visitedEntryPoints;
+
+        float footprintScale = 32.0f;
 
         public HeighFieldForm()
         {
             InitializeComponent();
 
             SetDoubleBuffered(heightFieldPanel);
+            SetDoubleBuffered(footprintTraversalPanel);
 
-            rayStart.Z = (double)rayStartZNumeric.Value;
-            rayEnd.Z = (double)rayEndZNumeric.Value;
+            rayStart.Z = 0;
+            rayEnd.Z = 1;
+
+            UpdateHeightfieldPanel();
         }
 
         public static void SetDoubleBuffered(System.Windows.Forms.Control c)
@@ -72,8 +82,10 @@
 
         private void UpdateHeightfieldPanel()
         {
-            heightFieldPanel.Size = new Size(heightField.Width, heightField.Height);
+            heightFieldPanel.Size = new Size(heightField.Width, heightField.Height); ;
+            footprintTraversalPanel.Size = new Size((int)(footprintScale * heightField.Width) + 1, (int)(footprintScale * heightField.Height) + 1); ;
             heightFieldPanel.Invalidate();
+            footprintTraversalPanel.Invalidate();
             layerCountLabel.Text = heightField.LayerCount.ToString();
         }
 
@@ -81,30 +93,40 @@
         {
             layerBitmaps.Clear();
             layers.Clear();
-            heightField = new HeightField(new[] { new FloatMapImage(1, 1, PixelFormat.Greyscale) });
+            heightField = emptyHeightField;
             UpdateHeightfieldPanel();
         }
 
         private void heightFieldPanel_MouseDown(object sender, MouseEventArgs e)
         {
-            if (layers.Count == 0)
-            {
-                return;
-            }
-
-            if ((e.Location.X < 0) || (e.Location.X > heightField.Width) ||
-                (e.Location.Y < 0) || (e.Location.Y > heightField.Height))
-            {
-                return;
-            }
-
             if (e.Button == MouseButtons.Left)
             {
-                editingRay = true;
-                rayStartPoint = e.Location;
-                //rayStart.X = rayStartPoint.X;
-                //rayStart.Y = rayStartPoint.Y;
+                panelMouseDown(e.Location, 1);
             }
+        }
+
+        private void footprintTraversalPanel_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                panelMouseDown(e.Location, footprintScale);
+            }
+        }
+
+        private void panelMouseDown(Point location, float scale)
+        {
+            if ((location.X < 0) || (location.X >= heightField.Width * scale) ||
+                (location.Y < 0) || (location.Y >= heightField.Height * scale))
+            {
+                return;
+            }
+
+            editingRay = true;
+            rayStartPoint = location;
+            rayStart.X = rayStartPoint.X / scale;
+            rayStart.Y = rayStartPoint.Y / scale;
+
+            UpdateGui();
         }
 
         private void heightFieldPanel_MouseUp(object sender, MouseEventArgs e)
@@ -112,57 +134,78 @@
             editingRay = false;
         }
 
-        private void heightFieldPanel_MouseMove(object sender, MouseEventArgs e)
+        private void footprintTraversalPanel_MouseUp(object sender, MouseEventArgs e)
         {
-            if ((layerBitmaps == null) || !editingRay)
-            {
-                return;
-            }
-
-            if ((e.Location.X < 0) || (e.Location.X >= heightField.Width) ||
-                (e.Location.Y < 0) || (e.Location.Y >= heightField.Height))
-            {
-                return;
-            }
-
-            rayEndPoint = e.Location;
-            //rayEnd.X = rayEndPoint.X;
-            //rayEnd.Y = rayEndPoint.Y;
-
-            ComputeIntersection();
+            editingRay = false;
         }
 
-        private void UpdateRayLabels()
+        private void heightFieldPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            panelMouseMove(e.Location, 1, false);
+        }
+
+        private void footprintTraversalPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            panelMouseMove(e.Location, footprintScale, true);
+        }
+
+        private void panelMouseMove(Point location, float scale, bool computeDebugInfo)
+        {
+            if (!editingRay)
+            {
+                return;
+            }
+
+            if ((location.X < 0) || (location.X >= heightField.Width * scale) ||
+                (location.Y < 0) || (location.Y >= heightField.Height * scale))
+            {
+                return;
+            }
+
+            rayEndPoint = location;
+            rayEnd.X = rayEndPoint.X / scale;
+            rayEnd.Y = rayEndPoint.Y / scale;
+
+            UpdateGui();
+
+            ComputeIntersection(computeDebugInfo);
+        }
+
+        private void UpdateGui()
         {
             rayStartXYZLabel.Text = rayStart.ToString();
             rayEndXYZLabel.Text = rayEnd.ToString();
+
+            updatingGuiVectors = true;
+
+            rayStartXNumeric.Value = (decimal)rayStart.X;
+            rayStartYNumeric.Value = (decimal)rayStart.Y;
+            rayStartZNumeric.Value = (decimal)rayStart.Z;
+
+            rayEndXNumeric.Value = (decimal)rayEnd.X;
+            rayEndYNumeric.Value = (decimal)rayEnd.Y;
+            rayEndZNumeric.Value = (decimal)rayEnd.Z;
+
+            updatingGuiVectors = false;
         }
 
-        private void ComputeIntersection()
+        private void ComputeIntersection(bool withDebugInfo)
         {
-            rayEnd.X = rayEndPoint.X;
-            rayEnd.Y = rayEndPoint.Y;
-
-            rayStart.X = rayStartPoint.X;
-            rayStart.Y = rayStartPoint.Y;
-
-            intersection = heightField.Intersect(new Ray(rayStart, rayEnd - rayStart));
+            if (withDebugInfo)
+            {
+                visitedPixels = new List<Vector2>();
+                visitedEntryPoints = new List<Vector2>();
+            }
+            else
+            {
+                visitedPixels = null;
+                visitedEntryPoints = null;
+            }
+            intersection = heightField.Intersect(new Ray(rayStart, rayEnd - rayStart), ref visitedPixels, ref visitedEntryPoints);
             intersectionLabel.Text = (intersection != null) ? intersection.Position.ToString() : "none";
 
-            UpdateRayLabels();
             heightFieldPanel.Invalidate();
-        }
-
-        private void rayStartZNumeric_ValueChanged(object sender, EventArgs e)
-        {
-            rayStart.Z = (float)rayStartZNumeric.Value;
-            ComputeIntersection();
-        }
-
-        private void rayEndZNumeric_ValueChanged(object sender, EventArgs e)
-        {
-            rayEnd.Z = (float)rayEndZNumeric.Value;
-            ComputeIntersection();
+            footprintTraversalPanel.Invalidate();
         }
 
         private void heightFieldPanel_Paint(object sender, PaintEventArgs e)
@@ -177,6 +220,104 @@
                     g.DrawRectangle(Pens.Red, (int)intersection.Position.X, (int)intersection.Position.Y, 1, 1);
                 }
             }
+        }
+
+        private void rayStartXNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            if (!updatingGuiVectors)
+            {
+                rayStart.X = (float)rayStartXNumeric.Value;
+            }
+        }
+
+        private void rayStartYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            if (!updatingGuiVectors)
+            {
+                rayStart.Y = (float)rayStartYNumeric.Value;
+            }
+        }
+
+        private void rayStartZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            if (!updatingGuiVectors)
+            {
+                rayStart.Z = (float)rayStartZNumeric.Value;
+            }
+        }
+
+        private void rayEndXNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            if (!updatingGuiVectors)
+            {
+                rayEnd.X = (float)rayEndXNumeric.Value;
+            }
+        }
+
+        private void rayEndYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            if (!updatingGuiVectors)
+            {
+                rayEnd.Y = (float)rayEndYNumeric.Value;
+            }
+        }
+
+        private void rayEndZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            if (!updatingGuiVectors)
+            {
+                rayEnd.Z = (float)rayEndZNumeric.Value;
+            }
+        }
+
+        private void recomputeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ComputeIntersection(true);
+        }
+
+        private void DrawGrid(Graphics g, Size size, float scale)
+        {
+            float width = size.Width * scale;
+            float height = size.Height * scale;
+
+            for (int y = 0; y <= size.Height; y++)
+            {
+                g.DrawLine(Pens.DarkOliveGreen, 0, y * scale, width - 1, y * scale);
+            }
+            for (int x = 0; x <= size.Width; x++)
+            {
+                g.DrawLine(Pens.DarkOliveGreen, x * scale, 0, x * scale, height - 1);
+            }
+        }
+
+        private void footprintTraversalPanel_Paint(object sender, PaintEventArgs e)
+        {
+            float scale = footprintScale;
+            var g = e.Graphics;
+            g.Clear(Color.Black);
+            DrawGrid(g, new Size(heightField.Width, heightField.Height), scale);
+
+            Brush brush = new SolidBrush(Color.FromArgb(128, 0, 100, 0));
+
+            if (visitedPixels != null)
+            {
+                foreach (var pixel in visitedPixels)
+                {
+                    g.FillRectangle(brush, scale * pixel.X + 1, scale * pixel.Y + 1, scale - 1, scale - 1);
+                }
+            }
+            if (visitedEntryPoints != null)
+            {
+                foreach (var entryPoint in visitedEntryPoints)
+                {
+                    g.FillRectangle(Brushes.Red, entryPoint.X * scale - 1, entryPoint.Y * scale - 1, 3, 3);
+                }
+            }
+
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.DrawLine(new Pen(Color.FromArgb(128, 255, 255, 255), 1),
+                (float)rayStart.X * scale, (float)rayStart.Y * scale,
+                (float)rayEnd.X * scale, (float)rayEnd.Y * scale);
         }
     }
 }

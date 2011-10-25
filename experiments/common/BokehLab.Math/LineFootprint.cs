@@ -40,7 +40,7 @@
         /// </para>
         /// <para>
         /// The algorithm assumes that X coordinate goes rightward a Y upwards
-        /// for the CW and CCW names, however it work even for Y pointing the
+        /// for the CW and CCW names, however it works even for Y pointing the
         /// other direction.
         /// </para>
         /// </remarks>
