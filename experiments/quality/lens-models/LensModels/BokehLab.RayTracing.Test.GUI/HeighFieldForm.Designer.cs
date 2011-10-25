@@ -79,7 +79,7 @@
             this.intersectionToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(685, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(992, 24);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -138,7 +138,7 @@
             // 
             this.splitContainer1.Panel2.AutoScroll = true;
             this.splitContainer1.Panel2.Controls.Add(this.tabControl1);
-            this.splitContainer1.Size = new System.Drawing.Size(685, 400);
+            this.splitContainer1.Size = new System.Drawing.Size(992, 526);
             this.splitContainer1.SplitterDistance = 200;
             this.splitContainer1.TabIndex = 1;
             // 
@@ -180,7 +180,7 @@
             -2147483648});
             this.rayEndZNumeric.Name = "rayEndZNumeric";
             this.rayEndZNumeric.Size = new System.Drawing.Size(55, 20);
-            this.rayEndZNumeric.TabIndex = 1;
+            this.rayEndZNumeric.TabIndex = 6;
             this.rayEndZNumeric.Value = new decimal(new int[] {
             1,
             0,
@@ -264,7 +264,7 @@
             0});
             this.rayEndYNumeric.Name = "rayEndYNumeric";
             this.rayEndYNumeric.Size = new System.Drawing.Size(55, 20);
-            this.rayEndYNumeric.TabIndex = 1;
+            this.rayEndYNumeric.TabIndex = 5;
             this.rayEndYNumeric.ValueChanged += new System.EventHandler(this.rayEndYNumeric_ValueChanged);
             // 
             // rayStartYNumeric
@@ -283,7 +283,7 @@
             0});
             this.rayStartYNumeric.Name = "rayStartYNumeric";
             this.rayStartYNumeric.Size = new System.Drawing.Size(55, 20);
-            this.rayStartYNumeric.TabIndex = 1;
+            this.rayStartYNumeric.TabIndex = 2;
             this.rayStartYNumeric.ValueChanged += new System.EventHandler(this.rayStartYNumeric_ValueChanged);
             // 
             // rayEndXNumeric
@@ -302,7 +302,7 @@
             0});
             this.rayEndXNumeric.Name = "rayEndXNumeric";
             this.rayEndXNumeric.Size = new System.Drawing.Size(55, 20);
-            this.rayEndXNumeric.TabIndex = 1;
+            this.rayEndXNumeric.TabIndex = 4;
             this.rayEndXNumeric.ValueChanged += new System.EventHandler(this.rayEndXNumeric_ValueChanged);
             // 
             // rayStartXNumeric
@@ -345,7 +345,7 @@
             -2147483648});
             this.rayStartZNumeric.Name = "rayStartZNumeric";
             this.rayStartZNumeric.Size = new System.Drawing.Size(55, 20);
-            this.rayStartZNumeric.TabIndex = 1;
+            this.rayStartZNumeric.TabIndex = 3;
             this.rayStartZNumeric.ValueChanged += new System.EventHandler(this.rayStartZNumeric_ValueChanged);
             // 
             // label1
@@ -367,8 +367,8 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(473, 392);
-            this.tabControl1.TabIndex = 1;
+            this.tabControl1.Size = new System.Drawing.Size(780, 518);
+            this.tabControl1.TabIndex = 7;
             // 
             // tabPage1
             // 
@@ -377,7 +377,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(465, 366);
+            this.tabPage1.Size = new System.Drawing.Size(772, 492);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Height-field";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -387,7 +387,7 @@
             this.heightFieldPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.heightFieldPanel.Location = new System.Drawing.Point(3, 3);
             this.heightFieldPanel.Name = "heightFieldPanel";
-            this.heightFieldPanel.Size = new System.Drawing.Size(459, 360);
+            this.heightFieldPanel.Size = new System.Drawing.Size(763, 483);
             this.heightFieldPanel.TabIndex = 0;
             this.heightFieldPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.heightFieldPanel_Paint);
             this.heightFieldPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.heightFieldPanel_MouseMove);
@@ -401,7 +401,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(465, 366);
+            this.tabPage2.Size = new System.Drawing.Size(772, 492);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Line footprint traversal";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -431,7 +431,7 @@
             // 
             this.footprintTraversalPanel.Location = new System.Drawing.Point(6, 6);
             this.footprintTraversalPanel.Name = "footprintTraversalPanel";
-            this.footprintTraversalPanel.Size = new System.Drawing.Size(453, 356);
+            this.footprintTraversalPanel.Size = new System.Drawing.Size(760, 483);
             this.footprintTraversalPanel.TabIndex = 0;
             this.footprintTraversalPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.footprintTraversalPanel_Paint);
             this.footprintTraversalPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.footprintTraversalPanel_MouseMove);
@@ -442,7 +442,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(685, 424);
+            this.ClientSize = new System.Drawing.Size(992, 550);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;

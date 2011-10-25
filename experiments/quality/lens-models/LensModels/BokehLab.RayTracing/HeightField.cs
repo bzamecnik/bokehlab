@@ -115,23 +115,31 @@
             // point where the 2D ray projection enters the current pixel
             Vector3 entry = (Vector3)ray.Origin;
             // note that current pixel
-            Vector2 currentPixel = GetPixelCorner(entry.Xy);
-            if ((entry.X % 1.0f < epsilon) || (entry.Y % 1.0f < epsilon))
-            {
-                // In case the ray entry point is on a pixel edge
-                // move it a bit forward.
-                currentPixel = GetPixelCorner(entry.Xy + epsilon * Vector2.NormalizeFast((Vector2)ray.Direction.Xy));
-            }
-            Vector2 endPixel = GetPixelCorner(rayEnd);
+
+            //Vector2 currentPixel = GetPixelCorner(entry.Xy);
+            //if ((entry.X % 1.0f < epsilon) || (entry.Y % 1.0f < epsilon))
+            //{
+            //    // In case the ray entry point is on a pixel edge
+            //    // move it a bit forward.
+            //    currentPixel = GetPixelCorner(entry.Xy + epsilon * Vector2.NormalizeFast((Vector2)ray.Direction.Xy));
+            //}
+            //Vector2 endPixel = GetPixelCorner(rayEnd);
+
+            Vector2 currentPixel = GetPixelCorner(entry.Xy, relDir);
+            Vector2 endPixel = GetPixelCorner(rayEnd, -relDir);
 
             // absolute position of the nearest corner
-            Vector2 corner = currentPixel;
-            if (isDirectionAxisAligned)
-            {
-                corner += relCorner;
-            }
 
-            while ((entry.Xy - endPixel).LengthFast > epsilon)
+            Vector2 corner = currentPixel + relDir;
+
+            //Vector2 corner = currentPixel;
+            //if (!isDirectionAxisAligned)
+            //{
+            //corner += relCorner;
+            //}
+
+            while (currentPixel != endPixel)
+            //while ((currentPixel - endPixel).LengthFast > epsilon)
             {
                 if (collectDebugInfo)
                 {
@@ -218,6 +226,31 @@
                 corner += nextDir;
             }
 
+            if (collectDebugInfo)
+            {
+                visitedPixels.Add(currentPixel);
+                entryPoints.Add(entry.Xy);
+            }
+
+            if (entry.Xy != currentPixel)
+            {
+
+                for (int layer = 0; layer < layerCount; layer++)
+                {
+                    // Tests whether a ray going over a height field pixel intersects it or not.
+                    //
+                    // There is an intersection if the heightfield pixel depth is between
+                    // depths of ray entry and exit points. In case of equality (up to
+                    // epsilon) the ray touches the pixel. Otherwise it misses the pixel.
+                    float layerZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
+                    float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
+                    if (Math.Sign(entry.Z - layerZ) != Math.Sign(endZ - layerZ))
+                    {
+                        return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
+                    }
+                }
+            }
+
             return null;
         }
 
@@ -242,10 +275,24 @@
             }
         }
 
-        private static Vector2 GetPixelCorner(Vector2 position)
+        private Vector2 GetPixelCorner(Vector2 position, Vector2 relDir)
         {
-            return new Vector2((float)Math.Floor(position.X), (float)Math.Floor(position.Y));
+            Vector2 corner = new Vector2((float)Math.Floor(position.X), (float)Math.Floor(position.Y));
+            if ((relDir.X < 0) && (position.X - corner.X < epsilon))
+            {
+                corner.X -= 1;
+            }
+            if ((relDir.Y < 0) && (position.Y - corner.Y < epsilon))
+            {
+                corner.Y -= 1;
+            }
+            return corner;
         }
+
+        //private static Vector2 GetPixelCorner(Vector2 position)
+        //{
+        //    return new Vector2((float)Math.Floor(position.X), (float)Math.Floor(position.Y));
+        //}
 
         private static float Cross2d(Vector2 a, Vector2 b)
         {

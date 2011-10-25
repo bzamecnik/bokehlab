@@ -14,7 +14,7 @@
 
     public partial class HeighFieldForm : Form
     {
-        static readonly HeightField emptyHeightField = new HeightField(new FloatMapImage[] { }) { Width = 15, Height = 10 };
+        static readonly HeightField emptyHeightField = new HeightField(new FloatMapImage[] { }) { Width = 30, Height = 20 };
         HeightField heightField = emptyHeightField;
         List<FloatMapImage> layers = new List<FloatMapImage>();
         List<Bitmap> layerBitmaps = new List<Bitmap>();
@@ -308,9 +308,14 @@
             }
             if (visitedEntryPoints != null)
             {
+                int i = 1;
+                float totalInv = 1f / visitedEntryPoints.Count;
                 foreach (var entryPoint in visitedEntryPoints)
                 {
-                    g.FillRectangle(Brushes.Red, entryPoint.X * scale - 1, entryPoint.Y * scale - 1, 3, 3);
+                    float ratio = 255 * i * totalInv;
+                    Brush b = new SolidBrush(Color.FromArgb(255, (int)ratio, 128, (int)(255 - ratio)));
+                    g.FillRectangle(b, entryPoint.X * scale - 1, entryPoint.Y * scale - 1, 3, 3);
+                    i++;
                 }
             }
 
