@@ -29,8 +29,7 @@
         bool updatingGuiVectors = false;
 
         Intersection intersection;
-        List<Vector2> visitedPixels;
-        List<Vector2> visitedEntryPoints;
+        HeightField.FootprintDebugInfo footprintDebugInfo;
 
         float footprintScale = 32.0f;
 
@@ -193,15 +192,13 @@
         {
             if (withDebugInfo)
             {
-                visitedPixels = new List<Vector2>();
-                visitedEntryPoints = new List<Vector2>();
+                footprintDebugInfo = new HeightField.FootprintDebugInfo();
             }
             else
             {
-                visitedPixels = null;
-                visitedEntryPoints = null;
+                footprintDebugInfo = null;
             }
-            intersection = heightField.Intersect(new Ray(rayStart, rayEnd - rayStart), ref visitedPixels, ref visitedEntryPoints);
+            intersection = heightField.Intersect(new Ray(rayStart, rayEnd - rayStart), ref footprintDebugInfo);
             intersectionLabel.Text = (intersection != null) ? intersection.Position.ToString() : "none";
 
             heightFieldPanel.Invalidate();
@@ -298,19 +295,20 @@
             DrawGrid(g, new Size(heightField.Width, heightField.Height), scale);
 
             Brush brush = new SolidBrush(Color.FromArgb(128, 0, 100, 0));
+            Brush brushStart = new SolidBrush(Color.FromArgb(128, 100, 0, 0));
+            Brush brushEnd = new SolidBrush(Color.FromArgb(128, 0, 0, 100));
 
-            if (visitedPixels != null)
+            if (footprintDebugInfo != null)
             {
-                foreach (var pixel in visitedPixels)
+                foreach (var pixel in footprintDebugInfo.VisitedPixels)
                 {
                     g.FillRectangle(brush, scale * pixel.X + 1, scale * pixel.Y + 1, scale - 1, scale - 1);
                 }
-            }
-            if (visitedEntryPoints != null)
-            {
+                g.FillRectangle(brushStart, scale * footprintDebugInfo.StartPixel.X + 1, scale * footprintDebugInfo.StartPixel.Y + 1, scale - 1, scale - 1);
+                g.FillRectangle(brushEnd, scale * footprintDebugInfo.EndPixel.X + 1, scale * footprintDebugInfo.EndPixel.Y + 1, scale - 1, scale - 1);
                 int i = 1;
-                float totalInv = 1f / visitedEntryPoints.Count;
-                foreach (var entryPoint in visitedEntryPoints)
+                float totalInv = 1f / footprintDebugInfo.EntryPoints.Count;
+                foreach (var entryPoint in footprintDebugInfo.EntryPoints)
                 {
                     float ratio = 255 * i * totalInv;
                     Brush b = new SolidBrush(Color.FromArgb(255, (int)ratio, 128, (int)(255 - ratio)));
