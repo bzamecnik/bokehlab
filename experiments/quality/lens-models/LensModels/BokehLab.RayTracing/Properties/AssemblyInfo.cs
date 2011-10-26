@@ -35,4 +35,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
+[assembly: InternalsVisibleToAttribute("BokehLab.RayTracing.Test")]
 [assembly: InternalsVisibleToAttribute("BokehLab.RayTracing.Test.GUI")]

@@ -58,7 +58,13 @@
 
         private static void MeasureIntersectionPerformance(HeightField heightfield, Vector3d start, Vector3d end, int iterations)
         {
-            Ray ray = new Ray(start, end - start);
+            Vector3d direction = end - start;
+            Ray ray = new Ray(start, direction);
+
+            HeightField.FootprintDebugInfo debugInfo = new HeightField.FootprintDebugInfo();
+            heightfield.Intersect(ray, ref debugInfo);
+            int visitedPixels = debugInfo.VisitedPixels.Count;
+
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 0; i < iterations; i++)
             {
@@ -66,10 +72,13 @@
             }
             sw.Stop();
 
+            Console.WriteLine("Visited pixels: {0}", visitedPixels);
             Console.WriteLine("Iterations: {0}", iterations);
             Console.WriteLine("Total time: {0} ms", sw.ElapsedMilliseconds);
-            Console.WriteLine("Average time: {0} ms", sw.ElapsedMilliseconds / (double)iterations);
-            Console.WriteLine("Throughput: {0} isec/s", iterations / ((double)sw.ElapsedMilliseconds * 0.001));
+            Console.WriteLine("Average time: {0:0.000} ms", sw.ElapsedMilliseconds / (double)iterations);
+            double throughput = iterations / ((double)sw.ElapsedMilliseconds * 0.001);
+            Console.WriteLine("Throughput: {0:0.000} traversals/s", throughput);
+            Console.WriteLine("Throughput of visited pixels: {0:0.000} Mpx/s", throughput * visitedPixels * 1e-6);
         }
 
         private static void TryFootprintTraversalPerformance()
@@ -77,12 +86,16 @@
             //HeightField heightfield = new HeightField(1000, 1000);
             //Vector3d start = new Vector3d(2.5, 1.5, 0);
             //Vector3d end = new Vector3d(999.5, 998.5, 1);
-            //int iterations = 10000;
 
             HeightField heightfield = new HeightField(200, 200);
             Vector3d start = new Vector3d(169, 181, 0);
             Vector3d end = new Vector3d(14, 191, 1);
-            int iterations = 1000;
+
+            //HeightField heightfield = new HeightField(200, 200);
+            //Vector3d start = new Vector3d(100, 100.1, 0);
+            //Vector3d end = new Vector3d(102.1, 102.2, 1);
+
+            int iterations = 100000;
             MeasureIntersectionPerformance(heightfield, start, end, iterations);
         }
 
