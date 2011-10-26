@@ -10,6 +10,11 @@
 
     // TODO: project the ray into the frustum space to match it with the depth map
 
+    // Assume the height field depth values are in range [0.0; 1.0] ~ [near; far].
+    // Value 1.0 also mean no data.
+    // Values in layers within each pixel are assumed to be ordered by increasing
+    // depth - the input data are assumed to be obtained by depth peeling.
+
     public class HeightField : IIntersectable
     {
         // [X,Y,layer]
@@ -26,6 +31,7 @@
         public int LayerCount { get { return layerCount; } }
 
         private float epsilon;
+        public float Epsilon { get { return epsilon; } set { epsilon = value; } }
 
         public HeightField(int width, int height)
             : this(new FloatMapImage[] { })
@@ -50,7 +56,7 @@
 
         public float GetDepth(int x, int y, int layer)
         {
-            //Debug.Assert(layer < layerCount);
+            Debug.Assert(layer < layerCount);
             Debug.Assert(x >= 0);
             Debug.Assert(y >= 0);
             Debug.Assert(x < width);
@@ -115,7 +121,7 @@
             Vector2 rayDzOverDxy = (float)ray.Direction.Z * dirInv;
             // direction to the nearest corner: [1,1], [1,-1], [-1,1] or [-1,-1]
             Vector2 relDir = new Vector2(Math.Sign(dir.X), Math.Sign(dir.Y));
-            bool isDirectionAxisAligned = Math.Sign(relDir.X) * Math.Sign(relDir.Y) == 0;
+            bool isDirectionAxisAligned = relDir.X * relDir.Y == 0;
             // relDir converted to a single pixel: [1,1], [1,0], [0,1] or [0,0]
             Vector2 relCorner = isDirectionAxisAligned ? relDir : (0.5f * (relDir + new Vector2(1, 1)));
 
@@ -136,7 +142,6 @@
             Vector2 corner = currentPixel + relCorner;
 
             while (currentPixel != endPixel)
-            //while ((currentPixel - endPixel).LengthFast > epsilon)
             {
                 if (collectDebugInfo)
                 {
@@ -163,11 +168,11 @@
                     // from the current position both to the nearest corner and
                     // the end of the ray (it is aligned with the Z axis).
 
-                    //float crossLength = Cross2d(corner - entryXY, rayEnd - entryXY);
                     float crossLength = (corner.X - entryXY.X) * (rayEnd.Y - entryXY.Y)
                         - (corner.Y - entryXY.Y) * (rayEnd.X - entryXY.X);
-
-                    // it is equavalent to:
+                    //   it is equavalent to:
+                    // float crossLength = Cross2d(corner - entryXY, rayEnd - entryXY);
+                    //   or to:
                     // float crossLength = Vector3.Cross(new Vector3(corner - entryXY), new Vector3(rayEnd - entryXY)).Z;
 
                     // The direction of the cross vector determines the relative
@@ -215,8 +220,18 @@
                     // depths of ray entry and exit points. In case of equality (up to
                     // epsilon) the ray touches the pixel. Otherwise it misses the pixel.
                     float layerZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
+                    if (layerZ == 1)
+                    {
+                        // Assume that value 1 (far plane) means no data.
+                        // Thus all layers behind at this pixel will have also value 1.
+                        break;
+                    }
                     if (Math.Sign(entry.Z - layerZ) != Math.Sign(exit.Z - layerZ))
                     {
+                        if (collectDebugInfo)
+                        {
+                            debugInfo.LayerOfIntersection = layer;
+                        }
                         return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
                     }
                 }
@@ -241,9 +256,19 @@
                 // depths of ray entry and exit points. In case of equality (up to
                 // epsilon) the ray touches the pixel. Otherwise it misses the pixel.
                 float layerZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
+                if (layerZ == 1)
+                {
+                    // Assume that value 1 (far plane) means no data.
+                    // Thus all layers behind at this pixel will have also value 1.
+                    break;
+                }
                 float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
                 if (Math.Sign(entry.Z - layerZ) != Math.Sign(endZ - layerZ))
                 {
+                    if (collectDebugInfo)
+                    {
+                        debugInfo.LayerOfIntersection = layer;
+                    }
                     return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
                 }
             }
@@ -252,7 +277,7 @@
         }
 
         private static Vector2 IntersectPixelEdge2d(
-            Vector2 rayStart,
+            Vector2 entry,
             Vector2 dir,
             Vector2 dirInv,
             Vector2 corner,
@@ -260,15 +285,15 @@
         {
             if (nextDir.X == 0)
             {
-                //return rayStart - dir * (rayStart.Y - corner.Y) * dirInv.Y;
-                float a = (rayStart.Y - corner.Y) * dirInv.Y;
-                return new Vector2(rayStart.X - dir.X * a, rayStart.Y - dir.Y * a);
+                //return entry - dir * (entry.Y - corner.Y) * dirInv.Y;
+                float a = (entry.Y - corner.Y) * dirInv.Y;
+                return new Vector2(entry.X - dir.X * a, entry.Y - dir.Y * a);
             }
             else if (nextDir.Y == 0)
             {
-                //return rayStart - dir * (rayStart.X - corner.X) * dirInv.X;
-                float a = (rayStart.X - corner.X) * dirInv.X;
-                return new Vector2(rayStart.X - dir.X * a, rayStart.Y - dir.Y * a);
+                //return entry - dir * (entry.X - corner.X) * dirInv.X;
+                float a = (entry.X - corner.X) * dirInv.X;
+                return new Vector2(entry.X - dir.X * a, entry.Y - dir.Y * a);
             }
             else
             {
@@ -301,6 +326,7 @@
             public List<Vector2> EntryPoints;
             public Vector2 StartPixel;
             public Vector2 EndPixel;
+            public int LayerOfIntersection;
 
             public FootprintDebugInfo()
             {

@@ -140,7 +140,8 @@
 
         private void heightFieldPanel_MouseMove(object sender, MouseEventArgs e)
         {
-            panelMouseMove(e.Location, 1, false);
+            //panelMouseMove(e.Location, 1, false);
+            panelMouseMove(e.Location, 1, true);
         }
 
         private void footprintTraversalPanel_MouseMove(object sender, MouseEventArgs e)
@@ -190,6 +191,8 @@
 
         private void ComputeIntersection(bool withDebugInfo)
         {
+            rayStartPoint = new Point((int)rayStart.X, (int)rayStart.Y);
+            rayEndPoint = new Point((int)rayEnd.X, (int)rayEnd.Y);
             if (withDebugInfo)
             {
                 footprintDebugInfo = new HeightField.FootprintDebugInfo();
@@ -200,6 +203,7 @@
             }
             intersection = heightField.Intersect(new Ray(rayStart, rayEnd - rayStart), ref footprintDebugInfo);
             intersectionLabel.Text = (intersection != null) ? intersection.Position.ToString() : "none";
+            isecLayerLabel.Text = (footprintDebugInfo != null) && (intersection != null) ? footprintDebugInfo.LayerOfIntersection.ToString() : "";
 
             heightFieldPanel.Invalidate();
             footprintTraversalPanel.Invalidate();

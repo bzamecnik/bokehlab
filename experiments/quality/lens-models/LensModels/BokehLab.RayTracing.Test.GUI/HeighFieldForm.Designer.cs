@@ -32,6 +32,8 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addLayerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearAllLayersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.intersectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.recomputeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.layerCountLabel = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
@@ -53,10 +55,10 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.heightFieldPanel = new System.Windows.Forms.Panel();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.intersectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.recomputeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.footprintTraversalPanel = new System.Windows.Forms.Panel();
+            this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label7 = new System.Windows.Forms.Label();
+            this.isecLayerLabel = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -107,6 +109,22 @@
             this.clearAllLayersToolStripMenuItem.Text = "&Clear all layers";
             this.clearAllLayersToolStripMenuItem.Click += new System.EventHandler(this.clearAllLayersToolStripMenuItem_Click);
             // 
+            // intersectionToolStripMenuItem
+            // 
+            this.intersectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.recomputeToolStripMenuItem});
+            this.intersectionToolStripMenuItem.Name = "intersectionToolStripMenuItem";
+            this.intersectionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
+            this.intersectionToolStripMenuItem.Text = "Intersection";
+            // 
+            // recomputeToolStripMenuItem
+            // 
+            this.recomputeToolStripMenuItem.Name = "recomputeToolStripMenuItem";
+            this.recomputeToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
+            this.recomputeToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
+            this.recomputeToolStripMenuItem.Text = "&Recompute";
+            this.recomputeToolStripMenuItem.Click += new System.EventHandler(this.recomputeToolStripMenuItem_Click);
+            // 
             // splitContainer1
             // 
             this.splitContainer1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -121,9 +139,11 @@
             this.splitContainer1.Panel1.Controls.Add(this.label6);
             this.splitContainer1.Panel1.Controls.Add(this.rayEndZNumeric);
             this.splitContainer1.Panel1.Controls.Add(this.label2);
+            this.splitContainer1.Panel1.Controls.Add(this.isecLayerLabel);
             this.splitContainer1.Panel1.Controls.Add(this.intersectionLabel);
             this.splitContainer1.Panel1.Controls.Add(this.rayEndXYZLabel);
             this.splitContainer1.Panel1.Controls.Add(this.rayStartXYZLabel);
+            this.splitContainer1.Panel1.Controls.Add(this.label7);
             this.splitContainer1.Panel1.Controls.Add(this.label5);
             this.splitContainer1.Panel1.Controls.Add(this.label4);
             this.splitContainer1.Panel1.Controls.Add(this.label3);
@@ -406,27 +426,6 @@
             this.tabPage2.Text = "Line footprint traversal";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // openFileDialog
-            // 
-            this.openFileDialog.Filter = "PNG files|*.png|All files|*.*";
-            this.openFileDialog.Multiselect = true;
-            // 
-            // intersectionToolStripMenuItem
-            // 
-            this.intersectionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.recomputeToolStripMenuItem});
-            this.intersectionToolStripMenuItem.Name = "intersectionToolStripMenuItem";
-            this.intersectionToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
-            this.intersectionToolStripMenuItem.Text = "Intersection";
-            // 
-            // recomputeToolStripMenuItem
-            // 
-            this.recomputeToolStripMenuItem.Name = "recomputeToolStripMenuItem";
-            this.recomputeToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.recomputeToolStripMenuItem.Size = new System.Drawing.Size(176, 22);
-            this.recomputeToolStripMenuItem.Text = "&Recompute";
-            this.recomputeToolStripMenuItem.Click += new System.EventHandler(this.recomputeToolStripMenuItem_Click);
-            // 
             // footprintTraversalPanel
             // 
             this.footprintTraversalPanel.Location = new System.Drawing.Point(6, 6);
@@ -437,6 +436,28 @@
             this.footprintTraversalPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.footprintTraversalPanel_MouseMove);
             this.footprintTraversalPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.footprintTraversalPanel_MouseDown);
             this.footprintTraversalPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.footprintTraversalPanel_MouseUp);
+            // 
+            // openFileDialog
+            // 
+            this.openFileDialog.Filter = "PNG files|*.png|All files|*.*";
+            this.openFileDialog.Multiselect = true;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(11, 186);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(90, 13);
+            this.label7.TabIndex = 0;
+            this.label7.Text = "Intersection layer:";
+            // 
+            // isecLayerLabel
+            // 
+            this.isecLayerLabel.AutoSize = true;
+            this.isecLayerLabel.Location = new System.Drawing.Point(108, 186);
+            this.isecLayerLabel.Name = "isecLayerLabel";
+            this.isecLayerLabel.Size = new System.Drawing.Size(0, 13);
+            this.isecLayerLabel.TabIndex = 0;
             // 
             // HeighFieldForm
             // 
@@ -499,5 +520,7 @@
         private System.Windows.Forms.ToolStripMenuItem intersectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem recomputeToolStripMenuItem;
         private System.Windows.Forms.Panel footprintTraversalPanel;
+        private System.Windows.Forms.Label isecLayerLabel;
+        private System.Windows.Forms.Label label7;
     }
 }

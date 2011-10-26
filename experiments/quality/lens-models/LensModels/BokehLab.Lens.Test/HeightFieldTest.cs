@@ -72,6 +72,7 @@
             }
             sw.Stop();
 
+            Console.WriteLine("Ray length: {0:0.0}", direction.Length);
             Console.WriteLine("Visited pixels: {0}", visitedPixels);
             Console.WriteLine("Iterations: {0}", iterations);
             Console.WriteLine("Total time: {0} ms", sw.ElapsedMilliseconds);
@@ -90,6 +91,8 @@
             HeightField heightfield = new HeightField(200, 200);
             Vector3d start = new Vector3d(169, 181, 0);
             Vector3d end = new Vector3d(14, 191, 1);
+            //Vector3d start = new Vector3d(178, 180, 0);
+            //Vector3d end = new Vector3d(33, 38, 1);
 
             //HeightField heightfield = new HeightField(200, 200);
             //Vector3d start = new Vector3d(100, 100.1, 0);
@@ -106,9 +109,14 @@
             layers.Add(((Bitmap)Bitmap.FromFile("../../data/2011-05-30_04-50-47_depth_1.png")).ToFloatMap());
             layers.Add(((Bitmap)Bitmap.FromFile("../../data/2011-05-30_04-50-47_depth_2.png")).ToFloatMap());
             layers.Add(((Bitmap)Bitmap.FromFile("../../data/2011-05-30_04-50-47_depth_3.png")).ToFloatMap());
+            layers.Add(((Bitmap)Bitmap.FromFile("../../data/2011-05-30_04-50-47_depth_4.png")).ToFloatMap());
             HeightField heightfield = new HeightField(layers);
+            // no isec
             Vector3d start = new Vector3d(169, 181, 0);
             Vector3d end = new Vector3d(14, 191, 1);
+            // isec at layer 4
+            //Vector3d start = new Vector3d(178, 180, 0);
+            //Vector3d end = new Vector3d(33, 38, 1);
             int iterations = 100000;
             MeasureIntersectionPerformance(heightfield, start, end, iterations);
         }
