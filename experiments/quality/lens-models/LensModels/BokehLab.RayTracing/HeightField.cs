@@ -110,6 +110,7 @@
             {
                 return null;
             }
+            bool rayGoesFromDepth = ray.Direction.Z < 0;
 
             Vector3 rayOrigin = (Vector3)ray.Origin;
             // 2D ray projection onto the height field plane
@@ -212,28 +213,10 @@
                 }
 
                 // compute intersection with the height field pixel (in several layers)
-                for (int layer = 0; layer < layerCount; layer++)
+                Intersection isec = IntersectLayerAtPixel(currentPixel, entry.Z, exit.Z, rayGoesFromDepth, collectDebugInfo, debugInfo);
+                if (isec != null)
                 {
-                    // Tests whether a ray going over a height field pixel intersects it or not.
-                    //
-                    // There is an intersection if the heightfield pixel depth is between
-                    // depths of ray entry and exit points. In case of equality (up to
-                    // epsilon) the ray touches the pixel. Otherwise it misses the pixel.
-                    float layerZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
-                    if (layerZ == 1)
-                    {
-                        // Assume that value 1 (far plane) means no data.
-                        // Thus all layers behind at this pixel will have also value 1.
-                        break;
-                    }
-                    if (Math.Sign(entry.Z - layerZ) != Math.Sign(exit.Z - layerZ))
-                    {
-                        if (collectDebugInfo)
-                        {
-                            debugInfo.LayerOfIntersection = layer;
-                        }
-                        return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
-                    }
+                    return isec;
                 }
 
                 entry = exit;
@@ -242,12 +225,24 @@
                 corner += nextDir;
             }
 
+            // tail of the ray (the end pixel)
             if (collectDebugInfo)
             {
                 debugInfo.VisitedPixels.Add(currentPixel);
                 debugInfo.EntryPoints.Add(entryXY);
             }
+            float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
+            return IntersectLayerAtPixel(currentPixel, entry.Z, endZ, rayGoesFromDepth, collectDebugInfo, debugInfo);
+        }
 
+        private Intersection IntersectLayerAtPixel(
+            Vector2 currentPixel,
+            float entryZ,
+            float exitZ,
+            bool rayGoesFromDepth,
+            bool collectDebugInfo,
+            FootprintDebugInfo debugInfo)
+        {
             for (int layer = 0; layer < layerCount; layer++)
             {
                 // Tests whether a ray going over a height field pixel intersects it or not.
@@ -256,14 +251,12 @@
                 // depths of ray entry and exit points. In case of equality (up to
                 // epsilon) the ray touches the pixel. Otherwise it misses the pixel.
                 float layerZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
-                if (layerZ == 1)
+                if ((layerZ == 1) || ((layerZ > exitZ) ^ rayGoesFromDepth))
                 {
-                    // Assume that value 1 (far plane) means no data.
-                    // Thus all layers behind at this pixel will have also value 1.
+                    // Early termination.
                     break;
                 }
-                float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
-                if (Math.Sign(entry.Z - layerZ) != Math.Sign(endZ - layerZ))
+                if (Math.Sign(entryZ - layerZ) != Math.Sign(exitZ - layerZ))
                 {
                     if (collectDebugInfo)
                     {
@@ -272,7 +265,6 @@
                     return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
                 }
             }
-
             return null;
         }
 

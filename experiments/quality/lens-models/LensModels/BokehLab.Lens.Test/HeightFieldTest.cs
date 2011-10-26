@@ -62,7 +62,7 @@
             Ray ray = new Ray(start, direction);
 
             HeightField.FootprintDebugInfo debugInfo = new HeightField.FootprintDebugInfo();
-            heightfield.Intersect(ray, ref debugInfo);
+            Intersection isec = heightfield.Intersect(ray, ref debugInfo);
             int visitedPixels = debugInfo.VisitedPixels.Count;
 
             Stopwatch sw = Stopwatch.StartNew();
@@ -72,6 +72,7 @@
             }
             sw.Stop();
 
+            Console.WriteLine("Intersection?: {0}", isec != null);
             Console.WriteLine("Ray length: {0:0.0}", direction.Length);
             Console.WriteLine("Visited pixels: {0}", visitedPixels);
             Console.WriteLine("Iterations: {0}", iterations);
@@ -89,10 +90,14 @@
             //Vector3d end = new Vector3d(999.5, 998.5, 1);
 
             HeightField heightfield = new HeightField(200, 200);
-            Vector3d start = new Vector3d(169, 181, 0);
-            Vector3d end = new Vector3d(14, 191, 1);
+            //Vector3d start = new Vector3d(169, 181, 0);
+            //Vector3d end = new Vector3d(14, 191, 1);
             //Vector3d start = new Vector3d(178, 180, 0);
             //Vector3d end = new Vector3d(33, 38, 1);
+            //Vector3d start = new Vector3d(9, 190, 0);
+            //Vector3d end = new Vector3d(131, 19, 1);
+            Vector3d start = new Vector3d(100, 100, 0);
+            Vector3d end = new Vector3d(104.5, 105.5, 1);
 
             //HeightField heightfield = new HeightField(200, 200);
             //Vector3d start = new Vector3d(100, 100.1, 0);
@@ -112,11 +117,16 @@
             layers.Add(((Bitmap)Bitmap.FromFile("../../data/2011-05-30_04-50-47_depth_4.png")).ToFloatMap());
             HeightField heightfield = new HeightField(layers);
             // no isec
-            Vector3d start = new Vector3d(169, 181, 0);
-            Vector3d end = new Vector3d(14, 191, 1);
+            //Vector3d start = new Vector3d(169, 181, 0);
+            //Vector3d end = new Vector3d(14, 191, 1);
             // isec at layer 4
             //Vector3d start = new Vector3d(178, 180, 0);
             //Vector3d end = new Vector3d(33, 38, 1);
+            // no isec with 5 layers, traversing the filled areas
+            //Vector3d start = new Vector3d(9, 190, 0);
+            //Vector3d end = new Vector3d(131, 19, 1);
+            Vector3d start = new Vector3d(100, 100, 0);
+            Vector3d end = new Vector3d(117.5, 115.5, 1);
             int iterations = 100000;
             MeasureIntersectionPerformance(heightfield, start, end, iterations);
         }
