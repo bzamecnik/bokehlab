@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using BokehLab.FloatMap;
     using BokehLab.Math;
     using OpenTK;
@@ -26,17 +27,24 @@
 
         private float epsilon;
 
-        public HeightField(FloatMapImage[] depthLayers)
+        public HeightField(int width, int height)
+            : this(new FloatMapImage[] { })
+        {
+            this.width = width;
+            this.height = height;
+        }
+
+        public HeightField(IEnumerable<FloatMapImage> depthLayers)
         {
             this.epsilon = 0.001f;
             Debug.Assert(depthLayers != null);
             //Debug.Assert(depthLayers.Length > 0);
-            this.depthLayers = depthLayers;
-            this.layerCount = depthLayers.Length;
+            this.depthLayers = depthLayers.ToArray();
+            this.layerCount = this.depthLayers.Length;
             if (layerCount > 0)
             {
-                this.width = (int)depthLayers[0].Width;
-                this.height = (int)depthLayers[0].Height;
+                this.width = (int)this.depthLayers[0].Width;
+                this.height = (int)this.depthLayers[0].Height;
             }
         }
 
