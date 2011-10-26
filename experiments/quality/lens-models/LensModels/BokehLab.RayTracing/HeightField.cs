@@ -105,6 +105,7 @@
                 return null;
             }
 
+            Vector3 rayOrigin = (Vector3)ray.Origin;
             // 2D ray projection onto the height field plane
             Vector2 rayEnd = (Vector2)(ray.Origin + ray.Direction).Xy;
             Vector2 dir = (Vector2)ray.Direction.Xy;
@@ -120,8 +121,9 @@
 
             // point where the 2D ray projection enters the current pixel
             Vector3 entry = (Vector3)ray.Origin;
+            Vector2 entryXY = entry.Xy;
 
-            Vector2 currentPixel = GetPixelCorner(entry.Xy, relDir);
+            Vector2 currentPixel = GetPixelCorner(entryXY, relDir);
             Vector2 endPixel = GetPixelCorner(rayEnd, -relDir);
 
             if (collectDebugInfo)
@@ -139,7 +141,7 @@
                 if (collectDebugInfo)
                 {
                     debugInfo.VisitedPixels.Add(currentPixel);
-                    debugInfo.EntryPoints.Add(entry.Xy);
+                    debugInfo.EntryPoints.Add(entryXY);
                 }
 
                 if ((currentPixel.X < 0) || (currentPixel.X >= width) ||
@@ -161,9 +163,12 @@
                     // from the current position both to the nearest corner and
                     // the end of the ray (it is aligned with the Z axis).
 
-                    float crossLength = Cross2d(corner - entry.Xy, rayEnd - entry.Xy);
+                    //float crossLength = Cross2d(corner - entryXY, rayEnd - entryXY);
+                    float crossLength = (corner.X - entryXY.X) * (rayEnd.Y - entryXY.Y)
+                        - (corner.Y - entryXY.Y) * (rayEnd.X - entryXY.X);
+
                     // it is equavalent to:
-                    // float crossLength = Vector3.Cross(new Vector3(corner - entry.Xy), new Vector3(rayEnd - entry.Xy)).Z;
+                    // float crossLength = Vector3.Cross(new Vector3(corner - entryXY), new Vector3(rayEnd - entryXY)).Z;
 
                     // The direction of the cross vector determines the relative
                     // orientation of the two examined vectors:
@@ -191,14 +196,14 @@
                 }
 
                 // point where the 2D ray projection exits the current pixel
-                Vector3 exit = new Vector3(IntersectPixelEdge2d(entry.Xy, dir, dirInv, corner, nextDir));
+                Vector3 exit = new Vector3(IntersectPixelEdge2d(entryXY, dir, dirInv, corner, nextDir));
                 if (rayGoesRatherHorizontal)
                 {
-                    exit.Z = (float)(ray.Origin.Z + (exit.X - ray.Origin.X) * rayDzOverDxy.X);
+                    exit.Z = rayOrigin.Z + (exit.X - rayOrigin.X) * rayDzOverDxy.X;
                 }
                 else
                 {
-                    exit.Z = (float)(ray.Origin.Z + (exit.Y - ray.Origin.Y) * rayDzOverDxy.Y);
+                    exit.Z = rayOrigin.Z + (exit.Y - rayOrigin.Y) * rayDzOverDxy.Y;
                 }
 
                 // compute intersection with the height field pixel (in several layers)
@@ -217,6 +222,7 @@
                 }
 
                 entry = exit;
+                entryXY = entry.Xy;
                 currentPixel += nextDir;
                 corner += nextDir;
             }
@@ -224,7 +230,7 @@
             if (collectDebugInfo)
             {
                 debugInfo.VisitedPixels.Add(currentPixel);
-                debugInfo.EntryPoints.Add(entry.Xy);
+                debugInfo.EntryPoints.Add(entryXY);
             }
 
             for (int layer = 0; layer < layerCount; layer++)
@@ -254,11 +260,15 @@
         {
             if (nextDir.X == 0)
             {
-                return rayStart - dir * (rayStart.Y - corner.Y) * dirInv.Y;
+                //return rayStart - dir * (rayStart.Y - corner.Y) * dirInv.Y;
+                float a = (rayStart.Y - corner.Y) * dirInv.Y;
+                return new Vector2(rayStart.X - dir.X * a, rayStart.Y - dir.Y * a);
             }
             else if (nextDir.Y == 0)
             {
-                return rayStart - dir * (rayStart.X - corner.X) * dirInv.X;
+                //return rayStart - dir * (rayStart.X - corner.X) * dirInv.X;
+                float a = (rayStart.X - corner.X) * dirInv.X;
+                return new Vector2(rayStart.X - dir.X * a, rayStart.Y - dir.Y * a);
             }
             else
             {
