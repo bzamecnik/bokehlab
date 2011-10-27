@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.RayTracing.Test.GU
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.LrtfSampler", "BokehLab.LrtfSampler\BokehLab.LrtfSampler.csproj", "{042A9512-FE6D-4158-9664-00C6045E6FA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.NBuffers", "..\..\..\common\BokehLab.NBuffers\BokehLab.NBuffers.csproj", "{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -118,6 +120,16 @@ Global
 		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{042A9512-FE6D-4158-9664-00C6045E6FA6}.Release|x86.ActiveCfg = Release|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CD3C63E9-09EF-4F61-A37F-95C91751EAA9}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

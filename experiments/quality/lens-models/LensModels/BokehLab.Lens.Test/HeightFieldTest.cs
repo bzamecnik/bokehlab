@@ -1,15 +1,16 @@
 ﻿namespace BokehLab.RayTracing.Test
 {
     using System;
-    using System.Diagnostics;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Drawing;
     using System.Linq;
     using System.Text;
-    using BokehLab.Math;
-    using OpenTK;
-    using BokehLab.RayTracing;
     using BokehLab.FloatMap;
-    using System.Drawing;
+    using BokehLab.Math;
+    using BokehLab.NBuffers;
+    using BokehLab.RayTracing;
+    using OpenTK;
 
     class HeightFieldTest
     {
@@ -129,6 +130,22 @@
             Vector3d end = new Vector3d(117.5, 115.5, 1);
             int iterations = 100000;
             MeasureIntersectionPerformance(heightfield, start, end, iterations);
+        }
+
+        private static void CreateNBuffersFromOneDepthMap()
+        {
+            var depthMap = ((Bitmap)Bitmap.FromFile("../../data/2011-05-30_04-50-47_depth_0.png")).ToFloatMap();
+            Stopwatch sw = Stopwatch.StartNew();
+            NeighborhoodBuffer nbuffer = new NeighborhoodBuffer(depthMap);
+            sw.Stop();
+            Console.WriteLine("N-Buffers created in {0} ms", sw.ElapsedMilliseconds);
+            Console.WriteLine("Size: {0}x{1}", nbuffer.Width, nbuffer.Height);
+            Console.WriteLine("Number of levels: {0}", nbuffer.LevelCount);
+            for (int i = 0; i < nbuffer.LevelCount; i++)
+            {
+                nbuffer.minLevels[i].ToBitmap().Save(String.Format("nbuffer_min_{0}.png", i));
+                nbuffer.maxLevels[i].ToBitmap().Save(String.Format("nbuffer_max_{0}.png", i));
+            }
         }
     }
 }
