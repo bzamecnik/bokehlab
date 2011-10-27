@@ -39,9 +39,11 @@
             this.label6 = new System.Windows.Forms.Label();
             this.rayEndZNumeric = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
+            this.isecLayerLabel = new System.Windows.Forms.Label();
             this.intersectionLabel = new System.Windows.Forms.Label();
             this.rayEndXYZLabel = new System.Windows.Forms.Label();
             this.rayStartXYZLabel = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -56,9 +58,14 @@
             this.heightFieldPanel = new System.Windows.Forms.Panel();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.footprintTraversalPanel = new System.Windows.Forms.Panel();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.lightSourceLayerNumeric = new System.Windows.Forms.NumericUpDown();
+            this.cocFootprintRadiusNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.cocClippingPanel = new System.Windows.Forms.Panel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label7 = new System.Windows.Forms.Label();
-            this.isecLayerLabel = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -72,6 +79,12 @@
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lightSourceLayerNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cocFootprintRadiusNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -217,6 +230,14 @@
             this.label2.TabIndex = 0;
             this.label2.Text = "Ray end (X, Y, Z):";
             // 
+            // isecLayerLabel
+            // 
+            this.isecLayerLabel.AutoSize = true;
+            this.isecLayerLabel.Location = new System.Drawing.Point(108, 186);
+            this.isecLayerLabel.Name = "isecLayerLabel";
+            this.isecLayerLabel.Size = new System.Drawing.Size(0, 13);
+            this.isecLayerLabel.TabIndex = 0;
+            // 
             // intersectionLabel
             // 
             this.intersectionLabel.AutoSize = true;
@@ -240,6 +261,15 @@
             this.rayStartXYZLabel.Name = "rayStartXYZLabel";
             this.rayStartXYZLabel.Size = new System.Drawing.Size(0, 13);
             this.rayStartXYZLabel.TabIndex = 0;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(11, 186);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(90, 13);
+            this.label7.TabIndex = 0;
+            this.label7.Text = "Intersection layer:";
             // 
             // label5
             // 
@@ -384,6 +414,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -437,27 +468,88 @@
             this.footprintTraversalPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.footprintTraversalPanel_MouseDown);
             this.footprintTraversalPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.footprintTraversalPanel_MouseUp);
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.splitContainer2);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(772, 492);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "CoC clipping";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer2.Location = new System.Drawing.Point(3, 3);
+            this.splitContainer2.Name = "splitContainer2";
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.lightSourceLayerNumeric);
+            this.splitContainer2.Panel1.Controls.Add(this.cocFootprintRadiusNumeric);
+            this.splitContainer2.Panel1.Controls.Add(this.label9);
+            this.splitContainer2.Panel1.Controls.Add(this.label8);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.cocClippingPanel);
+            this.splitContainer2.Size = new System.Drawing.Size(766, 486);
+            this.splitContainer2.SplitterDistance = 200;
+            this.splitContainer2.TabIndex = 1;
+            // 
+            // lightSourceLayerNumeric
+            // 
+            this.lightSourceLayerNumeric.Location = new System.Drawing.Point(111, 32);
+            this.lightSourceLayerNumeric.Name = "lightSourceLayerNumeric";
+            this.lightSourceLayerNumeric.Size = new System.Drawing.Size(59, 20);
+            this.lightSourceLayerNumeric.TabIndex = 1;
+            this.lightSourceLayerNumeric.ValueChanged += new System.EventHandler(this.lightSourceNumeric_ValueChanged);
+            // 
+            // cocFootprintRadiusNumeric
+            // 
+            this.cocFootprintRadiusNumeric.Location = new System.Drawing.Point(111, 6);
+            this.cocFootprintRadiusNumeric.Name = "cocFootprintRadiusNumeric";
+            this.cocFootprintRadiusNumeric.Size = new System.Drawing.Size(59, 20);
+            this.cocFootprintRadiusNumeric.TabIndex = 1;
+            this.cocFootprintRadiusNumeric.ValueChanged += new System.EventHandler(this.cocFootprintRadiusNumericUpDown1_ValueChanged);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(3, 34);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(93, 13);
+            this.label9.TabIndex = 0;
+            this.label9.Text = "Light source layer:";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(3, 8);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(102, 13);
+            this.label8.TabIndex = 0;
+            this.label8.Text = "CoC footprint radius:";
+            // 
+            // cocClippingPanel
+            // 
+            this.cocClippingPanel.Location = new System.Drawing.Point(3, 3);
+            this.cocClippingPanel.Name = "cocClippingPanel";
+            this.cocClippingPanel.Size = new System.Drawing.Size(556, 480);
+            this.cocClippingPanel.TabIndex = 0;
+            this.cocClippingPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.cocClippingPanel_Paint);
+            this.cocClippingPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.cocClippingPanel_MouseMove);
+            this.cocClippingPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.cocClippingPanel_MouseDown);
+            this.cocClippingPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.cocClippingPanel_MouseUp);
+            // 
             // openFileDialog
             // 
             this.openFileDialog.Filter = "PNG files|*.png|All files|*.*";
             this.openFileDialog.Multiselect = true;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(11, 186);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(90, 13);
-            this.label7.TabIndex = 0;
-            this.label7.Text = "Intersection layer:";
-            // 
-            // isecLayerLabel
-            // 
-            this.isecLayerLabel.AutoSize = true;
-            this.isecLayerLabel.Location = new System.Drawing.Point(108, 186);
-            this.isecLayerLabel.Name = "isecLayerLabel";
-            this.isecLayerLabel.Size = new System.Drawing.Size(0, 13);
-            this.isecLayerLabel.TabIndex = 0;
             // 
             // HeighFieldForm
             // 
@@ -484,6 +576,13 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel1.PerformLayout();
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            this.splitContainer2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.lightSourceLayerNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cocFootprintRadiusNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -522,5 +621,12 @@
         private System.Windows.Forms.Panel footprintTraversalPanel;
         private System.Windows.Forms.Label isecLayerLabel;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Panel cocClippingPanel;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.NumericUpDown cocFootprintRadiusNumeric;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.NumericUpDown lightSourceLayerNumeric;
+        private System.Windows.Forms.Label label9;
     }
 }

@@ -33,15 +33,24 @@
 
         float footprintScale = 32.0f;
 
+        int cocFootprintRadius = 10;
+        Vector2 cocCenter;
+        int lightSourceLayer = 0;
+
+        bool editingCocCenter = false;
+
         public HeighFieldForm()
         {
             InitializeComponent();
 
             SetDoubleBuffered(heightFieldPanel);
             SetDoubleBuffered(footprintTraversalPanel);
+            SetDoubleBuffered(cocClippingPanel);
 
             rayStart.Z = 0;
             rayEnd.Z = 1;
+
+            cocFootprintRadiusNumeric.Value = (decimal)cocFootprintRadius;
 
             UpdateHeightfieldPanel();
         }
@@ -81,10 +90,17 @@
 
         private void UpdateHeightfieldPanel()
         {
-            heightFieldPanel.Size = new Size(heightField.Width, heightField.Height); ;
-            footprintTraversalPanel.Size = new Size((int)(footprintScale * heightField.Width) + 1, (int)(footprintScale * heightField.Height) + 1); ;
+            heightFieldPanel.Size = new Size(heightField.Width, heightField.Height);
             heightFieldPanel.Invalidate();
+
+            footprintTraversalPanel.Size = new Size((int)(footprintScale * heightField.Width) + 1, (int)(footprintScale * heightField.Height) + 1);
             footprintTraversalPanel.Invalidate();
+
+            cocClippingPanel.Size = new Size(heightField.Width, heightField.Height);
+            cocCenter = new Vector2(heightField.Width / 2, heightField.Height / 2);
+            lightSourceLayerNumeric.Maximum = Math.Max(heightField.LayerCount - 1, 0);
+            cocClippingPanel.Invalidate();
+
             layerCountLabel.Text = heightField.LayerCount.ToString();
         }
 
@@ -325,6 +341,86 @@
             g.DrawLine(new Pen(Color.FromArgb(128, 255, 255, 255), 1),
                 (float)rayStart.X * scale, (float)rayStart.Y * scale,
                 (float)rayEnd.X * scale, (float)rayEnd.Y * scale);
+        }
+
+        private void cocClippingPanel_Paint(object sender, PaintEventArgs e)
+        {
+            if (layerBitmaps.Count <= 0)
+            {
+                return;
+            }
+
+            var g = e.Graphics;
+
+            g.DrawImage(layerBitmaps[0], 0, 0, heightField.Width, heightField.Height);
+
+            int footprintSize = 2 * cocFootprintRadius + 1;
+            Vector3d lightSource = new Vector3d(cocCenter.X, cocCenter.X,
+                heightField.GetDepth((int)cocCenter.X, (int)cocCenter.Y, lightSourceLayer));
+            Rectangle cocFootprint = new Rectangle(
+                (int)cocCenter.X - cocFootprintRadius,
+                (int)cocCenter.Y - cocFootprintRadius,
+                footprintSize,
+                footprintSize);
+            g.DrawRectangle(new Pen(new SolidBrush(Color.FromArgb(200, 0, 200, 0))), cocFootprint);
+            for (int y = 0; y < footprintSize; y++)
+            {
+                for (int x = 0; x < footprintSize; x++)
+                {
+                    Vector3d origin = new Vector3d(cocFootprint.X + x, cocFootprint.Y + y, 0);
+                    Intersection isec = heightField.Intersect(new Ray(origin, lightSource - origin));
+                    g.DrawRectangle((isec == null) ? Pens.Yellow : Pens.Blue, cocFootprint.X + x, cocFootprint.Y + y, 1, 1);
+                }
+            }
+        }
+
+        private void lightSourceNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            lightSourceLayer = (int)lightSourceLayerNumeric.Value;
+            if (lightSourceLayer < heightField.LayerCount)
+            {
+                cocClippingPanel.Invalidate();
+            }
+        }
+
+        private void cocFootprintRadiusNumericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            cocFootprintRadius = (int)cocFootprintRadiusNumeric.Value;
+            cocClippingPanel.Invalidate();
+        }
+
+        private void cocClippingPanel_MouseClick(object sender, MouseEventArgs e)
+        {
+            cocCenter = new Vector2(e.Location.X, e.Location.Y);
+            cocClippingPanel.Invalidate();
+        }
+
+        private void cocClippingPanel_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                editingCocCenter = true;
+            }
+        }
+
+        private void cocClippingPanel_MouseUp(object sender, MouseEventArgs e)
+        {
+            editingCocCenter = false;
+        }
+
+        private void cocClippingPanel_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (editingCocCenter)
+            {
+                if ((e.Location.X < 0) || (e.Location.X >= heightField.Width) ||
+                    (e.Location.Y < 0) || (e.Location.Y >= heightField.Height))
+                {
+                    return;
+                }
+
+                cocCenter = new Vector2(e.Location.X, e.Location.Y);
+                cocClippingPanel.Invalidate();
+            }
         }
     }
 }
