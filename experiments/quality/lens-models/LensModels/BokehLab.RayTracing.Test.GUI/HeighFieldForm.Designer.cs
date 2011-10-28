@@ -61,11 +61,15 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.lightSourceLayerNumeric = new System.Windows.Forms.NumericUpDown();
+            this.cocRadiusNumeric = new System.Windows.Forms.NumericUpDown();
             this.cocFootprintRadiusNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.cocClippingPanel = new System.Windows.Forms.Panel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label11 = new System.Windows.Forms.Label();
+            this.epsilonForCloseDepthNumeric = new System.Windows.Forms.NumericUpDown();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -84,7 +88,9 @@
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lightSourceLayerNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cocRadiusNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cocFootprintRadiusNumeric)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.epsilonForCloseDepthNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -149,8 +155,10 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.layerCountLabel);
+            this.splitContainer1.Panel1.Controls.Add(this.epsilonForCloseDepthNumeric);
             this.splitContainer1.Panel1.Controls.Add(this.label6);
             this.splitContainer1.Panel1.Controls.Add(this.rayEndZNumeric);
+            this.splitContainer1.Panel1.Controls.Add(this.label11);
             this.splitContainer1.Panel1.Controls.Add(this.label2);
             this.splitContainer1.Panel1.Controls.Add(this.isecLayerLabel);
             this.splitContainer1.Panel1.Controls.Add(this.intersectionLabel);
@@ -490,7 +498,9 @@
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.Controls.Add(this.lightSourceLayerNumeric);
+            this.splitContainer2.Panel1.Controls.Add(this.cocRadiusNumeric);
             this.splitContainer2.Panel1.Controls.Add(this.cocFootprintRadiusNumeric);
+            this.splitContainer2.Panel1.Controls.Add(this.label10);
             this.splitContainer2.Panel1.Controls.Add(this.label9);
             this.splitContainer2.Panel1.Controls.Add(this.label8);
             // 
@@ -503,24 +513,41 @@
             // 
             // lightSourceLayerNumeric
             // 
-            this.lightSourceLayerNumeric.Location = new System.Drawing.Point(111, 32);
+            this.lightSourceLayerNumeric.Location = new System.Drawing.Point(113, 6);
             this.lightSourceLayerNumeric.Name = "lightSourceLayerNumeric";
             this.lightSourceLayerNumeric.Size = new System.Drawing.Size(59, 20);
             this.lightSourceLayerNumeric.TabIndex = 1;
             this.lightSourceLayerNumeric.ValueChanged += new System.EventHandler(this.lightSourceNumeric_ValueChanged);
             // 
+            // cocRadiusNumeric
+            // 
+            this.cocRadiusNumeric.Location = new System.Drawing.Point(113, 58);
+            this.cocRadiusNumeric.Name = "cocRadiusNumeric";
+            this.cocRadiusNumeric.Size = new System.Drawing.Size(59, 20);
+            this.cocRadiusNumeric.TabIndex = 1;
+            this.cocRadiusNumeric.ValueChanged += new System.EventHandler(this.cocRadiusNumeric_ValueChanged);
+            // 
             // cocFootprintRadiusNumeric
             // 
-            this.cocFootprintRadiusNumeric.Location = new System.Drawing.Point(111, 6);
+            this.cocFootprintRadiusNumeric.Location = new System.Drawing.Point(113, 32);
             this.cocFootprintRadiusNumeric.Name = "cocFootprintRadiusNumeric";
             this.cocFootprintRadiusNumeric.Size = new System.Drawing.Size(59, 20);
             this.cocFootprintRadiusNumeric.TabIndex = 1;
-            this.cocFootprintRadiusNumeric.ValueChanged += new System.EventHandler(this.cocFootprintRadiusNumericUpDown1_ValueChanged);
+            this.cocFootprintRadiusNumeric.ValueChanged += new System.EventHandler(this.cocFootprintRadiusNumeric_ValueChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(5, 60);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(61, 13);
+            this.label10.TabIndex = 0;
+            this.label10.Text = "CoC radius:";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(3, 34);
+            this.label9.Location = new System.Drawing.Point(5, 8);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(93, 13);
             this.label9.TabIndex = 0;
@@ -529,7 +556,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 8);
+            this.label8.Location = new System.Drawing.Point(5, 34);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(102, 13);
             this.label8.TabIndex = 0;
@@ -550,6 +577,29 @@
             // 
             this.openFileDialog.Filter = "PNG files|*.png|All files|*.*";
             this.openFileDialog.Multiselect = true;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(11, 210);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(121, 13);
+            this.label11.TabIndex = 0;
+            this.label11.Text = "Eplison for intersections:";
+            // 
+            // epsilonForCloseDepthNumeric
+            // 
+            this.epsilonForCloseDepthNumeric.DecimalPlaces = 4;
+            this.epsilonForCloseDepthNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            this.epsilonForCloseDepthNumeric.Location = new System.Drawing.Point(138, 208);
+            this.epsilonForCloseDepthNumeric.Name = "epsilonForCloseDepthNumeric";
+            this.epsilonForCloseDepthNumeric.Size = new System.Drawing.Size(50, 20);
+            this.epsilonForCloseDepthNumeric.TabIndex = 1;
+            this.epsilonForCloseDepthNumeric.ValueChanged += new System.EventHandler(this.epsilonForCloseDepthNumeric_ValueChanged);
             // 
             // HeighFieldForm
             // 
@@ -582,7 +632,9 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             this.splitContainer2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.lightSourceLayerNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cocRadiusNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cocFootprintRadiusNumeric)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.epsilonForCloseDepthNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -628,5 +680,9 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.NumericUpDown lightSourceLayerNumeric;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.NumericUpDown cocRadiusNumeric;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.NumericUpDown epsilonForCloseDepthNumeric;
+        private System.Windows.Forms.Label label11;
     }
 }

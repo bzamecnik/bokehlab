@@ -33,11 +33,14 @@
 
         float footprintScale = 32.0f;
 
-        int cocFootprintRadius = 10;
+        int cocFootprintRadius = 5;
+        int cocRadius = 20;
         Vector2 cocCenter;
         int lightSourceLayer = 0;
 
         bool editingCocCenter = false;
+
+        Sampler sampler = new Sampler();
 
         public HeighFieldForm()
         {
@@ -51,6 +54,9 @@
             rayEnd.Z = 1;
 
             cocFootprintRadiusNumeric.Value = (decimal)cocFootprintRadius;
+            cocRadiusNumeric.Value = (decimal)cocRadius;
+
+            epsilonForCloseDepthNumeric.Value = (decimal)heightField.EpsilonForClosePixelDepth;
 
             UpdateHeightfieldPanel();
         }
@@ -352,24 +358,41 @@
 
             var g = e.Graphics;
 
-            g.DrawImage(layerBitmaps[0], 0, 0, heightField.Width, heightField.Height);
+            g.DrawImage(layerBitmaps[lightSourceLayer], 0, 0, heightField.Width, heightField.Height);
 
-            int footprintSize = 2 * cocFootprintRadius + 1;
-            Vector3d lightSource = new Vector3d(cocCenter.X, cocCenter.X,
+            int cocSize = 2 * cocRadius + 1;
+            Vector3d lightSource = new Vector3d(cocCenter.X, cocCenter.Y,
                 heightField.GetDepth((int)cocCenter.X, (int)cocCenter.Y, lightSourceLayer));
-            Rectangle cocFootprint = new Rectangle(
-                (int)cocCenter.X - cocFootprintRadius,
-                (int)cocCenter.Y - cocFootprintRadius,
-                footprintSize,
-                footprintSize);
-            g.DrawRectangle(new Pen(new SolidBrush(Color.FromArgb(200, 0, 200, 0))), cocFootprint);
-            for (int y = 0; y < footprintSize; y++)
+            if (lightSource.Z == 1)
             {
-                for (int x = 0; x < footprintSize; x++)
+                return;
+            }
+            Rectangle coc = new Rectangle(
+                (int)cocCenter.X - cocRadius,
+                (int)cocCenter.Y - cocRadius,
+                cocSize,
+                cocSize);
+            g.DrawRectangle(new Pen(new SolidBrush(Color.FromArgb(200, 0, 200, 0))), coc);
+            float ratio = cocFootprintRadius / (float)cocRadius;
+            for (int y = -cocRadius; y <= cocRadius; y++)
+            {
+                for (int x = -cocRadius; x <= cocRadius; x++)
                 {
-                    Vector3d origin = new Vector3d(cocFootprint.X + x, cocFootprint.Y + y, 0);
-                    Intersection isec = heightField.Intersect(new Ray(origin, lightSource - origin));
-                    g.DrawRectangle((isec == null) ? Pens.Yellow : Pens.Blue, cocFootprint.X + x, cocFootprint.Y + y, 1, 1);
+                    //Vector2d jitter = sampler.GenerateUniformPoint();
+                    //Vector3d origin = new Vector3d(
+                    //    cocCenter.X + ratio * (x + jitter.X),
+                    //    cocCenter.X + ratio * (y + jitter.Y), 0);
+
+                    Vector3d origin = new Vector3d(
+                        cocCenter.X + ratio * x,
+                        cocCenter.Y + ratio * y, 0);
+
+                    if ((origin.X >= 0) && (origin.X < Width) &&
+                        (origin.Y >= 0) && (origin.Y < Height))
+                    {
+                        Intersection isec = heightField.Intersect(new Ray(origin, lightSource - origin));
+                        g.FillRectangle((isec == null) ? Brushes.Yellow : Brushes.Blue, cocCenter.X + x, cocCenter.Y + y, 1, 1);
+                    }
                 }
             }
         }
@@ -383,15 +406,9 @@
             }
         }
 
-        private void cocFootprintRadiusNumericUpDown1_ValueChanged(object sender, EventArgs e)
+        private void cocFootprintRadiusNumeric_ValueChanged(object sender, EventArgs e)
         {
             cocFootprintRadius = (int)cocFootprintRadiusNumeric.Value;
-            cocClippingPanel.Invalidate();
-        }
-
-        private void cocClippingPanel_MouseClick(object sender, MouseEventArgs e)
-        {
-            cocCenter = new Vector2(e.Location.X, e.Location.Y);
             cocClippingPanel.Invalidate();
         }
 
@@ -421,6 +438,19 @@
                 cocCenter = new Vector2(e.Location.X, e.Location.Y);
                 cocClippingPanel.Invalidate();
             }
+        }
+
+        private void cocRadiusNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            cocRadius = (int)cocRadiusNumeric.Value;
+            cocClippingPanel.Invalidate();
+        }
+
+        private void epsilonForCloseDepthNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            heightField.EpsilonForClosePixelDepth = (float)epsilonForCloseDepthNumeric.Value;
+            heightFieldPanel.Invalidate();
+            cocClippingPanel.Invalidate();
         }
     }
 }

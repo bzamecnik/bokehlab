@@ -30,8 +30,14 @@
         private int layerCount;
         public int LayerCount { get { return layerCount; } }
 
-        private float epsilon;
-        public float Epsilon { get { return epsilon; } set { epsilon = value; } }
+        private float epsilonForCorners;
+        public float EpsilonForCorners { get { return epsilonForCorners; } set { epsilonForCorners = value; } }
+
+        // If the ray goes through a hole in subsequent pixels which is
+        // tighter in depth that this epsilon we can consider it to be an
+        // intersection.
+        private float epsilonForClosePixelDepth;
+        public float EpsilonForClosePixelDepth { get { return epsilonForClosePixelDepth; } set { epsilonForClosePixelDepth = value; } }
 
         public HeightField(int width, int height)
             : this(new FloatMapImage[] { })
@@ -42,7 +48,8 @@
 
         public HeightField(IEnumerable<FloatMapImage> depthLayers)
         {
-            this.epsilon = 0.001f;
+            this.epsilonForCorners = 0.001f;
+            this.epsilonForClosePixelDepth = 0.05f;
             Debug.Assert(depthLayers != null);
             //Debug.Assert(depthLayers.Length > 0);
             this.depthLayers = depthLayers.ToArray();
@@ -106,7 +113,7 @@
         {
             bool collectDebugInfo = debugInfo != null;
 
-            if (Math.Abs(ray.Direction.Z) < epsilon)
+            if (Math.Abs(ray.Direction.Z) < epsilonForCorners)
             {
                 return null;
             }
@@ -141,6 +148,10 @@
 
             // absolute position of the nearest corner
             Vector2 corner = currentPixel + relCorner;
+
+            // depth of the last square in the previous pixel which was
+            // completely in front of the ray
+            float? previousLastZ = null;
 
             while (currentPixel != endPixel)
             {
@@ -182,7 +193,7 @@
                     // > 0 -> go to the clockwise edge
                     // < 0 -> go to the counter-clockwise edge
 
-                    if (Math.Abs(crossLength) > epsilon)
+                    if (Math.Abs(crossLength) > epsilonForCorners)
                     {
                         // add a vector perpendicular in one or another direction
                         // to get a vector 45 degrees apart from the corner
@@ -213,7 +224,7 @@
                 }
 
                 // compute intersection with the height field pixel (in several layers)
-                Intersection isec = IntersectLayerAtPixel(currentPixel, entry.Z, exit.Z, rayGoesFromDepth, collectDebugInfo, debugInfo);
+                Intersection isec = IntersectLayerAtPixel(currentPixel, entry.Z, exit.Z, rayGoesFromDepth, collectDebugInfo, debugInfo, ref previousLastZ);
                 if (isec != null)
                 {
                     return isec;
@@ -232,7 +243,7 @@
                 debugInfo.EntryPoints.Add(entryXY);
             }
             float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
-            return IntersectLayerAtPixel(currentPixel, entry.Z, endZ, rayGoesFromDepth, collectDebugInfo, debugInfo);
+            return IntersectLayerAtPixel(currentPixel, entry.Z, endZ, rayGoesFromDepth, collectDebugInfo, debugInfo, ref previousLastZ);
         }
 
         private Intersection IntersectLayerAtPixel(
@@ -241,9 +252,14 @@
             float exitZ,
             bool rayGoesFromDepth,
             bool collectDebugInfo,
-            FootprintDebugInfo debugInfo)
+            FootprintDebugInfo debugInfo,
+            ref float? previousLastZ)
         {
-            for (int layer = 0; layer < layerCount; layer++)
+            // depth of the last square in the current pixel which was
+            // completely in front of the ray
+            float? currentLastZ = null;
+            int layer;
+            for (layer = 0; layer < layerCount; layer++)
             {
                 // Tests whether a ray going over a height field pixel intersects it or not.
                 //
@@ -251,20 +267,54 @@
                 // depths of ray entry and exit points. In case of equality (up to
                 // epsilon) the ray touches the pixel. Otherwise it misses the pixel.
                 float layerZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
-                if ((layerZ == 1) || ((layerZ > exitZ) ^ rayGoesFromDepth))
+                if (layerZ == 1)
                 {
-                    // Early termination.
+                    // early termination - no data in the height field
                     break;
+                }
+                if (layer == 0)
+                {
+                    currentLastZ = layerZ;
                 }
                 if (Math.Sign(entryZ - layerZ) != Math.Sign(exitZ - layerZ))
                 {
+                    // ray crosses the square, proper intersection
                     if (collectDebugInfo)
                     {
                         debugInfo.LayerOfIntersection = layer;
                     }
                     return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
                 }
+                else if ((layerZ > exitZ) ^ rayGoesFromDepth)
+                {
+                    // termination since the rest of layers is also behind
+                    break;
+                }
+                // else: ray misses the square in front of it
+                currentLastZ = layerZ;
             }
+            // ray misses the square behind it
+            if (previousLastZ.HasValue && currentLastZ.HasValue)
+            {
+                //float diff = (rayGoesFromDepth ? -1 : 1) *
+                //    (previousLastZ.Value - currentLastZ.Value);
+                //if ((diff > 0) && (diff < epsilonForClosePixelDepth))
+                //{
+                float diff = previousLastZ.Value - currentLastZ.Value;
+                if ((Math.Sign(currentLastZ.Value - entryZ) != Math.Sign(previousLastZ.Value - entryZ)) &&
+                    (Math.Abs(diff) < EpsilonForClosePixelDepth))
+                {
+                    // in case the squares of subsequent pixels are too
+                    // close and the ray goes between them we can consider
+                    // it an intersection
+                    if (collectDebugInfo)
+                    {
+                        debugInfo.LayerOfIntersection = layer;
+                    }
+                    return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, 0.5f * diff));
+                }
+            }
+            previousLastZ = currentLastZ;
             return null;
         }
 
@@ -296,11 +346,11 @@
         private Vector2 GetPixelCorner(Vector2 position, Vector2 relDir)
         {
             Vector2 corner = new Vector2((float)Math.Floor(position.X), (float)Math.Floor(position.Y));
-            if ((relDir.X < 0) && (position.X - corner.X < epsilon))
+            if ((relDir.X < 0) && (position.X - corner.X < epsilonForCorners))
             {
                 corner.X -= 1;
             }
-            if ((relDir.Y < 0) && (position.Y - corner.Y < epsilon))
+            if ((relDir.Y < 0) && (position.Y - corner.Y < epsilonForCorners))
             {
                 corner.Y -= 1;
             }
