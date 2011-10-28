@@ -361,7 +361,10 @@
             g.DrawImage(layerBitmaps[lightSourceLayer], 0, 0, heightField.Width, heightField.Height);
 
             int cocSize = 2 * cocRadius + 1;
-            Vector3d lightSource = new Vector3d(cocCenter.X, cocCenter.Y,
+            // The light source cannot be at the pixel edge as it will not be
+            // easy to test if there was only a single intersection - with the
+            // light source. If the light source is within the pixel it is easier.
+            Vector3d lightSource = new Vector3d(cocCenter.X + 0.5f, cocCenter.Y + 0.5f,
                 heightField.GetDepth((int)cocCenter.X, (int)cocCenter.Y, lightSourceLayer));
             if (lightSource.Z == 1)
             {
@@ -373,6 +376,8 @@
                 cocSize,
                 cocSize);
             g.DrawRectangle(new Pen(new SolidBrush(Color.FromArgb(200, 0, 200, 0))), coc);
+            Brush yellowBrush = new SolidBrush(Color.FromArgb(200, 255, 255, 0));
+            Brush blueBrush = new SolidBrush(Color.FromArgb(200, 0, 0, 100));
             float ratio = cocFootprintRadius / (float)cocRadius;
             for (int y = -cocRadius; y <= cocRadius; y++)
             {
@@ -387,11 +392,12 @@
                         cocCenter.X + ratio * x,
                         cocCenter.Y + ratio * y, 0);
 
-                    if ((origin.X >= 0) && (origin.X < Width) &&
-                        (origin.Y >= 0) && (origin.Y < Height))
+                    if ((origin.X >= 0) && (origin.X < heightField.Width) &&
+                        (origin.Y >= 0) && (origin.Y < heightField.Height))
                     {
                         Intersection isec = heightField.Intersect(new Ray(origin, lightSource - origin));
-                        g.FillRectangle((isec == null) ? Brushes.Yellow : Brushes.Blue, cocCenter.X + x, cocCenter.Y + y, 1, 1);
+                        bool visible = (isec == null) || (isec.Position.Z >= lightSource.Z - 0.1f);
+                        g.FillRectangle(visible ? yellowBrush : blueBrush, cocCenter.X + x, cocCenter.Y + y, 1, 1);
                     }
                 }
             }

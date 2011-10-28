@@ -36,8 +36,10 @@
             this.recomputeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.layerCountLabel = new System.Windows.Forms.Label();
+            this.epsilonForCloseDepthNumeric = new System.Windows.Forms.NumericUpDown();
             this.label6 = new System.Windows.Forms.Label();
             this.rayEndZNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label11 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.isecLayerLabel = new System.Windows.Forms.Label();
             this.intersectionLabel = new System.Windows.Forms.Label();
@@ -68,12 +70,11 @@
             this.label8 = new System.Windows.Forms.Label();
             this.cocClippingPanel = new System.Windows.Forms.Panel();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.label11 = new System.Windows.Forms.Label();
-            this.epsilonForCloseDepthNumeric = new System.Windows.Forms.NumericUpDown();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.epsilonForCloseDepthNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayEndZNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayEndYNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayStartYNumeric)).BeginInit();
@@ -90,7 +91,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.lightSourceLayerNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cocRadiusNumeric)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cocFootprintRadiusNumeric)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.epsilonForCloseDepthNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -191,6 +191,20 @@
             this.layerCountLabel.Size = new System.Drawing.Size(0, 13);
             this.layerCountLabel.TabIndex = 3;
             // 
+            // epsilonForCloseDepthNumeric
+            // 
+            this.epsilonForCloseDepthNumeric.DecimalPlaces = 4;
+            this.epsilonForCloseDepthNumeric.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            this.epsilonForCloseDepthNumeric.Location = new System.Drawing.Point(138, 208);
+            this.epsilonForCloseDepthNumeric.Name = "epsilonForCloseDepthNumeric";
+            this.epsilonForCloseDepthNumeric.Size = new System.Drawing.Size(50, 20);
+            this.epsilonForCloseDepthNumeric.TabIndex = 1;
+            this.epsilonForCloseDepthNumeric.ValueChanged += new System.EventHandler(this.epsilonForCloseDepthNumeric_ValueChanged);
+            // 
             // label6
             // 
             this.label6.AutoSize = true;
@@ -228,6 +242,15 @@
             0,
             0});
             this.rayEndZNumeric.ValueChanged += new System.EventHandler(this.rayEndZNumeric_ValueChanged);
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(11, 210);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(121, 13);
+            this.label11.TabIndex = 0;
+            this.label11.Text = "Eplison for intersections:";
             // 
             // label2
             // 
@@ -492,6 +515,8 @@
             this.splitContainer2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer2.Location = new System.Drawing.Point(3, 3);
             this.splitContainer2.Name = "splitContainer2";
             // 
@@ -506,6 +531,7 @@
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.AutoScroll = true;
             this.splitContainer2.Panel2.Controls.Add(this.cocClippingPanel);
             this.splitContainer2.Size = new System.Drawing.Size(766, 486);
             this.splitContainer2.SplitterDistance = 200;
@@ -578,29 +604,6 @@
             this.openFileDialog.Filter = "PNG files|*.png|All files|*.*";
             this.openFileDialog.Multiselect = true;
             // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(11, 210);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(121, 13);
-            this.label11.TabIndex = 0;
-            this.label11.Text = "Eplison for intersections:";
-            // 
-            // epsilonForCloseDepthNumeric
-            // 
-            this.epsilonForCloseDepthNumeric.DecimalPlaces = 4;
-            this.epsilonForCloseDepthNumeric.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            131072});
-            this.epsilonForCloseDepthNumeric.Location = new System.Drawing.Point(138, 208);
-            this.epsilonForCloseDepthNumeric.Name = "epsilonForCloseDepthNumeric";
-            this.epsilonForCloseDepthNumeric.Size = new System.Drawing.Size(50, 20);
-            this.epsilonForCloseDepthNumeric.TabIndex = 1;
-            this.epsilonForCloseDepthNumeric.ValueChanged += new System.EventHandler(this.epsilonForCloseDepthNumeric_ValueChanged);
-            // 
             // HeighFieldForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -617,6 +620,7 @@
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.epsilonForCloseDepthNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayEndZNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayEndYNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rayStartYNumeric)).EndInit();
@@ -634,7 +638,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.lightSourceLayerNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cocRadiusNumeric)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cocFootprintRadiusNumeric)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.epsilonForCloseDepthNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
