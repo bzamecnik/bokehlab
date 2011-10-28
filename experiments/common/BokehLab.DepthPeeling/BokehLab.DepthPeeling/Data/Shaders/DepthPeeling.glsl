@@ -25,11 +25,14 @@ void main() {
 	
 	float depth = texture2D(depthTexture, gl_FragCoord.xy/textureSize(depthTexture, 0));
 	//float depth = texture2DRect(depthTexture, gl_FragCoord.xy);
-	if (depth >= gl_FragCoord.z) {
+	if ((depth == 1) || (gl_FragCoord.z <= depth)) {
 		discard;
 	}
 	
 	gl_FragColor = gl_Color;
+	//if (gl_FragCoord.z != 0) {
+	//gl_FragDepth = gl_FragCoord.z;
+	//}
 	
 	//gl_FragColor = texture2D(depthTexture, gl_FragCoord.xy/(float)512);
 	

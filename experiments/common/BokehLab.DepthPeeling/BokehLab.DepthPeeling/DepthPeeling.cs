@@ -407,13 +407,23 @@ namespace BokehLab.DepthPeeling
 
             GL.Disable(EnableCap.Blend);
 
+            // draw the first layer without depth peeling
+
             GL.BindTexture(TextureTarget.Texture2D, 0);
             BindFramebufferWithLayerTextures(FBOHandle, 0);
+            //GL.Enable(EnableCap.DepthTest);
+            //GL.ClearDepth(1);
             DrawOriginalScene(scene);
             //UnbindFramebuffer();
 
+            // draw the rest of layers with depth peeling
+
             // enable peeling shader
             GL.UseProgram(shaderProgram);
+
+            // mark areas with no objects with depth 0
+            //GL.Disable(EnableCap.DepthTest);
+            //GL.ClearDepth(0);
 
             //GL.ActiveTexture(TextureUnit.Texture0);
             for (int i = 1; i < LayerCount; i++)
@@ -425,6 +435,9 @@ namespace BokehLab.DepthPeeling
             }
             // disable peeling shader
             GL.UseProgram(0);
+
+            //GL.ClearDepth(1);
+            //GL.Enable(EnableCap.DepthTest);
 
             UnbindFramebuffer(); // disable rendering into the FBO
         }

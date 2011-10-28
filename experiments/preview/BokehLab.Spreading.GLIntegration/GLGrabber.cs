@@ -81,6 +81,22 @@ namespace BokehLab.Spreading.GLIntegration
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Back, PolygonMode.Fill);
 
+
+            //GL.Light(LightName.Light0, LightParameter.Position, new Vector4(10, 10, 0, 1));
+            //GL.Light(LightName.Light0, LightParameter.Ambient, new Vector4(0, 0, 0, 1));
+            //GL.Light(LightName.Light0, LightParameter.Diffuse, new Vector4(1, 1, 1, 1));
+            //GL.Light(LightName.Light0, LightParameter.Specular, new Vector4(1, 1, 1, 1));
+            //GL.LightModel(LightModelParameter.LightModelAmbient, 0.2f);
+
+            //GL.Enable(EnableCap.Lighting);
+            //GL.Enable(EnableCap.Light0);
+            //GL.Enable(EnableCap.ColorMaterial);
+
+            //GL.ColorMaterial(MaterialFace.Front, ColorMaterialParameter.AmbientAndDiffuse);
+            //GL.Material(MaterialFace.Front, MaterialParameter.Specular, new Vector4(1, 1, 1, 1));
+            //GL.Material(MaterialFace.Front, MaterialParameter.Emission, new Vector4(0, 0, 0, 1));
+
+
             // Create Color Tex
             GL.GenTextures(1, out ColorTexture);
             GL.BindTexture(TextureTarget.Texture2D, ColorTexture);
@@ -327,6 +343,9 @@ namespace BokehLab.Spreading.GLIntegration
         {
             GL.Disable(EnableCap.Texture2D);
 
+            //GL.Enable(EnableCap.Lighting);
+            //GL.Enable(EnableCap.Light0);
+
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBOHandle);
 
             GL.UseProgram(shaderProgram);
@@ -388,6 +407,7 @@ namespace BokehLab.Spreading.GLIntegration
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0); // disable rendering into the FBO
 
             GL.UseProgram(0);
+            //GL.Disable(EnableCap.Lighting);
 
             GL.Enable(EnableCap.Texture2D); // enable Texture Mapping
         }
@@ -509,7 +529,7 @@ namespace BokehLab.Spreading.GLIntegration
             if (statusCode != 1)
                 throw new ApplicationException(info);
 
-            // Compile vertex shader
+            // Compile fragment shader
             GL.ShaderSource(fragmentObject, fs);
             GL.CompileShader(fragmentObject);
             GL.GetShaderInfoLog(fragmentObject, out info);
