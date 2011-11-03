@@ -383,22 +383,27 @@
             {
                 for (int x = -cocRadius; x <= cocRadius; x++)
                 {
-                    //Vector2d jitter = sampler.GenerateUniformPoint();
-                    //Vector3d origin = new Vector3d(
-                    //    cocCenter.X + ratio * (x + jitter.X),
-                    //    cocCenter.X + ratio * (y + jitter.Y), 0);
+                    Vector2d[] jitter = sampler.GenerateJitteredSamples(2).ToArray();
 
-                    Vector3d origin = new Vector3d(
-                        cocCenter.X + ratio * x,
-                        cocCenter.Y + ratio * y, 0);
-
-                    if ((origin.X >= 0) && (origin.X < heightField.Width) &&
-                        (origin.Y >= 0) && (origin.Y < heightField.Height))
+                    int visibleSamples = 0;
+                    for (int i = 0; i < jitter.Length; i++)
                     {
-                        Intersection isec = heightField.Intersect(new Ray(origin, lightSource - origin));
-                        bool visible = (isec == null) || (isec.Position.Z >= lightSource.Z - 0.1f);
-                        g.FillRectangle(visible ? yellowBrush : blueBrush, cocCenter.X + x, cocCenter.Y + y, 1, 1);
+                        Vector3d origin = new Vector3d(
+                            cocCenter.X + ratio * (x + jitter[i].X),
+                            cocCenter.Y + ratio * (y + jitter[i].Y), 0);
+                        if ((origin.X >= 0) && (origin.X < heightField.Width) &&
+                            (origin.Y >= 0) && (origin.Y < heightField.Height))
+                        {
+                            Intersection isec = selectedIntersector.Intersect(new Ray(origin, lightSource - origin));
+                            if ((isec == null) || (isec.Position.Z >= lightSource.Z - 0.1f))
+                            {
+                                visibleSamples++;
+                            }
+                        }
                     }
+                    float visibilityRatio = visibleSamples / (float)jitter.Length;
+                    int intensity = (int)(255 * visibilityRatio);
+                    g.FillRectangle(new SolidBrush(Color.FromArgb(200, intensity, intensity, 255 - intensity)), cocCenter.X + x, cocCenter.Y + y, 1, 1);
                 }
             }
         }
