@@ -10,6 +10,7 @@
     using System.Windows.Forms;
     using BokehLab.FloatMap;
     using BokehLab.Math;
+    using BokehLab.RayTracing.HeightField;
     using OpenTK;
 
     public partial class HeighFieldForm : Form
@@ -18,6 +19,9 @@
         HeightField heightField = emptyHeightField;
         List<FloatMapImage> layers = new List<FloatMapImage>();
         List<Bitmap> layerBitmaps = new List<Bitmap>();
+
+        MyIntersector myHeightFieldIntersector = new MyIntersector(null);
+        AbstractIntersector selectedIntersector;
 
         Point rayStartPoint;
         Point rayEndPoint;
@@ -29,7 +33,7 @@
         bool updatingGuiVectors = false;
 
         Intersection intersection;
-        HeightField.FootprintDebugInfo footprintDebugInfo;
+        FootprintDebugInfo footprintDebugInfo;
 
         float footprintScale = 32.0f;
 
@@ -56,7 +60,9 @@
             cocFootprintRadiusNumeric.Value = (decimal)cocFootprintRadius;
             cocRadiusNumeric.Value = (decimal)cocRadius;
 
-            epsilonForCloseDepthNumeric.Value = (decimal)heightField.EpsilonForClosePixelDepth;
+            epsilonForCloseDepthNumeric.Value = (decimal)myHeightFieldIntersector.EpsilonForClosePixelDepth;
+
+            selectedIntersector = myHeightFieldIntersector;
 
             UpdateHeightfieldPanel();
         }
@@ -90,6 +96,7 @@
                     layers.Add(newLayerBitmap.ToFloatMap());
                 }
                 heightField = new HeightField(layers.ToArray());
+                selectedIntersector.HeightField = heightField;
                 UpdateHeightfieldPanel();
             }
         }
@@ -217,13 +224,13 @@
             rayEndPoint = new Point((int)rayEnd.X, (int)rayEnd.Y);
             if (withDebugInfo)
             {
-                footprintDebugInfo = new HeightField.FootprintDebugInfo();
+                footprintDebugInfo = new FootprintDebugInfo();
             }
             else
             {
                 footprintDebugInfo = null;
             }
-            intersection = heightField.Intersect(new Ray(rayStart, rayEnd - rayStart), ref footprintDebugInfo);
+            intersection = selectedIntersector.Intersect(new Ray(rayStart, rayEnd - rayStart), ref footprintDebugInfo);
             intersectionLabel.Text = (intersection != null) ? intersection.Position.ToString() : "none";
             isecLayerLabel.Text = (footprintDebugInfo != null) && (intersection != null) ? footprintDebugInfo.LayerOfIntersection.ToString() : "";
 
@@ -459,7 +466,7 @@
 
         private void epsilonForCloseDepthNumeric_ValueChanged(object sender, EventArgs e)
         {
-            heightField.EpsilonForClosePixelDepth = (float)epsilonForCloseDepthNumeric.Value;
+            myHeightFieldIntersector.EpsilonForClosePixelDepth = (float)epsilonForCloseDepthNumeric.Value;
             heightFieldPanel.Invalidate();
             cocClippingPanel.Invalidate();
         }

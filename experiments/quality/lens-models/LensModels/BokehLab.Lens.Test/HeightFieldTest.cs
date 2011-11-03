@@ -10,6 +10,7 @@
     using BokehLab.Math;
     using BokehLab.NBuffers;
     using BokehLab.RayTracing;
+    using BokehLab.RayTracing.HeightField;
     using OpenTK;
 
     class HeightFieldTest
@@ -53,7 +54,8 @@
         private static void IntersectAndReport(HeightField heightfield, Vector3d start, Vector3d end)
         {
             Ray ray = new Ray(start, end - start);
-            Intersection intersection = heightfield.Intersect(ray);
+            MyIntersector intersector = new MyIntersector(heightfield);
+            Intersection intersection = intersector.Intersect(ray);
             Console.WriteLine((intersection != null) ? intersection.Position.ToString() : "no intersection");
         }
 
@@ -62,14 +64,15 @@
             Vector3d direction = end - start;
             Ray ray = new Ray(start, direction);
 
-            HeightField.FootprintDebugInfo debugInfo = new HeightField.FootprintDebugInfo();
-            Intersection isec = heightfield.Intersect(ray, ref debugInfo);
+            MyIntersector intersector = new MyIntersector(heightfield);
+            FootprintDebugInfo debugInfo = new FootprintDebugInfo();
+            Intersection isec = intersector.Intersect(ray, ref debugInfo);
             int visitedPixels = debugInfo.VisitedPixels.Count;
 
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 0; i < iterations; i++)
             {
-                Intersection intersection = heightfield.Intersect(ray);
+                Intersection intersection = intersector.Intersect(ray);
             }
             sw.Stop();
 

@@ -49,7 +49,9 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="Circle.cs" />
-    <Compile Include="HeightField.cs" />
+    <Compile Include="HeightField\BinarySearchIntersector.cs" />
+    <Compile Include="HeightField\HeightField.cs" />
+    <Compile Include="HeightField\IIntersectionAlgorithm.cs" />
     <Compile Include="IIntersectable.cs" />
     <Compile Include="INormalField.cs" />
     <Compile Include="Intersection.cs" />
@@ -63,6 +65,7 @@
     <Compile Include="Lens\LensWithTwoStops.cs" />
     <Compile Include="Lens\PinholeLens.cs" />
     <Compile Include="Lens\ThinLens.cs" />
+    <Compile Include="HeightField\MyIntersector.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sensor.cs" />

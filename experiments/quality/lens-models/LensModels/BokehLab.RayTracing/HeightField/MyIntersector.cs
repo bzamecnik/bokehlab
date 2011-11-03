@@ -1,35 +1,14 @@
-﻿namespace BokehLab.RayTracing
+﻿namespace BokehLab.RayTracing.HeightField
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using BokehLab.FloatMap;
-    using BokehLab.Math;
+    using System.Text;
     using OpenTK;
-    using System.Diagnostics;
+    using BokehLab.Math;
 
-    // TODO: project the ray into the frustum space to match it with the depth map
-
-    // Assume the height field depth values are in range [0.0; 1.0] ~ [near; far].
-    // Value 1.0 also mean no data.
-    // Values in layers within each pixel are assumed to be ordered by increasing
-    // depth - the input data are assumed to be obtained by depth peeling.
-
-    public class HeightField : IIntersectable
+    class MyIntersector : AbstractIntersector
     {
-        // [X,Y,layer]
-        // layers ordered from near to far depth
-        private FloatMapImage[] depthLayers;
-
-        private int width = 0;
-        private int height = 0;
-
-        public int Width { get { return width; } internal set { width = value; } }
-        public int Height { get { return height; } internal set { height = value; } }
-
-        private int layerCount;
-        public int LayerCount { get { return layerCount; } }
-
         private float epsilonForCorners;
         public float EpsilonForCorners { get { return epsilonForCorners; } set { epsilonForCorners = value; } }
 
@@ -39,36 +18,11 @@
         private float epsilonForClosePixelDepth;
         public float EpsilonForClosePixelDepth { get { return epsilonForClosePixelDepth; } set { epsilonForClosePixelDepth = value; } }
 
-        public HeightField(int width, int height)
-            : this(new FloatMapImage[] { })
-        {
-            this.width = width;
-            this.height = height;
-        }
-
-        public HeightField(IEnumerable<FloatMapImage> depthLayers)
+        public MyIntersector(HeightField heightField)
+            : base(heightField)
         {
             this.epsilonForCorners = 0.001f;
             this.epsilonForClosePixelDepth = 0.05f;
-            Debug.Assert(depthLayers != null);
-            //Debug.Assert(depthLayers.Length > 0);
-            this.depthLayers = depthLayers.ToArray();
-            this.layerCount = this.depthLayers.Length;
-            if (layerCount > 0)
-            {
-                this.width = (int)this.depthLayers[0].Width;
-                this.height = (int)this.depthLayers[0].Height;
-            }
-        }
-
-        public float GetDepth(int x, int y, int layer)
-        {
-            Debug.Assert(layer < layerCount);
-            Debug.Assert(x >= 0);
-            Debug.Assert(y >= 0);
-            Debug.Assert(x < width);
-            Debug.Assert(y < height);
-            return depthLayers[layer].Image[x, y, 0];
         }
 
         /// <summary>
@@ -101,13 +55,7 @@
         /// <returns>Intersection instance - position of the intersection in
         /// the height field (only the pixel corner, not the exact position)
         /// - if the was an intersection; null otherwise</returns>
-        public Intersection Intersect(Ray ray)
-        {
-            FootprintDebugInfo debugInfo = null;
-            return Intersect(ray, ref debugInfo);
-        }
-
-        internal Intersection Intersect(
+        public override Intersection Intersect(
             Ray ray,
             ref FootprintDebugInfo debugInfo)
         {
@@ -161,8 +109,8 @@
                     debugInfo.EntryPoints.Add(entryXY);
                 }
 
-                if ((currentPixel.X < 0) || (currentPixel.X >= width) ||
-                    (currentPixel.Y < 0) || (currentPixel.Y >= height))
+                if ((currentPixel.X < 0) || (currentPixel.X >= this.HeightField.Width) ||
+                    (currentPixel.Y < 0) || (currentPixel.Y >= this.HeightField.Height))
                 {
                     return null;
                 }
@@ -259,14 +207,14 @@
             // completely in front of the ray
             float? currentLastZ = null;
             int layer;
-            for (layer = 0; layer < layerCount; layer++)
+            for (layer = 0; layer < this.HeightField.LayerCount; layer++)
             {
                 // Tests whether a ray going over a height field pixel intersects it or not.
                 //
                 // There is an intersection if the heightfield pixel depth is between
                 // depths of ray entry and exit points. In case of equality (up to
                 // epsilon) the ray touches the pixel. Otherwise it misses the pixel.
-                float layerZ = GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
+                float layerZ = this.HeightField.GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
                 if (layerZ == 1)
                 {
                     // early termination - no data in the height field
@@ -360,21 +308,6 @@
         private static float Cross2d(Vector2 a, Vector2 b)
         {
             return a.X * b.Y - a.Y * b.X;
-        }
-
-        internal class FootprintDebugInfo
-        {
-            public List<Vector2> VisitedPixels;
-            public List<Vector2> EntryPoints;
-            public Vector2 StartPixel;
-            public Vector2 EndPixel;
-            public int LayerOfIntersection;
-
-            public FootprintDebugInfo()
-            {
-                VisitedPixels = new List<Vector2>();
-                EntryPoints = new List<Vector2>();
-            }
         }
     }
 }
