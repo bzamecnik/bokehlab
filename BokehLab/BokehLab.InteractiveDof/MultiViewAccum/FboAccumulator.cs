@@ -77,7 +77,7 @@
             // - read current frame and average textures
             // - make linear interpolation thereof inside a fragment shader
             // - render the result into updated average texture
-            DrawQuad();
+            LayerHelper.DrawQuad();
 
             GL.UseProgram(0);
 
@@ -101,38 +101,8 @@
 
             GL.BindTexture(TextureTarget.Texture2D, averageTexture);
 
-            DrawQuad();
+            LayerHelper.DrawQuad();
             GL.BindTexture(TextureTarget.Texture2D, 0);
-        }
-
-        private static void DrawQuad()
-        {
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.PushMatrix();
-            GL.LoadIdentity();
-
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.PushMatrix();
-            GL.LoadIdentity();
-
-            GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Replace);
-
-            GL.Begin(BeginMode.Quads);
-            {
-                GL.TexCoord2(0f, 1f);
-                GL.Vertex2(-1.0f, 1.0f);
-                GL.TexCoord2(0.0f, 0.0f);
-                GL.Vertex2(-1.0f, -1.0f);
-                GL.TexCoord2(1.0f, 0.0f);
-                GL.Vertex2(1.0f, -1.0f);
-                GL.TexCoord2(1.0f, 1.0f);
-                GL.Vertex2(1.0f, 1.0f);
-            }
-            GL.End();
-
-            GL.PopMatrix();
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.PopMatrix();
         }
 
         public void Clear()
