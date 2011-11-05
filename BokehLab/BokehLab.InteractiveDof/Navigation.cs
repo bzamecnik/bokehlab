@@ -159,6 +159,24 @@
                 IsViewDirty = true;
             }
 
+            float viewRotDelta = 0.025f;
+            if (Keyboard[Key.Up])
+            {
+                RotateViewVertical(-viewRotDelta);
+            }
+            else if (Keyboard[Key.Down])
+            {
+                RotateViewVertical(viewRotDelta);
+            }
+            if (Keyboard[Key.Right])
+            {
+                RotateViewHorizontal(viewRotDelta);
+            }
+            else if (Keyboard[Key.Left])
+            {
+                RotateViewHorizontal(-viewRotDelta);
+            }
+
             if (Keyboard[Key.Home])
             {
                 Camera.ApertureRadius *= 1.1f;
@@ -190,21 +208,31 @@
         {
             if (delta.X != 0)
             {
-                float angle = 2 * fieldOfView * delta.X;
-                Matrix4 rot = Matrix4.CreateRotationY(angle);
-                Camera.View = Vector3.TransformVector(Camera.View, rot);
-                Camera.Up = Vector3.TransformVector(Camera.Up, rot);
-                IsViewDirty = true;
+                RotateViewHorizontal(delta.X);
             }
 
             if (delta.Y != 0)
             {
-                float angle = 2 * fieldOfView * delta.Y;
-                Matrix4 rot = Matrix4.CreateFromAxisAngle(Camera.Right, angle);
-                Camera.View = Vector3.TransformVector(Camera.View, rot);
-                Camera.Up = Vector3.TransformVector(Camera.Up, rot);
-                IsViewDirty = true;
+                RotateViewVertical(delta.Y);
             }
+        }
+
+        private void RotateViewVertical(float delta)
+        {
+            float angle = 2 * fieldOfView * delta;
+            Matrix4 rot = Matrix4.CreateFromAxisAngle(Camera.Right, angle);
+            Camera.View = Vector3.TransformVector(Camera.View, rot);
+            Camera.Up = Vector3.TransformVector(Camera.Up, rot);
+            IsViewDirty = true;
+        }
+
+        private void RotateViewHorizontal(float delta)
+        {
+            float angle = 2 * fieldOfView * delta;
+            Matrix4 rot = Matrix4.CreateRotationY(angle);
+            Camera.View = Vector3.TransformVector(Camera.View, rot);
+            Camera.Up = Vector3.TransformVector(Camera.Up, rot);
+            IsViewDirty = true;
         }
 
         public void MouseMoveUpdateFocus(Vector2 delta)
