@@ -78,9 +78,9 @@ namespace BokehLab.IbrtGpu
         Vector2 UniformScreenSize { get; set; }
         float uniformFocusDistance;
 
-        string colorTextureFilename = @"..\..\..\color_0.png";
+        //string colorTextureFilename = @"..\..\..\color_0.png";
         //string colorTextureFilename = @"..\..\..\testpattern-hd-720.png";
-        //string colorTextureFilename = @"..\..\..\kamelot.jpg";
+        string colorTextureFilename = @"..\..\..\kamelot.jpg";
         //string colorTextureFilename = @"..\..\..\stars.png";
         //string colorTextureFilename = @"..\..\..\white-dot_small.png";
         //string colorTextureFilename = @"..\..\..\dot.png";

@@ -8,8 +8,8 @@
     <ProjectGuid>{E3BCBC1D-B80C-4C0B-BE1E-22E1CAFF3BFD}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BokehLab.Pinhole</RootNamespace>
-    <AssemblyName>BokehLab.Pinhole</AssemblyName>
+    <RootNamespace>BokehLab.InteractiveDof</RootNamespace>
+    <AssemblyName>BokehLab.InteractiveDof</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -59,7 +59,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
-    <Compile Include="MultiViewAccumulation.cs" />
+    <Compile Include="MultiViewAccum\BufferAccumulator.cs" />
+    <Compile Include="MultiViewAccum\FboAccumulator.cs" />
+    <Compile Include="MultiViewAccum\IAccumulator.cs" />
+    <Compile Include="MultiViewAccum\MultiViewAccumulation.cs" />
     <Compile Include="Navigation.cs" />
     <Compile Include="InteractiveRenderer.cs" />
     <Compile Include="Program.cs" />
@@ -74,10 +77,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Content Include="AccumFS.glsl">
+    <Content Include="MultiViewAccum\AccumFS.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="AccumVS.glsl">
+    <Content Include="MultiViewAccum\AccumVS.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Properties\Settings.settings">

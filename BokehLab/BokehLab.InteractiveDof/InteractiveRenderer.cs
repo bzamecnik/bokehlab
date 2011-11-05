@@ -1,25 +1,18 @@
-﻿#region --- License ---
-/* Licensed under the MIT/X11 license.
- * Copyright (c) 2006-2008 the OpenTK Team.
- * This notice may not be removed from any source distribution.
- * See license.txt for licensing details.
- */
-#endregion
-
-namespace BokehLab.Pinhole
+﻿namespace BokehLab.InteractiveDof
 {
     using System;
-    using System.Diagnostics;
-    using System.Drawing;
-    using System.IO;
+    using BokehLab.InteractiveDof.MultiViewAccum;
     using OpenTK;
-    using OpenTK.Input;
-    using OpenTK.Graphics;
     using OpenTK.Graphics.OpenGL;
-    using System.Runtime.InteropServices;
-    using BokehLab.Math;
-    using System.Collections.Generic;
-    using System.Linq;
+    using OpenTK.Input;
+
+    // TODO:
+    // - integrate depth peeling
+    // - create height field intersection routines
+    // - integrate image-based ray tracing
+    // - FPS counter
+    // - time counter for the whole multi-view accumulation
+    // - create a configuration panel to switch the methods and control parameters
 
     public class InteractiveRenderer : GameWindow
     {
@@ -52,7 +45,7 @@ namespace BokehLab.Pinhole
 
         protected override void OnLoad(EventArgs e)
         {
-            CheckFbo();
+            CheckFboExtension();
 
             scene = GenerateScene();
 
@@ -68,15 +61,9 @@ namespace BokehLab.Pinhole
             multiViewAccum.Initialize(Width, Height);
 
             OnResize(new EventArgs());
-
-            //GL.Enable(EnableCap.Lighting);
-            //GL.Enable(EnableCap.Light0);
-            //GL.Light(LightName.Light0, LightParameter.Ambient, new Color4(0.5f, 0.5f, 0.5f, 1));
-            //GL.Light(LightName.Light0, LightParameter.Diffuse, new Color4(0.8f, 0.8f, 0.8f, 1));
-            //GL.Light(LightName.Light0, LightParameter.Position, new Vector4(1, 5, 1, 1));
         }
 
-        private void CheckFbo()
+        private void CheckFboExtension()
         {
             if (!GL.GetString(StringName.Extensions).Contains("EXT_framebuffer_object"))
             {

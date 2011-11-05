@@ -6,7 +6,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace BokehLab.Pinhole
+namespace BokehLab.InteractiveDof
 {
     class Scene
     {

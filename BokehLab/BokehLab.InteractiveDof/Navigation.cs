@@ -1,4 +1,4 @@
-﻿namespace BokehLab.Pinhole
+﻿namespace BokehLab.InteractiveDof
 {
     using System;
     using System.Collections.Generic;

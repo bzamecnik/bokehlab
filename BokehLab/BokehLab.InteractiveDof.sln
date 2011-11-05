@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Pinhole", "BokehLab.Pinhole\BokehLab.Pinhole.csproj", "{E3BCBC1D-B80C-4C0B-BE1E-22E1CAFF3BFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.InteractiveDof", "BokehLab.InteractiveDof\BokehLab.InteractiveDof.csproj", "{E3BCBC1D-B80C-4C0B-BE1E-22E1CAFF3BFD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Math", "BokehLab.Math\BokehLab.Math.csproj", "{26E431BD-7267-4A7F-914E-229072AAC363}"
 EndProject

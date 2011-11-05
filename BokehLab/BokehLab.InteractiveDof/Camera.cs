@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using OpenTK;
-
-namespace BokehLab.Pinhole
+﻿namespace BokehLab.InteractiveDof
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using OpenTK;
+
     class Camera
     {
         public float ZFocal = 5; // focal plane depth
