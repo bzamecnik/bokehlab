@@ -24,9 +24,9 @@ namespace BokehLab.DepthPeeling
         /// Number of depth peeling layers (color and depth textures).
         /// </summary>
         /// <remarks>
-        /// At most 3 works for me (NVidia Quadro NVS 140)
+        /// 8 layers are almost always enough.
         /// </remarks>
-        static readonly int LayerCount = 3;
+        static readonly int LayerCount = 4;
 
         // index of currently displayed layer [0; LayerCount - 1]
         int activeLayer = 0;
@@ -36,7 +36,7 @@ namespace BokehLab.DepthPeeling
         bool showBlendedLayers = true;
 
         public DepthPeeling()
-            : base(800, 600)
+            : base(1024, 768)
         {
         }
 
@@ -95,6 +95,8 @@ namespace BokehLab.DepthPeeling
             //BindFramebufferWithLayerTextures(FBOHandle, activeLayer);
 
             //DrawIntoLayers();
+
+            GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Replace);
 
             Keyboard.KeyUp += KeyUp;
         }
@@ -163,11 +165,14 @@ namespace BokehLab.DepthPeeling
             {
                 throw new ArgumentException("At least one layer is needed.");
             }
+
+            // create textures
+            GL.GenTextures(layerCount, ColorTextures);
+            GL.GenTextures(layerCount, DepthTextures);
+
             for (int i = 0; i < layerCount; i++)
             {
-                // create and setup COLOR texture
-                GL.GenTextures(layerCount, out ColorTextures[i]);
-
+                // setup COLOR texture
                 GL.BindTexture(TextureTarget.Texture2D, ColorTextures[i]);
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba8, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
@@ -175,9 +180,7 @@ namespace BokehLab.DepthPeeling
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
-                // create and setup DEPTH texture
-                GL.GenTextures(LayerCount, out DepthTextures[i]);
-
+                // setup DEPTH texture
                 GL.BindTexture(TextureTarget.Texture2D, DepthTextures[i]);
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32f, width, height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
                 //GL.TexImage2D(TextureTarget.Texture2D, 0, (PixelInternalFormat)All.DepthComponent16, width, height, 0, PixelFormat.DepthComponent, PixelType.UnsignedShort, IntPtr.Zero);
@@ -206,92 +209,29 @@ namespace BokehLab.DepthPeeling
             }
         }
 
-        private void BindFramebufferWithLayerTextures(uint fboHandle, int layerIndex)
+        private void AttachLayerTextures(int layerIndex)
         {
-            //Console.WriteLine("BindFramebufferWithLayerTextures");
-            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
-            GL.Ext.FramebufferTexture2D(
-                FramebufferTarget.FramebufferExt,
-                FramebufferAttachment.ColorAttachment0Ext,
-                TextureTarget.Texture2D,
-                ColorTextures[layerIndex], 0);
-            GL.Ext.FramebufferTexture2D(
-                FramebufferTarget.FramebufferExt,
-                FramebufferAttachment.DepthAttachmentExt,
-                TextureTarget.Texture2D,
-                DepthTextures[layerIndex], 0);
-            //Console.WriteLine("BindFramebufferWithLayerTextures: testing for error");
-            #region Test for Error
+            // DEBUG: detach previous textures
+            //GL.Ext.FramebufferTexture2D(
+            //    FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+            //    TextureTarget.Texture2D, 0, 0);
+            //GL.Ext.FramebufferTexture2D(
+            //    FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt,
+            //    TextureTarget.Texture2D, 0, 0);
 
-            switch (GL.Ext.CheckFramebufferStatus(FramebufferTarget.FramebufferExt))
+            // attach color and depth from the selected layer
+            GL.Ext.FramebufferTexture2D(
+                FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+                TextureTarget.Texture2D, ColorTextures[layerIndex], 0);
+            GL.Ext.FramebufferTexture2D(
+                FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt,
+                TextureTarget.Texture2D, DepthTextures[layerIndex], 0);
+
+            var result = GL.Ext.CheckFramebufferStatus(FramebufferTarget.FramebufferExt);
+            if (result != FramebufferErrorCode.FramebufferCompleteExt)
             {
-                case FramebufferErrorCode.FramebufferCompleteExt:
-                    {
-                        //Console.WriteLine("FBO: The framebuffer is complete and valid for rendering.");
-                        break;
-                    }
-                case FramebufferErrorCode.FramebufferIncompleteAttachmentExt:
-                    {
-                        //Console.WriteLine("FBO: One or more attachment points are not framebuffer attachment complete. This could mean there’s no texture attached or the format isn’t renderable. For color textures this means the base format must be RGB or RGBA and for depth textures it must be a DEPTH_COMPONENT format. Other causes of this error are that the width or height is zero or the z-offset is out of range in case of render to volume.");
-                        break;
-                    }
-                case FramebufferErrorCode.FramebufferIncompleteMissingAttachmentExt:
-                    {
-                        //Console.WriteLine("FBO: There are no attachments.");
-                        break;
-                    }
-                /* case  FramebufferErrorCode.GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT: 
-                     {
-                         Console.WriteLine("FBO: An object has been attached to more than one attachment point.");
-                         break;
-                     }*/
-                case FramebufferErrorCode.FramebufferIncompleteDimensionsExt:
-                    {
-                        //Console.WriteLine("FBO: Attachments are of different size. All attachments must have the same width and height.");
-                        break;
-                    }
-                case FramebufferErrorCode.FramebufferIncompleteFormatsExt:
-                    {
-                        //Console.WriteLine("FBO: The color attachments have different format. All color attachments must have the same format.");
-                        break;
-                    }
-                case FramebufferErrorCode.FramebufferIncompleteDrawBufferExt:
-                    {
-                        //Console.WriteLine("FBO: An attachment point referenced by GL.DrawBuffers() doesn’t have an attachment.");
-                        break;
-                    }
-                case FramebufferErrorCode.FramebufferIncompleteReadBufferExt:
-                    {
-                        //Console.WriteLine("FBO: The attachment point referenced by GL.ReadBuffers() doesn’t have an attachment.");
-                        break;
-                    }
-                case FramebufferErrorCode.FramebufferUnsupportedExt:
-                    {
-                        //Console.WriteLine("FBO: This particular FBO configuration is not supported by the implementation.");
-                        break;
-                    }
-                default:
-                    {
-                        //Console.WriteLine("FBO: Status unknown. (yes, this is really bad.)");
-                        break;
-                    }
+                throw new ApplicationException(string.Format("Bad FBO: {0}", result));
             }
-
-            //// using FBO might have changed states, e.g. the FBO might not support stereoscopic views or double buffering
-            //int[] queryinfo = new int[6];
-            //GL.GetInteger(GetPName.MaxColorAttachmentsExt, out queryinfo[0]);
-            //GL.GetInteger(GetPName.AuxBuffers, out queryinfo[1]);
-            //GL.GetInteger(GetPName.MaxDrawBuffers, out queryinfo[2]);
-            //GL.GetInteger(GetPName.Stereo, out queryinfo[3]);
-            //GL.GetInteger(GetPName.Samples, out queryinfo[4]);
-            //GL.GetInteger(GetPName.Doublebuffer, out queryinfo[5]);
-            //Console.WriteLine("max. ColorBuffers: " + queryinfo[0] + " max. AuxBuffers: " + queryinfo[1] + " max. DrawBuffers: " + queryinfo[2] +
-            //                   "\nStereo: " + queryinfo[3] + " Samples: " + queryinfo[4] + " DoubleBuffer: " + queryinfo[5]);
-
-            //Console.WriteLine("Last GL Error: " + GL.GetError());
-
-            #endregion Test for Error
-            //Console.WriteLine("BindFramebufferWithLayerTextures: OK");
         }
 
         private void UnbindFramebuffer()
@@ -361,45 +301,24 @@ namespace BokehLab.DepthPeeling
             //GL.MatrixMode(MatrixMode.Modelview);
             //GL.LoadMatrix(ref sceneModelView);
 
-            GL.Disable(EnableCap.Blend);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.LoadIdentity();
 
             GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
             GL.LoadIdentity();
-            GL.Ortho(-1, 1, -1, 1, 1, -1);
 
+            GL.Disable(EnableCap.Blend);
+
+            GL.ClearColor(0, 0, 0, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            scene.Draw();
+
+            GL.PopMatrix();
             GL.MatrixMode(MatrixMode.Modelview);
-            Matrix4 lookat = Matrix4.LookAt(0, 0, 0, 0, 0, -1, 0, 1, 0);
-            GL.LoadMatrix(ref lookat);
-
-            GL.PushAttrib(AttribMask.ViewportBit);
-            {
-                GL.Viewport(0, 0, Width, Height);
-
-                // clear the screen in red, to make it very obvious what the clear affected. only the FBO, not the real framebuffer
-                //GL.ClearColor(1f, 0f, 0f, 1f);
-                GL.ClearColor(0, 0, 0, 1);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-                // smack 50 random triangles into the FBO's textures
-                GL.Begin(BeginMode.Triangles);
-                {
-                    scene.Draw();
-
-                    //GL.Color3(0.5, 0, 0); GL.Vertex3(0, 0, 0);
-                    //GL.Color3(0, 0.5, 0); GL.Vertex3(1, 1, 0);
-                    //GL.Color3(0, 0, 0.5); GL.Vertex3(0, 1, 0);
-
-                    //GL.Color3(0.5, 0, 0); GL.Vertex3(0, 0, -1);
-                    //GL.Color3(0, 0.5, 0); GL.Vertex3(1, 1, 0);
-                    //GL.Color3(0, 0, 0.5); GL.Vertex3(0, 1, 1);
-
-                    //GL.Color3(0.5, 0, 0); GL.Vertex3(-1, -1, -1);
-                    //GL.Color3(0, 0.5, 0); GL.Vertex3(-1, 1, -1);
-                    //GL.Color3(0, 0, 0.5); GL.Vertex3(1, -1, 1);
-                }
-                GL.End();
-            }
-            GL.PopAttrib();
+            GL.PopMatrix();
         }
 
         private void DrawIntoLayers()
@@ -408,23 +327,21 @@ namespace BokehLab.DepthPeeling
 
             GL.Disable(EnableCap.Blend);
 
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBOHandle);
+
             // draw the first layer without depth peeling
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
-            BindFramebufferWithLayerTextures(FBOHandle, 0);
-            //Console.WriteLine("Bound frame buffer for layer 0");
+            AttachLayerTextures(0);
             //GL.Enable(EnableCap.DepthTest);
             //GL.ClearDepth(1);
 
             DrawOriginalScene(scene);
-            //Console.WriteLine("Original scene drawn");
-            //UnbindFramebuffer();
 
             // draw the rest of layers with depth peeling
 
             // enable peeling shader
             GL.UseProgram(shaderProgram);
-            //Console.WriteLine("peeling program enabed");
 
             // mark areas with no objects with depth 0
             //GL.Disable(EnableCap.DepthTest);
@@ -433,48 +350,32 @@ namespace BokehLab.DepthPeeling
             //GL.ActiveTexture(TextureUnit.Texture0);
             for (int i = 1; i < LayerCount; i++)
             {
-                BindFramebufferWithLayerTextures(FBOHandle, i);
-                //Console.WriteLine("Bound frame buffer for layer {0}", i);
+                AttachLayerTextures(i);
 
                 GL.BindTexture(TextureTarget.Texture2D, DepthTextures[i - 1]);
-                //Console.WriteLine("Bound depth depth texture {0}", i - 1);
                 DrawOriginalScene(scene);
-                //Console.WriteLine("Original scene drawn");
-                //UnbindFramebuffer();
             }
             // disable peeling shader
             GL.UseProgram(0);
-            //Console.WriteLine("peeling program disabled");
 
             //GL.ClearDepth(1);
             //GL.Enable(EnableCap.DepthTest);
 
             UnbindFramebuffer(); // disable rendering into the FBO
-            //Console.WriteLine("Unbound framebuffer");
         }
 
         private void DisplayLayers()
         {
-            //GL.MatrixMode(MatrixMode.Projection);
-            //GL.LoadMatrix(ref scenePerspective);
-
-            //GL.MatrixMode(MatrixMode.Modelview);
-            //GL.LoadMatrix(ref sceneModelView);
-
-            GL.Viewport(0, 0, Width, Height);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.LoadIdentity();
 
             GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
             GL.LoadIdentity();
-            GL.Ortho(-1, 1, -1, 1, 1, -1);
-
-            GL.MatrixMode(MatrixMode.Modelview);
-            Matrix4 lookat = Matrix4.LookAt(0, 0, 0, 0, 0, -1, 0, 1, 0);
-            GL.LoadMatrix(ref lookat);
 
             GL.ClearColor(0f, 0f, 0f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            GL.Color3(1f, 1f, 1f);
 
             if (showBlendedLayers)
             {
@@ -506,6 +407,10 @@ namespace BokehLab.DepthPeeling
 
                 DrawFullScreenQuad();
             }
+
+            GL.PopMatrix();
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PopMatrix();
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
@@ -733,7 +638,7 @@ namespace BokehLab.DepthPeeling
                 scene.vertices = new Vector3[scene.vertexCount];
                 for (int i = 0; i < scene.vertexCount; i++)
                 {
-                    scene.colors[i] = new Vector4(0, GetRandom0to1(), GetRandom0to1(), 0.5f);
+                    scene.colors[i] = new Vector4(GetRandom0to1(), GetRandom0to1(), GetRandom0to1(), 0.5f);
                     scene.vertices[i] = new Vector3(GetRandom(), GetRandom(), GetRandom());
                 }
                 return scene;
@@ -741,11 +646,15 @@ namespace BokehLab.DepthPeeling
 
             public void Draw()
             {
-                for (int i = 0; i < colors.Length; i++)
+                GL.Begin(BeginMode.Triangles);
                 {
-                    GL.Color4(colors[i]);
-                    GL.Vertex3(vertices[i]);
+                    for (int i = 0; i < colors.Length; i++)
+                    {
+                        GL.Color4(colors[i]);
+                        GL.Vertex3(vertices[i]);
+                    }
                 }
+                GL.End();
             }
 
             static Random rnd = new Random();
