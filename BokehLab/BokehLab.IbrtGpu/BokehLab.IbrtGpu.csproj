@@ -81,7 +81,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\common\BokehLab.Math\BokehLab.Math.csproj">
+    <ProjectReference Include="..\BokehLab.Math\BokehLab.Math.csproj">
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>
     </ProjectReference>
