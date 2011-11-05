@@ -8,6 +8,10 @@ namespace BokehLab.Pinhole
 {
     class Camera
     {
+        public float ZFocal = 5; // focal plane depth
+        public float ApertureRadius = 0.05f;
+        public Vector2 PinholePos { get; set; }
+
         private Vector3 position;
 
         public Vector3 Position

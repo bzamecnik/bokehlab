@@ -30,6 +30,9 @@ namespace BokehLab.Pinhole
 
         public void Draw()
         {
+            GL.ClearColor(0, 0, 0, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
             GL.Begin(BeginMode.Triangles);
             for (int i = 0; i < colors.Length; i++)
             {

@@ -59,7 +59,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
-    <Compile Include="PinholeRenderer.cs" />
+    <Compile Include="MultiViewAccumulation.cs" />
+    <Compile Include="Navigation.cs" />
+    <Compile Include="InteractiveRenderer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

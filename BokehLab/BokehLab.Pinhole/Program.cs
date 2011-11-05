@@ -13,7 +13,7 @@ namespace BokehLab.Pinhole
         [STAThread]
         public static void Main()
         {
-            PinholeRenderer.RunExample();
+            InteractiveRenderer.RunExample();
         }
     }
 }
