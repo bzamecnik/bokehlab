@@ -22,7 +22,7 @@ namespace BokehLab.Pinhole
             scene.vertices = new Vector3[scene.vertexCount];
             for (int i = 0; i < scene.vertexCount; i++)
             {
-                scene.colors[i] = new Vector4(0, GetRandom0to1(), GetRandom0to1(), 0.5f);
+                scene.colors[i] = new Vector4(GetRandom0to1(), GetRandom0to1(), GetRandom0to1(), 0.5f);
                 scene.vertices[i] = new Vector3(GetRandom(), GetRandom(), GetRandom());
             }
             return scene;

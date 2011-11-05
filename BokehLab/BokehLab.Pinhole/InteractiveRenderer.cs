@@ -52,6 +52,8 @@ namespace BokehLab.Pinhole
 
         protected override void OnLoad(EventArgs e)
         {
+            CheckFbo();
+
             scene = GenerateScene();
 
             Keyboard.KeyUp += KeyUp;
@@ -63,6 +65,8 @@ namespace BokehLab.Pinhole
 
             navigation.Camera.Position = new Vector3(0, 0, 3);
 
+            multiViewAccum.Initialize(Width, Height);
+
             OnResize(new EventArgs());
 
             //GL.Enable(EnableCap.Lighting);
@@ -72,8 +76,21 @@ namespace BokehLab.Pinhole
             //GL.Light(LightName.Light0, LightParameter.Position, new Vector4(1, 5, 1, 1));
         }
 
+        private void CheckFbo()
+        {
+            if (!GL.GetString(StringName.Extensions).Contains("EXT_framebuffer_object"))
+            {
+                System.Windows.Forms.MessageBox.Show(
+                     "Framebuffer Objects are not supported by the GPU.",
+                     "FBOs not supported",
+                     System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+                Exit();
+            }
+        }
+
         protected override void OnUnload(EventArgs e)
         {
+            multiViewAccum.Dispose();
         }
 
         protected override void OnResize(EventArgs e)
@@ -85,8 +102,6 @@ namespace BokehLab.Pinhole
             GL.MatrixMode(MatrixMode.Projection);
             Matrix4 perspective = navigation.Perspective;
             GL.LoadMatrix(ref perspective);
-
-            DrawScene();
 
             base.OnResize(e);
         }
@@ -106,16 +121,6 @@ namespace BokehLab.Pinhole
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            DrawScene();
-            this.SwapBuffers();
-        }
-
-        #endregion
-
-        #region Drawing the scene
-
-        private void DrawScene()
-        {
             GL.MatrixMode(MatrixMode.Modelview);
             Matrix4 modelView = navigation.Camera.ModelView;
             GL.LoadMatrix(ref modelView);
@@ -129,6 +134,8 @@ namespace BokehLab.Pinhole
             {
                 scene.Draw();
             }
+
+            this.SwapBuffers();
         }
 
         #endregion
@@ -142,7 +149,6 @@ namespace BokehLab.Pinhole
                 // recompute geometry and redraw layers
                 scene = GenerateScene();
                 navigation.IsViewDirty = true;
-                DrawScene();
             }
             else
                 if (e.Key == Key.F11)
