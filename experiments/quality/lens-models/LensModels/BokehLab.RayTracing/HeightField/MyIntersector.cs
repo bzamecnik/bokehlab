@@ -55,26 +55,25 @@
         /// <returns>Intersection instance - position of the intersection in
         /// the height field (only the pixel corner, not the exact position)
         /// - if the was an intersection; null otherwise</returns>
-        public override Intersection Intersect(
-            Ray ray,
+        internal override Intersection Intersect(
+            Vector3 start, Vector3 end,
             ref FootprintDebugInfo debugInfo)
         {
             bool collectDebugInfo = debugInfo != null;
 
-            if (Math.Abs(ray.Direction.Z) < epsilonForCorners)
+            Vector3 rayDirection = end - start;
+
+            if (Math.Abs(rayDirection.Z) < epsilonForCorners)
             {
                 return null;
             }
-            bool rayGoesFromDepth = ray.Direction.Z < 0;
+            bool rayGoesFromDepth = rayDirection.Z < 0;
 
-            Vector3 rayOrigin = (Vector3)ray.Origin;
-            // 2D ray projection onto the height field plane
-            Vector2 rayEnd = (Vector2)(ray.Origin + ray.Direction).Xy;
-            Vector2 dir = (Vector2)ray.Direction.Xy;
+            Vector2 dir = rayDirection.Xy;
             bool rayGoesRatherHorizontal = Math.Abs(dir.X) > Math.Abs(dir.Y);
 
-            Vector2 dirInv = new Vector2((float)(1 / ray.Direction.X), (float)(1 / ray.Direction.Y));
-            Vector2 rayDzOverDxy = (float)ray.Direction.Z * dirInv;
+            Vector2 dirInv = new Vector2((float)(1 / dir.X), (float)(1 / dir.Y));
+            Vector2 rayDzOverDxy = rayDirection.Z * dirInv;
             // direction to the nearest corner: [1,1], [1,-1], [-1,1] or [-1,-1]
             Vector2 relDir = new Vector2(Math.Sign(dir.X), Math.Sign(dir.Y));
             bool isDirectionAxisAligned = relDir.X * relDir.Y == 0;
@@ -82,11 +81,11 @@
             Vector2 relCorner = isDirectionAxisAligned ? relDir : (0.5f * (relDir + new Vector2(1, 1)));
 
             // point where the 2D ray projection enters the current pixel
-            Vector3 entry = (Vector3)ray.Origin;
+            Vector3 entry = start;
             Vector2 entryXY = entry.Xy;
 
             Vector2 currentPixel = GetPixelCorner(entryXY, relDir);
-            Vector2 endPixel = GetPixelCorner(rayEnd, -relDir);
+            Vector2 endPixel = GetPixelCorner(end.Xy, -relDir);
 
             if (collectDebugInfo)
             {
@@ -128,10 +127,10 @@
                     // from the current position both to the nearest corner and
                     // the end of the ray (it is aligned with the Z axis).
 
-                    float crossLength = (corner.X - entryXY.X) * (rayEnd.Y - entryXY.Y)
-                        - (corner.Y - entryXY.Y) * (rayEnd.X - entryXY.X);
+                    float crossLength = (corner.X - entryXY.X) * (end.Y - entryXY.Y)
+                        - (corner.Y - entryXY.Y) * (end.X - entryXY.X);
                     //   it is equavalent to:
-                    // float crossLength = Cross2d(corner - entryXY, rayEnd - entryXY);
+                    // float crossLength = Cross2d(corner - entryXY, end.Xy - entryXY);
                     //   or to:
                     // float crossLength = Vector3.Cross(new Vector3(corner - entryXY), new Vector3(rayEnd - entryXY)).Z;
 
@@ -164,11 +163,11 @@
                 Vector3 exit = new Vector3(IntersectPixelEdge2d(entryXY, dir, dirInv, corner, nextDir));
                 if (rayGoesRatherHorizontal)
                 {
-                    exit.Z = rayOrigin.Z + (exit.X - rayOrigin.X) * rayDzOverDxy.X;
+                    exit.Z = start.Z + (exit.X - start.X) * rayDzOverDxy.X;
                 }
                 else
                 {
-                    exit.Z = rayOrigin.Z + (exit.Y - rayOrigin.Y) * rayDzOverDxy.Y;
+                    exit.Z = start.Z + (exit.Y - start.Y) * rayDzOverDxy.Y;
                 }
 
                 // compute intersection with the height field pixel (in several layers)
@@ -190,8 +189,7 @@
                 debugInfo.VisitedPixels.Add(currentPixel);
                 debugInfo.EntryPoints.Add(entryXY);
             }
-            float endZ = (float)(ray.Origin.Z + ray.Direction.Z);
-            return IntersectLayerAtPixel(currentPixel, entry.Z, endZ, rayGoesFromDepth, collectDebugInfo, debugInfo, ref previousLastZ);
+            return IntersectLayerAtPixel(currentPixel, entry.Z, end.Z, rayGoesFromDepth, collectDebugInfo, debugInfo, ref previousLastZ);
         }
 
         private Intersection IntersectLayerAtPixel(

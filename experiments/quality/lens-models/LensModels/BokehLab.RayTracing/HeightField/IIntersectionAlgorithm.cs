@@ -7,9 +7,9 @@ using BokehLab.Math;
 
 namespace BokehLab.RayTracing.HeightField
 {
-    interface IIntersectionAlgorithm : IIntersectable
+    public interface IIntersectionAlgorithm : IIntersectable
     {
-        Intersection Intersect(Ray ray, ref FootprintDebugInfo debugInfo);
+        Intersection Intersect(Vector3 start, Vector3 end);
     }
 
     // TODO: project the ray into the frustum space to match it with the depth map
@@ -19,7 +19,7 @@ namespace BokehLab.RayTracing.HeightField
     // Values in layers within each pixel are assumed to be ordered by increasing
     // depth - the input data are assumed to be obtained by depth peeling.
 
-    abstract class AbstractIntersector : IIntersectionAlgorithm
+    public abstract class AbstractIntersector : IIntersectionAlgorithm
     {
         public HeightField HeightField { get; set; }
 
@@ -28,12 +28,18 @@ namespace BokehLab.RayTracing.HeightField
             this.HeightField = heightField;
         }
 
-        public abstract Intersection Intersect(Ray ray, ref FootprintDebugInfo debugInfo);
+        internal abstract Intersection Intersect(Vector3 start, Vector3 end, ref FootprintDebugInfo debugInfo);
+
+        public Intersection Intersect(Vector3 start, Vector3 end)
+        {
+            FootprintDebugInfo debugInfo = null;
+            return Intersect(start, end, ref debugInfo);
+        }
 
         public Intersection Intersect(Ray ray)
         {
             FootprintDebugInfo debugInfo = null;
-            return Intersect(ray, ref debugInfo);
+            return Intersect((Vector3)ray.Origin, (Vector3)(ray.Origin + ray.Direction), ref debugInfo);
         }
     }
 

@@ -19,6 +19,7 @@ namespace BokehLab.RayTracing.Test.GUI
             try
             {
                 Application.Run(new HeighFieldForm());
+                //Application.Run(new ComplexLensForm());
             }
             catch (Exception ex)
             {

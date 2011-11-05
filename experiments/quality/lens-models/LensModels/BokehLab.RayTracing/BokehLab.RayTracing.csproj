@@ -52,6 +52,7 @@
     <Compile Include="HeightField\BinarySearchIntersector.cs" />
     <Compile Include="HeightField\HeightField.cs" />
     <Compile Include="HeightField\IIntersectionAlgorithm.cs" />
+    <Compile Include="HeightField\LinearSearchIntersector.cs" />
     <Compile Include="IIntersectable.cs" />
     <Compile Include="INormalField.cs" />
     <Compile Include="Intersection.cs" />

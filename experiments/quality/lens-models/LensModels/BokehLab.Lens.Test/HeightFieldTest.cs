@@ -21,8 +21,8 @@
             data.Image[0, 0, 0] = 0.5f;
             HeightField heightfield = new HeightField(new[] { data });
 
-            Vector3d start = new Vector3d(0.1, 0.1, 0.25);
-            Vector3d end = new Vector3d(0.2, 0.2, 0.75);
+            Vector3 start = new Vector3(0.1f, 0.1f, 0.25f);
+            Vector3 end = new Vector3(0.2f, 0.2f, 0.75f);
             IntersectAndReport(heightfield, start, end);
         }
 
@@ -32,8 +32,8 @@
             data.Image[0, 0, 0] = 0.5f;
             HeightField heightfield = new HeightField(new[] { data });
 
-            Vector3d start = new Vector3d(0.1, 0.1, 0.25);
-            Vector3d end = new Vector3d(0.1, 0.1, 0.75);
+            Vector3 start = new Vector3(0.1f, 0.1f, 0.25f);
+            Vector3 end = new Vector3(0.1f, 0.1f, 0.75f);
             IntersectAndReport(heightfield, start, end);
         }
 
@@ -46,33 +46,31 @@
             data.Image[1, 1, 0] = 0.5f;
             HeightField heightfield = new HeightField(new[] { data });
 
-            Vector3d start = new Vector3d(0.5, 1.5, 0.0);
-            Vector3d end = new Vector3d(2, 2, 1);
+            Vector3 start = new Vector3(0.5f, 1.5f, 0.0f);
+            Vector3 end = new Vector3(2, 2, 1);
             IntersectAndReport(heightfield, start, end);
         }
 
-        private static void IntersectAndReport(HeightField heightfield, Vector3d start, Vector3d end)
+        private static void IntersectAndReport(HeightField heightfield, Vector3 start, Vector3 end)
         {
-            Ray ray = new Ray(start, end - start);
             MyIntersector intersector = new MyIntersector(heightfield);
-            Intersection intersection = intersector.Intersect(ray);
+            Intersection intersection = intersector.Intersect(start, end);
             Console.WriteLine((intersection != null) ? intersection.Position.ToString() : "no intersection");
         }
 
-        private static void MeasureIntersectionPerformance(HeightField heightfield, Vector3d start, Vector3d end, int iterations)
+        private static void MeasureIntersectionPerformance(HeightField heightfield, Vector3 start, Vector3 end, int iterations)
         {
-            Vector3d direction = end - start;
-            Ray ray = new Ray(start, direction);
+            Vector3 direction = end - start;
 
             MyIntersector intersector = new MyIntersector(heightfield);
             FootprintDebugInfo debugInfo = new FootprintDebugInfo();
-            Intersection isec = intersector.Intersect(ray, ref debugInfo);
+            Intersection isec = intersector.Intersect(start, end, ref debugInfo);
             int visitedPixels = debugInfo.VisitedPixels.Count;
 
             Stopwatch sw = Stopwatch.StartNew();
             for (int i = 0; i < iterations; i++)
             {
-                Intersection intersection = intersector.Intersect(ray);
+                Intersection intersection = intersector.Intersect(start, end);
             }
             sw.Stop();
 
@@ -90,22 +88,22 @@
         private static void TryFootprintTraversalPerformance()
         {
             //HeightField heightfield = new HeightField(1000, 1000);
-            //Vector3d start = new Vector3d(2.5, 1.5, 0);
-            //Vector3d end = new Vector3d(999.5, 998.5, 1);
+            //Vector3 start = new Vector3(2.5, 1.5, 0);
+            //Vector3 end = new Vector3(999.5f, 998.5f, 1);
 
             HeightField heightfield = new HeightField(200, 200);
-            //Vector3d start = new Vector3d(169, 181, 0);
-            //Vector3d end = new Vector3d(14, 191, 1);
-            //Vector3d start = new Vector3d(178, 180, 0);
-            //Vector3d end = new Vector3d(33, 38, 1);
-            //Vector3d start = new Vector3d(9, 190, 0);
-            //Vector3d end = new Vector3d(131, 19, 1);
-            Vector3d start = new Vector3d(100, 100, 0);
-            Vector3d end = new Vector3d(104.5, 105.5, 1);
+            //Vector3 start = new Vector3(169, 181, 0);
+            //Vector3 end = new Vector3(14, 191, 1);
+            //Vector3 start = new Vector3(178, 180, 0);
+            //Vector3 end = new Vector3(33, 38, 1);
+            //Vector3 start = new Vector3(9, 190, 0);
+            //Vector3 end = new Vector3(131, 19, 1);
+            Vector3 start = new Vector3(100, 100, 0);
+            Vector3 end = new Vector3(104.5f, 105.5f, 1);
 
             //HeightField heightfield = new HeightField(200, 200);
-            //Vector3d start = new Vector3d(100, 100.1, 0);
-            //Vector3d end = new Vector3d(102.1, 102.2, 1);
+            //Vector3 start = new Vector3(100, 100.1, 0);
+            //Vector3 end = new Vector3(102.1, 102.2, 1);
 
             int iterations = 100000;
             MeasureIntersectionPerformance(heightfield, start, end, iterations);
@@ -121,16 +119,16 @@
             layers.Add(((Bitmap)Bitmap.FromFile("../../data/2011-05-30_04-50-47_depth_4.png")).ToFloatMap());
             HeightField heightfield = new HeightField(layers);
             // no isec
-            //Vector3d start = new Vector3d(169, 181, 0);
-            //Vector3d end = new Vector3d(14, 191, 1);
+            //Vector3 start = new Vector3(169, 181, 0);
+            //Vector3 end = new Vector3(14, 191, 1);
             // isec at layer 4
-            //Vector3d start = new Vector3d(178, 180, 0);
-            //Vector3d end = new Vector3d(33, 38, 1);
+            //Vector3 start = new Vector3(178, 180, 0);
+            //Vector3 end = new Vector3(33, 38, 1);
             // no isec with 5 layers, traversing the filled areas
-            //Vector3d start = new Vector3d(9, 190, 0);
-            //Vector3d end = new Vector3d(131, 19, 1);
-            Vector3d start = new Vector3d(100, 100, 0);
-            Vector3d end = new Vector3d(117.5, 115.5, 1);
+            //Vector3 start = new Vector3(9, 190, 0);
+            //Vector3 end = new Vector3(131, 19, 1);
+            Vector3 start = new Vector3(100, 100, 0);
+            Vector3 end = new Vector3(117.5f, 115.5f, 1);
             int iterations = 100000;
             MeasureIntersectionPerformance(heightfield, start, end, iterations);
         }

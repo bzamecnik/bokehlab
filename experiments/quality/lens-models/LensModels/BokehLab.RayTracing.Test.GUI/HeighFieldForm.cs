@@ -21,12 +21,14 @@
         List<Bitmap> layerBitmaps = new List<Bitmap>();
 
         MyIntersector myHeightFieldIntersector = new MyIntersector(null);
+        BinarySearchIntersector binarySearchIntersector = new BinarySearchIntersector(null);
+        LinearSearchIntersector linearSearchIntersector = new LinearSearchIntersector(null);
         AbstractIntersector selectedIntersector;
 
         Point rayStartPoint;
         Point rayEndPoint;
-        Vector3d rayStart;
-        Vector3d rayEnd;
+        Vector3 rayStart;
+        Vector3 rayEnd;
 
         bool editingRay = false;
 
@@ -63,6 +65,9 @@
             epsilonForCloseDepthNumeric.Value = (decimal)myHeightFieldIntersector.EpsilonForClosePixelDepth;
 
             selectedIntersector = myHeightFieldIntersector;
+            //selectedIntersector = binarySearchIntersector;
+            //selectedIntersector = linearSearchIntersector;
+            selectedIntersector.HeightField = heightField;
 
             UpdateHeightfieldPanel();
         }
@@ -230,7 +235,7 @@
             {
                 footprintDebugInfo = null;
             }
-            intersection = selectedIntersector.Intersect(new Ray(rayStart, rayEnd - rayStart), ref footprintDebugInfo);
+            intersection = selectedIntersector.Intersect(rayStart, rayEnd, ref footprintDebugInfo);
             intersectionLabel.Text = (intersection != null) ? intersection.Position.ToString() : "none";
             isecLayerLabel.Text = (footprintDebugInfo != null) && (intersection != null) ? footprintDebugInfo.LayerOfIntersection.ToString() : "";
 
