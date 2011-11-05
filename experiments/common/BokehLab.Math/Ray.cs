@@ -23,6 +23,8 @@
         public Ray Transform(Matrix4d matrix)
         {
             Vector3d newOrigin = Vector3d.Transform(Origin, matrix);
+            // TODO: direction cannot be transformed with the same matrix as position!!!
+            // use the inverse transpose !!!
             Vector3d newDirection = Vector3d.Transform(Direction, matrix);
             return new Ray(newOrigin, newDirection);
         }
