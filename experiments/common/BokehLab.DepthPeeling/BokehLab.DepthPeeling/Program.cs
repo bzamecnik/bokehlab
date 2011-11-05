@@ -13,7 +13,14 @@ namespace BokehLab.DepthPeeling
         [STAThread]
         public static void Main()
         {
-            DepthPeeling.RunExample();
+            try
+            {
+                DepthPeeling.RunExample();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }

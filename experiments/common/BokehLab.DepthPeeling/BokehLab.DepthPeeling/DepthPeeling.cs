@@ -24,9 +24,9 @@ namespace BokehLab.DepthPeeling
         /// Number of depth peeling layers (color and depth textures).
         /// </summary>
         /// <remarks>
-        /// At most 7 works for me (NVidia Quadro NVS 140)
+        /// At most 3 works for me (NVidia Quadro NVS 140)
         /// </remarks>
-        static readonly int LayerCount = 7;
+        static readonly int LayerCount = 3;
 
         // index of currently displayed layer [0; LayerCount - 1]
         int activeLayer = 0;
@@ -147,6 +147,7 @@ namespace BokehLab.DepthPeeling
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            //DrawIntoLayers();
             DisplayLayers();
 
             this.SwapBuffers();
@@ -207,7 +208,7 @@ namespace BokehLab.DepthPeeling
 
         private void BindFramebufferWithLayerTextures(uint fboHandle, int layerIndex)
         {
-            Console.WriteLine("BindFramebufferWithLayerTextures");
+            //Console.WriteLine("BindFramebufferWithLayerTextures");
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
             GL.Ext.FramebufferTexture2D(
                 FramebufferTarget.FramebufferExt,
@@ -219,24 +220,24 @@ namespace BokehLab.DepthPeeling
                 FramebufferAttachment.DepthAttachmentExt,
                 TextureTarget.Texture2D,
                 DepthTextures[layerIndex], 0);
-            Console.WriteLine("BindFramebufferWithLayerTextures: testing for error");
+            //Console.WriteLine("BindFramebufferWithLayerTextures: testing for error");
             #region Test for Error
 
             switch (GL.Ext.CheckFramebufferStatus(FramebufferTarget.FramebufferExt))
             {
                 case FramebufferErrorCode.FramebufferCompleteExt:
                     {
-                        Console.WriteLine("FBO: The framebuffer is complete and valid for rendering.");
+                        //Console.WriteLine("FBO: The framebuffer is complete and valid for rendering.");
                         break;
                     }
                 case FramebufferErrorCode.FramebufferIncompleteAttachmentExt:
                     {
-                        Console.WriteLine("FBO: One or more attachment points are not framebuffer attachment complete. This could mean there’s no texture attached or the format isn’t renderable. For color textures this means the base format must be RGB or RGBA and for depth textures it must be a DEPTH_COMPONENT format. Other causes of this error are that the width or height is zero or the z-offset is out of range in case of render to volume.");
+                        //Console.WriteLine("FBO: One or more attachment points are not framebuffer attachment complete. This could mean there’s no texture attached or the format isn’t renderable. For color textures this means the base format must be RGB or RGBA and for depth textures it must be a DEPTH_COMPONENT format. Other causes of this error are that the width or height is zero or the z-offset is out of range in case of render to volume.");
                         break;
                     }
                 case FramebufferErrorCode.FramebufferIncompleteMissingAttachmentExt:
                     {
-                        Console.WriteLine("FBO: There are no attachments.");
+                        //Console.WriteLine("FBO: There are no attachments.");
                         break;
                     }
                 /* case  FramebufferErrorCode.GL_FRAMEBUFFER_INCOMPLETE_DUPLICATE_ATTACHMENT_EXT: 
@@ -246,32 +247,32 @@ namespace BokehLab.DepthPeeling
                      }*/
                 case FramebufferErrorCode.FramebufferIncompleteDimensionsExt:
                     {
-                        Console.WriteLine("FBO: Attachments are of different size. All attachments must have the same width and height.");
+                        //Console.WriteLine("FBO: Attachments are of different size. All attachments must have the same width and height.");
                         break;
                     }
                 case FramebufferErrorCode.FramebufferIncompleteFormatsExt:
                     {
-                        Console.WriteLine("FBO: The color attachments have different format. All color attachments must have the same format.");
+                        //Console.WriteLine("FBO: The color attachments have different format. All color attachments must have the same format.");
                         break;
                     }
                 case FramebufferErrorCode.FramebufferIncompleteDrawBufferExt:
                     {
-                        Console.WriteLine("FBO: An attachment point referenced by GL.DrawBuffers() doesn’t have an attachment.");
+                        //Console.WriteLine("FBO: An attachment point referenced by GL.DrawBuffers() doesn’t have an attachment.");
                         break;
                     }
                 case FramebufferErrorCode.FramebufferIncompleteReadBufferExt:
                     {
-                        Console.WriteLine("FBO: The attachment point referenced by GL.ReadBuffers() doesn’t have an attachment.");
+                        //Console.WriteLine("FBO: The attachment point referenced by GL.ReadBuffers() doesn’t have an attachment.");
                         break;
                     }
                 case FramebufferErrorCode.FramebufferUnsupportedExt:
                     {
-                        Console.WriteLine("FBO: This particular FBO configuration is not supported by the implementation.");
+                        //Console.WriteLine("FBO: This particular FBO configuration is not supported by the implementation.");
                         break;
                     }
                 default:
                     {
-                        Console.WriteLine("FBO: Status unknown. (yes, this is really bad.)");
+                        //Console.WriteLine("FBO: Status unknown. (yes, this is really bad.)");
                         break;
                     }
             }
@@ -290,12 +291,12 @@ namespace BokehLab.DepthPeeling
             //Console.WriteLine("Last GL Error: " + GL.GetError());
 
             #endregion Test for Error
-            Console.WriteLine("BindFramebufferWithLayerTextures: OK");
+            //Console.WriteLine("BindFramebufferWithLayerTextures: OK");
         }
 
         private void UnbindFramebuffer()
         {
-            Console.WriteLine("UnbindFramebuffer");
+            //Console.WriteLine("UnbindFramebuffer");
             // detach textures - TODO: really needed?
             GL.Ext.FramebufferTexture2D(
                 FramebufferTarget.FramebufferExt,
@@ -308,7 +309,7 @@ namespace BokehLab.DepthPeeling
                 TextureTarget.Texture2D,
                 0, 0);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
-            Console.WriteLine("UnbindFramebuffer: OK");
+            //Console.WriteLine("UnbindFramebuffer: OK");
         }
 
         #endregion
@@ -411,15 +412,19 @@ namespace BokehLab.DepthPeeling
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
             BindFramebufferWithLayerTextures(FBOHandle, 0);
+            //Console.WriteLine("Bound frame buffer for layer 0");
             //GL.Enable(EnableCap.DepthTest);
             //GL.ClearDepth(1);
+
             DrawOriginalScene(scene);
+            //Console.WriteLine("Original scene drawn");
             //UnbindFramebuffer();
 
             // draw the rest of layers with depth peeling
 
             // enable peeling shader
             GL.UseProgram(shaderProgram);
+            //Console.WriteLine("peeling program enabed");
 
             // mark areas with no objects with depth 0
             //GL.Disable(EnableCap.DepthTest);
@@ -429,17 +434,23 @@ namespace BokehLab.DepthPeeling
             for (int i = 1; i < LayerCount; i++)
             {
                 BindFramebufferWithLayerTextures(FBOHandle, i);
+                //Console.WriteLine("Bound frame buffer for layer {0}", i);
+
                 GL.BindTexture(TextureTarget.Texture2D, DepthTextures[i - 1]);
+                //Console.WriteLine("Bound depth depth texture {0}", i - 1);
                 DrawOriginalScene(scene);
+                //Console.WriteLine("Original scene drawn");
                 //UnbindFramebuffer();
             }
             // disable peeling shader
             GL.UseProgram(0);
+            //Console.WriteLine("peeling program disabled");
 
             //GL.ClearDepth(1);
             //GL.Enable(EnableCap.DepthTest);
 
             UnbindFramebuffer(); // disable rendering into the FBO
+            //Console.WriteLine("Unbound framebuffer");
         }
 
         private void DisplayLayers()
