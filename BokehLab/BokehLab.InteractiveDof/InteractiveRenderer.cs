@@ -2,12 +2,12 @@
 {
     using System;
     using BokehLab.InteractiveDof.MultiViewAccum;
+    using BokehLab.InteractiveDof.DepthPeeling;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
 
     // TODO:
-    // - integrate depth peeling
     // - create height field intersection routines
     // - integrate image-based ray tracing
     // - FPS counter
@@ -32,9 +32,10 @@
 
         MultiViewAccumulation multiViewAccum = new MultiViewAccumulation();
 
+        DepthPeeler depthPeeler = new DepthPeeler();
+
         public static void RunExample()
         {
-
             using (InteractiveRenderer example = new InteractiveRenderer())
             {
                 example.Run(30.0, 0.0);
@@ -58,7 +59,9 @@
 
             navigation.Camera.Position = new Vector3(0, 0, 3);
 
-            multiViewAccum.Initialize(Width, Height);
+            //multiViewAccum.Initialize(Width, Height);
+
+            depthPeeler.Initialize(Width, Height);
 
             OnResize(new EventArgs());
         }
@@ -90,6 +93,8 @@
             Matrix4 perspective = navigation.Perspective;
             GL.LoadMatrix(ref perspective);
 
+            depthPeeler.OnResize(Width, Height);
+
             base.OnResize(e);
         }
 
@@ -112,10 +117,11 @@
             Matrix4 modelView = navigation.Camera.ModelView;
             GL.LoadMatrix(ref modelView);
 
-
             if (enableDofAccumulation)
             {
-                multiViewAccum.AccumulateAndDraw(scene, navigation);
+                //multiViewAccum.AccumulateAndDraw(scene, navigation);
+                depthPeeler.PeelLayers(scene, navigation);
+                depthPeeler.DisplayLayers();
             }
             else
             {

@@ -59,6 +59,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="DepthPeeling\DepthPeeler.cs" />
+    <Compile Include="LayerHelper.cs" />
     <Compile Include="MultiViewAccum\BufferAccumulator.cs" />
     <Compile Include="MultiViewAccum\FboAccumulator.cs" />
     <Compile Include="MultiViewAccum\IAccumulator.cs" />
@@ -81,6 +83,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="MultiViewAccum\AccumVS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DepthPeeling\DepthPeelerFS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DepthPeeling\DepthPeelerVS.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Properties\Settings.settings">
