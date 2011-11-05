@@ -17,6 +17,8 @@
         private LensRayTransferFunction.Table3d lrtfTable;
         private Ray incomingRay;
         private Ray outgoingRay;
+
+
         private Vector3d backLensPos;
         private IList<Vector3d> intersections;
         double directionPhi;
@@ -27,11 +29,16 @@
 
         bool initialized = false;
 
+        bool showAlsoLrtf = false;
+
         public ComplexLensForm()
         {
             InitializeComponent();
             complexLens = CreateLens();
-            PrepareLrtf(complexLens, 128);
+            if (showAlsoLrtf)
+            {
+                PrepareLrtf(complexLens, 128);
+            }
             //directionPhi = Math.PI;
             directionPhi = 1.0;
             incomingRay = new Ray(new Vector3d(25, 0, 300), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
@@ -291,15 +298,18 @@
 
                 //outgoingParams.PositionPhi += positionPhi;
 
-                // test LRTF evaluated from a precomputed table
-                var outgoingParams = lrtfTable.EvaluateLrtf3D(incomingParams);
-
-                var outgoingRayFromLrtf = complexLens.ConvertParametersToFrontSurfaceRay(outgoingParams);
-                if (outgoingRayFromLrtf.Direction != Vector3d.Zero)
+                if (showAlsoLrtf)
                 {
-                    origin = projFunc(outgoingRayFromLrtf.Origin);
-                    target = projFunc(outgoingRayFromLrtf.Origin + 1000 * Vector3d.Normalize(outgoingRayFromLrtf.Direction));
-                    g.DrawLine(Pens.Orange, origin, target);
+                    // test LRTF evaluated from a precomputed table
+                    var outgoingParams = lrtfTable.EvaluateLrtf3D(incomingParams);
+
+                    var outgoingRayFromLrtf = complexLens.ConvertParametersToFrontSurfaceRay(outgoingParams);
+                    if (outgoingRayFromLrtf.Direction != Vector3d.Zero)
+                    {
+                        origin = projFunc(outgoingRayFromLrtf.Origin);
+                        target = projFunc(outgoingRayFromLrtf.Origin + 1000 * Vector3d.Normalize(outgoingRayFromLrtf.Direction));
+                        g.DrawLine(Pens.Orange, origin, target);
+                    }
                 }
             }
 
