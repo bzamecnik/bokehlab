@@ -122,12 +122,12 @@
             }
 
             bool perspectiveChanged = false;
-            if (Keyboard[Key.PageUp])
+            if (Keyboard[Key.Insert])
             {
                 fieldOfView /= 1.1f;
                 perspectiveChanged = true;
             }
-            else if (Keyboard[Key.PageDown])
+            else if (Keyboard[Key.Delete])
             {
                 fieldOfView *= 1.1f;
                 perspectiveChanged = true;
@@ -187,12 +187,12 @@
                 Camera.ApertureRadius /= 1.1f;
                 perspectiveChanged = true;
             }
-            if (Keyboard[Key.Up])
+            if (Keyboard[Key.PageUp])
             {
                 Camera.ZFocal *= 1.1f;
                 perspectiveChanged = true;
             }
-            else if (Keyboard[Key.Down])
+            else if (Keyboard[Key.PageDown])
             {
                 Camera.ZFocal /= 1.1f;
                 perspectiveChanged = true;
