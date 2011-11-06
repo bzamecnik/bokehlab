@@ -127,7 +127,6 @@
             GL.Ext.GenFramebuffers(1, out fboHandle);
 
             GL.Enable(EnableCap.Texture2D);
-            GL.Enable(EnableCap.DepthTest);
         }
 
         public override void Dispose()
@@ -143,10 +142,13 @@
         protected override void Enable()
         {
             CreateLayerTextures(Width, Height);
+            GL.Enable(EnableCap.DepthTest);
         }
 
         protected override void Disable()
         {
+            GL.Disable(EnableCap.DepthTest);
+
             if (fboHandle != 0)
                 GL.Ext.DeleteFramebuffers(1, ref fboHandle);
 
