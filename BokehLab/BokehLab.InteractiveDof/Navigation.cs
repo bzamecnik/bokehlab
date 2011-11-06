@@ -23,28 +23,7 @@
 
         static readonly float DeltaShift = 0.1f;
 
-        static readonly float DefaultFieldOfView = OpenTK.MathHelper.PiOver4;
-        float fieldOfView = DefaultFieldOfView;
-        public float FieldOfView
-        {
-            get { return fieldOfView; }
-            set
-            {
-                fieldOfView = value;
-                if (fieldOfView > (OpenTK.MathHelper.Pi - 0.1f))
-                {
-                    fieldOfView = OpenTK.MathHelper.Pi - 0.1f;
-                }
-                else if (fieldOfView < 0.0000001f)
-                {
-                    fieldOfView = 0.0000001f;
-                }
-                Perspective = GetPerspective();
-            }
-        }
         float near = 0.1f;
-        float far = 1000f;
-
         public float Near
         {
             get { return near; }
@@ -54,23 +33,14 @@
                 Perspective = GetPerspective();
             }
         }
+
+        float far = 1000f;
         public float Far
         {
             get { return far; }
             set
             {
                 far = value;
-                Perspective = GetPerspective();
-            }
-        }
-
-        public float aspectRatio = 1.0f;
-        public float AspectRatio
-        {
-            get { return aspectRatio; }
-            set
-            {
-                aspectRatio = value;
                 Perspective = GetPerspective();
             }
         }
@@ -84,11 +54,8 @@
 
         public void Reset()
         {
-            FieldOfView = OpenTK.MathHelper.PiOver4;
             Camera = new Camera();
             Camera.Position = new Vector3(0, 0, 3);
-            Camera.ZFocal = 5;
-            Camera.ApertureRadius = 0.01f;
             Perspective = GetPerspective();
         }
 
@@ -130,12 +97,12 @@
             bool perspectiveChanged = false;
             if (Keyboard[Key.Insert])
             {
-                FieldOfView /= 1.1f;
+                Camera.FieldOfView /= 1.1f;
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.Delete])
             {
-                FieldOfView *= 1.1f;
+                Camera.FieldOfView *= 1.1f;
                 perspectiveChanged = true;
             }
 
@@ -167,22 +134,22 @@
 
             if (Keyboard[Key.Home])
             {
-                Camera.ApertureRadius *= 1.1f;
+                Camera.Lens.ApertureNumber *= 1.1f;
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.End])
             {
-                Camera.ApertureRadius /= 1.1f;
+                Camera.Lens.ApertureNumber /= 1.1f;
                 perspectiveChanged = true;
             }
             if (Keyboard[Key.PageUp])
             {
-                Camera.ZFocal *= 1.1f;
+                Camera.FocalZ = Camera.FocalZ * 1.1f;
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.PageDown])
             {
-                Camera.ZFocal /= 1.1f;
+                Camera.FocalZ = Camera.FocalZ / 1.1f;
                 perspectiveChanged = true;
             }
             if (perspectiveChanged)
@@ -191,7 +158,6 @@
                 Matrix4 perspective = Perspective;
 
                 GL.MatrixMode(MatrixMode.Projection);
-                GL.PushMatrix();
                 GL.LoadMatrix(ref perspective);
                 IsViewDirty = true;
             }
@@ -212,7 +178,7 @@
 
         private void RotateViewVertical(float delta)
         {
-            float angle = 2 * fieldOfView * delta;
+            float angle = 2 * Camera.FieldOfView * delta;
             Matrix4 rot = Matrix4.CreateFromAxisAngle(Camera.Right, angle);
             Camera.View = Vector3.TransformVector(Camera.View, rot);
             Camera.Up = Vector3.TransformVector(Camera.Up, rot);
@@ -221,7 +187,7 @@
 
         private void RotateViewHorizontal(float delta)
         {
-            float angle = 2 * fieldOfView * delta;
+            float angle = 2 * Camera.FieldOfView * delta;
             Matrix4 rot = Matrix4.CreateRotationY(angle);
             Camera.View = Vector3.TransformVector(Camera.View, rot);
             Camera.Up = Vector3.TransformVector(Camera.Up, rot);
@@ -232,7 +198,7 @@
         {
             if (delta.Y != 0)
             {
-                Camera.ZFocal += delta.Y;
+                Camera.FocalZ += delta.Y;
                 IsViewDirty = true;
             }
         }
@@ -241,25 +207,30 @@
         {
             if (delta != 0)
             {
-                Camera.ZFocal *= (float)Math.Pow(1.1, delta);
+                Camera.FocalZ *= (float)Math.Pow(1.1, delta);
                 IsViewDirty = true;
             }
         }
 
-        public Matrix4 GetPerspective()
+        public void UpdatePerspective()
         {
-            return Matrix4.CreatePerspectiveFieldOfView(FieldOfView, AspectRatio, near, far);
+            Perspective = GetPerspective();
+        }
+
+        private Matrix4 GetPerspective()
+        {
+            return Matrix4.CreatePerspectiveFieldOfView(Camera.FieldOfView, Camera.AspectRatio, near, far);
         }
 
         public Vector2 GetPinholePos(Vector2 lensSample)
         {
             //pinholePos = apertureRadius * (Vector2)Sampler.ConcentricSampleDisk(sampler.GenerateUniformPoint());
-            return Camera.ApertureRadius * lensSample;
+            return Camera.Lens.ApertureRadius * lensSample;
         }
 
         public Matrix4 GetMultiViewPerspective(Vector2 pinholePos)
         {
-            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, pinholePos, Camera.ZFocal);
+            return CreatePerspectiveFieldOfViewOffCenter(Camera.FieldOfView, Camera.AspectRatio, near, far, pinholePos, -Camera.FocalZ);
         }
 
         private Matrix4 CreatePerspectiveFieldOfViewOffCenter(

@@ -12,9 +12,64 @@
     /// </summary>
     class Camera
     {
-        // TODO: get the intrinsic camera parameters away into a lens model
-        public float ZFocal = 5; // focal plane depth
-        public float ApertureRadius = 0.05f;
+        private float focalZ;
+        // focal plane depth
+        public float FocalZ
+        {
+            get { return focalZ; }
+            set
+            {
+                focalZ = value;
+                sensorZ = Lens.Transform(new Vector3(0, 0, value)).Z;
+            }
+        }
+
+        private float sensorZ;
+        // sensor depth
+        public float SensorZ
+        {
+            get { return sensorZ; }
+            set
+            {
+                sensorZ = value;
+                focalZ = Lens.Transform(new Vector3(0, 0, value)).Z;
+            }
+        }
+
+        public static readonly float DefaultFieldOfView = OpenTK.MathHelper.PiOver4;
+
+        float fieldOfView = DefaultFieldOfView;
+        public float FieldOfView
+        {
+            get { return fieldOfView; }
+            set
+            {
+                fieldOfView = BokehLab.Math.MathHelper.Clamp(value,
+                    0.0000001f, OpenTK.MathHelper.Pi - 0.1f);
+            }
+        }
+
+        public float aspectRatio = 1.0f;
+        public float AspectRatio
+        {
+            get { return aspectRatio; }
+            set
+            {
+                aspectRatio = value;
+            }
+        }
+
+        public Vector2 SensorSize
+        {
+            get
+            {
+                float height = 2 * sensorZ * (float)System.Math.Tan(0.5f * fieldOfView);
+                float width = height * aspectRatio;
+                return new Vector2(width, height);
+            }
+        }
+
+        public ThinLens Lens { get; private set; }
 
         private Vector3 position;
 
@@ -63,6 +118,9 @@
 
         public Camera()
         {
+            Lens = new ThinLens() { ApertureNumber = 2.8f, FocalLength = 0.1f };
+            FocalZ = -(20 * Lens.FocalLength);
+
             Position = Vector3.Zero;
             View = -Vector3.UnitZ;
             Up = Vector3.UnitY;

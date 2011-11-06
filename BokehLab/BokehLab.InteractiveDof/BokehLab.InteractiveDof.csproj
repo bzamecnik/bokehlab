@@ -111,6 +111,7 @@
     <Compile Include="RayTracing\ImageBasedRayTracer.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="ShaderLoader.cs" />
+    <Compile Include="ThinLens.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BokehLab.Math\BokehLab.Math.csproj">

@@ -105,11 +105,13 @@
         {
             GL.Viewport(0, 0, Width, Height);
 
-            navigation.AspectRatio = Width / (float)Height;
+            navigation.Camera.AspectRatio = Width / (float)Height;
+            navigation.UpdatePerspective();
 
             GL.MatrixMode(MatrixMode.Projection);
             Matrix4 perspective = navigation.Perspective;
             GL.LoadMatrix(ref perspective);
+            GL.MatrixMode(MatrixMode.Modelview);
 
             foreach (var module in modules)
             {
