@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Text;
     using OpenTK;
+    using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
 
     /// <summary>
@@ -38,6 +39,7 @@
                 {
                     fieldOfView = 0.0000001f;
                 }
+                Perspective = GetPerspective();
             }
         }
         float near = 0.1f;
@@ -128,12 +130,12 @@
             bool perspectiveChanged = false;
             if (Keyboard[Key.Insert])
             {
-                fieldOfView /= 1.1f;
+                FieldOfView /= 1.1f;
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.Delete])
             {
-                fieldOfView *= 1.1f;
+                FieldOfView *= 1.1f;
                 perspectiveChanged = true;
             }
 
@@ -142,6 +144,7 @@
                 // reset Camera configuration
                 Reset();
                 IsViewDirty = true;
+                perspectiveChanged = true;
             }
 
             float viewRotDelta = 0.025f;
@@ -185,6 +188,11 @@
             if (perspectiveChanged)
             {
                 Perspective = GetPerspective();
+                Matrix4 perspective = Perspective;
+
+                GL.MatrixMode(MatrixMode.Projection);
+                GL.PushMatrix();
+                GL.LoadMatrix(ref perspective);
                 IsViewDirty = true;
             }
         }
