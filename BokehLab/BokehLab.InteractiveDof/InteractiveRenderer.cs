@@ -13,6 +13,7 @@
     // - FPS counter
     // - time counter for the whole multi-view accumulation
     // - create a configuration panel to switch the methods and control parameters
+    // - umbra depth peeling, extended-umbra depth peeling
 
     public class InteractiveRenderer : GameWindow
     {
@@ -29,6 +30,7 @@
         bool mouseButtonRightPressed = false;
 
         bool enableDofAccumulation = false;
+        bool enableDepthPeeling = false;
 
         MultiViewAccumulation multiViewAccum = new MultiViewAccumulation();
 
@@ -59,9 +61,10 @@
 
             navigation.Camera.Position = new Vector3(0, 0, 3);
 
-            //multiViewAccum.Initialize(Width, Height);
-
+            multiViewAccum.Initialize(Width, Height);
+            //multiViewAccum.Enable();
             depthPeeler.Initialize(Width, Height);
+            //depthPeeler.Enable();
 
             OnResize(new EventArgs());
         }
@@ -93,7 +96,7 @@
             Matrix4 perspective = navigation.Perspective;
             GL.LoadMatrix(ref perspective);
 
-            depthPeeler.OnResize(Width, Height);
+            depthPeeler.Resize(Width, Height);
 
             base.OnResize(e);
         }
@@ -119,7 +122,11 @@
 
             if (enableDofAccumulation)
             {
-                //multiViewAccum.AccumulateAndDraw(scene, navigation);
+                multiViewAccum.AccumulateAndDraw(scene, navigation);
+
+            }
+            else if (enableDepthPeeling)
+            {
                 depthPeeler.PeelLayers(scene, navigation);
                 depthPeeler.DisplayLayers();
             }
@@ -152,6 +159,16 @@
                 else if (e.Key == Key.F2)
                 {
                     enableDofAccumulation = !enableDofAccumulation;
+                    multiViewAccum.Enabled = enableDofAccumulation;
+                    if (enableDofAccumulation)
+                    {
+                        navigation.IsViewDirty = true;
+                    }
+                }
+                else if (e.Key == Key.F3)
+                {
+                    enableDepthPeeling = !enableDepthPeeling;
+                    depthPeeler.Enabled = enableDepthPeeling;
                 }
         }
 

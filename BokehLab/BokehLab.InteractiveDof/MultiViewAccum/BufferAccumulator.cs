@@ -5,7 +5,7 @@
     /// <summary>
     /// Accumulation buffer accumulator, an integer buffer.
     /// </summary>
-    class BufferAccumulator : IAccumulator
+    class BufferAccumulator : AbstractRendererModule, IAccumulator
     {
         public int TotalIterations { get; set; }
         int iteration = 0;
@@ -42,14 +42,6 @@
         {
             GL.Clear(ClearBufferMask.AccumBufferBit);
             iteration = 0;
-        }
-
-        public void Initialize(int width, int height)
-        {
-        }
-
-        public void Dispose()
-        {
         }
         #endregion
     }

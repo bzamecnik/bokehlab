@@ -1,6 +1,6 @@
 ﻿namespace BokehLab.InteractiveDof.MultiViewAccum
 {
-    interface IAccumulator
+    interface IAccumulator : IRendererModule
     {
         void PreAccumulate();
         void PostAccumulate();
@@ -10,8 +10,5 @@
 
         void Show();
         void Clear();
-
-        void Initialize(int width, int height);
-        void Dispose();
     }
 }

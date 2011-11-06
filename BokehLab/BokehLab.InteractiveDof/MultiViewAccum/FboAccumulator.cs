@@ -2,6 +2,7 @@
 {
     using System;
     using OpenTK.Graphics.OpenGL;
+    using BokehLab.InteractiveDof;
 
     /// <summary>
     /// // FrameBuffer accumulator, a float buffer.
@@ -10,7 +11,7 @@
     /// It seems that float32 is needed for high sample counts, eg. 1024.
     /// However, it is considerably slower tahn float16.
     /// </remarks>
-    class FboAccumulator : IAccumulator
+    class FboAccumulator : AbstractRendererModule, IAccumulator
     {
         static readonly string VertexShaderPath = "MultiViewAccum/AccumVS.glsl";
         static readonly string FragmentShaderPath = "MultiViewAccum/AccumFS.glsl";
@@ -110,14 +111,19 @@
             iteration = 0;
         }
 
-        public void Initialize(int width, int height)
+        public override void Initialize(int width, int height)
         {
+            base.Initialize(width, height);
+
             ShaderLoader.CreateShaderFromFiles(
                 VertexShaderPath, FragmentShaderPath,
                 out accumVertexShader, out accumFragmentShader, out accumShaderProgram);
 
             GL.Enable(EnableCap.Texture2D);
+        }
 
+        protected override void Enable()
+        {
             // Create color texture
             GL.GenTextures(3, textures);
             currentFrameTexture = textures[0];
@@ -127,7 +133,7 @@
             foreach (var texId in textures)
             {
                 GL.BindTexture(TextureTarget.Texture2D, texId);
-                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb32f, width, height, 0, PixelFormat.Rgb, PixelType.Float, IntPtr.Zero);
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb32f, Width, Height, 0, PixelFormat.Rgb, PixelType.Float, IntPtr.Zero);
                 //GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb16f, width, height, 0, PixelFormat.Rgb, PixelType.HalfFloat, IntPtr.Zero);
                 //GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb8, width, height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, IntPtr.Zero);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
@@ -141,14 +147,17 @@
             GL.Ext.GenFramebuffers(1, out fboHandle);
         }
 
-        public void Dispose()
+        protected override void Disable()
         {
             if (fboHandle != 0)
                 GL.Ext.DeleteFramebuffers(1, ref fboHandle);
 
             if (textures != null)
                 GL.DeleteTextures(textures.Length, textures);
+        }
 
+        public override void Dispose()
+        {
             if (accumShaderProgram != 0)
                 GL.DeleteProgram(accumShaderProgram);
             if (accumVertexShader != 0)

@@ -58,8 +58,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractRendererModule.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="DepthPeeling\DepthPeeler.cs" />
+    <Compile Include="IRendererModule.cs" />
     <Compile Include="LayerHelper.cs" />
     <Compile Include="MultiViewAccum\BufferAccumulator.cs" />
     <Compile Include="MultiViewAccum\FboAccumulator.cs" />

@@ -7,13 +7,12 @@
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
 
-    class MultiViewAccumulation
+    class MultiViewAccumulation : AbstractRendererModule
     {
         // How many views should be accumulated during one frame rendering.
         int viewsPerFrame = 4; // 16 good for float16, 4 or 8 for float32
 
         int sqrtSampleCount = 32;
-
 
         int iteration = 0;
         Vector2[] unitDiskSamples;
@@ -33,14 +32,31 @@
             accumulator = new FboAccumulator();
         }
 
-        public void Initialize(int width, int height)
+        public override void Initialize(int width, int height)
         {
+            base.Initialize(width, height);
             accumulator.Initialize(width, height);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             accumulator.Dispose();
+        }
+
+        protected override void Enable()
+        {
+            accumulator.Enabled = true;
+        }
+
+        protected override void Disable()
+        {
+            accumulator.Enabled = false;
+        }
+
+        public override void Resize(int width, int height)
+        {
+            base.Resize(width, height);
+            accumulator.Resize(width, height);
         }
 
         public void AccumulateAndDraw(Scene scene, Navigation navigation)

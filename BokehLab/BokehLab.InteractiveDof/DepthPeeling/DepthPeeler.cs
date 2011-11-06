@@ -8,7 +8,7 @@
     using OpenTK.Graphics.OpenGL;
     using BokehLab.InteractiveDof;
 
-    class DepthPeeler
+    class DepthPeeler : AbstractRendererModule
     {
         /// <summary>
         /// Number of depth peeling layers (color and depth textures).
@@ -114,8 +114,12 @@
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        public void Initialize(int width, int height)
+        #region IRendererModule Members
+
+        public override void Initialize(int width, int height)
         {
+            base.Initialize(width, height);
+
             ShaderLoader.CreateShaderFromFiles(
                VertexShaderPath, FragmentShaderPath,
                out vertexShader, out fragmentShader, out shaderProgram);
@@ -124,20 +128,10 @@
 
             GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.DepthTest);
-
-            CreateLayerTextures(width, height);
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            if (fboHandle != 0)
-                GL.Ext.DeleteFramebuffers(1, ref fboHandle);
-
-            if (colorTextures != null)
-                GL.DeleteTextures(1, colorTextures);
-            if (depthTextures != null)
-                GL.DeleteTextures(1, depthTextures);
-
             if (shaderProgram != 0)
                 GL.DeleteProgram(shaderProgram);
             if (vertexShader != 0)
@@ -146,15 +140,23 @@
                 GL.DeleteShader(fragmentShader);
         }
 
-        public void OnResize(int width, int height)
+        protected override void Enable()
         {
+            CreateLayerTextures(Width, Height);
+        }
+
+        protected override void Disable()
+        {
+            if (fboHandle != 0)
+                GL.Ext.DeleteFramebuffers(1, ref fboHandle);
+
             if (colorTextures != null)
                 GL.DeleteTextures(1, colorTextures);
             if (depthTextures != null)
                 GL.DeleteTextures(1, depthTextures);
-
-            CreateLayerTextures(width, height);
         }
+
+        #endregion
 
         private void CreateLayerTextures(int width, int height)
         {
