@@ -28,18 +28,29 @@
             GL.ClearColor(0f, 0f, 0f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            // - bind color and depth textures
-            //GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[1]);
+            // bind color and depth textures
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[0]);
+            GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[0]);
 
-            // - enable IBRT shader
-            //GL.UseProgram(shaderProgram);
-            // - set shader parameters (textures, lens model, ...)
-            // - draw quad
+            // enable IBRT shader
+            GL.UseProgram(shaderProgram);
+
+            // set shader parameters (textures, lens model, ...)
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), 0); // TextureUnit.Texture0
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture"), 1); // TextureUnit.Texture1
+
+            // draw the quad
             LayerHelper.DrawQuad();
-            // - disable shader
-            //GL.UseProgram(0);
-            // - unbind textures
+
+            // disable shader
+            GL.UseProgram(0);
+
+            // unbind textures
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
