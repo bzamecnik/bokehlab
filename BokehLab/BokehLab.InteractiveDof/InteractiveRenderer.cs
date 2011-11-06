@@ -136,6 +136,8 @@
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            this.Title = "BokehLab - FPS: " + (1f / e.Time).ToString("0.0");
+
             GL.MatrixMode(MatrixMode.Modelview);
             Matrix4 modelView = navigation.Camera.ModelView;
             GL.LoadMatrix(ref modelView);
