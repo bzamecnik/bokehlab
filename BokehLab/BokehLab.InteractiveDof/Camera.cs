@@ -7,8 +7,7 @@
     using OpenTK;
 
     /// <summary>
-    /// Represents the extrinsic camera parameters defining the camera space,
-    /// such as camera position and orientation.
+    /// Represents the intrinsic camera parameters.
     /// </summary>
     class Camera
     {
@@ -71,96 +70,77 @@
 
         public ThinLens Lens { get; private set; }
 
-        private Vector3 position;
 
-        public Vector3 Position
+        float near = 0.1f;
+        public float Near
         {
-            get { return position; }
-            set { position = value; modelViewDirty = true; }
-        }
-        private Vector3 view;
-
-        public Vector3 View
-        {
-            get { return view; }
-            set { view = value; modelViewDirty = true; }
-        }
-        private Vector3 up;
-
-        public Vector3 Up
-        {
-            get { return up; }
-            set { up = value; modelViewDirty = true; }
-        }
-        private Vector3 right;
-
-        public Vector3 Right
-        {
-            get { return right; }
-            set { right = value; modelViewDirty = true; }
-        }
-
-        private Matrix4 modelView;
-
-        public Matrix4 ModelView
-        {
-            get
+            get { return near; }
+            set
             {
-                if (modelViewDirty)
-                {
-                    modelView = ComputeModelView();
-                    modelViewDirty = false;
-                }
-                return modelView;
+                near = value;
+                Perspective = GetPerspective();
             }
         }
-        bool modelViewDirty = true;
+
+        float far = 1000f;
+        public float Far
+        {
+            get { return far; }
+            set
+            {
+                far = value;
+                Perspective = GetPerspective();
+            }
+        }
+
+        public Matrix4 Perspective { get; private set; }
 
         public Camera()
         {
             Lens = new ThinLens() { ApertureNumber = 2.8f, FocalLength = 0.1f };
             FocalZ = -(20 * Lens.FocalLength);
-
-            Position = Vector3.Zero;
-            View = -Vector3.UnitZ;
-            Up = Vector3.UnitY;
-            Right = Vector3.UnitX;
-
-            modelView = ComputeModelView();
         }
 
-        /// <summary>
-        /// Produce a first-person shooter model view matrix.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The goal is a comfortable control witout rotation around the view vector.
-        /// </para>
-        /// <para>
-        /// The formulas were inspired by Kevin R. Harris: http://www.codesampler.com/
-        /// </para>
-        /// </remarks>
-        /// <returns></returns>
-        private Matrix4 ComputeModelView()
+        public void UpdatePerspective()
         {
-            view.Normalize();
-            right = Vector3.Cross(view, Up);
-            right.Normalize();
-            up = Vector3.Cross(right, View);
-            up.Normalize();
+            Perspective = GetPerspective();
+        }
 
-            Vector4 lastRow = new Vector4(
-                Vector3.Dot(position, right),
-                Vector3.Dot(position, up),
-                Vector3.Dot(position, view),
-                1);
+        private Matrix4 GetPerspective()
+        {
+            return Matrix4.CreatePerspectiveFieldOfView(FieldOfView, AspectRatio, near, far);
+        }
 
-            Matrix4 m = new Matrix4(
-                right.X, up.X, view.X, 0,
-                right.Y, up.Y, view.Y, 0,
-                right.Z, up.Z, view.Z, 0,
-                lastRow.X, lastRow.Y, lastRow.Z, lastRow.W);
-            return m;
+        public Vector2 GetPinholePos(Vector2 lensSample)
+        {
+            return Lens.ApertureRadius * lensSample;
+        }
+
+        public Matrix4 GetMultiViewPerspective(Vector2 pinholePos)
+        {
+            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, pinholePos, -FocalZ);
+        }
+
+        private Matrix4 CreatePerspectiveFieldOfViewOffCenter(
+            float fovy,
+            float aspect,
+            float zNear,
+            float zFar,
+            Vector2 lensShift,
+            float zFocal)
+        {
+            float yMax = zNear * (float)System.Math.Tan(0.5f * fovy);
+            float yMin = -yMax;
+            float xMin = yMin * aspect;
+            float xMax = yMax * aspect;
+
+            float mag = -zNear / zFocal;
+            float right = xMax + lensShift.X * mag;
+            float left = xMin + lensShift.X * mag;
+            float top = yMax + lensShift.Y * mag;
+            float bottom = yMin + lensShift.Y * mag;
+
+            return Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, zNear, zFar);
         }
     }
 }

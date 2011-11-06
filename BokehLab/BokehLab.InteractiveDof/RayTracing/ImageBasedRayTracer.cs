@@ -21,7 +21,7 @@
 
         public DepthPeeler DepthPeeler { get; set; }
 
-        public void DrawIbrtImage()
+        public void DrawIbrtImage(Camera camera)
         {
             Debug.Assert(DepthPeeler != null);
 

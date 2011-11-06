@@ -76,8 +76,8 @@
                 {
                     accumulator.PreDraw();
 
-                    Vector2 localPinholePos = navigation.GetPinholePos(unitDiskSamples[iteration]);
-                    Matrix4 perspective = navigation.GetMultiViewPerspective(localPinholePos);
+                    Vector2 localPinholePos = navigation.Camera.GetPinholePos(unitDiskSamples[iteration]);
+                    Matrix4 perspective = navigation.Camera.GetMultiViewPerspective(localPinholePos);
 
                     GL.MatrixMode(MatrixMode.Projection);
                     GL.PushMatrix();

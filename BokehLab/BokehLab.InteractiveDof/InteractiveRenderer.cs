@@ -64,7 +64,7 @@
             Mouse.ButtonUp += MouseButtonHandler;
             Mouse.WheelChanged += MouseWheelChanged;
 
-            navigation.Camera.Position = new Vector3(0, 0, 3);
+            navigation.Position = new Vector3(0, 0, 3);
 
             modules.Add(multiViewAccum);
             modules.Add(depthPeeler);
@@ -106,10 +106,10 @@
             GL.Viewport(0, 0, Width, Height);
 
             navigation.Camera.AspectRatio = Width / (float)Height;
-            navigation.UpdatePerspective();
+            navigation.Camera.UpdatePerspective();
 
             GL.MatrixMode(MatrixMode.Projection);
-            Matrix4 perspective = navigation.Perspective;
+            Matrix4 perspective = navigation.Camera.Perspective;
             GL.LoadMatrix(ref perspective);
             GL.MatrixMode(MatrixMode.Modelview);
 
@@ -139,7 +139,7 @@
             this.Title = "BokehLab - FPS: " + (1f / e.Time).ToString("0.0");
 
             GL.MatrixMode(MatrixMode.Modelview);
-            Matrix4 modelView = navigation.Camera.ModelView;
+            Matrix4 modelView = navigation.ModelView;
             GL.LoadMatrix(ref modelView);
 
             switch (renderingMode)
@@ -156,7 +156,7 @@
                     break;
                 case Mode.ImageBasedRayTracing:
                     depthPeeler.PeelLayers(scene);
-                    ibrt.DrawIbrtImage();
+                    ibrt.DrawIbrtImage(navigation.Camera);
                     break;
                 default:
                     Debug.Assert(false, "Unknown rendering mode");
