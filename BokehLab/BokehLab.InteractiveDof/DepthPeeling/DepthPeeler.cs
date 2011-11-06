@@ -16,24 +16,30 @@
         /// <remarks>
         /// 8 layers are almost always enough.
         /// </remarks>
-        static readonly int LayerCount = 8;
+        public static readonly int LayerCount = 4;
 
         static readonly string VertexShaderPath = "DepthPeeling/DepthPeelerVS.glsl";
         static readonly string FragmentShaderPath = "DepthPeeling/DepthPeelerFS.glsl";
 
         uint[] colorTextures = new uint[LayerCount];
         uint[] depthTextures = new uint[LayerCount];
+
+        public uint[] ColorTextures { get { return colorTextures; } }
+        public uint[] DepthTextures { get { return depthTextures; } }
+
         /// <summary>
         /// Frame-buffer Object to which the current color and depth texture
         /// can be attached.
         /// </summary>
         uint fboHandle;
 
+        public uint FboHandle { get; set; }
+
         int vertexShader;
         int fragmentShader;
         int shaderProgram;
 
-        public void PeelLayers(Scene scene, Navigation navigation)
+        public void PeelLayers(Scene scene)
         {
             // put the results into color and depth textures via FBO
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
@@ -138,18 +144,17 @@
                 GL.DeleteShader(vertexShader);
             if (fragmentShader != 0)
                 GL.DeleteShader(fragmentShader);
+
+            base.Dispose();
         }
 
         protected override void Enable()
         {
             CreateLayerTextures(Width, Height);
-            GL.Enable(EnableCap.DepthTest);
         }
 
         protected override void Disable()
         {
-            GL.Disable(EnableCap.DepthTest);
-
             if (fboHandle != 0)
                 GL.Ext.DeleteFramebuffers(1, ref fboHandle);
 

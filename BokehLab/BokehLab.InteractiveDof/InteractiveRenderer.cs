@@ -1,8 +1,12 @@
 ﻿namespace BokehLab.InteractiveDof
 {
     using System;
-    using BokehLab.InteractiveDof.MultiViewAccum;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
     using BokehLab.InteractiveDof.DepthPeeling;
+    using BokehLab.InteractiveDof.MultiViewAccum;
+    using BokehLab.InteractiveDof.RayTracing;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
@@ -29,12 +33,13 @@
         bool mouseButtonLeftPressed = false;
         bool mouseButtonRightPressed = false;
 
-        bool enableDofAccumulation = false;
-        bool enableDepthPeeling = false;
+        Mode renderingMode = Mode.Pinhole;
 
         MultiViewAccumulation multiViewAccum = new MultiViewAccumulation();
-
         DepthPeeler depthPeeler = new DepthPeeler();
+        ImageBasedRayTracer ibrt = new ImageBasedRayTracer();
+
+        List<IRendererModule> modules = new List<IRendererModule>();
 
         public static void RunExample()
         {
@@ -61,10 +66,17 @@
 
             navigation.Camera.Position = new Vector3(0, 0, 3);
 
-            multiViewAccum.Initialize(Width, Height);
-            //multiViewAccum.Enable();
-            depthPeeler.Initialize(Width, Height);
-            //depthPeeler.Enable();
+            modules.Add(multiViewAccum);
+            modules.Add(depthPeeler);
+            modules.Add(ibrt);
+            foreach (var module in modules)
+            {
+                module.Initialize(Width, Height);
+            }
+            ibrt.DepthPeeler = depthPeeler;
+
+            GL.Enable(EnableCap.DepthTest);
+            GL.ClearDepth(1.0f);
 
             OnResize(new EventArgs());
         }
@@ -83,7 +95,10 @@
 
         protected override void OnUnload(EventArgs e)
         {
-            multiViewAccum.Dispose();
+            foreach (var module in modules)
+            {
+                module.Dispose();
+            }
         }
 
         protected override void OnResize(EventArgs e)
@@ -96,7 +111,10 @@
             Matrix4 perspective = navigation.Perspective;
             GL.LoadMatrix(ref perspective);
 
-            depthPeeler.Resize(Width, Height);
+            foreach (var module in modules)
+            {
+                module.Resize(Width, Height);
+            }
 
             base.OnResize(e);
         }
@@ -120,19 +138,25 @@
             Matrix4 modelView = navigation.Camera.ModelView;
             GL.LoadMatrix(ref modelView);
 
-            if (enableDofAccumulation)
+            switch (renderingMode)
             {
-                multiViewAccum.AccumulateAndDraw(scene, navigation);
-
-            }
-            else if (enableDepthPeeling)
-            {
-                depthPeeler.PeelLayers(scene, navigation);
-                depthPeeler.DisplayLayers();
-            }
-            else
-            {
-                scene.Draw();
+                case Mode.Pinhole:
+                    scene.Draw();
+                    break;
+                case Mode.MultiViewAccum:
+                    multiViewAccum.AccumulateAndDraw(scene, navigation);
+                    break;
+                case Mode.OrderIndependentTransparency:
+                    depthPeeler.PeelLayers(scene);
+                    depthPeeler.DisplayLayers();
+                    break;
+                case Mode.ImageBasedRayTracing:
+                    depthPeeler.PeelLayers(scene);
+                    ibrt.DrawIbrtImage();
+                    break;
+                default:
+                    Debug.Assert(false, "Unknown rendering mode");
+                    break;
             }
 
             this.SwapBuffers();
@@ -158,17 +182,55 @@
                 }
                 else if (e.Key == Key.F2)
                 {
-                    enableDofAccumulation = !enableDofAccumulation;
-                    multiViewAccum.Enabled = enableDofAccumulation;
-                    if (enableDofAccumulation)
+                    if (renderingMode != Mode.Pinhole)
                     {
+                        foreach (var module in modules)
+                        {
+                            module.Enabled = false;
+                        }
+                        renderingMode = Mode.Pinhole;
                         navigation.IsViewDirty = true;
                     }
                 }
                 else if (e.Key == Key.F3)
                 {
-                    enableDepthPeeling = !enableDepthPeeling;
-                    depthPeeler.Enabled = enableDepthPeeling;
+                    if (renderingMode != Mode.MultiViewAccum)
+                    {
+                        foreach (var module in modules)
+                        {
+                            module.Enabled = false;
+                        }
+                        multiViewAccum.Enabled = true;
+                        renderingMode = Mode.MultiViewAccum;
+                        navigation.IsViewDirty = true;
+                    }
+                }
+                else if (e.Key == Key.F5)
+                {
+                    if (renderingMode != Mode.ImageBasedRayTracing)
+                    {
+                        foreach (var module in modules)
+                        {
+                            module.Enabled = false;
+                        }
+                        depthPeeler.Enabled = true;
+                        ibrt.Enabled = true;
+                        renderingMode = Mode.ImageBasedRayTracing;
+                        navigation.IsViewDirty = true;
+                    }
+                }
+                else if (e.Key == Key.F4)
+                {
+                    if (renderingMode != Mode.OrderIndependentTransparency)
+                    {
+                        foreach (var module in modules)
+                        {
+                            module.Enabled = false;
+                        }
+                        depthPeeler.Enabled = true;
+                        renderingMode = Mode.OrderIndependentTransparency;
+                        navigation.IsViewDirty = true;
+                    }
                 }
         }
 
@@ -208,5 +270,13 @@
         }
 
         #endregion
+
+        enum Mode
+        {
+            Pinhole,
+            MultiViewAccum,
+            ImageBasedRayTracing,
+            OrderIndependentTransparency,
+        }
     }
 }
