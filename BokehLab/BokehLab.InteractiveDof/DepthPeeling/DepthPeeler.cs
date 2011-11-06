@@ -57,6 +57,7 @@
                 scene.Draw();
             }
             GL.UseProgram(0); // disable the peeling shader
+            GL.BindTexture(TextureTarget.Texture2D, 0);
 
             UnbindFramebuffer(); // disable rendering into the FBO
         }
