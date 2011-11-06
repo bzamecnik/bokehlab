@@ -6,11 +6,15 @@
     using System.Text;
     using OpenTK;
 
+    /// <summary>
+    /// Represents the extrinsic camera parameters defining the camera space,
+    /// such as camera position and orientation.
+    /// </summary>
     class Camera
     {
+        // TODO: get the intrinsic camera parameters away into a lens model
         public float ZFocal = 5; // focal plane depth
         public float ApertureRadius = 0.05f;
-        public Vector2 PinholePos { get; set; }
 
         private Vector3 position;
 

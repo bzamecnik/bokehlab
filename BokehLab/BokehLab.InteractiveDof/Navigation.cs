@@ -7,6 +7,11 @@
     using OpenTK;
     using OpenTK.Input;
 
+    /// <summary>
+    /// Enables interaction with the extrinsic parameters of the camera model
+    /// and translates them into a suitable perspective projection for
+    /// rasterization.
+    /// </summary>
     class Navigation
     {
         public Camera Camera { get; set; }
@@ -80,7 +85,6 @@
             FieldOfView = OpenTK.MathHelper.PiOver4;
             Camera = new Camera();
             Camera.Position = new Vector3(0, 0, 3);
-            Camera.PinholePos = Vector2.Zero;
             Camera.ZFocal = 5;
             Camera.ApertureRadius = 0.01f;
             Perspective = GetPerspective();
@@ -132,26 +136,7 @@
                 fieldOfView *= 1.1f;
                 perspectiveChanged = true;
             }
-            if (Keyboard[Key.T])
-            {
-                Camera.PinholePos += new Vector2(0, 0.1f);
-                perspectiveChanged = true;
-            }
-            else if (Keyboard[Key.G])
-            {
-                Camera.PinholePos += new Vector2(0, -0.1f);
-                perspectiveChanged = true;
-            }
-            else if (Keyboard[Key.H])
-            {
-                Camera.PinholePos += new Vector2(0.1f, 0);
-                perspectiveChanged = true;
-            }
-            else if (Keyboard[Key.F])
-            {
-                Camera.PinholePos += new Vector2(-0.1f, 0);
-                perspectiveChanged = true;
-            }
+
             if (Keyboard[Key.R])
             {
                 // reset Camera configuration
