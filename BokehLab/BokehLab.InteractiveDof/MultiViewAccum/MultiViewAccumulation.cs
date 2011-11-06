@@ -107,6 +107,8 @@
             var jitteredSamples = sampler.GenerateJitteredSamples(sampleCount);
             var diskSamples = jitteredSamples.Select((sample) => (Vector2)Sampler.ConcentricSampleDisk(sample));
             var diskSamplesList = diskSamples.ToList();
+            // shuffle the samples to prevent temporal correlation
+            // in incremental rendering
             Shuffle<Vector2>(diskSamplesList);
             return diskSamplesList;
         }

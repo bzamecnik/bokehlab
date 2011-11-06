@@ -5,7 +5,7 @@
     using BokehLab.InteractiveDof;
 
     /// <summary>
-    /// // FrameBuffer accumulator, a float buffer.
+    /// FrameBuffer accumulator, a float buffer.
     /// </summary>
     /// <remarks>
     /// It seems that float32 is needed for high sample counts, eg. 1024.
@@ -21,6 +21,7 @@
         // 1, 2 - average, updated average (these two will be swapped together)
         uint[] textures = new uint[3];
         uint currentFrameTexture;
+        uint currentFrameDepthTexture;
         uint averageTexture;
         uint updatedAverageTexture;
         uint fboHandle;
@@ -49,6 +50,9 @@
             GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
                 FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D,
                 currentFrameTexture, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.DepthAttachmentExt, TextureTarget.Texture2D,
+                currentFrameDepthTexture, 0);
         }
 
         public void PostDraw()
@@ -141,6 +145,20 @@
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
             }
+
+
+            GL.GenTextures(1, out currentFrameDepthTexture);
+
+            GL.BindTexture(TextureTarget.Texture2D, currentFrameDepthTexture);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32f, Width, Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
+            //GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32, Width, Height, 0, PixelFormat.DepthComponent, PixelType.UnsignedInt, IntPtr.Zero);
+            //GL.TexImage2D(TextureTarget.Texture2D, 0, (PixelInternalFormat)All.DepthComponent16, width, height, 0, PixelFormat.DepthComponent, PixelType.UnsignedShort, IntPtr.Zero);
+            // things go horribly wrong if DepthComponent's Bitcount does not match the main Framebuffer's Depth
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
             // Create a FBO and attach the texture
