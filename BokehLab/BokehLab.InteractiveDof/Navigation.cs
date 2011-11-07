@@ -112,14 +112,16 @@
 
         public void Reset()
         {
-            Position = new Vector3(0, 0, 3);
+            Position = new Vector3(0, 0, 4);
             View = -Vector3.UnitZ;
             Up = Vector3.UnitY;
             Right = Vector3.UnitX;
 
             modelView = ComputeModelView();
 
+            float aspectRatio = Camera.AspectRatio;
             Camera = new Camera();
+            Camera.AspectRatio = aspectRatio;
         }
 
         public void OnUpdateFrame(FrameEventArgs e, KeyboardDevice Keyboard)

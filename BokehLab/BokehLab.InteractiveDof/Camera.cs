@@ -50,7 +50,8 @@
             }
         }
 
-        public static readonly float DefaultFieldOfView = OpenTK.MathHelper.PiOver4;
+        // vertiacal angle of view 27 degrees for 50mm lens on full frame film (36x24mm)
+        public static readonly float DefaultFieldOfView = 0.471238f;
 
         float fieldOfView = DefaultFieldOfView;
         /// <summary>
@@ -99,7 +100,7 @@
         public ThinLens Lens { get; private set; }
 
 
-        float near = 0.1f;
+        float near = 0.5f;
         /// <summary>
         /// Unsigned near plane distance. The plane lies on -Near.
         /// </summary>
@@ -135,8 +136,9 @@
 
         public Camera()
         {
-            Lens = new ThinLens() { ApertureNumber = 2.8f, FocalLength = 0.1f };
-            FocalZ = -(20 * Lens.FocalLength);
+            Lens = new ThinLens() { ApertureNumber = 1.4f, FocalLength = 0.05f };
+            //FocalZ = -(20 * Lens.FocalLength);
+            FocalZ = -4f;
             UpdatePerspective();
         }
 

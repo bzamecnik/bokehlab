@@ -22,7 +22,7 @@
     public class InteractiveRenderer : GameWindow
     {
         public InteractiveRenderer()
-            : base(800, 600)
+            : base(900, 600)
         {
         }
 
@@ -63,8 +63,6 @@
             Mouse.ButtonDown += MouseButtonHandler;
             Mouse.ButtonUp += MouseButtonHandler;
             Mouse.WheelChanged += MouseWheelChanged;
-
-            navigation.Position = new Vector3(0, 0, 3);
 
             modules.Add(multiViewAccum);
             modules.Add(depthPeeler);
@@ -157,6 +155,7 @@
                 case Mode.ImageBasedRayTracing:
                     depthPeeler.PeelLayers(scene);
                     ibrt.DrawIbrtImage(navigation.Camera);
+                    //ImageBasedRayTracer.IbrtPlayground.TraceRay(navigation.Camera);
                     break;
                 default:
                     Debug.Assert(false, "Unknown rendering mode");

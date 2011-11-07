@@ -84,5 +84,71 @@
 
             base.Dispose();
         }
+
+        public class IbrtPlayground
+        {
+            public static void TraceRay(Camera camera)
+            {
+                // pixel postion in the normalized sensor space [0;1]^2
+                Vector2 texCoord = new Vector2(0.0f, 0.0f);
+
+                // pixel corner in camera space
+                // TODO: offset to pixel center or jitter the pixel area
+                Vector3 pixelPos = new Vector3(
+                    (0.5f - texCoord.X) * camera.SensorSize.X,
+                    (0.5f - texCoord.Y) * camera.SensorSize.Y,
+                    camera.SensorZ);
+
+                //Vector3 colorSum = Vector3(0.0, 0.0, 0.0);
+                //iVector2 steps = iVector2(3, 3);
+
+                //float apertureRadius = camera.Lens.ApertureRadius;// * 0.025;
+                float apertureRadius = 0.0001f;
+
+                //Vector2 offsetStep = (2.0 * apertureRadius) * Vector2(1.0 / Vector2(steps - iVector2(1, 1)));
+                //for (int y = 0; y < steps.y; y++) {
+                //for (int x = 0; x < steps.x; x++) {
+                //Vector3 lensOffset = Vector3(
+                //float(x) * offsetStep.x - apertureRadius,
+                //float(y) * offsetStep.y - apertureRadius, 0.0);
+
+                Vector3 lensOffset = new Vector3(apertureRadius, apertureRadius, 0);
+
+                //Vector3 lensOffset = Vector3(0, 0, 0);
+
+                Vector3 rayDirection = lensOffset - pixelPos;
+                Vector3 unitZRayDir = rayDirection / rayDirection.Z;
+
+                Vector3 startCamera = lensOffset + (-camera.Near) * unitZRayDir;
+                // convert the start and end points to from [-1;1]^3 to [0;1]^3
+                Vector3 start = TransformPoint(camera.Perspective, startCamera);
+                start = BigToSmallCube(start);
+
+                Vector3 endCamera = lensOffset + (-camera.Far) * unitZRayDir;
+                Vector3 end = TransformPoint(camera.Perspective, endCamera);
+                end = BigToSmallCube(end);
+
+                //colorSum += intersectHeightField(start, end);
+                //}
+                //}
+            }
+            // convert from [0;1]^3 to [-1;1]^3
+            static Vector3 SmallToBigCube(Vector3 vector)
+            {
+                return 2 * vector - new Vector3(1, 1, 1);
+            }
+
+            // convert from [-1;1]^3 to [0;1]^3
+            static Vector3 BigToSmallCube(Vector3 vector)
+            {
+                return 0.5f * (vector + new Vector3(1, 1, 1));
+            }
+
+            static Vector3 TransformPoint(Matrix4 matrix, Vector3 point)
+            {
+                Vector4 result = Vector4.Transform(new Vector4(point, 1), matrix);
+                return result.Xyz / result.W;
+            }
+        }
     }
 }

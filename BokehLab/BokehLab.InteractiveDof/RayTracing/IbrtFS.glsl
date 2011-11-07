@@ -70,9 +70,10 @@ void main() {
 	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
 
     vec3 colorSum = vec3(0.0, 0.0, 0.0);
-    ivec2 steps = ivec2(3, 3);
+    ivec2 steps = ivec2(2, 2);
     
-    float apertureRadius = lensApertureRadius * 0.025;
+    //float apertureRadius = lensApertureRadius;// * 0.025;
+    float apertureRadius = 0.0001;
     
     vec2 offsetStep = (2.0 * apertureRadius) * vec2(1.0 / vec2(steps - ivec2(1, 1)));
     for (int y = 0; y < steps.y; y++) {
@@ -80,6 +81,8 @@ void main() {
             vec3 lensOffset = vec3(
 				float(x) * offsetStep.x - apertureRadius,
 				float(y) * offsetStep.y - apertureRadius, 0.0);
+            
+            //vec3 lensOffset = vec3(-apertureRadius,-apertureRadius, 0.0);
             
             //vec3 lensOffset = vec3(0, 0, 0);
             
@@ -99,6 +102,7 @@ void main() {
 	
 	gl_FragColor.rgb = colorSum / float(steps.x * steps.y);
 	//gl_FragColor.rg = texture2D(colorTexture, start.xy).rgb;
+	//gl_FragColor.rgb = intersectHeightField(start, end);
 	
 	//if (texCoord.y > 0.5) {
 		//gl_FragColor.r = (end.z - (1)) * 0.5 + 0.5;
