@@ -119,7 +119,7 @@
 
             modelView = ComputeModelView();
 
-            Camera.UpdatePerspective();
+            Camera = new Camera();
         }
 
         public void OnUpdateFrame(FrameEventArgs e, KeyboardDevice Keyboard)
@@ -171,9 +171,7 @@
 
             if (Keyboard[Key.R])
             {
-                // reset Camera configuration
                 Reset();
-                Camera = new Camera();
                 IsViewDirty = true;
                 perspectiveChanged = true;
             }

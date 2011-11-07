@@ -9,10 +9,20 @@
     /// <summary>
     /// Represents the intrinsic camera parameters.
     /// </summary>
+    /// <remarks>
+    /// We are assuming the thin lens model with untilted sensor with an
+    /// aperture at the lens principal plane.
+    /// </remarks>
     class Camera
     {
         private float focalZ;
-        // focal plane depth
+        /// <summary>
+        /// Depth (signed Z coordinate) of the focal plane (sensor center
+        /// image) in the camera space.
+        /// </summary>
+        /// <remarks>
+        /// It should lie in the -z half-space.
+        /// </remarks>
         public float FocalZ
         {
             get { return focalZ; }
@@ -24,7 +34,12 @@
         }
 
         private float sensorZ;
-        // sensor depth
+        /// <summary>
+        /// Depth (signed Z coordinate) of the sensor center in camera space.
+        /// </summary>
+        /// <remarks>
+        /// It should lie in the +z half-space.
+        /// </remarks>
         public float SensorZ
         {
             get { return sensorZ; }
@@ -38,6 +53,13 @@
         public static readonly float DefaultFieldOfView = OpenTK.MathHelper.PiOver4;
 
         float fieldOfView = DefaultFieldOfView;
+        /// <summary>
+        /// Field of view of the camera.
+        /// </summary>
+        /// <remarks>
+        /// Relates the sensor depth and size. Assuming the aperture coincides
+        /// with the lens principal plane this is ok.
+        /// </remarks>
         public float FieldOfView
         {
             get { return fieldOfView; }
@@ -49,6 +71,9 @@
         }
 
         public float aspectRatio = 1.0f;
+        /// <summary>
+        /// Sensor aspect ratio (width/height).
+        /// </summary>
         public float AspectRatio
         {
             get { return aspectRatio; }
@@ -58,6 +83,9 @@
             }
         }
 
+        /// <summary>
+        /// Sensor size in camera space.
+        /// </summary>
         public Vector2 SensorSize
         {
             get
@@ -72,6 +100,9 @@
 
 
         float near = 0.1f;
+        /// <summary>
+        /// Unsigned near plane distance. The plane lies on -Near.
+        /// </summary>
         public float Near
         {
             get { return near; }
@@ -83,6 +114,9 @@
         }
 
         float far = 1000f;
+        /// <summary>
+        /// Unsigned far plane distance. The plane lies on -Far.
+        /// </summary>
         public float Far
         {
             get { return far; }
@@ -93,12 +127,17 @@
             }
         }
 
+        /// <summary>
+        /// Perspective matrix of the center of the aperture. Indended to be
+        /// used by OpenGL for rasterization.
+        /// </summary>
         public Matrix4 Perspective { get; private set; }
 
         public Camera()
         {
             Lens = new ThinLens() { ApertureNumber = 2.8f, FocalLength = 0.1f };
             FocalZ = -(20 * Lens.FocalLength);
+            UpdatePerspective();
         }
 
         public void UpdatePerspective()
