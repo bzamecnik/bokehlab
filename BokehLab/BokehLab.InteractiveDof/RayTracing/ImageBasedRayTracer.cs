@@ -40,6 +40,14 @@
             // set shader parameters (textures, lens model, ...)
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), 0); // TextureUnit.Texture0
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture"), 1); // TextureUnit.Texture1
+            GL.Uniform2(GL.GetUniformLocation(shaderProgram, "sensorSize"), camera.SensorSize);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "near"), camera.Near);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "far"), camera.Far);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), camera.Lens.FocalLength);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensApertureRadius"), camera.Lens.ApertureRadius);
+            Matrix4 perspective = camera.Perspective;
+            GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "perspective"), false, ref perspective);
 
             // draw the quad
             LayerHelper.DrawQuad();

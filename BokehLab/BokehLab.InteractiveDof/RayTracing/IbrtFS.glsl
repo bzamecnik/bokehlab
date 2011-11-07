@@ -4,15 +4,28 @@
 // - lens sampling
 // - arrays of textures are possible
 
+// sensor size in camera space (width, height)
+uniform vec2 sensorSize;
+// Z coordinate of the sensor center (usually in +z half-space)
+uniform float sensorZ;
+// near and far plane distances (unsigned), the planes lie in -z half-space
+uniform float near;
+uniform float far;
+uniform float lensFocalLength;
+uniform float lensApertureRadius;
+uniform mat4 perspective;
+
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
 
-vec3 ndcToTexture(vec3 vector) {
-	return vec3(0.5 * (vector.x + 1.0), 0.5 * (vector.y + 1.0), vector.z);
+// convert from [0;1]^3 to [-1;1]^3
+vec3 smallToBigCube(vec3 vector) {
+    return 2.0 * vector - vec3(1.0);
 }
 
-vec3 textureToNdc(vec3 vector) {
-	return vec3((2.0 * vector.x) - 1.0, (2.0 * vector.y) - 1.0, vector.z);
+// convert from [-1;1]^3 to [0;1]^3
+vec3 bigToSmallCube(vec3 vector) {
+    return 0.5 * (vector + vec3(1.0));
 }
 
 // Intersect the height field defined by the depth texture and return the
@@ -22,66 +35,77 @@ vec3 textureToNdc(vec3 vector) {
 // frustum space. The start point usually can be on the near plane (z=0),
 // the end point can be on the far plane (z=1).
 vec3 intersectHeightField(vec3 start, vec3 end) {
-	int steps = 10;
-	vec3 rayStep = (end - start) / float(steps);
-	vec3 currentPos = start;
-	vec3 bestPos = start;
-	bool isecFound = false;
-	for (int i = 0; i < steps; i++) {
-		currentPos += rayStep;
-		vec2 texPos = ndcToTexture(currentPos).xy;
-		float layerDepth = texture2D(depthTexture, texPos).r;
-		if (currentPos.z >= layerDepth) {
-			bestPos = currentPos;
-			isecFound = true;
-		}
+    int steps = 5;
+    vec3 rayStep = (end - start) / float(steps);
+    vec3 currentPos = start;
+    vec3 bestPos = start;
+    bool isecFound = false;
+    vec3 color = vec3(0, 0, 0);
+    for (int i = 0; i < steps; i++) {
+        currentPos += rayStep;
+        vec2 texPos = currentPos.xy;
+        float layerDepth = texture2D(depthTexture, texPos).r;
+        if (currentPos.z >= layerDepth) {
+            bestPos = currentPos;
+            isecFound = true;
+        }
 	}
 	if (isecFound) {
-		return texture2D(colorTexture, ndcToTexture(bestPos).xy).rgb;
-	} else {
-		return vec3(0, 0, 0);
-	}
+        color = texture2D(colorTexture, bestPos.xy).rgb;
+    }
+    return color;
+}
+
+vec3 transformPoint(mat4 matrix, vec3 point) {
+	vec4 result = matrix * vec4(point, 1);
+	return result.xyz / result.w;
 }
 
 void main() {
-	// pixel postion in the normalized sensor space [0;1]^2
+    // pixel postion in the normalized sensor space [0;1]^2
 	vec2 texCoord = gl_TexCoord[0].st;
-	
-	//gl_FragColor.rgb = texture2D(colorTexture, texCoord).bgr;
-	//gl_FragColor.rgb = texture2D(depthTexture, texCoord).rgb;
-	
-	vec3 centerOfProjection = vec3(0.5, 0.5, 3);
-	vec3 pixelPos = textureToNdc(vec3(texCoord, 0));
-	
-	vec3 colorSum = vec3(0, 0, 0);
-	float apertureRadius = 0.02;
-	int stepsX = 3;
-	int stepsY = 3;
-	vec2 offsetStep = (2 * apertureRadius) * vec2(1 / float(stepsX - 1), 1 / float(stepsX - 1));
-	for (int y = 0; y < stepsY; y++) {
-		for (int x = 0; x < stepsX; x++) {
-			vec3 lensOffset = vec3(x * offsetStep.x - apertureRadius, y * offsetStep.y - apertureRadius, 0);
-			
-			vec3 rayDirection = pixelPos - (centerOfProjection + lensOffset);
-			//rayDirection = normalize(rayDirection);
-			float imageZ = -1.0;
-			// intersection with the image plane at z = -1
-			vec3 isec = rayDirection * imageZ / rayDirection.z;
-			
-			// intersection converted to [0; 1]^2 texture coords
-			//vec2 isecTex = ndcToTexture(isec).xy;
-			//gl_FragColor.rgb = texture2D(colorTexture, isecTex).rgb;
-			
-			vec3 start = centerOfProjection + lensOffset;
-			// the height field depth in in [0; 1] interval while the ray
-			// goes in the -z half-space
-			vec3 end = vec3(isec.x, isec.y, -isec.z);
-			
+
+    // pixel corner in camera space
+	// TODO: offset to pixel center or jitter the pixel area
+	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
+
+    vec3 colorSum = vec3(0.0, 0.0, 0.0);
+    ivec2 steps = ivec2(3, 3);
+    
+    float apertureRadius = lensApertureRadius * 0.025;
+    
+    vec2 offsetStep = (2.0 * apertureRadius) * vec2(1.0 / vec2(steps - ivec2(1, 1)));
+    for (int y = 0; y < steps.y; y++) {
+        for (int x = 0; x < steps.x; x++) {
+            vec3 lensOffset = vec3(
+				float(x) * offsetStep.x - apertureRadius,
+				float(y) * offsetStep.y - apertureRadius, 0.0);
+            
+            //vec3 lensOffset = vec3(0, 0, 0);
+            
+            vec3 rayDirection = lensOffset - pixelPos;
+            vec3 unitZRayDir = rayDirection / rayDirection.z;
+            
+            vec3 startCamera = lensOffset + (-near) * unitZRayDir;
+            // convert the start and end points to from [-1;1]^3 to [0;1]^3
+            vec3 start = bigToSmallCube(transformPoint(perspective, startCamera));
+            
+            vec3 endCamera = lensOffset + (-far) * unitZRayDir;
+            vec3 end = bigToSmallCube(transformPoint(perspective, endCamera));
+            
 			colorSum += intersectHeightField(start, end);
-		}
+        }
 	}
 	
-	gl_FragColor.rgb = colorSum / float(stepsX * stepsY);
+	gl_FragColor.rgb = colorSum / float(steps.x * steps.y);
+	//gl_FragColor.rg = texture2D(colorTexture, start.xy).rgb;
 	
-	gl_FragColor.a = 1;
+	//if (texCoord.y > 0.5) {
+		//gl_FragColor.r = (end.z - (1)) * 0.5 + 0.5;
+		////gl_FragColor.r = sign(start.z) * 0.5 + 0.5;
+	//} else {
+		//gl_FragColor.r = texCoord.x;
+	//}
+	
+    gl_FragColor.a = 1.0;
 }
