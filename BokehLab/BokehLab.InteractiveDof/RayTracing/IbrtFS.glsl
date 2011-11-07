@@ -154,10 +154,10 @@ vec3 intersectHeightField(vec3 start, vec3 end) {
 	return intersectHeightFieldLinearThenBinary(start, end);
 }
 
-vec3 transformPoint(mat4 matrix, vec3 point) {
-	vec4 result = matrix * vec4(point, 1);
-	return result.xyz / result.w;
-}
+//vec3 transformPoint(mat4 matrix, vec3 point) {
+	//vec4 result = matrix * vec4(point, 1);
+	//return result.xyz / result.w;
+//}
 
 vec3 thinLensTransformPoint(vec3 point) {
 	return point / (1.0 - (abs(point.z) / lensFocalLength));
@@ -175,8 +175,8 @@ void main() {
     ivec2 steps = ivec2(4, 4);
     
     float apertureRadius = lensApertureRadius;
-    //float apertureRadius = 0.0001; // pinhole
     
+    // inverse frustum size (for a simplified frustum transform)
     // 1 / ((right - left), (top - bottom))
     vec2 frustumSizeInv = 1.0 / (frustumBounds.xz - frustumBounds.yw);
     float nearOverFar = near / far;
@@ -188,51 +188,26 @@ void main() {
 				float(x) * offsetStep.x - apertureRadius,
 				float(y) * offsetStep.y - apertureRadius, 0.0);
             
-            //vec3 lensOffset = vec3(-apertureRadius,-apertureRadius, 0.0);
-            
-            //vec3 lensOffset = vec3(0.01, 0.01, 0);
-            
-            // pinhole
+            // create lens ray (lensOffset, rayDirection)
+            // TODO: take care of lensOffset.z != 0
+            // - pinhole
             //vec3 rayDirection = lensOffset - pixelPos;
-            // thin lens
+            // - thin lens
             vec3 rayDirection = thinLensTransformPoint(pixelPos) - lensOffset;
             rayDirection /= rayDirection.z; // normalize to a unit z step
             
+            // ray start in camera space
             vec3 startCamera = lensOffset + (-near) * rayDirection;
-            //vec3 startCamera = (-near) * rayDirection;
-            // convert the start and end points to from [-1;1]^3 to [0;1]^3
-            //vec3 start = bigToSmallCube(transformPoint(perspective, startCamera));
+            // convert it to the frustum space [0;1]^3
             vec3 start = vec3((startCamera.xy - frustumBounds.yw) * frustumSizeInv, 0);
             
+            // ray end in camera space
             vec3 endCamera = lensOffset + (-far) * rayDirection;
-            //vec3 endCamera = (-far) * rayDirection;
-            //vec3 end = bigToSmallCube(transformPoint(perspective, endCamera));
             vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
             
 			colorSum += intersectHeightField(start, end);
-			
-			//float nearInt = 0;
-			//if ((start.x > 0) && (start.x <= 1) && (start.y > 0) && (start.y <= 1)) {
-				//nearInt=1;
-			//}
-			//float farInt = 0;
-			//if ((end.x > 0) && (end.x <= 1) && (end.y > 0) && (end.y <= 1)) {
-				//farInt=1;
-			//}
-			//colorSum += vec3(nearInt,farInt,0);
         }
 	}
 	
-	gl_FragColor.rgb = colorSum / float(steps.x * steps.y);
-	//gl_FragColor.rg = texture2D(colorTexture, start.xy).rgb;
-	//gl_FragColor.rgb = intersectHeightField(start, end);
-	
-	//if (texCoord.y > 0.5) {
-		//gl_FragColor.r = (end.z - (1)) * 0.5 + 0.5;
-		////gl_FragColor.r = sign(start.z) * 0.5 + 0.5;
-	//} else {
-		//gl_FragColor.r = texCoord.x;
-	//}
-	
-    gl_FragColor.a = 1.0;
+	gl_FragColor = vec4(colorSum / float(steps.x * steps.y), 1.0);
 }

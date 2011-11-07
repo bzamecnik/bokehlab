@@ -100,7 +100,7 @@
         public ThinLens Lens { get; private set; }
 
 
-        float near = 0.5f;
+        float near = 0.25f;
         /// <summary>
         /// Unsigned near plane distance. The plane lies on -Near.
         /// </summary>
