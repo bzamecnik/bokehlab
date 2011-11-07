@@ -6,6 +6,7 @@
     using BokehLab.Math;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
+    using System.Diagnostics;
 
     class MultiViewAccumulation : AbstractRendererModule
     {
@@ -19,6 +20,10 @@
         Sampler sampler = new Sampler();
         int maxIterations;
         IAccumulator accumulator;
+
+        Stopwatch stopwatch = new Stopwatch();
+        public long CumulativeMilliseconds { get; set; }
+        public int SampleCount { get { return maxIterations; } }
 
         public MultiViewAccumulation()
         {
@@ -63,6 +68,8 @@
         {
             if (navigation.IsViewDirty)
             {
+                stopwatch.Reset();
+                CumulativeMilliseconds = 0;
                 accumulator.Clear();
                 navigation.IsViewDirty = false;
                 iteration = 0;
@@ -70,6 +77,7 @@
 
             if (iteration < maxIterations)
             {
+                stopwatch.Start();
                 accumulator.PreAccumulate();
 
                 for (int i = 0; (i < viewsPerFrame) && (iteration < maxIterations); i++)
@@ -93,7 +101,12 @@
                     iteration++;
                 }
                 accumulator.PostAccumulate();
+                stopwatch.Stop();
             }
+            //if (iteration == maxIterations)
+            //{
+            CumulativeMilliseconds = stopwatch.ElapsedMilliseconds;
+            //}
 
             accumulator.Show();
         }

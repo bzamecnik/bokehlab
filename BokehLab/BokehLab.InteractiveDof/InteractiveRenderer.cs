@@ -134,11 +134,11 @@
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            this.Title = "BokehLab - FPS: " + (1f / e.Time).ToString("0.0");
-
             GL.MatrixMode(MatrixMode.Modelview);
             Matrix4 modelView = navigation.ModelView;
             GL.LoadMatrix(ref modelView);
+
+            double cumulativeMilliseconds = 1000 * e.Time;
 
             switch (renderingMode)
             {
@@ -147,6 +147,7 @@
                     break;
                 case Mode.MultiViewAccum:
                     multiViewAccum.AccumulateAndDraw(scene, navigation);
+                    cumulativeMilliseconds = multiViewAccum.CumulativeMilliseconds;
                     break;
                 case Mode.OrderIndependentTransparency:
                     depthPeeler.PeelLayers(scene);
@@ -161,6 +162,8 @@
                     Debug.Assert(false, "Unknown rendering mode");
                     break;
             }
+
+            this.Title = string.Format("BokehLab - FPS: {0:0.0}, frame: {1:0.0} ms, accum: {2} ms", (1f / e.Time), 1000 * e.Time, cumulativeMilliseconds);
 
             this.SwapBuffers();
         }
