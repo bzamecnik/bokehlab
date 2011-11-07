@@ -134,6 +134,11 @@
         /// </summary>
         public Matrix4 Perspective { get; private set; }
 
+        /// <summary>
+        /// Frustum bounds (right, left, top,bottom).
+        /// </summary>
+        public Vector4 FrustumBounds { get; set; }
+
         public Camera()
         {
             Lens = new ThinLens() { ApertureNumber = 1.4f, FocalLength = 0.05f };
@@ -145,6 +150,11 @@
         public void UpdatePerspective()
         {
             Perspective = GetPerspective();
+            float yMax = near * (float)System.Math.Tan(0.5f * fieldOfView);
+            float yMin = -yMax;
+            float xMin = yMin * aspectRatio;
+            float xMax = yMax * aspectRatio;
+            FrustumBounds = new Vector4(xMax, xMin, yMax, yMin);
         }
 
         private Matrix4 GetPerspective()

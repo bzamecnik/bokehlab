@@ -13,7 +13,10 @@ uniform float near;
 uniform float far;
 uniform float lensFocalLength;
 uniform float lensApertureRadius;
-uniform mat4 perspective;
+//uniform mat4 perspective;
+
+// left, right, bottom, top
+uniform vec4 frustumBounds;
 
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
@@ -34,20 +37,62 @@ vec3 bigToSmallCube(vec3 vector) {
 // The ray is given by its starting end ending points in the normalized
 // frustum space. The start point usually can be on the near plane (z=0),
 // the end point can be on the far plane (z=1).
-vec3 intersectHeightField(vec3 start, vec3 end) {
-    int steps = 5;
+vec3 intersectHeightFieldLinear(vec3 start, vec3 end) {
+    int steps = 10;
     vec3 rayStep = (end - start) / float(steps);
     vec3 currentPos = start;
     vec3 bestPos = start;
-    bool isecFound = false;
+    // TODO: find out if it is better to terminate early or not
+    //bool isecFound = false;
     vec3 color = vec3(0, 0, 0);
     for (int i = 0; i < steps; i++) {
         currentPos += rayStep;
-        vec2 texPos = currentPos.xy;
-        float layerDepth = texture2D(depthTexture, texPos).r;
+        float layerDepth = texture2D(depthTexture, currentPos.xy).r;
+        //if (!isecFound && (currentPos.z >= layerDepth)) {
         if (currentPos.z >= layerDepth) {
             bestPos = currentPos;
+            //isecFound = true;
+            
+            //float diffZ= currentPos.z - layerDepth;
+            //color = vec3(diffZ, diffZ, diffZ);
+            //color = vec3(currentPos.z, currentPos.z, currentPos.z);
+            //color = vec3(layerDepth, layerDepth, layerDepth);
+            
+            //float value =i/float(steps);
+            //return vec3(value,value,value);
+            
+            //color = vec3(value,value,value);
+            //color = vec3(layerDepth,layerDepth,layerDepth);
+            //return texture2D(colorTexture, bestPos.xy).rgb;
+            
+            return texture2D(colorTexture, bestPos.xy).rgb;
+        }
+	}
+	//if (isecFound) {
+        //color = texture2D(colorTexture, bestPos.xy).rgb;
+    //}
+    return color;
+}
+
+vec3 intersectHeightFieldBinary(vec3 start, vec3 end) {
+    int steps = 10;
+    
+    vec3 startPos = start;
+    vec3 endPos = end;
+    vec3 bestPos = start;
+    vec3 middlePos;
+    vec3 color = vec3(0, 0, 0);
+    bool isecFound = false;
+    
+    for (int i = 0; i < steps; i++) {
+        middlePos = 0.5 * (startPos + endPos);
+        float layerDepth = texture2D(depthTexture, middlePos.xy).r;
+        if (middlePos.z >= layerDepth) {
+			endPos = middlePos;
+            bestPos = middlePos;
             isecFound = true;
+        } else {
+			startPos = middlePos;
         }
 	}
 	if (isecFound) {
@@ -56,9 +101,66 @@ vec3 intersectHeightField(vec3 start, vec3 end) {
     return color;
 }
 
+vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
+    int linearSteps = 10;
+    int binarySteps = 5;
+    
+    vec3 startPos = start;
+    vec3 endPos = end;
+    vec3 bestPos = start;
+    vec3 color = vec3(0, 0, 0);
+    bool isecFound = false;
+    
+    vec3 rayStep = (end - start) / float(linearSteps);
+    vec3 currentPos = start;
+    
+    //for (int i = 0; (i < linearSteps) && !isecFound; i++) {
+    for (int i = 0; (i < linearSteps); i++) {
+        currentPos += rayStep;
+        float layerDepth = texture2D(depthTexture, currentPos.xy).r;
+        //if (currentPos.z >= layerDepth) {
+        if (!isecFound && (currentPos.z >= layerDepth)) {
+            bestPos = currentPos;
+            isecFound = true;
+        }
+	}
+    
+    if (!isecFound) {
+		binarySteps = 0;
+    }
+    
+    startPos = bestPos;
+    endPos = bestPos - rayStep;
+    vec3 middlePos;
+    
+    for (int i = 0; i < binarySteps; i++) {    
+        middlePos = 0.5 * (startPos + endPos);
+        float layerDepth = texture2D(depthTexture, middlePos.xy).r;
+        if (middlePos.z >= layerDepth) {
+			endPos = middlePos;
+            bestPos = middlePos;
+        } else {
+			startPos = middlePos;
+        }
+	}
+	
+	if (isecFound) {
+        color = texture2D(colorTexture, bestPos.xy).rgb;
+    }
+    return color;
+}
+
+vec3 intersectHeightField(vec3 start, vec3 end) {
+	return intersectHeightFieldLinearThenBinary(start, end);
+}
+
 vec3 transformPoint(mat4 matrix, vec3 point) {
 	vec4 result = matrix * vec4(point, 1);
 	return result.xyz / result.w;
+}
+
+vec3 thinLensTransformPoint(vec3 point) {
+	return point / (1.0 - (abs(point.z) / lensFocalLength));
 }
 
 void main() {
@@ -70,33 +172,54 @@ void main() {
 	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
 
     vec3 colorSum = vec3(0.0, 0.0, 0.0);
-    ivec2 steps = ivec2(2, 2);
+    ivec2 steps = ivec2(4, 4);
     
-    //float apertureRadius = lensApertureRadius;// * 0.025;
-    float apertureRadius = 0.0001;
+    float apertureRadius = lensApertureRadius;
+    //float apertureRadius = 0.0001; // pinhole
+    
+    // 1 / ((right - left), (top - bottom))
+    vec2 frustumSizeInv = 1.0 / (frustumBounds.xz - frustumBounds.yw);
+    float nearOverFar = near / far;
     
     vec2 offsetStep = (2.0 * apertureRadius) * vec2(1.0 / vec2(steps - ivec2(1, 1)));
     for (int y = 0; y < steps.y; y++) {
-        for (int x = 0; x < steps.x; x++) {
+        for (int x = 0; x < steps.x; x++) {	
             vec3 lensOffset = vec3(
 				float(x) * offsetStep.x - apertureRadius,
 				float(y) * offsetStep.y - apertureRadius, 0.0);
             
             //vec3 lensOffset = vec3(-apertureRadius,-apertureRadius, 0.0);
             
-            //vec3 lensOffset = vec3(0, 0, 0);
+            //vec3 lensOffset = vec3(0.01, 0.01, 0);
             
-            vec3 rayDirection = lensOffset - pixelPos;
-            vec3 unitZRayDir = rayDirection / rayDirection.z;
+            // pinhole
+            //vec3 rayDirection = lensOffset - pixelPos;
+            // thin lens
+            vec3 rayDirection = thinLensTransformPoint(pixelPos) - lensOffset;
+            rayDirection /= rayDirection.z; // normalize to a unit z step
             
-            vec3 startCamera = lensOffset + (-near) * unitZRayDir;
+            vec3 startCamera = lensOffset + (-near) * rayDirection;
+            //vec3 startCamera = (-near) * rayDirection;
             // convert the start and end points to from [-1;1]^3 to [0;1]^3
-            vec3 start = bigToSmallCube(transformPoint(perspective, startCamera));
+            //vec3 start = bigToSmallCube(transformPoint(perspective, startCamera));
+            vec3 start = vec3((startCamera.xy - frustumBounds.yw) * frustumSizeInv, 0);
             
-            vec3 endCamera = lensOffset + (-far) * unitZRayDir;
-            vec3 end = bigToSmallCube(transformPoint(perspective, endCamera));
+            vec3 endCamera = lensOffset + (-far) * rayDirection;
+            //vec3 endCamera = (-far) * rayDirection;
+            //vec3 end = bigToSmallCube(transformPoint(perspective, endCamera));
+            vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
             
 			colorSum += intersectHeightField(start, end);
+			
+			//float nearInt = 0;
+			//if ((start.x > 0) && (start.x <= 1) && (start.y > 0) && (start.y <= 1)) {
+				//nearInt=1;
+			//}
+			//float farInt = 0;
+			//if ((end.x > 0) && (end.x <= 1) && (end.y > 0) && (end.y <= 1)) {
+				//farInt=1;
+			//}
+			//colorSum += vec3(nearInt,farInt,0);
         }
 	}
 	

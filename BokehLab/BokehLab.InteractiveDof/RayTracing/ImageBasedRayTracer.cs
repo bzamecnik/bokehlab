@@ -46,8 +46,9 @@
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "far"), camera.Far);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), camera.Lens.FocalLength);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensApertureRadius"), camera.Lens.ApertureRadius);
-            Matrix4 perspective = camera.Perspective;
-            GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "perspective"), false, ref perspective);
+            //Matrix4 perspective = camera.Perspective;
+            //GL.UniformMatrix4(GL.GetUniformLocation(shaderProgram, "perspective"), false, ref perspective);
+            GL.Uniform4(GL.GetUniformLocation(shaderProgram, "frustumBounds"), camera.FrustumBounds);
 
             // draw the quad
             LayerHelper.DrawQuad();
@@ -102,8 +103,8 @@
                 //Vector3 colorSum = Vector3(0.0, 0.0, 0.0);
                 //iVector2 steps = iVector2(3, 3);
 
-                //float apertureRadius = camera.Lens.ApertureRadius;// * 0.025;
-                float apertureRadius = 0.0001f;
+                float apertureRadius = camera.Lens.ApertureRadius;
+                //float apertureRadius = 0.0001f;
 
                 //Vector2 offsetStep = (2.0 * apertureRadius) * Vector2(1.0 / Vector2(steps - iVector2(1, 1)));
                 //for (int y = 0; y < steps.y; y++) {
@@ -116,15 +117,16 @@
 
                 //Vector3 lensOffset = Vector3(0, 0, 0);
 
-                Vector3 rayDirection = lensOffset - pixelPos;
-                Vector3 unitZRayDir = rayDirection / rayDirection.Z;
+                //Vector3 rayDirection = lensOffset - pixelPos;
+                Vector3 rayDirection = ThinLensTransformPoint(pixelPos, camera.Lens.FocalLength) - lensOffset;
+                rayDirection /= rayDirection.Z; // normalize to a unit z step
 
-                Vector3 startCamera = lensOffset + (-camera.Near) * unitZRayDir;
+                Vector3 startCamera = lensOffset + (-camera.Near) * rayDirection;
                 // convert the start and end points to from [-1;1]^3 to [0;1]^3
                 Vector3 start = TransformPoint(camera.Perspective, startCamera);
                 start = BigToSmallCube(start);
 
-                Vector3 endCamera = lensOffset + (-camera.Far) * unitZRayDir;
+                Vector3 endCamera = lensOffset + (-camera.Far) * rayDirection;
                 Vector3 end = TransformPoint(camera.Perspective, endCamera);
                 end = BigToSmallCube(end);
 
@@ -148,6 +150,11 @@
             {
                 Vector4 result = Vector4.Transform(new Vector4(point, 1), matrix);
                 return result.Xyz / result.W;
+            }
+
+            static Vector3 ThinLensTransformPoint(Vector3 point, float focalLength)
+            {
+                return point / (1.0f - (Math.Abs(point.Z) / focalLength));
             }
         }
     }

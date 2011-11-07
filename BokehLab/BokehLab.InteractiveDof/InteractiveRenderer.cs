@@ -22,7 +22,7 @@
     public class InteractiveRenderer : GameWindow
     {
         public InteractiveRenderer()
-            : base(900, 600)
+            : base(450, 300)
         {
         }
 

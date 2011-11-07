@@ -198,22 +198,22 @@
 
             if (Keyboard[Key.Home])
             {
-                Camera.Lens.ApertureNumber *= 1.1f;
+                Camera.Lens.ApertureNumber *= 1.05f;
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.End])
             {
-                Camera.Lens.ApertureNumber /= 1.1f;
+                Camera.Lens.ApertureNumber /= 1.05f;
                 perspectiveChanged = true;
             }
             if (Keyboard[Key.PageUp])
             {
-                Camera.FocalZ = Camera.FocalZ * 1.1f;
+                Camera.FocalZ = Camera.FocalZ * 1.05f;
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.PageDown])
             {
-                Camera.FocalZ = Camera.FocalZ / 1.1f;
+                Camera.FocalZ = Camera.FocalZ / 1.05f;
                 perspectiveChanged = true;
             }
             if (perspectiveChanged)
