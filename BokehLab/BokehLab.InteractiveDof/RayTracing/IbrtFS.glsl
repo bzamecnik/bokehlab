@@ -21,6 +21,24 @@ uniform vec4 frustumBounds;
 uniform sampler2D colorTexture;
 uniform sampler2D depthTexture;
 
+// precomputed pseudo-random senzor and lens sample positions
+// - a 2D vector - lens position (x,y) in camera space (unit disk [-1;1])
+// - samples for one fragment stored in R dimension
+// - samples for neighbor pixel tiled in S and T dimensions
+// TODO: two 2D vectors could be packed into one 4D vector
+uniform sampler3D lensSamplesTexture;
+// number of samples - allowed values: [0; length(lensSamples)]
+uniform int sampleCount;
+uniform float sampleCountInv;
+
+uniform vec2 screenSize;
+
+// inverse frustum size (for a simplified frustum transform)
+// 1 / ((right - left), (top - bottom))
+vec2 frustumSizeInv = 1.0 / (frustumBounds.xz - frustumBounds.yw);
+float nearOverFar = near / far;
+
+
 // convert from [0;1]^3 to [-1;1]^3
 vec3 smallToBigCube(vec3 vector) {
     return 2.0 * vector - vec3(1.0);
@@ -163,6 +181,64 @@ vec3 thinLensTransformPoint(vec3 point) {
 	return point / (1.0 - (abs(point.z) / lensFocalLength));
 }
 
+// trace a ray going from sensorPos to lensPos
+// evaluate the incoming color
+vec3 traceRay(vec3 senzorPos, vec3 lensPos) {
+	// create lens ray (lensPos, rayDirection)
+    // TODO: take care of lensPos.z != 0
+    // - pinhole
+    //vec3 rayDirection = lensPos - senzorPos;
+    // - thin lens
+    vec3 rayDirection = thinLensTransformPoint(senzorPos) - lensPos;
+    rayDirection /= rayDirection.z; // normalize to a unit z step
+    
+    // ray start in camera space
+    vec3 startCamera = lensPos + (-near) * rayDirection;
+    // convert it to the frustum space [0;1]^3
+    vec3 start = vec3((startCamera.xy - frustumBounds.yw) * frustumSizeInv, 0);
+    
+    // ray end in camera space
+    vec3 endCamera = lensPos + (-far) * rayDirection;
+    vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
+    
+	return intersectHeightField(start, end);
+}
+
+vec3 estimateRadianceNonJittered(vec3 pixelPos) {
+	vec3 colorSum = vec3(0.0, 0.0, 0.0);
+    ivec2 steps = ivec2(4, 4);
+    
+    vec2 offsetStep = (2.0 * lensApertureRadius) * vec2(1.0 / vec2(steps - ivec2(1, 1)));
+    for (int y = 0; y < steps.y; y++) {
+        for (int x = 0; x < steps.x; x++) {	
+            vec3 lensOffset = vec3(
+				float(x) * offsetStep.x - lensApertureRadius,
+				float(y) * offsetStep.y - lensApertureRadius, 0.0);
+            colorSum += traceRay(pixelPos, lensOffset);
+        }
+	}
+	
+	return colorSum / float(steps.x * steps.y);
+}
+
+vec3 estimateRadianceJittered(vec3 pixelPos) {
+	vec3 colorAccum = vec3(0, 0, 0);
+	ivec3 lensJitterSize = textureSize3D(lensSamplesTexture, 0);
+	vec2 jitterCoords = gl_FragCoord.st;
+	jitterCoords.t = screenSize.y - jitterCoords.t;
+	vec3 samplesIndex = vec3(jitterCoords / vec2(lensJitterSize.st), 0.0);
+	// TODO: check dFdx(texcoord.x) out
+	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(sampleCount) - 1.0));
+	for (int i = 0; i < sampleCount; i += 1) {
+		vec2 lensPos = texture3D(lensSamplesTexture, samplesIndex).st;
+		lensPos *= lensApertureRadius;
+		colorAccum += traceRay(pixelPos, vec3(lensPos, 0));
+		samplesIndex += samplesIndexStep;
+	}
+	//return vec4(samplesIndex.b, 0, 0, 1);
+	return colorAccum * sampleCountInv;
+}
+
 void main() {
     // pixel postion in the normalized sensor space [0;1]^2
 	vec2 texCoord = gl_TexCoord[0].st;
@@ -171,43 +247,6 @@ void main() {
 	// TODO: offset to pixel center or jitter the pixel area
 	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
 
-    vec3 colorSum = vec3(0.0, 0.0, 0.0);
-    ivec2 steps = ivec2(4, 4);
-    
-    float apertureRadius = lensApertureRadius;
-    
-    // inverse frustum size (for a simplified frustum transform)
-    // 1 / ((right - left), (top - bottom))
-    vec2 frustumSizeInv = 1.0 / (frustumBounds.xz - frustumBounds.yw);
-    float nearOverFar = near / far;
-    
-    vec2 offsetStep = (2.0 * apertureRadius) * vec2(1.0 / vec2(steps - ivec2(1, 1)));
-    for (int y = 0; y < steps.y; y++) {
-        for (int x = 0; x < steps.x; x++) {	
-            vec3 lensOffset = vec3(
-				float(x) * offsetStep.x - apertureRadius,
-				float(y) * offsetStep.y - apertureRadius, 0.0);
-            
-            // create lens ray (lensOffset, rayDirection)
-            // TODO: take care of lensOffset.z != 0
-            // - pinhole
-            //vec3 rayDirection = lensOffset - pixelPos;
-            // - thin lens
-            vec3 rayDirection = thinLensTransformPoint(pixelPos) - lensOffset;
-            rayDirection /= rayDirection.z; // normalize to a unit z step
-            
-            // ray start in camera space
-            vec3 startCamera = lensOffset + (-near) * rayDirection;
-            // convert it to the frustum space [0;1]^3
-            vec3 start = vec3((startCamera.xy - frustumBounds.yw) * frustumSizeInv, 0);
-            
-            // ray end in camera space
-            vec3 endCamera = lensOffset + (-far) * rayDirection;
-            vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
-            
-			colorSum += intersectHeightField(start, end);
-        }
-	}
-	
-	gl_FragColor = vec4(colorSum / float(steps.x * steps.y), 1.0);
+	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
+	gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
 }
