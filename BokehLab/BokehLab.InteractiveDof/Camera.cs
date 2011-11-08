@@ -169,29 +169,29 @@
 
         public Matrix4 GetMultiViewPerspective(Vector2 pinholePos)
         {
-            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, pinholePos, -FocalZ);
+            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, pinholePos, FocalZ);
         }
 
         private Matrix4 CreatePerspectiveFieldOfViewOffCenter(
             float fovy,
             float aspect,
-            float zNear,
-            float zFar,
+            float near,
+            float far,
             Vector2 lensShift,
             float zFocal)
         {
-            float yMax = zNear * (float)System.Math.Tan(0.5f * fovy);
+            float yMax = near * (float)System.Math.Tan(0.5f * fovy);
             float yMin = -yMax;
             float xMin = yMin * aspect;
             float xMax = yMax * aspect;
 
-            float mag = -zNear / zFocal;
+            float mag = -((-near) / zFocal);
             float right = xMax + lensShift.X * mag;
             float left = xMin + lensShift.X * mag;
             float top = yMax + lensShift.Y * mag;
             float bottom = yMin + lensShift.Y * mag;
 
-            return Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, zNear, zFar);
+            return Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, near, far);
         }
     }
 }
