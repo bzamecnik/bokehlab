@@ -33,6 +33,16 @@ namespace BokehLab.InteractiveDof
             GL.ClearColor(0, 0, 0, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            GL.Color4(1, 1, 1, 0.5);
+            GL.Begin(BeginMode.Quads);
+            {
+                GL.Vertex3(-1.0f, -1, 1.0f);
+                GL.Vertex3(-1.0f, -1, -1.0f);
+                GL.Vertex3(1.0f, -1, -1.0f);
+                GL.Vertex3(1.0f, -1, 1.0f);
+            }
+            GL.End();
+
             GL.Begin(BeginMode.Triangles);
             for (int i = 0; i < colors.Length; i++)
             {
