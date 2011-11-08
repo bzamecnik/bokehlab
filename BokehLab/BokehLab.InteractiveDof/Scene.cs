@@ -30,7 +30,7 @@ namespace BokehLab.InteractiveDof
 
         public void Draw()
         {
-            GL.ClearColor(0, 0, 0, 1);
+            GL.ClearColor(0.25f, 0.25f, 0.25f, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.Color4(1, 1, 1, 0.5);

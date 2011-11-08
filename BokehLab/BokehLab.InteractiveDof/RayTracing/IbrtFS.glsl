@@ -1,4 +1,6 @@
-﻿// TODO:
+﻿#extension GL_EXT_gpu_shader4 : enable
+
+// TODO:
 // - height field intersection
 // - simple thin lens model
 // - lens sampling
@@ -70,19 +72,6 @@ vec3 intersectHeightFieldLinear(vec3 start, vec3 end) {
         if (currentPos.z >= layerDepth) {
             bestPos = currentPos;
             //isecFound = true;
-            
-            //float diffZ= currentPos.z - layerDepth;
-            //color = vec3(diffZ, diffZ, diffZ);
-            //color = vec3(currentPos.z, currentPos.z, currentPos.z);
-            //color = vec3(layerDepth, layerDepth, layerDepth);
-            
-            //float value =i/float(steps);
-            //return vec3(value,value,value);
-            
-            //color = vec3(value,value,value);
-            //color = vec3(layerDepth,layerDepth,layerDepth);
-            //return texture2D(colorTexture, bestPos.xy).rgb;
-            
             return texture2D(colorTexture, bestPos.xy).rgb;
         }
 	}
@@ -168,8 +157,42 @@ vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
     return color;
 }
 
+vec3 intersectHeightFieldLinearDiscontinuous(vec3 start, vec3 end) {
+    int steps = 10;
+    vec3 rayStep = (end - start) / float(steps);
+    vec3 currentPos = start;
+    vec3 bestPos = start;
+    float lastHfDepth = texture2D(depthTexture, start.xy).r;
+    bool insideHeightField = lastHfDepth < start.z;
+    float depthDerivativeLimit = 5.0;
+    float dxyLenInv = 1.0 / length(rayStep.xy);
+    bool isecFound = false;
+    
+    for (int i = 0; i < steps; i++) {
+        currentPos += rayStep;
+        float layerDepth = texture2D(depthTexture, currentPos.xy).r;
+        // directional difference in the ray xy direction
+        float hfDerivative = abs((layerDepth - lastHfDepth) * dxyLenInv);
+		// after stepping over a discontinuity check for the inside/outside position again.
+		if (hfDerivative > depthDerivativeLimit) {
+			insideHeightField = layerDepth < currentPos.z;
+		}
+        if (!isecFound && ((currentPos.z >= layerDepth) ^^ insideHeightField)) {
+            bestPos = currentPos;
+            isecFound = true;
+        }
+        lastHfDepth = layerDepth;
+	}
+	vec3 color = vec3(0, 0, 0);
+	if (isecFound) {
+		color = texture2D(colorTexture, bestPos.xy).rgb;
+	}
+    return color;
+}
+
 vec3 intersectHeightField(vec3 start, vec3 end) {
-	return intersectHeightFieldLinearThenBinary(start, end);
+	//return intersectHeightFieldLinear(start, end);
+	return intersectHeightFieldLinearDiscontinuous(start, end);
 }
 
 //vec3 transformPoint(mat4 matrix, vec3 point) {
@@ -249,4 +272,5 @@ void main() {
 
 	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
 	gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
+	//gl_FragColor.rgb = vec4(traceRay(pixelPos, vec3(-lensApertureRadius, lensApertureRadius, 0.0)), 1.0);
 }
