@@ -22,7 +22,7 @@
 
         int lensSamplesTexture;
 
-        int lensSampleCount = 3 * 3;
+        int lensSampleCount = 4 * 4;
         int lensSampleTileSize = 128;
         int totalSampleCount;
         float totalSampleCountInv;
