@@ -218,9 +218,144 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     return color;
 }
 
+vec2 GetPixelCorner(vec2 position, vec2 relDir)
+{
+    vec2 corner = floor(position);
+    if ((relDir.x < 0) && (position.x - corner.x < 0.00001))
+    {
+        corner.x -= 1;
+    }
+    if ((relDir.y < 0) && (position.y - corner.y < 0.00001))
+    {
+        corner.y -= 1;
+    }
+    return corner;
+}
+
+// "A Fast Voxel Traversal Algorithm for Ray Tracing", John Amanatides and Andrew Woo [amanatides1999]
+// - 2D implementation
+// - in addition to pure pixels we need also entry and exit points where the
+//   ray crosses pixel boundaries
+vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
+	vec3 start = vec3((startPos.xy * screenSize), startPos.z);
+	vec3 end = vec3((endPos.xy * screenSize), endPos.z);
+	vec3 dir = end - start;
+	float epsilonForRayDir = 0.0001;
+	if (abs(dir.x) < epsilonForRayDir)
+    {
+        dir.x = epsilonForRayDir;
+    }
+    if (abs(dir.y) < epsilonForRayDir)
+    {	
+        dir.y = epsilonForRayDir;
+    }
+    
+    vec2 rayStep = sign(dir.xy);
+    //vec2 currentPixel = floor(start.xy);
+    //vec2 endPixel = floor(end.xy);
+    vec2 currentPixel = GetPixelCorner(start.xy, rayStep);
+    vec2 endPixel = GetPixelCorner(start.xy + dir.xy, -rayStep);
+
+	// vec2 boundary = currentPixel + max(rayStep, 0.0);
+    vec2 boundary = currentPixel + vec2((rayStep.x > 0.0) ? 1.0 : 0.0, (rayStep.y > 0.0) ? 1.0 : 0.0);
+    vec2 rayDirInv = 1.0 / dir.xy;
+    vec2 screenSizeInv = 1.0 / screenSize;
+
+    vec2 tMax = (boundary - start.xy) * rayDirInv;
+    vec2 tDelta = rayStep * rayDirInv;
+    
+    vec3 entry = start;
+    vec3 exit = start;
+
+	//if (currentPixel == endPixel) {
+		////return vec3(0,1,0);
+		//float layerZ = texture2D(depthTexture0, startPos.xy).r;
+		//if ((start.z < layerZ) && (layerZ <= end.z + 0.001))
+        //{
+            //return texture2D(colorTexture0, startPos.xy).rgb;
+        //}
+	//}
+
+	//int maxIterations = int(2.0 * length(dir.xy));
+	int maxIterations = 100;
+    int iterations = 0;
+    float prevLayerZ = start.z;
+	while (currentPixel != endPixel) {
+        if (tMax.x < tMax.y)
+        {
+            exit = start + tMax.x * dir;
+            tMax.x += tDelta.x;
+            currentPixel.x += rayStep.x;
+        }
+        else
+        {
+            exit = start + tMax.y * dir;
+            tMax.y += tDelta.y;
+            currentPixel.y += rayStep.y;
+        }
+
+        // height field intersection
+        
+        //vec2 depthTestPos = currentPixel * screenSizeInv;
+        vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
+        //vec2 depthTestPos = entry * screenSizeInv;
+        //vec2 depthTestPos = exit * screenSizeInv;
+        //vec2 depthTestPos = 0.5 * (exit + entry) * screenSizeInv;
+        
+        float layerZ = texture2D(depthTexture0, depthTestPos).r;
+        
+        //float entryHfZ = texture2D(depthTexture0, entry.xy * screenSizeInv).r;
+        //float exitHfZ = texture2D(depthTexture0, exit.xy * screenSizeInv).r;
+        
+        ////for (int layer = 0; layer < 1; layer++)
+        ////{
+            //// we could compare:
+            //// (1) sign(entry.z - hf[pixel.xy]) != sign(exit.z - hf[pixel.xy])
+            //// (2) sign(entry.z - hf[entry.xy]) != sign(exit.z - hf[exit.xy])
+            //// (3) sign(entry.z - hf[middle.xy]) != sign(exit.z - hf[middle.xy])
+            ////Vector2 middle = 0.5f * (exit.Xy + entry.Xy);
+            ////float layerZ = this.HeightField.GetDepth((int)middle.x, (int)middle.y, 0);
+            //if (sign(layerZ - entry.z) != sign(layerZ - exit.z))
+            //{
+                //return texture2D(colorTexture0, depthTestPos).rgb;
+            //}
+        ////}
+        
+        // this epsilon prevents artifact within objects arising from the
+        // (virtual) nearest-neighbor interpolation of the depth layer
+        if ((entry.z < layerZ) && (layerZ <= exit.z + 0.01))
+        {
+            return texture2D(colorTexture0, depthTestPos).rgb;
+            //return texture2D(colorTexture0, 0.5 * (exit.xy + entry.xy) * screenSizeInv).rgb;
+        }
+        
+        //if ((entry.z < entryHfZ) && (exitHfZ <= exit.z))
+        //{
+            //return texture2D(colorTexture0, exit.xy * screenSizeInv).rgb;
+        //}
+
+        entry = exit;
+        prevLayerZ = layerZ;
+        
+        if (iterations == maxIterations) return vec3(1, 0, 1);
+        iterations++;
+	}
+	
+	float layerZ = texture2D(depthTexture0, endPos.xy).r;
+	if ((entry.z < layerZ) && (layerZ <= endPos.z))
+    {
+        return texture2D(colorTexture0, endPos.xy).rgb;
+    }
+	
+	//return vec3(maxIterations/10.0);
+	//return vec3(texture2D(depthTexture0, currentPixel * screenSizeInv).r);
+	return vec3(1, 0, 0);
+}
+
 vec3 intersectHeightField(vec3 start, vec3 end) {
 	//return intersectHeightFieldLinear(start, end);
-	return intersectHeightFieldLinearDiscontinuousThenBinary(start, end);
+	//return intersectHeightFieldLinearDiscontinuousThenBinary(start, end);
+	return intersectHeightFieldPerPixel(start, end);
 }
 
 //vec3 transformPoint(mat4 matrix, vec3 point) {
