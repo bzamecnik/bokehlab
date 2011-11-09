@@ -20,8 +20,9 @@ uniform float lensApertureRadius;
 // left, right, bottom, top
 uniform vec4 frustumBounds;
 
-uniform sampler2D colorTexture;
-uniform sampler2D depthTexture;
+uniform sampler2D depthTexture0;
+uniform sampler2D colorTexture0;
+uniform sampler2D colorTexture1;
 
 // precomputed pseudo-random senzor and lens sample positions
 // - a 2D vector - lens position (x,y) in camera space (unit disk [-1;1])
@@ -34,6 +35,8 @@ uniform int sampleCount;
 uniform float sampleCountInv;
 
 uniform vec2 screenSize;
+
+uniform vec2 cameraShift;
 
 // inverse frustum size (for a simplified frustum transform)
 // 1 / ((right - left), (top - bottom))
@@ -67,16 +70,16 @@ vec3 intersectHeightFieldLinear(vec3 start, vec3 end) {
     vec3 color = vec3(0, 0, 0);
     for (int i = 0; i < steps; i++) {
         currentPos += rayStep;
-        float layerDepth = texture2D(depthTexture, currentPos.xy).r;
+        float layerDepth = texture2D(depthTexture0, currentPos.xy).r;
         //if (!isecFound && (currentPos.z >= layerDepth)) {
         if (currentPos.z >= layerDepth) {
             bestPos = currentPos;
             //isecFound = true;
-            return texture2D(colorTexture, bestPos.xy).rgb;
+            return texture2D(colorTexture0, bestPos.xy).rgb;
         }
 	}
 	//if (isecFound) {
-        //color = texture2D(colorTexture, bestPos.xy).rgb;
+        //color = texture2D(colorTexture0, bestPos.xy).rgb;
     //}
     return color;
 }
@@ -93,7 +96,7 @@ vec3 intersectHeightFieldBinary(vec3 start, vec3 end) {
     
     for (int i = 0; i < steps; i++) {
         middlePos = 0.5 * (startPos + endPos);
-        float layerDepth = texture2D(depthTexture, middlePos.xy).r;
+        float layerDepth = texture2D(depthTexture0, middlePos.xy).r;
         if (middlePos.z >= layerDepth) {
 			endPos = middlePos;
             bestPos = middlePos;
@@ -103,7 +106,7 @@ vec3 intersectHeightFieldBinary(vec3 start, vec3 end) {
         }
 	}
 	if (isecFound) {
-        color = texture2D(colorTexture, bestPos.xy).rgb;
+        color = texture2D(colorTexture0, bestPos.xy).rgb;
     }
     return color;
 }
@@ -124,7 +127,7 @@ vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
     //for (int i = 0; (i < linearSteps) && !isecFound; i++) {
     for (int i = 0; (i < linearSteps); i++) {
         currentPos += rayStep;
-        float layerDepth = texture2D(depthTexture, currentPos.xy).r;
+        float layerDepth = texture2D(depthTexture0, currentPos.xy).r;
         //if (currentPos.z >= layerDepth) {
         if (!isecFound && (currentPos.z >= layerDepth)) {
             bestPos = currentPos;
@@ -142,7 +145,7 @@ vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
     
     for (int i = 0; i < binarySteps; i++) {    
         middlePos = 0.5 * (startPos + endPos);
-        float layerDepth = texture2D(depthTexture, middlePos.xy).r;
+        float layerDepth = texture2D(depthTexture0, middlePos.xy).r;
         if (middlePos.z >= layerDepth) {
 			endPos = middlePos;
             bestPos = middlePos;
@@ -152,7 +155,7 @@ vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
 	}
 	
 	if (isecFound) {
-        color = texture2D(colorTexture, bestPos.xy).rgb;
+        color = texture2D(colorTexture0, bestPos.xy).rgb;
     }
     return color;
 }
@@ -164,7 +167,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     vec3 rayStep = (endPos - startPos) / float(linearSteps);
     vec3 currentPos = startPos;
     vec3 bestPos = startPos;
-    float lastHfDepth = texture2D(depthTexture, startPos.xy).r;
+    float lastHfDepth = texture2D(depthTexture0, startPos.xy).r;
     bool insideHeightField = lastHfDepth < startPos.z;
     float depthDerivativeLimit = 5.0;
     float rayStepLen = length(rayStep.xy);
@@ -174,11 +177,12 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     
     for (int i = 0; !isecFound && (i < linearSteps); i++) {
         currentPos += rayStep;
-        float layerDepth = texture2D(depthTexture, currentPos.xy).r;
+        float layerDepth = texture2D(depthTexture0, currentPos.xy).r;
         // directional difference in the ray xy direction
         float hfDerivative = abs((layerDepth - lastHfDepth) * dxyLenInv);
 		// after stepping over a discontinuity check for the inside/outside position again.
-		if ((rayStepLen > pixelDiagLen) && (hfDerivative > depthDerivativeLimit)) {
+		if ((rayStepLen > pixelDiagLen) &&
+		(hfDerivative > depthDerivativeLimit)) {
 			insideHeightField = layerDepth < currentPos.z;
 		}
         if (!isecFound && ((currentPos.z >= layerDepth) ^^ insideHeightField)) {
@@ -198,7 +202,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     
     for (int i = 0; i < binarySteps; i++) {    
         middlePos = 0.5 * (startPos + endPos);
-        float layerDepth = texture2D(depthTexture, middlePos.xy).r;
+        float layerDepth = texture2D(depthTexture0, middlePos.xy).r;
         if (middlePos.z >= layerDepth) {
 			endPos = middlePos;
             bestPos = middlePos;
@@ -209,7 +213,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
 	
 	vec3 color = vec3(0, 0, 0);
 	if (isecFound) {
-		color = texture2D(colorTexture, bestPos.xy).rgb;
+		color = texture2D(colorTexture0, bestPos.xy).rgb;
 	}
     return color;
 }
@@ -295,6 +299,6 @@ void main() {
 	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
 
 	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
-	gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
-	//gl_FragColor.rgb = vec4(traceRay(pixelPos, vec3(-lensApertureRadius, lensApertureRadius, 0.0)), 1.0);
+	//gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
+	gl_FragColor.rgb = vec4(traceRay(pixelPos, vec3(lensApertureRadius * cameraShift, 0.0)), 1.0);
 }

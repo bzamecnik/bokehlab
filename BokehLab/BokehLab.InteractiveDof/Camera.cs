@@ -139,6 +139,9 @@
         /// </summary>
         public Vector4 FrustumBounds { get; set; }
 
+        // just for debugging purposes to get a single view from a lens sample position
+        public Vector2 Shift { get; set; }
+
         public Camera()
         {
             Lens = new ThinLens() { ApertureNumber = 1.4f, FocalLength = 0.05f };

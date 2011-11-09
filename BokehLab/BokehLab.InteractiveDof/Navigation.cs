@@ -216,6 +216,32 @@
                 Camera.FocalZ = Camera.FocalZ / 1.05f;
                 perspectiveChanged = true;
             }
+
+            if (Keyboard[Key.I])
+            {
+                float shiftY = BokehLab.Math.MathHelper.Clamp(Camera.Shift.Y + 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.Shift = new Vector2(Camera.Shift.X, shiftY);
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.K])
+            {
+                float shiftY = BokehLab.Math.MathHelper.Clamp(Camera.Shift.Y - 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.Shift = new Vector2(Camera.Shift.X, shiftY);
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.L])
+            {
+                float shiftX = BokehLab.Math.MathHelper.Clamp(Camera.Shift.X + 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.Shift = new Vector2(shiftX, Camera.Shift.Y);
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.J])
+            {
+                float shiftX = BokehLab.Math.MathHelper.Clamp(Camera.Shift.X - 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.Shift = new Vector2(shiftX, Camera.Shift.Y);
+                IsViewDirty = true;
+            }
+
             if (perspectiveChanged)
             {
                 Camera.UpdatePerspective();
