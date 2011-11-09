@@ -42,7 +42,9 @@
             bool collectDebugInfo = debugInfo != null;
 
             #region initialization
-            Vector2 rayDir = end.Xy - start.Xy;
+            Vector2 rayStart = start.Xy;
+            Vector2 rayEnd = end.Xy;
+            Vector2 rayDir = rayEnd - rayStart;
 
             // make sure the denominator in tMax and tDelta is not zero
 
@@ -64,7 +66,7 @@
                 currentPixel.X + ((step.X > 0) ? 1 : 0),
                 currentPixel.Y + ((step.Y > 0) ? 1 : 0));
 
-            Vector2 boundaryToStart = boundary - start.Xy;
+            Vector2 boundaryToStart = boundary - rayStart;
 
             Vector2 rayDirInv = new Vector2(1 / rayDir.X, 1 / rayDir.Y);
 
@@ -83,8 +85,10 @@
 
             List<Vector2> footprintPixels = new List<Vector2>();
 
-            int maxIterations = (int)(2 * rayDir.Length);
-            int iterations = 0;
+            //int maxIterations = (int)(2 * rayDir.Length);
+            //int iterations = 0;
+            debugInfo.EntryPoints.Add(rayStart);
+            Vector2 entry = rayStart;
             while (currentPixel != endPixel)
             {
                 #region visit current pixel - implementation dependent code
@@ -92,23 +96,28 @@
                 if (collectDebugInfo)
                 {
                     debugInfo.VisitedPixels.Add(currentPixel);
+                    //debugInfo.EntryPoints.Add(rayStart + Math.Min(tMax.X, tMax.Y) * rayDir);
                 }
 
                 #endregion
 
                 if (tMax.X < tMax.Y)
                 {
+                    entry = rayStart + tMax.X * rayDir;
                     tMax.X += tDelta.X;
                     currentPixel.X += step.X;
                 }
                 else
                 {
+                    entry = rayStart + tMax.Y * rayDir;
                     tMax.Y += tDelta.Y;
                     currentPixel.Y += step.Y;
                 }
-                if (iterations == maxIterations) break;
-                iterations++;
+                debugInfo.EntryPoints.Add(entry);
+                //if (iterations == maxIterations) break;
+                //iterations++;
             }
+            debugInfo.EntryPoints.Add(rayEnd);
 
             #endregion
 
