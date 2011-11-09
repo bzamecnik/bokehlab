@@ -38,23 +38,26 @@
 
             // bind color and depth textures
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[0]);
-            GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[0]);
-            GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[1]);
-
-            GL.ActiveTexture(TextureUnit.Texture3);
             GL.BindTexture(TextureTarget.Texture3D, lensSamplesTexture);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[0]);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[1]);
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[0]);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[1]);
 
             // enable IBRT shader
             GL.UseProgram(shaderProgram);
 
             // set shader parameters (textures, lens model, ...)
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture0"), 0); // TextureUnit.Texture0
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture0"), 1); // TextureUnit.Texture1
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture1"), 2); // TextureUnit.Texture1
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensSamplesTexture"), 3);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensSamplesTexture"), 0);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture0"), 1);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture1"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture0"), 3);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture1"), 4);
+
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "sensorSize"), camera.SensorSize);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "near"), camera.Near);

@@ -21,6 +21,7 @@ uniform float lensApertureRadius;
 uniform vec4 frustumBounds;
 
 uniform sampler2D depthTexture0;
+uniform sampler2D depthTexture1;
 uniform sampler2D colorTexture0;
 uniform sampler2D colorTexture1;
 
@@ -241,6 +242,7 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 	vec3 end = vec3((endPos.xy * screenSize), endPos.z);
 	vec3 dir = end - start;
 	float epsilonForRayDir = 0.0001;
+	float epsilonForDepthTest = 0.01;
 	if (abs(dir.x) < epsilonForRayDir)
     {
         dir.x = epsilonForRayDir;
@@ -251,13 +253,10 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
     }
     
     vec2 rayStep = sign(dir.xy);
-    //vec2 currentPixel = floor(start.xy);
-    //vec2 endPixel = floor(end.xy);
     vec2 currentPixel = GetPixelCorner(start.xy, rayStep);
     vec2 endPixel = GetPixelCorner(start.xy + dir.xy, -rayStep);
 
-	// vec2 boundary = currentPixel + max(rayStep, 0.0);
-    vec2 boundary = currentPixel + vec2((rayStep.x > 0.0) ? 1.0 : 0.0, (rayStep.y > 0.0) ? 1.0 : 0.0);
+	vec2 boundary = currentPixel + max(rayStep, 0.0);
     vec2 rayDirInv = 1.0 / dir.xy;
     vec2 screenSizeInv = 1.0 / screenSize;
 
@@ -267,19 +266,9 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
     vec3 entry = start;
     vec3 exit = start;
 
-	//if (currentPixel == endPixel) {
-		////return vec3(0,1,0);
-		//float layerZ = texture2D(depthTexture0, startPos.xy).r;
-		//if ((start.z < layerZ) && (layerZ <= end.z + 0.001))
-        //{
-            //return texture2D(colorTexture0, startPos.xy).rgb;
-        //}
-	//}
-
 	//int maxIterations = int(2.0 * length(dir.xy));
-	int maxIterations = 100;
-    int iterations = 0;
-    float prevLayerZ = start.z;
+	//int maxIterations = 100;
+    //int iterations = 0;
 	while (currentPixel != endPixel) {
         if (tMax.x < tMax.y)
         {
@@ -296,59 +285,46 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 
         // height field intersection
         
-        //vec2 depthTestPos = currentPixel * screenSizeInv;
+        // the height field is samples at pixel centers
+        
         vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
-        //vec2 depthTestPos = entry * screenSizeInv;
-        //vec2 depthTestPos = exit * screenSizeInv;
-        //vec2 depthTestPos = 0.5 * (exit + entry) * screenSizeInv;
         
-        float layerZ = texture2D(depthTexture0, depthTestPos).r;
-        
-        //float entryHfZ = texture2D(depthTexture0, entry.xy * screenSizeInv).r;
-        //float exitHfZ = texture2D(depthTexture0, exit.xy * screenSizeInv).r;
-        
-        ////for (int layer = 0; layer < 1; layer++)
-        ////{
-            //// we could compare:
-            //// (1) sign(entry.z - hf[pixel.xy]) != sign(exit.z - hf[pixel.xy])
-            //// (2) sign(entry.z - hf[entry.xy]) != sign(exit.z - hf[exit.xy])
-            //// (3) sign(entry.z - hf[middle.xy]) != sign(exit.z - hf[middle.xy])
-            ////Vector2 middle = 0.5f * (exit.Xy + entry.Xy);
-            ////float layerZ = this.HeightField.GetDepth((int)middle.x, (int)middle.y, 0);
-            //if (sign(layerZ - entry.z) != sign(layerZ - exit.z))
-            //{
-                //return texture2D(colorTexture0, depthTestPos).rgb;
-            //}
-        ////}
+        //vec4 layersZ = texture2D(depthTexture0, depthTestPos);
+        float layer0Z = texture2D(depthTexture0, depthTestPos);
+        float layer1Z = texture2D(depthTexture1, depthTestPos);
+        vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
         
         // this epsilon prevents artifact within objects arising from the
         // (virtual) nearest-neighbor interpolation of the depth layer
-        if ((entry.z < layerZ) && (layerZ <= exit.z + 0.01))
+        if ((entry.z < layersZ.x) && (layersZ.x <= exit.z + epsilonForDepthTest))
         {
             return texture2D(colorTexture0, depthTestPos).rgb;
-            //return texture2D(colorTexture0, 0.5 * (exit.xy + entry.xy) * screenSizeInv).rgb;
         }
-        
-        //if ((entry.z < entryHfZ) && (exitHfZ <= exit.z))
-        //{
-            //return texture2D(colorTexture0, exit.xy * screenSizeInv).rgb;
-        //}
+        if ((entry.z < layersZ.y) && (layersZ.y <= exit.z + epsilonForDepthTest))
+        {
+            return texture2D(colorTexture1, depthTestPos).rgb;
+        }
 
         entry = exit;
-        prevLayerZ = layerZ;
         
-        if (iterations == maxIterations) return vec3(1, 0, 1);
-        iterations++;
+        //if (iterations == maxIterations) return vec3(1, 0, 1);
+        //iterations++;
 	}
 	
-	float layerZ = texture2D(depthTexture0, endPos.xy).r;
-	if ((entry.z < layerZ) && (layerZ <= endPos.z))
+	vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
+	//vec4 layersZ = texture2D(depthTexture0, depthTestPos);
+	float layer0Z = texture2D(depthTexture0, depthTestPos);
+	float layer1Z = texture2D(depthTexture1, depthTestPos);
+	vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
+	if ((entry.z < layersZ.x) && (layersZ.x <= endPos.z + epsilonForDepthTest))
     {
-        return texture2D(colorTexture0, endPos.xy).rgb;
+        return texture2D(colorTexture0, depthTestPos).rgb;
     }
-	
-	//return vec3(maxIterations/10.0);
-	//return vec3(texture2D(depthTexture0, currentPixel * screenSizeInv).r);
+    if ((entry.z < layersZ.y) && (layersZ.y <= endPos.z + epsilonForDepthTest))
+    {
+        return texture2D(colorTexture1, depthTestPos).rgb;
+    }
+
 	return vec3(1, 0, 0);
 }
 
@@ -435,5 +411,5 @@ void main() {
 
 	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
 	//gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
-	gl_FragColor.rgb = vec4(traceRay(pixelPos, vec3(lensApertureRadius * cameraShift, 0.0)), 1.0);
+	gl_FragColor = vec4(traceRay(pixelPos, vec3(lensApertureRadius * cameraShift, 0.0)), 1.0);
 }
