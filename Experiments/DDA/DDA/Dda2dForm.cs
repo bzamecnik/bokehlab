@@ -418,7 +418,8 @@ namespace DDA
             Vector2 start, Vector2 end,
             Brush brush, Graphics g, float scale)
         {
-            IList<Vector2> pixels = LineFootprint.TraverseFootprint(start, end);
+            //IList<Vector2> pixels = LineFootprint.TraverseFootprint(start, end);
+            IList<Vector2> pixels = LineFootprint.TraverseFootprintAmanatides(start, end);
             foreach (var pixel in pixels)
             {
                 g.FillRectangle(brush, scale * pixel.X + 1, scale * pixel.Y + 1, scale - 1, scale - 1);

@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="Circle.cs" />
+    <Compile Include="HeightField\AmanatidesIntersector.cs" />
     <Compile Include="HeightField\BinarySearchIntersector.cs" />
     <Compile Include="HeightField\HeightField.cs" />
     <Compile Include="HeightField\IIntersectionAlgorithm.cs" />

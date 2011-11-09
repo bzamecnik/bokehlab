@@ -23,6 +23,7 @@
         MyIntersector myHeightFieldIntersector = new MyIntersector(null);
         BinarySearchIntersector binarySearchIntersector = new BinarySearchIntersector(null);
         LinearSearchIntersector linearSearchIntersector = new LinearSearchIntersector(null);
+        AmanatidesIntersector amanatidesIntersector = new AmanatidesIntersector(null);
         AbstractIntersector selectedIntersector;
 
         Point rayStartPoint;
@@ -64,7 +65,8 @@
 
             epsilonForCloseDepthNumeric.Value = (decimal)myHeightFieldIntersector.EpsilonForClosePixelDepth;
 
-            selectedIntersector = myHeightFieldIntersector;
+            //selectedIntersector = myHeightFieldIntersector;
+            selectedIntersector = amanatidesIntersector;
             //selectedIntersector = binarySearchIntersector;
             //selectedIntersector = linearSearchIntersector;
             selectedIntersector.HeightField = heightField;

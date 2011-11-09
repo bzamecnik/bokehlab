@@ -113,6 +113,85 @@
             return footprintPixels;
         }
 
+        /// <summary>
+        /// "A Fast Voxel Traversal Algorithm for Ray Tracing", John Amanatides and Andrew Woo
+        /// [amanatides1999]
+        /// </summary>
+        /// <param name="rayStart"></param>
+        /// <param name="rayEnd"></param>
+        /// <returns></returns>
+        public static IList<Vector2> TraverseFootprintAmanatides(Vector2 rayStart, Vector2 rayEnd)
+        {
+            #region initialization
+            Vector2 rayDir = rayEnd - rayStart;
+            Vector2 currentPixel = new Vector2(
+                (float)Math.Floor(rayStart.X),
+                (float)Math.Floor(rayStart.Y));
+
+            Vector2 endPixel = new Vector2(
+                (float)Math.Floor(rayEnd.X),
+                (float)Math.Floor(rayEnd.Y));
+
+            // make sure the denominator in tMax and tDelta is not zero
+            float epsilon = 0.0001f;
+            if (Math.Abs(rayDir.X) < epsilon)
+            {
+                rayDir.X = epsilon;
+            }
+            if (Math.Abs(rayDir.Y) < epsilon)
+            {
+                rayDir.Y = epsilon;
+            }
+
+            Vector2 step = new Vector2(Math.Sign(rayDir.X), Math.Sign(rayDir.Y));
+            Vector2 boundary = new Vector2(
+                currentPixel.X + ((step.X > 0) ? 1 : 0),
+                currentPixel.Y + ((step.Y > 0) ? 1 : 0));
+
+            Vector2 boundaryToStart = boundary - rayStart;
+            // make sure the numerator in tMax is not zero
+            if (Math.Abs(boundaryToStart.X) < epsilon)
+            {
+                boundaryToStart.X = epsilon;
+            }
+            if (Math.Abs(boundaryToStart.Y) < epsilon)
+            {
+                boundaryToStart.Y = epsilon;
+            }
+
+            Vector2 rayDirInv = new Vector2(1 / rayDir.X, 1 / rayDir.X);
+
+            Vector2 tMax = new Vector2(boundaryToStart.X * rayDirInv.X, boundaryToStart.Y * rayDirInv.Y);
+            Vector2 tDelta = new Vector2(step.X * rayDirInv.X, step.Y * rayDirInv.Y);
+            #endregion
+
+            #region traversal
+
+            List<Vector2> footprintPixels = new List<Vector2>();
+
+            do
+            {
+                #region visit current pixel - implementation dependent code
+
+                footprintPixels.Add(currentPixel);
+
+                #endregion
+
+                if (tMax.X < tMax.Y)
+                {
+                    tMax.X += tDelta.X;
+                    currentPixel.X += step.X;
+                }
+                else
+                {
+                    tMax.Y += tDelta.Y;
+                    currentPixel.Y += step.Y;
+                }
+            } while (currentPixel != endPixel);
+
+            #endregion
+            return footprintPixels;
+        }
 
         private static Vector2 IntersectPixelEdge2d(
             Vector2 rayStart,
