@@ -158,8 +158,8 @@
 
             editingRay = true;
             rayStartPoint = location;
-            rayStart.X = rayStartPoint.X / scale;
-            rayStart.Y = rayStartPoint.Y / scale;
+            rayStart.X = (rayStartPoint.X / scale) + 0.5f;
+            rayStart.Y = (rayStartPoint.Y / scale) + 0.5f;
 
             UpdateGui();
         }
@@ -199,8 +199,8 @@
             }
 
             rayEndPoint = location;
-            rayEnd.X = rayEndPoint.X / scale;
-            rayEnd.Y = rayEndPoint.Y / scale;
+            rayEnd.X = (rayEndPoint.X / scale) + 0.5f;
+            rayEnd.Y = (rayEndPoint.Y / scale) + 0.5f;
 
             UpdateGui();
 
