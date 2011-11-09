@@ -44,7 +44,8 @@
             #region initialization
             Vector2 rayStart = start.Xy;
             Vector2 rayEnd = end.Xy;
-            Vector2 rayDir = rayEnd - rayStart;
+            Vector3 dir = end - start;
+            Vector2 rayDir = dir.Xy;
 
             // make sure the denominator in tMax and tDelta is not zero
 
@@ -85,10 +86,10 @@
 
             List<Vector2> footprintPixels = new List<Vector2>();
 
-            //int maxIterations = (int)(2 * rayDir.Length);
-            //int iterations = 0;
+            int maxIterations = (int)(2 * rayDir.Length);
+            int iterations = 0;
             debugInfo.EntryPoints.Add(rayStart);
-            Vector2 entry = rayStart;
+            Vector3 entry = start;
             while (currentPixel != endPixel)
             {
                 #region visit current pixel - implementation dependent code
@@ -97,25 +98,44 @@
                 {
                     debugInfo.VisitedPixels.Add(currentPixel);
                     //debugInfo.EntryPoints.Add(rayStart + Math.Min(tMax.X, tMax.Y) * rayDir);
+                    debugInfo.EntryPoints.Add(entry.Xy);
                 }
 
                 #endregion
 
+                Vector3 exit;
                 if (tMax.X < tMax.Y)
                 {
-                    entry = rayStart + tMax.X * rayDir;
+                    exit = start + tMax.X * dir;
                     tMax.X += tDelta.X;
                     currentPixel.X += step.X;
                 }
                 else
                 {
-                    entry = rayStart + tMax.Y * rayDir;
+                    exit = start + tMax.Y * dir;
                     tMax.Y += tDelta.Y;
                     currentPixel.Y += step.Y;
                 }
-                debugInfo.EntryPoints.Add(entry);
-                //if (iterations == maxIterations) break;
-                //iterations++;
+
+                // height field intersection here
+                // TODO: multi-layer
+                if (this.HeightField.LayerCount > 0)
+                {
+                    float layerZ = this.HeightField.GetDepth((int)currentPixel.X, (int)currentPixel.Y, 0);
+                    if ((Math.Sign(layerZ - entry.Z) != Math.Sign(layerZ - exit.Z)))
+                    {
+                        if (collectDebugInfo)
+                        {
+                            debugInfo.LayerOfIntersection = 0;
+                        }
+                        return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
+                    }
+                }
+
+                entry = exit;
+
+                if (iterations == maxIterations) break;
+                iterations++;
             }
             debugInfo.EntryPoints.Add(rayEnd);
 
