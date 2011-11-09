@@ -16,6 +16,9 @@
         private float epsilonForRayDir;
         public float EpsilonForRayDir { get { return epsilonForRayDir; } set { epsilonForRayDir = value; } }
 
+        private float epsilonForCorners;
+        public float EpsilonForCorners { get { return epsilonForCorners; } set { epsilonForCorners = value; } }
+
         // If the ray goes through a hole in subsequent pixels which is
         // tighter in depth that this epsilon we can consider it to be an
         // intersection.
@@ -26,6 +29,7 @@
             : base(heightField)
         {
             this.epsilonForRayDir = 0.001f;
+            this.epsilonForCorners = 0.0001f;
             this.epsilonForClosePixelDepth = 0.05f;
         }
 
@@ -48,7 +52,6 @@
             Vector2 rayDir = dir.Xy;
 
             // make sure the denominator in tMax and tDelta is not zero
-
             if (Math.Abs(rayDir.X) < epsilonForRayDir)
             {
                 rayDir.X = epsilonForRayDir;
@@ -60,8 +63,8 @@
 
             Vector2 step = new Vector2(Math.Sign(rayDir.X), Math.Sign(rayDir.Y));
 
-            Vector2 currentPixel = new Vector2((float)Math.Floor(start.X), (float)Math.Floor(start.Y));
-            Vector2 endPixel = new Vector2((float)Math.Floor(end.X), (float)Math.Floor(end.Y));
+            Vector2 currentPixel = GetPixelCorner(start.Xy, step);
+            Vector2 endPixel = GetPixelCorner(start.Xy + rayDir, -step);
 
             Vector2 boundary = new Vector2(
                 currentPixel.X + ((step.X > 0) ? 1 : 0),
@@ -92,16 +95,12 @@
             Vector3 entry = start;
             while (currentPixel != endPixel)
             {
-                #region visit current pixel - implementation dependent code
-
                 if (collectDebugInfo)
                 {
                     debugInfo.VisitedPixels.Add(currentPixel);
                     //debugInfo.EntryPoints.Add(rayStart + Math.Min(tMax.X, tMax.Y) * rayDir);
                     debugInfo.EntryPoints.Add(entry.Xy);
                 }
-
-                #endregion
 
                 Vector3 exit;
                 if (tMax.X < tMax.Y)
@@ -117,16 +116,21 @@
                     currentPixel.Y += step.Y;
                 }
 
-                // height field intersection here
-                // TODO: multi-layer
-                if (this.HeightField.LayerCount > 0)
+                // height field intersection
+                for (int layer = 0; layer < this.HeightField.LayerCount; layer++)
                 {
-                    float layerZ = this.HeightField.GetDepth((int)currentPixel.X, (int)currentPixel.Y, 0);
+                    float layerZ = this.HeightField.GetDepth((int)currentPixel.X, (int)currentPixel.Y, layer);
+                    // we could compare:
+                    // (1) sign(entry.Z - hf[pixel.xy]) != sign(exit.Z - hf[pixel.xy])
+                    // (2) sign(entry.Z - hf[entry.xy]) != sign(exit.Z - hf[exit.xy])
+                    // (3) sign(entry.Z - hf[middle.xy]) != sign(exit.Z - hf[middle.xy])
+                    //Vector2 middle = 0.5f * (exit.Xy - entry.Xy);
+                    //float layerZ = this.HeightField.GetDepth((int)middle.X, (int)middle.Y, 0);
                     if ((Math.Sign(layerZ - entry.Z) != Math.Sign(layerZ - exit.Z)))
                     {
                         if (collectDebugInfo)
                         {
-                            debugInfo.LayerOfIntersection = 0;
+                            debugInfo.LayerOfIntersection = layer;
                         }
                         return new Intersection(new Vector3d(currentPixel.X, currentPixel.Y, layerZ));
                     }
@@ -137,11 +141,26 @@
                 if (iterations == maxIterations) break;
                 iterations++;
             }
+            debugInfo.VisitedPixels.Add(currentPixel);
             debugInfo.EntryPoints.Add(rayEnd);
 
             #endregion
 
             return null;
+        }
+
+        private Vector2 GetPixelCorner(Vector2 position, Vector2 relDir)
+        {
+            Vector2 corner = new Vector2((float)Math.Floor(position.X), (float)Math.Floor(position.Y));
+            if ((relDir.X < 0) && (position.X - corner.X < epsilonForCorners))
+            {
+                corner.X -= 1;
+            }
+            if ((relDir.Y < 0) && (position.Y - corner.Y < epsilonForCorners))
+            {
+                corner.Y -= 1;
+            }
+            return corner;
         }
     }
 }
