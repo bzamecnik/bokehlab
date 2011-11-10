@@ -6,12 +6,13 @@
     using System.Linq;
     using BokehLab.InteractiveDof;
     using BokehLab.InteractiveDof.DepthPeeling;
+    using BokehLab.InteractiveDof.MultiViewAccum;
     using BokehLab.Math;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
     using System.Runtime.InteropServices;
 
-    class ImageBasedRayTracer : AbstractRendererModule
+    class ImageBasedRayTracer : IncrementalRenderer
     {
         static readonly string VertexShaderPath = "RayTracing/IbrtVS.glsl";
         static readonly string FragmentShaderPath = "RayTracing/IbrtFS.glsl";
@@ -20,26 +21,41 @@
         int fragmentShader;
         int shaderProgram;
 
-        int lensSamplesTexture;
+        int[] lensSamplesTextures;
         int pixelSamplesTexture;
 
-        int lensSampleCount = 3 * 3;
+        int lensSampleCount = 2 * 2;
         int lensSampleTileSize = 128;
         int totalSampleCount;
         float totalSampleCountInv;
 
+        static readonly int SingleFrameIterations = 32;
+
         public DepthPeeler DepthPeeler { get; set; }
 
-        public void DrawIbrtImage(Camera camera)
+        public ImageBasedRayTracer()
+        {
+            MaxIterations = SingleFrameIterations;
+            ViewsPerFrame = 1;
+        }
+
+        public void DrawSingleFrame(Scene scene, Navigation navigation)
+        {
+            DrawSingleFrame(0, scene, navigation);
+        }
+
+        protected override void DrawSingleFrame(int iteration, Scene scene, Navigation navigation)
         {
             Debug.Assert(DepthPeeler != null);
+
+            Camera camera = navigation.Camera;
 
             GL.ClearColor(0f, 0f, 0f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             // bind color and depth textures
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture3D, lensSamplesTexture);
+            GL.BindTexture(TextureTarget.Texture3D, lensSamplesTextures[iteration]);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture1D, pixelSamplesTexture);
             GL.ActiveTexture(TextureUnit.Texture2);
@@ -128,8 +144,8 @@
             if (fragmentShader != 0)
                 GL.DeleteShader(fragmentShader);
 
-            if (lensSamplesTexture != 0)
-                GL.DeleteTexture(lensSamplesTexture);
+            if (lensSamplesTextures != null)
+                GL.DeleteTextures(SingleFrameIterations, lensSamplesTextures);
 
             base.Dispose();
         }
@@ -140,18 +156,22 @@
             totalSampleCount = sqrtSampleCount * sqrtSampleCount;
             totalSampleCountInv = 1 / (float)totalSampleCount;
 
-            if (lensSamplesTexture == 0)
+            if ((lensSamplesTextures == null) || (lensSamplesTextures[0] == 0))
             {
-                lensSamplesTexture = GL.GenTexture();
+                lensSamplesTextures = new int[SingleFrameIterations];
+                GL.GenTextures(SingleFrameIterations, lensSamplesTextures);
             }
             if (pixelSamplesTexture == 0)
             {
                 pixelSamplesTexture = GL.GenTexture();
             }
-            GenerateLensSamplesTexture(lensSamplesTexture, tileSize, sqrtSampleCount, totalSampleCount);
+
+            for (int i = 0; i < SingleFrameIterations; i++)
+            {
+                GenerateLensSamplesTexture(lensSamplesTextures[i], tileSize, sqrtSampleCount, totalSampleCount);
+            }
             GeneratePixelSamplesTexture(pixelSamplesTexture, sqrtSampleCount, totalSampleCount);
         }
-
 
         private void GenerateLensSamplesTexture(int textureId, int tileSize, int sqrtSampleCount, int totalSampleCount)
         {

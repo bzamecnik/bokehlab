@@ -66,6 +66,7 @@
     <Compile Include="MultiViewAccum\BufferAccumulator.cs" />
     <Compile Include="MultiViewAccum\FboAccumulator.cs" />
     <Compile Include="MultiViewAccum\IAccumulator.cs" />
+    <Compile Include="MultiViewAccum\IncrementalRenderer.cs" />
     <Compile Include="MultiViewAccum\MultiViewAccumulation.cs" />
     <Compile Include="Navigation.cs" />
     <Compile Include="InteractiveRenderer.cs" />

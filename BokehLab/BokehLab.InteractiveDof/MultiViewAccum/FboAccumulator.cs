@@ -57,13 +57,16 @@
 
         public void PostDraw()
         {
+            //DEBUG
+            //GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+
             // target texture
             GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
                 FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D,
                 updatedAverageTexture, 0);
 
             GL.ClearColor(0, 0, 0, 1);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             // source textures
             GL.ActiveTexture(TextureUnit.Texture0);

@@ -155,8 +155,13 @@
                     break;
                 case Mode.ImageBasedRayTracing:
                     depthPeeler.PeelLayers(scene);
-                    ibrt.DrawIbrtImage(navigation.Camera);
+                    ibrt.DrawSingleFrame(scene, navigation);
                     //ImageBasedRayTracer.IbrtPlayground.TraceRay(navigation.Camera);
+                    break;
+                case Mode.IncrementalImageBasedRayTracing:
+                    depthPeeler.PeelLayers(scene);
+                    ibrt.AccumulateAndDraw(scene, navigation);
+                    cumulativeMilliseconds = ibrt.CumulativeMilliseconds;
                     break;
                 default:
                     Debug.Assert(false, "Unknown rendering mode");
@@ -225,6 +230,20 @@
                         navigation.IsViewDirty = true;
                     }
                 }
+                else if (e.Key == Key.F6)
+                {
+                    if (renderingMode != Mode.IncrementalImageBasedRayTracing)
+                    {
+                        foreach (var module in modules)
+                        {
+                            module.Enabled = false;
+                        }
+                        depthPeeler.Enabled = true;
+                        ibrt.Enabled = true;
+                        renderingMode = Mode.IncrementalImageBasedRayTracing;
+                        navigation.IsViewDirty = true;
+                    }
+                }
                 else if (e.Key == Key.F4)
                 {
                     if (renderingMode != Mode.OrderIndependentTransparency)
@@ -282,6 +301,7 @@
             Pinhole,
             MultiViewAccum,
             ImageBasedRayTracing,
+            IncrementalImageBasedRayTracing,
             OrderIndependentTransparency,
         }
     }

@@ -8,107 +8,51 @@
     using OpenTK.Graphics.OpenGL;
     using System.Diagnostics;
 
-    class MultiViewAccumulation : AbstractRendererModule
+    /// <summary>
+    /// Many pinhole views are rasterized and accumulated and averaged to
+    /// estimate the light transport through a lens with a finite aperture.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This method is based on [haeberli1990] and is extended to incremental
+    /// rendering (the moving average is displayed during rendering). Original
+    /// accumulation buffer can be used, however a modern variant is to use
+    /// FBO, render to textures and to the averaging in a shader. FBO textures
+    /// support floating point pixel formats, in contrast to the accumulation
+    /// buffer. This prevents artifact even for a thousand of accumulated views.
+    /// </para>
+    /// <para>
+    /// [haeberli1990] Haeberli, P. & Akeley, K.: The accumulation buffer:
+    /// hardware support for high-quality rendering, 1999.
+    /// </para>
+    /// </remarks>
+    class MultiViewAccumulation : IncrementalRenderer
     {
-        // How many views should be accumulated during one frame rendering.
-        int viewsPerFrame = 4; // 16 good for float16, 4 or 8 for float32
+        static readonly int sqrtSampleCount = 32;
 
-        int sqrtSampleCount = 32;
-
-        int iteration = 0;
         Vector2[] unitDiskSamples;
         Sampler sampler = new Sampler();
-        int maxIterations;
-        IAccumulator accumulator;
-
-        Stopwatch stopwatch = new Stopwatch();
-        public long CumulativeMilliseconds { get; set; }
-        public int SampleCount { get { return maxIterations; } }
 
         public MultiViewAccumulation()
         {
             unitDiskSamples = CreateLensSamples(sqrtSampleCount).ToArray();
-            maxIterations = unitDiskSamples.Length;
-
-            // draw all views at once
-            //viewsPerFrame = maxIterations;
-
-            //accumulator = new BufferAccumulator() { TotalIterations = maxIterations };
-            accumulator = new FboAccumulator();
+            MaxIterations = unitDiskSamples.Length;
         }
 
-        public override void Initialize(int width, int height)
+        protected override void DrawSingleFrame(int iteration, Scene scene, Navigation navigation)
         {
-            base.Initialize(width, height);
-            accumulator.Initialize(width, height);
-        }
+            Vector2 localPinholePos = navigation.Camera.GetPinholePos(unitDiskSamples[iteration]);
+            Matrix4 perspective = navigation.Camera.GetMultiViewPerspective(localPinholePos);
 
-        public override void Dispose()
-        {
-            accumulator.Dispose();
-        }
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.PushMatrix();
+            GL.LoadMatrix(ref perspective);
 
-        protected override void Enable()
-        {
-            accumulator.Enabled = true;
-        }
+            GL.Translate(-localPinholePos.X, -localPinholePos.Y, 0);
 
-        protected override void Disable()
-        {
-            accumulator.Enabled = false;
-        }
+            scene.Draw();
 
-        public override void Resize(int width, int height)
-        {
-            base.Resize(width, height);
-            accumulator.Resize(width, height);
-        }
-
-        public void AccumulateAndDraw(Scene scene, Navigation navigation)
-        {
-            if (navigation.IsViewDirty)
-            {
-                stopwatch.Reset();
-                CumulativeMilliseconds = 0;
-                accumulator.Clear();
-                navigation.IsViewDirty = false;
-                iteration = 0;
-            }
-
-            if (iteration < maxIterations)
-            {
-                stopwatch.Start();
-                accumulator.PreAccumulate();
-
-                for (int i = 0; (i < viewsPerFrame) && (iteration < maxIterations); i++)
-                {
-                    accumulator.PreDraw();
-
-                    Vector2 localPinholePos = navigation.Camera.GetPinholePos(unitDiskSamples[iteration]);
-                    Matrix4 perspective = navigation.Camera.GetMultiViewPerspective(localPinholePos);
-
-                    GL.MatrixMode(MatrixMode.Projection);
-                    GL.PushMatrix();
-                    GL.LoadMatrix(ref perspective);
-
-                    GL.Translate(-localPinholePos.X, -localPinholePos.Y, 0);
-
-                    scene.Draw();
-
-                    GL.PopMatrix();
-
-                    accumulator.PostDraw();
-                    iteration++;
-                }
-                accumulator.PostAccumulate();
-                stopwatch.Stop();
-            }
-            //if (iteration == maxIterations)
-            //{
-            CumulativeMilliseconds = stopwatch.ElapsedMilliseconds;
-            //}
-
-            accumulator.Show();
+            GL.PopMatrix();
         }
 
         /// <summary>
