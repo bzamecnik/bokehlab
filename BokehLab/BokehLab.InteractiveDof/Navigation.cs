@@ -126,36 +126,42 @@
 
         public void OnUpdateFrame(FrameEventArgs e, KeyboardDevice Keyboard)
         {
+            float deltaShift = DeltaShift;
+            if (Keyboard[Key.ShiftLeft] || Keyboard[Key.ShiftRight])
+            {
+                deltaShift /= 10.0f;
+            }
+
             if (Keyboard[Key.W])
             {
-                Position += DeltaShift * View;
+                Position += deltaShift * View;
                 IsViewDirty = true;
             }
             else if (Keyboard[Key.S])
             {
-                Position -= DeltaShift * View;
+                Position -= deltaShift * View;
                 IsViewDirty = true;
             }
 
             if (Keyboard[Key.D])
             {
-                Position -= DeltaShift * Right;
+                Position -= deltaShift * Right;
                 IsViewDirty = true;
             }
             else if (Keyboard[Key.A])
             {
-                Position += DeltaShift * Right;
+                Position += deltaShift * Right;
                 IsViewDirty = true;
             }
 
             if (Keyboard[Key.E])
             {
-                Position -= DeltaShift * Up;
+                Position -= deltaShift * Up;
                 IsViewDirty = true;
             }
             else if (Keyboard[Key.Q])
             {
-                Position += DeltaShift * Up;
+                Position += deltaShift * Up;
                 IsViewDirty = true;
             }
 
