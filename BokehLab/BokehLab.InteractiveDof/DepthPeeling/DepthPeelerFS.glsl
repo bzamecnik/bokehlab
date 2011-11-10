@@ -1,8 +1,8 @@
 ﻿uniform sampler2D depthTexture;
+uniform vec2 depthTextureSizeInv;
 
 void main() {
-	// TODO: provide a uniform precomputed vec2: 1 / textureSize(depthTexture, 0)
-	float depth = texture2D(depthTexture, gl_FragCoord.xy / textureSize(depthTexture, 0));
+	float depth = texture2D(depthTexture, gl_FragCoord.xy * depthTextureSizeInv);
 	//
 	//float depth = texture2D(depthTexture, gl_TexCoord[0].st);
 	//

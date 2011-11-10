@@ -16,16 +16,22 @@
         /// <remarks>
         /// 8 layers are almost always enough.
         /// </remarks>
-        public static readonly int LayerCount = 2;
+        public static readonly int LayerCount = 4;
+        public static readonly int PackedLayerCount = LayerCount / 4;
 
-        static readonly string VertexShaderPath = "DepthPeeling/DepthPeelerVS.glsl";
-        static readonly string FragmentShaderPath = "DepthPeeling/DepthPeelerFS.glsl";
+        static readonly string PeelingVertexShaderPath = "DepthPeeling/DepthPeelerVS.glsl";
+        static readonly string PeelingFragmentShaderPath = "DepthPeeling/DepthPeelerFS.glsl";
+
+        static readonly string PackingVertexShaderPath = "DepthPeeling/DepthPackerVS.glsl";
+        static readonly string PackingFragmentShaderPath = "DepthPeeling/DepthPackerFS.glsl";
 
         uint[] colorTextures = new uint[LayerCount];
         uint[] depthTextures = new uint[LayerCount];
+        uint[] packedDepthTextures = new uint[PackedLayerCount];
 
         public uint[] ColorTextures { get { return colorTextures; } }
         public uint[] DepthTextures { get { return depthTextures; } }
+        public uint[] PackedDepthTextures { get { return packedDepthTextures; } }
 
         /// <summary>
         /// Frame-buffer Object to which the current color and depth texture
@@ -35,9 +41,13 @@
 
         public uint FboHandle { get; set; }
 
-        int vertexShader;
-        int fragmentShader;
-        int shaderProgram;
+        int peelingVertexShader;
+        int peelingFragmentShader;
+        int peelingShaderProgram;
+
+        int packingVertexShader;
+        int packingFragmentShader;
+        int packingShaderProgram;
 
         public void PeelLayers(Scene scene)
         {
@@ -53,19 +63,77 @@
             scene.Draw();
 
             // draw the rest of layers with depth peeling
-            GL.UseProgram(shaderProgram); // enable the peeling shader
+            GL.UseProgram(peelingShaderProgram); // enable the peeling shader
             for (int i = 1; i < LayerCount; i++)
             {
                 AttachLayerTextures(i);
                 // use the previous depth layer for manual depth comparisons
                 GL.BindTexture(TextureTarget.Texture2D, depthTextures[i - 1]);
-                GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture"), 0); // TextureUnit.Texture0
+                GL.Uniform1(GL.GetUniformLocation(peelingShaderProgram, "depthTexture"), 0); // TextureUnit.Texture0
+                GL.Uniform2(GL.GetUniformLocation(peelingShaderProgram, "depthTextureSizeInv"),
+                    new Vector2(1.0f / Width, 1.0f / Height));
                 scene.Draw();
             }
             GL.UseProgram(0); // disable the peeling shader
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-            UnbindFramebuffer(); // disable rendering into the FBO
+            GL.Ext.FramebufferTexture2D(
+                FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt,
+                TextureTarget.Texture2D, 0, 0);
+
+            PackDepthImages();
+
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+        }
+
+        /// <summary>
+        /// Packs four single-channel depth images into one four-channel image.
+        /// </summary>
+        private void PackDepthImages()
+        {
+            // for visualization
+            //GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+
+            GL.ClearColor(0f, 0f, 0f, 1f);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            GL.Ext.FramebufferTexture2D(
+                FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+                TextureTarget.Texture2D, packedDepthTextures[0], 0);
+
+            var result = GL.Ext.CheckFramebufferStatus(FramebufferTarget.FramebufferExt);
+            if (result != FramebufferErrorCode.FramebufferCompleteExt)
+            {
+                throw new ApplicationException(string.Format("Bad FBO: {0}", result));
+            }
+
+            GL.UseProgram(packingShaderProgram);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, depthTextures[0]);
+            GL.Uniform1(GL.GetUniformLocation(packingShaderProgram, "depthTexture0"), 0);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, depthTextures[1]);
+            GL.Uniform1(GL.GetUniformLocation(packingShaderProgram, "depthTexture1"), 1);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture2D, depthTextures[2]);
+            GL.Uniform1(GL.GetUniformLocation(packingShaderProgram, "depthTexture2"), 2);
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, depthTextures[3]);
+            GL.Uniform1(GL.GetUniformLocation(packingShaderProgram, "depthTexture3"), 3);
+
+            LayerHelper.DrawQuad();
+
+            GL.UseProgram(0);
+
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void DisplayLayers()
@@ -128,8 +196,12 @@
             base.Initialize(width, height);
 
             ShaderLoader.CreateShaderFromFiles(
-               VertexShaderPath, FragmentShaderPath,
-               out vertexShader, out fragmentShader, out shaderProgram);
+               PeelingVertexShaderPath, PeelingFragmentShaderPath,
+               out peelingVertexShader, out peelingFragmentShader, out peelingShaderProgram);
+
+            ShaderLoader.CreateShaderFromFiles(
+               PackingVertexShaderPath, PackingFragmentShaderPath,
+               out packingVertexShader, out packingFragmentShader, out packingShaderProgram);
 
             GL.Ext.GenFramebuffers(1, out fboHandle);
 
@@ -138,12 +210,19 @@
 
         public override void Dispose()
         {
-            if (shaderProgram != 0)
-                GL.DeleteProgram(shaderProgram);
-            if (vertexShader != 0)
-                GL.DeleteShader(vertexShader);
-            if (fragmentShader != 0)
-                GL.DeleteShader(fragmentShader);
+            if (peelingShaderProgram != 0)
+                GL.DeleteProgram(peelingShaderProgram);
+            if (peelingVertexShader != 0)
+                GL.DeleteShader(peelingVertexShader);
+            if (peelingFragmentShader != 0)
+                GL.DeleteShader(peelingFragmentShader);
+
+            if (packingShaderProgram != 0)
+                GL.DeleteProgram(packingShaderProgram);
+            if (packingVertexShader != 0)
+                GL.DeleteShader(packingVertexShader);
+            if (packingFragmentShader != 0)
+                GL.DeleteShader(packingFragmentShader);
 
             base.Dispose();
         }
@@ -162,6 +241,8 @@
                 GL.DeleteTextures(1, colorTextures);
             if (depthTextures != null)
                 GL.DeleteTextures(1, depthTextures);
+            if (packedDepthTextures != null)
+                GL.DeleteTextures(1, packedDepthTextures);
         }
 
         #endregion
@@ -176,6 +257,7 @@
             // create textures
             GL.GenTextures(LayerCount, colorTextures);
             GL.GenTextures(LayerCount, depthTextures);
+            GL.GenTextures(PackedLayerCount, packedDepthTextures);
 
             for (int i = 0; i < LayerCount; i++)
             {
@@ -193,6 +275,16 @@
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32f, width, height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
                 //GL.TexImage2D(TextureTarget.Texture2D, 0, (PixelInternalFormat)All.DepthComponent16, width, height, 0, PixelFormat.DepthComponent, PixelType.UnsignedShort, IntPtr.Zero);
                 // things go horribly wrong if DepthComponent's Bitcount does not match the main Framebuffer's Depth
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            }
+            for (int i = 0; i < PackedLayerCount; i++)
+            {
+                // setup depth texture
+                GL.BindTexture(TextureTarget.Texture2D, packedDepthTextures[i]);
+                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba16f, width, height, 0, PixelFormat.Rgba, PixelType.HalfFloat, IntPtr.Zero);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
@@ -217,18 +309,6 @@
             {
                 throw new ApplicationException(string.Format("Bad FBO: {0}", result));
             }
-        }
-
-        private void UnbindFramebuffer()
-        {
-            // detach textures - TODO: really needed?
-            GL.Ext.FramebufferTexture2D(
-                FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
-                TextureTarget.Texture2D, 0, 0);
-            GL.Ext.FramebufferTexture2D(
-                FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt,
-                TextureTarget.Texture2D, 0, 0);
-            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
         }
     }
 }
