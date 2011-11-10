@@ -165,6 +165,17 @@
                 IsViewDirty = true;
             }
 
+            if (Keyboard[Key.Plus])
+            {
+                Camera.Lens.FocalLength *= 1.05f;
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.Minus])
+            {
+                Camera.Lens.FocalLength /= 1.05f;
+                IsViewDirty = true;
+            }
+
             bool perspectiveChanged = false;
             if (Keyboard[Key.Insert])
             {
@@ -294,7 +305,7 @@
         {
             if (delta.Y != 0)
             {
-                Camera.FocalZ += delta.Y;
+                Camera.FocalZ += delta.Y * Camera.FocalZ;
                 IsViewDirty = true;
             }
         }

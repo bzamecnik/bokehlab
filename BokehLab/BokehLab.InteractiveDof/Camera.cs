@@ -6,6 +6,8 @@
     using System.Text;
     using OpenTK;
 
+    // TODO: compute field of view from focal length and senzor size and position
+
     /// <summary>
     /// Represents the intrinsic camera parameters.
     /// </summary>
@@ -114,7 +116,7 @@
             }
         }
 
-        float far = 1000f;
+        float far = 50f;
         /// <summary>
         /// Unsigned far plane distance. The plane lies on -Far.
         /// </summary>
@@ -144,7 +146,7 @@
 
         public Camera()
         {
-            Lens = new ThinLens() { ApertureNumber = 1.4f, FocalLength = 0.05f };
+            Lens = new ThinLens() { ApertureNumber = 2.8f, FocalLength = 0.05f };
             //FocalZ = -(20 * Lens.FocalLength);
             FocalZ = -4f;
             UpdatePerspective();
