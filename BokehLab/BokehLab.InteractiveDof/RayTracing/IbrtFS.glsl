@@ -31,6 +31,7 @@ uniform sampler2D colorTexture1;
 // - samples for neighbor pixel tiled in S and T dimensions
 // TODO: two 2D vectors could be packed into one 4D vector
 uniform sampler3D lensSamplesTexture;
+uniform sampler1D pixelSamplesTexture;
 // number of samples - allowed values: [0; length(lensSamples)]
 uniform int sampleCount;
 uniform float sampleCountInv;
@@ -251,7 +252,7 @@ bool TestIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color
     // compare up to 4 layers at once for intersection
     //bvec4 comparison = (vec4(entry.z) < layersZ) && (layersZ <= vec4(exit.z + epsilonForDepthTest));
     //ivec4 comparison = sign(layersZ - vec4(entry.z)) + sign(vec4(exit.z + epsilonForDepthTest) - layersZ);
-    ivec2 comparison = sign(layersZ.xy - vec2(entry.z)) + sign(vec2(exit.z + epsilonForDepthTest) - layersZ.xy);
+    ivec2 comparison = ivec2(sign(layersZ.xy - vec2(entry.z)) + sign(vec2(exit.z + epsilonForDepthTest) - layersZ.xy));
     // intersection happens at the first layer with result value 2 (ie. both sign are positive)
     if (comparison.x == 2)
     {
@@ -389,11 +390,16 @@ vec3 estimateRadianceJittered(vec3 pixelPos) {
 	vec3 samplesIndex = vec3(jitterCoords / vec2(lensJitterSize.st), 0.0);
 	// TODO: check dFdx(texcoord.x) out
 	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(sampleCount) - 1.0));
+	// [0;1]^2 pixel sample to camera space
+	vec2 pixelSampleToCamera = sensorSize * screenSizeInv;
+	float pixelSampleTexIndex = 0.0;
 	for (int i = 0; i < sampleCount; i += 1) {
 		vec2 lensPos = texture3D(lensSamplesTexture, samplesIndex).st;
+		vec2 pixelOffset = pixelSampleToCamera * texture1D(pixelSamplesTexture, pixelSampleTexIndex).st;
 		lensPos *= lensApertureRadius;
-		colorAccum += traceRay(pixelPos, vec3(lensPos, 0));
+		colorAccum += traceRay(pixelPos + vec3(pixelOffset, 0), vec3(lensPos, 0));
 		samplesIndex += samplesIndexStep;
+		pixelSampleTexIndex += sampleCountInv;
 	}
 	//return vec4(samplesIndex.b, 0, 0, 1);
 	return colorAccum * sampleCountInv;

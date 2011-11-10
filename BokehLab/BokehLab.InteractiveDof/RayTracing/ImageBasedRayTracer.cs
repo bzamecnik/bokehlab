@@ -21,6 +21,7 @@
         int shaderProgram;
 
         int lensSamplesTexture;
+        int pixelSamplesTexture;
 
         int lensSampleCount = 3 * 3;
         int lensSampleTileSize = 128;
@@ -40,12 +41,14 @@
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture3D, lensSamplesTexture);
             GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[0]);
+            GL.BindTexture(TextureTarget.Texture1D, pixelSamplesTexture);
             GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[1]);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[0]);
             GL.ActiveTexture(TextureUnit.Texture3);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[0]);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[1]);
             GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[0]);
+            GL.ActiveTexture(TextureUnit.Texture5);
             GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[1]);
 
             // enable IBRT shader
@@ -53,10 +56,11 @@
 
             // set shader parameters (textures, lens model, ...)
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensSamplesTexture"), 0);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture0"), 1);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture1"), 2);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture0"), 3);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture1"), 4);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "pixelSamplesTexture"), 1);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture0"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture1"), 3);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture0"), 4);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture1"), 5);
 
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "sensorSize"), camera.SensorSize);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
@@ -99,7 +103,7 @@
 
             GL.Enable(EnableCap.Texture2D);
 
-            RegenerateLensSamplesTexture(lensSampleTileSize, lensSampleCount);
+            RegenerateSampleTextures(lensSampleTileSize, lensSampleCount);
         }
 
         public override void Dispose()
@@ -117,7 +121,7 @@
             base.Dispose();
         }
 
-        private void RegenerateLensSamplesTexture(int tileSize, int sampleCount)
+        private void RegenerateSampleTextures(int tileSize, int sampleCount)
         {
             int sqrtSampleCount = (int)Math.Sqrt(sampleCount);
             totalSampleCount = sqrtSampleCount * sqrtSampleCount;
@@ -127,7 +131,12 @@
             {
                 lensSamplesTexture = GL.GenTexture();
             }
+            if (pixelSamplesTexture == 0)
+            {
+                pixelSamplesTexture = GL.GenTexture();
+            }
             GenerateLensSamplesTexture(lensSamplesTexture, tileSize, sqrtSampleCount, totalSampleCount);
+            GeneratePixelSamplesTexture(pixelSamplesTexture, sqrtSampleCount, totalSampleCount);
         }
 
 
@@ -179,6 +188,40 @@
             GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.Clamp);
         }
 
+        private void GeneratePixelSamplesTexture(int textureId, int sqrtSampleCount, int totalSampleCount)
+        {
+            GL.BindTexture(TextureTarget.Texture1D, textureId);
+            // size of a group of samples for a single pixel
+            int bands = 2;
+            int textureSize = bands * totalSampleCount;
+
+            Sampler sampler = new Sampler();
+            IntPtr texturePtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Half)) * textureSize);
+            unsafe
+            {
+                Half* row = (Half*)texturePtr;
+                int index = 0;
+                foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
+                {
+                    row[index] = (Half)sample.X;
+                    index++;
+                    row[index] = (Half)sample.Y;
+                    index++;
+                }
+            }
+
+            // TODO: could be an half float or unsigned byte instead of a float
+            // TODO: two sample pair could be stored in one 4-channel value
+            GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.Rg16f,
+                totalSampleCount, 0,
+                PixelFormat.Rg, PixelType.HalfFloat, texturePtr);
+
+            // TODO: when to unallocate the buffer?
+
+            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        }
 
         public class IbrtPlayground
         {
