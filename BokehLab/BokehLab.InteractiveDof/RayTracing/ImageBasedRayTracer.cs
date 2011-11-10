@@ -22,7 +22,7 @@
 
         int lensSamplesTexture;
 
-        int lensSampleCount = 4 * 4;
+        int lensSampleCount = 3 * 3;
         int lensSampleTileSize = 128;
         int totalSampleCount;
         float totalSampleCountInv;
@@ -70,6 +70,7 @@
 
             // jittering
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "screenSize"), new Vector2(Width, Height));
+            GL.Uniform2(GL.GetUniformLocation(shaderProgram, "screenSizeInv"), new Vector2(1.0f / Width, 1.0f / Height));
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), totalSampleCount);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), totalSampleCountInv);
 

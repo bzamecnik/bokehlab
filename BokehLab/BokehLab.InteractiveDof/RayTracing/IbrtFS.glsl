@@ -36,6 +36,7 @@ uniform int sampleCount;
 uniform float sampleCountInv;
 
 uniform vec2 screenSize;
+uniform vec2 screenSizeInv;
 
 uniform vec2 cameraShift;
 
@@ -222,13 +223,13 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
 vec2 GetPixelCorner(vec2 position, vec2 relDir)
 {
     vec2 corner = floor(position);
-    if ((relDir.x < 0) && (position.x - corner.x < 0.00001))
+    if ((relDir.x < 0.0) && (position.x - corner.x < 0.00001))
     {
-        corner.x -= 1;
+        corner.x -= 1.0;
     }
-    if ((relDir.y < 0) && (position.y - corner.y < 0.00001))
+    if ((relDir.y < 0.0) && (position.y - corner.y < 0.00001))
     {
-        corner.y -= 1;
+        corner.y -= 1.0;
     }
     return corner;
 }
@@ -258,7 +259,6 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 
 	vec2 boundary = currentPixel + max(rayStep, 0.0);
     vec2 rayDirInv = 1.0 / dir.xy;
-    vec2 screenSizeInv = 1.0 / screenSize;
 
     vec2 tMax = (boundary - start.xy) * rayDirInv;
     vec2 tDelta = rayStep * rayDirInv;
@@ -267,8 +267,8 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
     vec3 exit = start;
 
 	//int maxIterations = int(2.0 * length(dir.xy));
-	//int maxIterations = 100;
-    //int iterations = 0;
+	//int maxIterations = 40;
+    int iterations = 0;
 	while (currentPixel != endPixel) {
         if (tMax.x < tMax.y)
         {
@@ -289,32 +289,34 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
         
         vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
         
-        //vec4 layersZ = texture2D(depthTexture0, depthTestPos);
-        float layer0Z = texture2D(depthTexture0, depthTestPos);
-        float layer1Z = texture2D(depthTexture1, depthTestPos);
+        //vec4 layersZ = texture2D(depthTexture0, depthTestPos).r;
+        float layer0Z = texture2D(depthTexture0, depthTestPos).r;
+        float layer1Z = texture2D(depthTexture1, depthTestPos).r;
         vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
+        
+        vec2 colorPos = 0.5 * (entry.xy + exit.xy) * screenSizeInv;
         
         // this epsilon prevents artifact within objects arising from the
         // (virtual) nearest-neighbor interpolation of the depth layer
         if ((entry.z < layersZ.x) && (layersZ.x <= exit.z + epsilonForDepthTest))
         {
-            return texture2D(colorTexture0, depthTestPos).rgb;
+            return texture2D(colorTexture0, colorPos).rgb;
         }
         if ((entry.z < layersZ.y) && (layersZ.y <= exit.z + epsilonForDepthTest))
         {
-            return texture2D(colorTexture1, depthTestPos).rgb;
+            return texture2D(colorTexture1, colorPos).rgb;
         }
 
         entry = exit;
         
         //if (iterations == maxIterations) return vec3(1, 0, 1);
-        //iterations++;
+        iterations++;
 	}
 	
 	vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
-	//vec4 layersZ = texture2D(depthTexture0, depthTestPos);
-	float layer0Z = texture2D(depthTexture0, depthTestPos);
-	float layer1Z = texture2D(depthTexture1, depthTestPos);
+	//vec4 layersZ = texture2D(depthTexture0, depthTestPos).r;
+	float layer0Z = texture2D(depthTexture0, depthTestPos).r;
+	float layer1Z = texture2D(depthTexture1, depthTestPos).r;
 	vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
 	if ((entry.z < layersZ.x) && (layersZ.x <= endPos.z + epsilonForDepthTest))
     {
@@ -324,6 +326,9 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
     {
         return texture2D(colorTexture1, depthTestPos).rgb;
     }
+
+	//return vec3(iterations / 100.0);
+	//return vec3(length(endPos.xy - startPos.xy));
 
 	return vec3(1, 0, 0);
 }
@@ -410,6 +415,6 @@ void main() {
 	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
 
 	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
-	//gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
-	gl_FragColor = vec4(traceRay(pixelPos, vec3(lensApertureRadius * cameraShift, 0.0)), 1.0);
+	gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
+	//gl_FragColor = vec4(traceRay(pixelPos, vec3(lensApertureRadius * cameraShift, 0.0)), 1.0);
 }
