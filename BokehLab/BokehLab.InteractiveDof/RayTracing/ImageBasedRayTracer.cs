@@ -43,13 +43,15 @@
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture1D, pixelSamplesTexture);
             GL.ActiveTexture(TextureUnit.Texture2);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[0]);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.PackedDepthTextures[0]);
             GL.ActiveTexture(TextureUnit.Texture3);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.DepthTextures[1]);
-            GL.ActiveTexture(TextureUnit.Texture4);
             GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[0]);
-            GL.ActiveTexture(TextureUnit.Texture5);
+            GL.ActiveTexture(TextureUnit.Texture4);
             GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[1]);
+            GL.ActiveTexture(TextureUnit.Texture5);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[2]);
+            GL.ActiveTexture(TextureUnit.Texture6);
+            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[3]);
 
             // enable IBRT shader
             GL.UseProgram(shaderProgram);
@@ -57,10 +59,11 @@
             // set shader parameters (textures, lens model, ...)
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensSamplesTexture"), 0);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "pixelSamplesTexture"), 1);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture0"), 2);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "depthTexture1"), 3);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture0"), 4);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture1"), 5);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "packedDepthTexture0"), 2);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture0"), 3);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture1"), 4);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture2"), 5);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture3"), 6);
 
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "sensorSize"), camera.SensorSize);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
@@ -87,6 +90,16 @@
             GL.UseProgram(0);
 
             // unbind textures
+            GL.ActiveTexture(TextureUnit.Texture6);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture5);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture3);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.ActiveTexture(TextureUnit.Texture2);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -203,9 +216,9 @@
                 int index = 0;
                 foreach (Vector2d sample in sampler.GenerateJitteredSamples(sqrtSampleCount))
                 {
-                    row[index] = (Half)sample.X;
+                    row[index] = (Half)(sample.X - 0.5f);
                     index++;
-                    row[index] = (Half)sample.Y;
+                    row[index] = (Half)(sample.Y - 0.5f);
                     index++;
                 }
             }
