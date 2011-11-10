@@ -234,6 +234,35 @@ vec2 GetPixelCorner(vec2 position, vec2 relDir)
     return corner;
 }
 
+bool TestIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color) {
+	float epsilonForDepthTest = 0.01;
+	
+	// the height field is samples at pixel centers  
+    vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
+    
+    //vec4 layersZ = texture2D(depthTexture0, depthTestPos).r;
+    float layer0Z = texture2D(depthTexture0, depthTestPos).r;
+    float layer1Z = texture2D(depthTexture1, depthTestPos).r;
+    vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
+    
+    //vec2 colorPos = 0.5 * (entry.xy + exit.xy) * screenSizeInv;
+    vec2 colorPos = depthTestPos;
+    
+    // this epsilon prevents artifact within objects arising from the
+    // (virtual) nearest-neighbor interpolation of the depth layer
+    if ((entry.z < layersZ.x) && (layersZ.x <= exit.z + epsilonForDepthTest))
+    {
+        color = texture2D(colorTexture0, colorPos).rgb;
+        return true;
+    }
+    if ((entry.z < layersZ.y) && (layersZ.y <= exit.z + epsilonForDepthTest))
+    {
+        color = texture2D(colorTexture1, colorPos).rgb;
+        return true;
+    }
+    return false;
+}
+
 // "A Fast Voxel Traversal Algorithm for Ray Tracing", John Amanatides and Andrew Woo [amanatides1999]
 // - 2D implementation
 // - in addition to pure pixels we need also entry and exit points where the
@@ -243,7 +272,7 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 	vec3 end = vec3((endPos.xy * screenSize), endPos.z);
 	vec3 dir = end - start;
 	float epsilonForRayDir = 0.0001;
-	float epsilonForDepthTest = 0.01;
+
 	if (abs(dir.x) < epsilonForRayDir)
     {
         dir.x = epsilonForRayDir;
@@ -266,9 +295,7 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
     vec3 entry = start;
     vec3 exit = start;
 
-	//int maxIterations = int(2.0 * length(dir.xy));
-	//int maxIterations = 40;
-    int iterations = 0;
+	vec3 color = vec3(0.0);
 	while (currentPixel != endPixel) {
         if (tMax.x < tMax.y)
         {
@@ -283,54 +310,17 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
             currentPixel.y += rayStep.y;
         }
 
-        // height field intersection
-        
-        // the height field is samples at pixel centers
-        
-        vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
-        
-        //vec4 layersZ = texture2D(depthTexture0, depthTestPos).r;
-        float layer0Z = texture2D(depthTexture0, depthTestPos).r;
-        float layer1Z = texture2D(depthTexture1, depthTestPos).r;
-        vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
-        
-        vec2 colorPos = 0.5 * (entry.xy + exit.xy) * screenSizeInv;
-        
-        // this epsilon prevents artifact within objects arising from the
-        // (virtual) nearest-neighbor interpolation of the depth layer
-        if ((entry.z < layersZ.x) && (layersZ.x <= exit.z + epsilonForDepthTest))
-        {
-            return texture2D(colorTexture0, colorPos).rgb;
-        }
-        if ((entry.z < layersZ.y) && (layersZ.y <= exit.z + epsilonForDepthTest))
-        {
-            return texture2D(colorTexture1, colorPos).rgb;
-        }
+		if (TestIntersection(currentPixel, entry, exit, color)) {
+			break;
+		}
 
         entry = exit;
-        
-        //if (iterations == maxIterations) return vec3(1, 0, 1);
-        iterations++;
 	}
-	
-	vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
-	//vec4 layersZ = texture2D(depthTexture0, depthTestPos).r;
-	float layer0Z = texture2D(depthTexture0, depthTestPos).r;
-	float layer1Z = texture2D(depthTexture1, depthTestPos).r;
-	vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
-	if ((entry.z < layersZ.x) && (layersZ.x <= endPos.z + epsilonForDepthTest))
-    {
-        return texture2D(colorTexture0, depthTestPos).rgb;
-    }
-    if ((entry.z < layersZ.y) && (layersZ.y <= endPos.z + epsilonForDepthTest))
-    {
-        return texture2D(colorTexture1, depthTestPos).rgb;
-    }
 
-	//return vec3(iterations / 100.0);
-	//return vec3(length(endPos.xy - startPos.xy));
+    // currentPixel == endPixel
+	TestIntersection(currentPixel, entry, endPos, color);
 
-	return vec3(1, 0, 0);
+	return color;
 }
 
 vec3 intersectHeightField(vec3 start, vec3 end) {
