@@ -235,29 +235,32 @@ vec2 GetPixelCorner(vec2 position, vec2 relDir)
 }
 
 bool TestIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color) {
-	float epsilonForDepthTest = 0.01;
-	
-	// the height field is samples at pixel centers  
+	// the height field is sampled at pixel centers  
     vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
     
     //vec4 layersZ = texture2D(depthTexture0, depthTestPos).r;
     float layer0Z = texture2D(depthTexture0, depthTestPos).r;
     float layer1Z = texture2D(depthTexture1, depthTestPos).r;
+    // up to 4 depth layers packed into one vector
     vec4 layersZ = vec4(layer0Z, layer1Z, 0.0, 0.0);
-    
-    //vec2 colorPos = 0.5 * (entry.xy + exit.xy) * screenSizeInv;
-    vec2 colorPos = depthTestPos;
     
     // this epsilon prevents artifact within objects arising from the
     // (virtual) nearest-neighbor interpolation of the depth layer
-    if ((entry.z < layersZ.x) && (layersZ.x <= exit.z + epsilonForDepthTest))
+	float epsilonForDepthTest = 0.01;
+    
+    // compare up to 4 layers at once for intersection
+    //bvec4 comparison = (vec4(entry.z) < layersZ) && (layersZ <= vec4(exit.z + epsilonForDepthTest));
+    //ivec4 comparison = sign(layersZ - vec4(entry.z)) + sign(vec4(exit.z + epsilonForDepthTest) - layersZ);
+    ivec2 comparison = sign(layersZ.xy - vec2(entry.z)) + sign(vec2(exit.z + epsilonForDepthTest) - layersZ.xy);
+    // intersection happens at the first layer with result value 2 (ie. both sign are positive)
+    if (comparison.x == 2)
     {
-        color = texture2D(colorTexture0, colorPos).rgb;
+        color = texture2D(colorTexture0, depthTestPos).rgb;
         return true;
     }
-    if ((entry.z < layersZ.y) && (layersZ.y <= exit.z + epsilonForDepthTest))
+    else if (comparison.y == 2)
     {
-        color = texture2D(colorTexture1, colorPos).rgb;
+        color = texture2D(colorTexture1, depthTestPos).rgb;
         return true;
     }
     return false;
