@@ -15,15 +15,16 @@
 
         int iteration = 0;
 
-        public int MaxIterations { get; protected set; }
+        public int MaxIterations { get; private set; }
         IAccumulator accumulator;
 
         Stopwatch stopwatch = new Stopwatch();
         public long CumulativeMilliseconds { get; set; }
 
-        public IncrementalRenderer()
+        public IncrementalRenderer(int maxIterations)
         {
             ViewsPerFrame = 4; // 16 good for float16, 4 or 8 for float32
+            MaxIterations = maxIterations;
 
             // draw all views at once
             //viewsPerFrame = maxIterations;

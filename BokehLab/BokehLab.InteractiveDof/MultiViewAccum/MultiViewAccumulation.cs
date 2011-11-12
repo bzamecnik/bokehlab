@@ -34,9 +34,10 @@
         Sampler sampler = new Sampler();
 
         public MultiViewAccumulation()
+            : base(sqrtSampleCount * sqrtSampleCount)
         {
+            // TODO: support creating samples for a cropped aperture (hexagon etc.)
             unitDiskSamples = CreateLensSamples(sqrtSampleCount).ToArray();
-            MaxIterations = unitDiskSamples.Length;
         }
 
         protected override void DrawSingleFrame(int iteration, Scene scene, Navigation navigation)

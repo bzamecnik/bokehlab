@@ -34,8 +34,8 @@
         public DepthPeeler DepthPeeler { get; set; }
 
         public ImageBasedRayTracer()
+            : base(SingleFrameIterations)
         {
-            MaxIterations = SingleFrameIterations;
             ViewsPerFrame = 1;
         }
 

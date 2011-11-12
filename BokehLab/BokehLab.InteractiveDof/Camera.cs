@@ -55,7 +55,7 @@
         // vertiacal angle of view 27 degrees for 50mm lens on full frame film (36x24mm)
         public static readonly float DefaultFieldOfView = 0.471238f;
 
-        float fieldOfView = DefaultFieldOfView;
+        private float fieldOfView = DefaultFieldOfView;
         /// <summary>
         /// Field of view of the camera.
         /// </summary>
@@ -73,7 +73,7 @@
             }
         }
 
-        public float aspectRatio = 1.0f;
+        private float aspectRatio = 1.0f;
         /// <summary>
         /// Sensor aspect ratio (width/height).
         /// </summary>
@@ -102,7 +102,7 @@
         public ThinLens Lens { get; private set; }
 
 
-        float near = 0.25f;
+        private float near = 0.25f;
         /// <summary>
         /// Unsigned near plane distance. The plane lies on -Near.
         /// </summary>
@@ -116,7 +116,7 @@
             }
         }
 
-        float far = 50f;
+        private float far = 50f;
         /// <summary>
         /// Unsigned far plane distance. The plane lies on -Far.
         /// </summary>

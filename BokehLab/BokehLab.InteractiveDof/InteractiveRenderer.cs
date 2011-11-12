@@ -12,17 +12,19 @@
     using OpenTK.Input;
 
     // TODO:
-    // - create height field intersection routines
-    // - integrate image-based ray tracing
-    // - FPS counter
-    // - time counter for the whole multi-view accumulation
+    // - accelerate height field intersection with N-buffers
+    //   - create N-buffers from the packed depth image(s) after depth peeling
+    //   - query N-buffers during HF intersection
+    // - fix the counter for the whole multi-view accumulation
+    // - make sample counts configurable at run-time
     // - create a configuration panel to switch the methods and control parameters
     // - umbra depth peeling, extended-umbra depth peeling
 
     public class InteractiveRenderer : GameWindow
     {
         public InteractiveRenderer()
-            : base(300, 200)
+            //: base(300, 200)
+            : base(450, 300)
         {
         }
 

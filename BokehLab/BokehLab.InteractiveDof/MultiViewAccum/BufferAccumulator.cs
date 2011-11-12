@@ -26,7 +26,10 @@
 
         public void PostDraw()
         {
-            //GL.Accum(AccumOp.Accum, 1f / maxIterations);
+            //GL.Accum(AccumOp.Accum, 1f / TotalIterations);
+
+            //GL.Accum(AccumOp.Accum, 1f);
+
             GL.Accum(AccumOp.Mult, 1 - 1f / (iteration + 1));
             GL.Accum(AccumOp.Accum, 1f / (iteration + 1));
             iteration++;
@@ -34,7 +37,10 @@
 
         public void Show()
         {
-            //GL.Accum(AccumOp.Return, maxIterations / (float)accumIterations);
+            //GL.Accum(AccumOp.Return, TotalIterations / (float)iteration);
+
+            //GL.Accum(AccumOp.Return, 1 / (float)iteration);
+
             GL.Accum(AccumOp.Return, 1f);
         }
 
