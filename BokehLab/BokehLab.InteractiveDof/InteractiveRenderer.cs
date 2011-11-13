@@ -23,8 +23,8 @@
     public class InteractiveRenderer : GameWindow
     {
         public InteractiveRenderer()
-            //: base(300, 200)
-            : base(450, 300)
+            : base(300, 200)
+        //: base(450, 300)
         {
         }
 

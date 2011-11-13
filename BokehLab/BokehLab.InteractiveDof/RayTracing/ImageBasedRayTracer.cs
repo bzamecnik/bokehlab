@@ -87,8 +87,8 @@
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture3"), 6);
 
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "sensorSize"), camera.SensorSize);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
-            //GL.Uniform3(GL.GetUniformLocation(shaderProgram, "sensorShift"), camera.SensorShift3);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
+            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "sensorShift"), camera.SensorShift3);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "near"), camera.Near);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "far"), camera.Far);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), camera.Lens.FocalLength);
@@ -132,11 +132,11 @@
         private void ComputeSensorTransform(Camera camera)
         {
             sensorTransform = Matrix4.Identity;
-            if (camera.SensorRotation.X > 0)
+            if (Math.Abs(camera.SensorRotation.X) > 0)
             {
                 sensorTransform *= Matrix4.CreateRotationX(camera.SensorRotation.X);
             }
-            if (camera.SensorRotation.Y > 0)
+            if (Math.Abs(camera.SensorRotation.Y) > 0)
             {
                 sensorTransform *= Matrix4.CreateRotationY(camera.SensorRotation.Y);
             }

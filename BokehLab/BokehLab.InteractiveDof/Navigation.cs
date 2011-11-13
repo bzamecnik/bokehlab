@@ -21,6 +21,7 @@
         public bool IsViewDirty { get; set; }
 
         static readonly float DeltaShift = 0.1f;
+        static readonly float MaxSensorTiltAngle = 0.5f;
 
         #region Camera position
 
@@ -256,6 +257,58 @@
             {
                 float shiftX = BokehLab.Math.MathHelper.Clamp(Camera.LensShift.X - 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
                 Camera.LensShift = new Vector2(shiftX, Camera.LensShift.Y);
+                IsViewDirty = true;
+            }
+
+            // sensor tilt
+            if (Keyboard[Key.X])
+            {
+                float rotX = BokehLab.Math.MathHelper.Clamp(Camera.SensorRotation.X + 0.01f, -MaxSensorTiltAngle, MaxSensorTiltAngle);
+                Camera.SensorRotation = new Vector2(rotX, Camera.SensorRotation.Y);
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.Z])
+            {
+                float rotX = BokehLab.Math.MathHelper.Clamp(Camera.SensorRotation.X - 0.01f, -MaxSensorTiltAngle, MaxSensorTiltAngle);
+                Camera.SensorRotation = new Vector2(rotX, Camera.SensorRotation.Y);
+                IsViewDirty = true;
+            }
+            if (Keyboard[Key.V])
+            {
+                float rotY = BokehLab.Math.MathHelper.Clamp(Camera.SensorRotation.Y + 0.01f, -MaxSensorTiltAngle, MaxSensorTiltAngle);
+                Camera.SensorRotation = new Vector2(Camera.SensorRotation.X, rotY);
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.C])
+            {
+                float rotY = BokehLab.Math.MathHelper.Clamp(Camera.SensorRotation.Y - 0.01f, -MaxSensorTiltAngle, MaxSensorTiltAngle);
+                Camera.SensorRotation = new Vector2(Camera.SensorRotation.X, rotY);
+                IsViewDirty = true;
+            }
+
+            // sensor shift
+            if (Keyboard[Key.N])
+            {
+                float shiftX = Camera.SensorShift2.X + 0.01f * Camera.SensorSize.X;
+                Camera.SensorShift2 = new Vector2(shiftX, Camera.SensorShift2.Y);
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.B])
+            {
+                float shiftX = Camera.SensorShift2.X - 0.01f * Camera.SensorSize.X;
+                Camera.SensorShift2 = new Vector2(shiftX, Camera.SensorShift2.Y);
+                IsViewDirty = true;
+            }
+            if (Keyboard[Key.Comma])
+            {
+                float shiftY = Camera.SensorShift2.Y + 0.01f * Camera.SensorSize.Y;
+                Camera.SensorShift2 = new Vector2(Camera.SensorShift2.X, shiftY);
+                IsViewDirty = true;
+            }
+            else if (Keyboard[Key.M])
+            {
+                float shiftY = Camera.SensorShift2.Y - 0.01f * Camera.SensorSize.Y;
+                Camera.SensorShift2 = new Vector2(Camera.SensorShift2.X, shiftY);
                 IsViewDirty = true;
             }
 

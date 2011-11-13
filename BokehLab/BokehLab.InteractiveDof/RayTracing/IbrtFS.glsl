@@ -7,8 +7,8 @@
 // sensor size in camera space (width, height)
 uniform vec2 sensorSize;
 // Z coordinate of the sensor center (usually in +z half-space)
-uniform float sensorZ;
-//uniform vec3 sensorShift;
+//uniform float sensorZ;
+uniform vec3 sensorShift;
 // near and far plane distances (unsigned), the planes lie in -z half-space
 uniform float near;
 uniform float far;
@@ -423,12 +423,10 @@ void main() {
 	vec2 texCoord = gl_TexCoord[0].st;
 
     // pixel corner in camera space
-    vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
+    //vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
 	//vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorShift.z);
-	//vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, 0);
-	//pixelPos = (sensorTransform * vec4(pixelPos, 0)).xyz;
-	//pixelPos = sensorTransform * pixelPos;
-	//pixelPos += vec3(0, 0, sensorShift.z);
+	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, 0);
+	pixelPos = sensorShift + sensorTransform * pixelPos;
 
 	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
 	gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);
