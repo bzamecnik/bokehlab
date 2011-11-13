@@ -1,16 +1,14 @@
 ﻿namespace BokehLab.InteractiveDof.RayTracing
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Linq;
+    using System.Runtime.InteropServices;
     using BokehLab.InteractiveDof;
     using BokehLab.InteractiveDof.DepthPeeling;
     using BokehLab.InteractiveDof.MultiViewAccum;
     using BokehLab.Math;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
-    using System.Runtime.InteropServices;
 
     class ImageBasedRayTracer : IncrementalRenderer
     {
@@ -24,12 +22,17 @@
         int[] lensSamplesTextures;
         int pixelSamplesTexture;
 
+        // number of samples rendered in a single rendering cycle
         int lensSampleCount = 2 * 2;
         int lensSampleTileSize = 128;
         int totalSampleCount;
         float totalSampleCountInv;
 
+        // total number of rendering cycles to be incrementally accumulated
         static readonly int SingleFrameIterations = 32;
+
+        Matrix4 sensorTransform;
+        float[] sensorTransform3x3;
 
         public DepthPeeler DepthPeeler { get; set; }
 
@@ -49,6 +52,8 @@
             Debug.Assert(DepthPeeler != null);
 
             Camera camera = navigation.Camera;
+
+            ComputeSensorTransform(camera);
 
             GL.ClearColor(0f, 0f, 0f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -83,6 +88,7 @@
 
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "sensorSize"), camera.SensorSize);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
+            //GL.Uniform3(GL.GetUniformLocation(shaderProgram, "sensorShift"), camera.SensorShift3);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "near"), camera.Near);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "far"), camera.Far);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "lensFocalLength"), camera.Lens.FocalLength);
@@ -97,7 +103,8 @@
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), totalSampleCount);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), totalSampleCountInv);
 
-            GL.Uniform2(GL.GetUniformLocation(shaderProgram, "cameraShift"), camera.Shift);
+            GL.Uniform2(GL.GetUniformLocation(shaderProgram, "cameraShift"), camera.LensShift);
+            GL.UniformMatrix3(GL.GetUniformLocation(shaderProgram, "sensorTransform"), 1, false, sensorTransform3x3);
 
             // draw the quad
             LayerHelper.DrawQuad();
@@ -120,6 +127,20 @@
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
+        }
+
+        private void ComputeSensorTransform(Camera camera)
+        {
+            sensorTransform = Matrix4.Identity;
+            if (camera.SensorRotation.X > 0)
+            {
+                sensorTransform *= Matrix4.CreateRotationX(camera.SensorRotation.X);
+            }
+            if (camera.SensorRotation.Y > 0)
+            {
+                sensorTransform *= Matrix4.CreateRotationY(camera.SensorRotation.Y);
+            }
+            sensorTransform3x3 = Matrix4x4To3x3Array(sensorTransform, ref sensorTransform3x3);
         }
 
         public override void Initialize(int width, int height)
@@ -254,6 +275,24 @@
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture1D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+        }
+
+        private float[] Matrix4x4To3x3Array(Matrix4 matrix4x4, ref float[] matrix3x3)
+        {
+            if (matrix3x3 == null)
+            {
+                matrix3x3 = new float[9];
+            }
+            matrix3x3[0] = matrix4x4.M11;
+            matrix3x3[1] = matrix4x4.M12;
+            matrix3x3[2] = matrix4x4.M13;
+            matrix3x3[3] = matrix4x4.M21;
+            matrix3x3[4] = matrix4x4.M22;
+            matrix3x3[5] = matrix4x4.M23;
+            matrix3x3[6] = matrix4x4.M31;
+            matrix3x3[7] = matrix4x4.M32;
+            matrix3x3[8] = matrix4x4.M33;
+            return matrix3x3;
         }
 
         public class IbrtPlayground

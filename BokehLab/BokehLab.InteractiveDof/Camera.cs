@@ -52,6 +52,34 @@
             }
         }
 
+        /// <summary>
+        /// Sensor shift in the XY plane (without focusing).
+        /// </summary>
+        /// <remarks>
+        /// The shift goes after the sensor rotation.
+        /// </remarks>
+        public Vector2 SensorShift2 { get; set; }
+
+        /// <summary>
+        /// Total sensor shift in the XYZ space (including its depth).
+        /// </summary>
+        public Vector3 SensorShift3
+        {
+            get
+            {
+                return new Vector3(SensorShift2.X, SensorShift2.Y, sensorZ);
+            }
+        }
+
+        /// <summary>
+        /// Sensor rotation (tilt) around its center.
+        /// </summary>
+        /// <remarks>
+        /// The rotation goes before the shift. First the rotation around the
+        /// X axis is applied, then around the rotated Y axis.
+        /// </remarks>
+        public Vector2 SensorRotation { get; set; }
+
         // vertiacal angle of view 27 degrees for 50mm lens on full frame film (36x24mm)
         public static readonly float DefaultFieldOfView = 0.471238f;
 
@@ -142,7 +170,7 @@
         public Vector4 FrustumBounds { get; set; }
 
         // just for debugging purposes to get a single view from a lens sample position
-        public Vector2 Shift { get; set; }
+        public Vector2 LensShift { get; set; }
 
         public Camera()
         {

@@ -236,26 +236,26 @@
 
             if (Keyboard[Key.I])
             {
-                float shiftY = BokehLab.Math.MathHelper.Clamp(Camera.Shift.Y + 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
-                Camera.Shift = new Vector2(Camera.Shift.X, shiftY);
+                float shiftY = BokehLab.Math.MathHelper.Clamp(Camera.LensShift.Y + 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.LensShift = new Vector2(Camera.LensShift.X, shiftY);
                 IsViewDirty = true;
             }
             else if (Keyboard[Key.K])
             {
-                float shiftY = BokehLab.Math.MathHelper.Clamp(Camera.Shift.Y - 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
-                Camera.Shift = new Vector2(Camera.Shift.X, shiftY);
+                float shiftY = BokehLab.Math.MathHelper.Clamp(Camera.LensShift.Y - 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.LensShift = new Vector2(Camera.LensShift.X, shiftY);
                 IsViewDirty = true;
             }
             else if (Keyboard[Key.L])
             {
-                float shiftX = BokehLab.Math.MathHelper.Clamp(Camera.Shift.X + 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
-                Camera.Shift = new Vector2(shiftX, Camera.Shift.Y);
+                float shiftX = BokehLab.Math.MathHelper.Clamp(Camera.LensShift.X + 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.LensShift = new Vector2(shiftX, Camera.LensShift.Y);
                 IsViewDirty = true;
             }
             else if (Keyboard[Key.J])
             {
-                float shiftX = BokehLab.Math.MathHelper.Clamp(Camera.Shift.X - 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
-                Camera.Shift = new Vector2(shiftX, Camera.Shift.Y);
+                float shiftX = BokehLab.Math.MathHelper.Clamp(Camera.LensShift.X - 0.01f, -Camera.Lens.ApertureRadius, Camera.Lens.ApertureRadius);
+                Camera.LensShift = new Vector2(shiftX, Camera.LensShift.Y);
                 IsViewDirty = true;
             }
 
