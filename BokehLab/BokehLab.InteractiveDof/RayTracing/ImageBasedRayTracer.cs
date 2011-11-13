@@ -29,7 +29,7 @@
         float totalSampleCountInv;
 
         // total number of rendering cycles to be incrementally accumulated
-        static readonly int SingleFrameIterations = 32;
+        static readonly int SingleFrameIterations = 64;
 
         Matrix4 sensorTransform;
         float[] sensorTransform3x3;

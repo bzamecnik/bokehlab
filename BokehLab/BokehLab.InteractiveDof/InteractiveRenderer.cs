@@ -78,6 +78,8 @@
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0f);
 
+            //GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
+
             OnResize(new EventArgs());
         }
 

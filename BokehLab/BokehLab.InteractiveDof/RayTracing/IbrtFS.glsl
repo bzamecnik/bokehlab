@@ -223,21 +223,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     return color;
 }
 
-vec2 GetPixelCorner(vec2 position, vec2 relDir)
-{
-    vec2 corner = floor(position);
-    if ((relDir.x < 0.0) && (position.x - corner.x < 0.00001))
-    {
-        corner.x -= 1.0;
-    }
-    if ((relDir.y < 0.0) && (position.y - corner.y < 0.00001))
-    {
-        corner.y -= 1.0;
-    }
-    return corner;
-}
-
-bool TestIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color) {
+bool testIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color) {
 	// the height field is sampled at pixel centers  
     vec2 depthTestPos = (vec2(0.5) + currentPixel) * screenSizeInv;
     //vec2 colorPos = currentPixel * screenSizeInv;
@@ -280,16 +266,40 @@ bool TestIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color
     return false;
 }
 
+
+vec2 getPixelCorner(vec2 position, vec2 relDir)
+{
+    vec2 corner = floor(position);
+    float epsilon = 0.00001;
+    // in case the position lies on its floor edge and the ray goes
+    // across the edge move the corner one more pixel in the ray direction
+    if ((relDir.x < 0.0) && (position.x - corner.x < epsilon))	
+    {
+        corner.x -= 1.0;
+    }
+    if ((relDir.y < 0.0) && (position.y - corner.y < epsilon))
+    {
+        corner.y -= 1.0;
+    }
+    return corner;
+}
+
 // "A Fast Voxel Traversal Algorithm for Ray Tracing", John Amanatides and Andrew Woo [amanatides1999]
 // - 2D implementation
 // - in addition to pure pixels we need also entry and exit points where the
 //   ray crosses pixel boundaries
+// - axis-aligned directions are modified a bit to prevent handled
+//   signularities differently
+// - start and end pixel corners are computed differently to assure
+//   the end pixel will not be missed
 vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 	vec3 start = vec3((startPos.xy * screenSize), startPos.z);
 	vec3 end = vec3((endPos.xy * screenSize), endPos.z);
 	vec3 dir = end - start;
 	float epsilonForRayDir = 0.0001;
 
+	// avoid division by zero in rayDirInv for tMax and tDelta
+	// and also avoid rayStep components being zero
 	if (abs(dir.x) < epsilonForRayDir)
     {
         dir.x = epsilonForRayDir;
@@ -299,11 +309,12 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
         dir.y = epsilonForRayDir;
     }
     
-    vec2 rayStep = sign(dir.xy);
-    vec2 currentPixel = GetPixelCorner(start.xy, rayStep);
-    vec2 endPixel = GetPixelCorner(start.xy + dir.xy, -rayStep);
+    vec2 rayStep = sign(dir.xy); // {-1,1}^2
+    vec2 currentPixel = getPixelCorner(start.xy, rayStep);
+    // use the modified ray end
+    vec2 endPixel = getPixelCorner(start.xy + dir.xy, -rayStep);
 
-	vec2 boundary = currentPixel + max(rayStep, 0.0);
+	vec2 boundary = currentPixel + max(rayStep, 0.0); // {0,1}^2
     vec2 rayDirInv = 1.0 / dir.xy;
 
     vec2 tMax = (boundary - start.xy) * rayDirInv;
@@ -328,7 +339,7 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
             currentPixel.y += rayStep.y;
         }
 
-		if (TestIntersection(currentPixel, entry, exit, color)) {
+		if (testIntersection(currentPixel, entry, exit, color)) {
 			break;
 		}
 
@@ -337,12 +348,26 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 	}
 
     // currentPixel == endPixel
-	TestIntersection(currentPixel, entry, endPos, color);
+	testIntersection(currentPixel, entry, endPos, color);
 
 	return color;
 }
 
-vec3 intersectHeightField(vec3 start, vec3 end) {
+// Intersect the height field with a ray starting at the
+// position 'lensPos' going to the 'rayDirection' direction.
+//
+// Assuming that lensPos.z == 0.
+vec3 intersectHeightField(vec3 lensPos, vec3 rayDirection) {
+	rayDirection /= rayDirection.z; // normalize to a unit z step
+    // ray start in camera space
+    vec3 startCamera = lensPos + (-near) * rayDirection;
+    // convert it to the frustum space [0;1]^3
+    vec3 start = vec3((startCamera.xy - frustumBounds.yw) * frustumSizeInv, 0);
+    
+    // ray end in camera space
+    vec3 endCamera = lensPos + (-far) * rayDirection;
+    vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
+
 	//return intersectHeightFieldLinear(start, end);
 	//return intersectHeightFieldLinearDiscontinuousThenBinary(start, end);
 	return intersectHeightFieldPerPixel(start, end);
@@ -366,18 +391,8 @@ vec3 traceRay(vec3 senzorPos, vec3 lensPos) {
     //vec3 rayDirection = lensPos - senzorPos;
     // - thin lens
     vec3 rayDirection = thinLensTransformPoint(senzorPos) - lensPos;
-    rayDirection /= rayDirection.z; // normalize to a unit z step
     
-    // ray start in camera space
-    vec3 startCamera = lensPos + (-near) * rayDirection;
-    // convert it to the frustum space [0;1]^3
-    vec3 start = vec3((startCamera.xy - frustumBounds.yw) * frustumSizeInv, 0);
-    
-    // ray end in camera space
-    vec3 endCamera = lensPos + (-far) * rayDirection;
-    vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
-    
-	return intersectHeightField(start, end);
+	return intersectHeightField(lensPos, rayDirection);
 }
 
 vec3 estimateRadianceNonJittered(vec3 pixelPos) {
@@ -406,15 +421,19 @@ vec3 estimateRadianceJittered(vec3 pixelPos) {
 	// TODO: check dFdx(texcoord.x) out
 	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(sampleCount) - 1.0));
 	// [0;1]^2 pixel sample to camera space
-	vec2 pixelSampleToCamera = sensorSize * screenSizeInv;
-	float pixelSampleTexIndex = 0.0;
+	//vec2 pixelSampleToCamera = sensorSize * screenSizeInv;
+	//float pixelSampleTexIndex = 0.0;
 	for (int i = 0; i < sampleCount; i += 1) {
 		vec2 lensPos = texture3D(lensSamplesTexture, samplesIndex).st;
-		vec2 pixelOffset = pixelSampleToCamera * texture1D(pixelSamplesTexture, pixelSampleTexIndex).st;
+		// TODO: The offset should be also rotated using the sensorTransform
+		// for a tilt-shift sensor! At best we should precompute transformed
+		// unit pixel vectors and multiply them with the offset.
+		//vec2 pixelOffset = pixelSampleToCamera * texture1D(pixelSamplesTexture, pixelSampleTexIndex).st;
 		lensPos *= lensApertureRadius;
-		colorAccum += traceRay(pixelPos + vec3(pixelOffset, 0), vec3(lensPos, 0));
+		//colorAccum += traceRay(pixelPos + vec3(pixelOffset, 0), vec3(lensPos, 0));
+		colorAccum += traceRay(pixelPos, vec3(lensPos, 0));
 		samplesIndex += samplesIndexStep;
-		pixelSampleTexIndex += sampleCountInv;
+		//pixelSampleTexIndex += sampleCountInv;
 	}
 	//return vec4(samplesIndex.b, 0, 0, 1);
 	return colorAccum * sampleCountInv;
