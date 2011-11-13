@@ -70,6 +70,7 @@
     <Compile Include="MultiViewAccum\MultiViewAccumulation.cs" />
     <Compile Include="Navigation.cs" />
     <Compile Include="InteractiveRenderer.cs" />
+    <Compile Include="NBuffers\NBuffers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -98,6 +99,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DepthPeeling\DepthPackerVS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NBuffers\NBuffersFS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NBuffers\NBuffersVS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NBuffers\NBuffersLevel0FS.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Properties\Settings.settings">
