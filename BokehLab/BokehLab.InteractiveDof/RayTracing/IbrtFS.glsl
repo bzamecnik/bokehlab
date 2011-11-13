@@ -313,7 +313,8 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
     vec3 exit = start;
 
 	vec3 color = vec3(0.0);
-	while (currentPixel != endPixel) {
+	int iteration = 0;
+	while ((iteration < 100) && (currentPixel != endPixel)) {
         if (tMax.x < tMax.y)
         {
             exit = start + tMax.x * dir;
@@ -332,6 +333,7 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 		}
 
         entry = exit;
+        iteration++;
 	}
 
     // currentPixel == endPixel
