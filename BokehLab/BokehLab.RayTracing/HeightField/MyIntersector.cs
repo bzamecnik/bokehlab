@@ -7,7 +7,7 @@
     using OpenTK;
     using BokehLab.Math;
 
-    class MyIntersector : AbstractIntersector
+    public class MyIntersector : AbstractIntersector
     {
         private float epsilonForCorners;
         public float EpsilonForCorners { get { return epsilonForCorners; } set { epsilonForCorners = value; } }

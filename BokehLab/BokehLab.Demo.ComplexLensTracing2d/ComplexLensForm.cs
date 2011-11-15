@@ -1,4 +1,4 @@
-﻿namespace BokehLab.RayTracing.Test.GUI
+﻿namespace BokehLab.Demo.ComplexLensTracing2d
 {
     using System;
     using System.Collections.Generic;

@@ -11,7 +11,7 @@
     /// "A Fast Voxel Traversal Algorithm for Ray Tracing", John Amanatides and Andrew Woo
     /// [amanatides1999]
     /// </summary>
-    class AmanatidesIntersector : AbstractIntersector
+    public class AmanatidesIntersector : AbstractIntersector
     {
         private float epsilonForRayDir;
         public float EpsilonForRayDir { get { return epsilonForRayDir; } set { epsilonForRayDir = value; } }

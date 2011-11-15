@@ -1,6 +1,6 @@
-﻿namespace BokehLab.RayTracing.Test.GUI
+﻿namespace BokehLab.Demo.HeightField
 {
-    partial class HeighFieldForm
+    partial class HeightFieldForm
     {
         /// <summary>
         /// Required designer variable.

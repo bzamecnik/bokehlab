@@ -1,4 +1,4 @@
-﻿namespace BokehLab.RayTracing.Test.GUI
+﻿namespace BokehLab.Demo.ComplexLensTracing2d
 {
     partial class ComplexLensForm
     {

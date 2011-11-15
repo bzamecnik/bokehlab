@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("BokehLab.RayTracing")]
+[assembly: AssemblyTitle("BokehLab.Demo.LrtfVisualization2d")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("BokehLab.RayTracing")]
-[assembly: AssemblyCopyright("Copyright © Bohumir Zamecnik 2010-2011")]
+[assembly: AssemblyProduct("BokehLab.Demo.LrtfVisualization2d")]
+[assembly: AssemblyCopyright("Copyright ©  2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("e1a5ef16-9acf-4587-97ec-c6133d19201d")]
+[assembly: Guid("d8fa8c13-0cf1-41a7-b619-da37ea9ceebd")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -34,8 +34,3 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-
-[assembly: InternalsVisibleToAttribute("BokehLab.RayTracing.Test")]
-[assembly: InternalsVisibleToAttribute("BokehLab.Demo.ComplexLensTracing2d")]
-[assembly: InternalsVisibleToAttribute("BokehLab.Demo.HeightFieldIntersection")]
-[assembly: InternalsVisibleToAttribute("BokehLab.Demo.LrtfVisualization2d")]

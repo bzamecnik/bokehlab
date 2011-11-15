@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8B66227E-B281-460B-B35A-947731138AEE}</ProjectGuid>
+    <ProjectGuid>{1B6A8DAB-2908-41A8-B18E-AA8994077C0F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BokehLab.RayTracing.Test.GUI</RootNamespace>
-    <AssemblyName>BokehLab.RayTracing.Test.GUI</AssemblyName>
+    <RootNamespace>BokehLab.Demo.LrtfVisualization2d</RootNamespace>
+    <AssemblyName>BokehLab.Demo.LrtfVisualization2d</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -52,8 +52,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComplexLensLrtfForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComplexLensLrtfForm.Designer.cs">
+      <DependentUpon>ComplexLensLrtfForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ComplexLensLrtfForm.resx">
+      <DependentUpon>ComplexLensLrtfForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -74,10 +83,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BokehLab.FloatMap\BokehLab.FloatMap.csproj">
-      <Project>{A742CC09-6F5E-436F-A4F5-EB3153E00710}</Project>
-      <Name>BokehLab.FloatMap</Name>
-    </ProjectReference>
     <ProjectReference Include="..\BokehLab.Math\BokehLab.Math.csproj">
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace BokehLab.RayTracing.Test.GUI
+namespace BokehLab.Demo.ComplexLensTracing2d
 {
     static class Program
     {
@@ -15,16 +15,7 @@ namespace BokehLab.RayTracing.Test.GUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new ComplexLensLrtfForm());
-            try
-            {
-                //Application.Run(new HeighFieldForm());
-                Application.Run(new ComplexLensLrtfForm());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+            Application.Run(new ComplexLensForm());
         }
     }
 }

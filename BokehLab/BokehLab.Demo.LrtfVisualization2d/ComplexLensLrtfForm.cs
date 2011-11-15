@@ -1,4 +1,4 @@
-﻿namespace BokehLab.RayTracing.Test.GUI
+﻿namespace BokehLab.Demo.LrtfVisualization2d
 {
     using System;
     using System.Collections.Generic;

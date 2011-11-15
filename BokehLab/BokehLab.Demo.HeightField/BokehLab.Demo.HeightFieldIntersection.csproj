@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{8B66227E-B281-460B-B35A-947731138AEE}</ProjectGuid>
+    <ProjectGuid>{E8958569-4FF9-494D-A6B0-FC9CD4812E6F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BokehLab.RayTracing.Test.GUI</RootNamespace>
-    <AssemblyName>BokehLab.RayTracing.Test.GUI</AssemblyName>
+    <RootNamespace>BokehLab.Demo.HeightFieldIntersection</RootNamespace>
+    <AssemblyName>BokehLab.Demo.HeightFieldIntersection</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -52,8 +52,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HeightFieldForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HeightFieldForm.Designer.cs">
+      <DependentUpon>HeightFieldForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="HeightFieldForm.resx">
+      <DependentUpon>HeightFieldForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -62,6 +71,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

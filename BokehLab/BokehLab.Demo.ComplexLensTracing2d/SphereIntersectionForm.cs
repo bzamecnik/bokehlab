@@ -1,4 +1,4 @@
-﻿namespace BokehLab.RayTracing.Test.GUI
+﻿namespace BokehLab.Demo.ComplexLensTracing2d
 {
     using System;
     using System.Collections.Generic;
@@ -13,33 +13,30 @@
     using BokehLab.RayTracing.Lens;
     using OpenTK;
 
-    public partial class BiconvexLensForm : Form
+    public partial class SphereIntersectionForm : Form
     {
-        private BiconvexLens biconvexLens;
-        private ComplexLens complexLens;
+        private Sphere sphere;
         private Ray incomingRay;
-        private Ray outgoingRay;
-        private Vector3d backLensPos;
-        private Ray complexOutgoingRay;
+        private Intersection intersection;
+        private Ray refractedRay;
+        private Vector3d normal;
 
         bool initialized = false;
 
-        public BiconvexLensForm()
+        public SphereIntersectionForm()
         {
             InitializeComponent();
-            biconvexLens = new BiconvexLens()
+            sphere = new Sphere()
             {
-                CurvatureRadius = 150,
-                ApertureRadius = 100,
-                RefractiveIndex = Materials.Fixed.GLASS_CROWN_BK7
+                Radius = 100,
+                Center = new Vector3d(0, 0, 0)
             };
-            complexLens = ComplexLens.CreateBiconvexLens(150, 100, 0);
-            double directionPhi = Math.PI;
-            incomingRay = new Ray(new Vector3d(70, 0, 150), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
+            double directionPhi = 0; // Math.PI;
+            incomingRay = new Ray(new Vector3d(5, 0, 110), new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi)));
 
             rayDirectionPhiNumeric.Value = (decimal)directionPhi;
-            curvatureRadiusNumeric.Value = (decimal)biconvexLens.CurvatureRadius;
-            apertureRadiusNumeric.Value = (decimal)biconvexLens.ApertureRadius;
+            sphereRadiusNumeric.Value = (decimal)sphere.Radius;
+            FillVectorToControls(sphere.Center, sphereCenterXNumeric, sphereCenterYNumeric, sphereCenterZNumeric);
             FillVectorToControls(incomingRay.Origin, rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
             initialized = true;
             Recompute();
@@ -52,30 +49,34 @@
                 return;
             }
 
+            sphere.Center = GetVectorFromControls(sphereCenterXNumeric, sphereCenterYNumeric, sphereCenterZNumeric);
             incomingRay.Origin = GetVectorFromControls(rayOriginXNumeric, rayOriginYNumeric, rayOriginZNumeric);
             double directionPhi = (double)rayDirectionPhiNumeric.Value;
             incomingRay.Direction = new Vector3d(Math.Sin(directionPhi), 0, Math.Cos(directionPhi));
 
-            Intersection backInt = biconvexLens.Intersect(incomingRay);
-            if (backInt != null)
+            intersection = sphere.Intersect(incomingRay);
+            refractedRay = null;
+            normal = Vector3d.Zero;
+            if (intersection != null)
             {
-                outgoingRay = biconvexLens.Transfer(incomingRay.Origin, backInt.Position);
-                backLensPos = backInt.Position;
+                normal = sphere.GetNormal(intersection.Position);
+                double n1, n2;
+                double dot = Vector3d.Dot(normal, incomingRay.Direction);
+                if (dot < 0)
+                {
+                    n1 = Materials.Fixed.AIR;
+                    n2 = Materials.Fixed.GLASS_CROWN_BK7;
+                }
+                else
+                {
+                    n1 = Materials.Fixed.GLASS_CROWN_BK7;
+                    n2 = Materials.Fixed.AIR;
+                    normal = -normal;
+                }
+                refractedRay = new Ray(intersection.Position,
+                    Ray.Refract(incomingRay.Direction, normal, n1, n2, false));
             }
-            else
-            {
-                outgoingRay = null;
-                backLensPos = Vector3d.Zero;
-            }
-            backInt = complexLens.Intersect(incomingRay);
-            if (backInt != null)
-            {
-                complexOutgoingRay = complexLens.Transfer(incomingRay.Origin, backInt.Position);
-            }
-            else
-            {
-                complexOutgoingRay = null;
-            }
+
             drawingPanel.Invalidate();
         }
 
@@ -109,18 +110,17 @@
 
             //g.TranslateTransform((float)-Bench.LensCenter, 0.0f);
 
-            // draw spheres
-            DrawCircle(g, Pens.Blue, Vector3dToPoint(biconvexLens.backSurface.Center), (float)biconvexLens.backSurface.Radius);
-            DrawCircle(g, Pens.Purple, Vector3dToPoint(biconvexLens.frontSurface.Center), (float)biconvexLens.frontSurface.Radius);
+            // draw sphere
+            DrawCircle(g, Pens.Black, Vector3dToPoint(sphere.Center), (float)sphere.Radius);
 
-            // draw incoming ray
+            // draw ray
             if (incomingRay.Direction != Vector3d.Zero)
             {
                 Point origin = Vector3dToPoint(incomingRay.Origin);
                 Point target;
-                if (outgoingRay != null)
+                if (intersection != null)
                 {
-                    target = Vector3dToPoint(backLensPos);
+                    target = Vector3dToPoint(intersection.Position);
                 }
                 else
                 {
@@ -129,36 +129,23 @@
                 g.DrawLine(Pens.Green, origin, target);
             }
 
-            if (backLensPos != Vector3d.Zero)
+            if ((refractedRay != null) && (refractedRay.Direction != Vector3d.Zero))
             {
-                FillSquare(g, Brushes.Red, Vector3dToPoint(backLensPos), 3);
+                Point origin = Vector3dToPoint(refractedRay.Origin);
+                Point target = Vector3dToPoint(refractedRay.Origin + 1000 * Vector3d.Normalize(refractedRay.Direction));
+                g.DrawLine(Pens.Orange, origin, target);
             }
 
-            // draw outgoing ray from biconvex lens
-            if ((outgoingRay != null) && (outgoingRay.Direction != Vector3d.Zero))
+            // draw intersection if there is any
+            if (intersection != null)
             {
-                Point origin = Vector3dToPoint(outgoingRay.Origin);
-                Point target = Vector3dToPoint(outgoingRay.Origin + 1000 * Vector3d.Normalize(outgoingRay.Direction));
-                g.DrawLine(Pens.Red, origin, target);
-                g.DrawLine(Pens.Green, Vector3dToPoint(backLensPos), origin);
-
-                // draw normal
-                g.DrawLine(Pens.Purple, origin, Vector3dToPoint(outgoingRay.Origin + 20 * -biconvexLens.frontSurface.GetNormal(outgoingRay.Origin)));
-            }
-
-            // draw outgoing ray from complex lens
-            if ((complexOutgoingRay != null) && (complexOutgoingRay.Direction != Vector3d.Zero))
-            {
-                Point origin = Vector3dToPoint(complexOutgoingRay.Origin);
-                Point target = Vector3dToPoint(complexOutgoingRay.Origin + 1000 * Vector3d.Normalize(complexOutgoingRay.Direction));
-                g.DrawLine(Pens.Brown, origin, target);
-                g.DrawLine(Pens.DarkGreen, Vector3dToPoint(backLensPos), origin);
-
-                // draw normal
-                g.DrawLine(Pens.Purple, origin, Vector3dToPoint(complexOutgoingRay.Origin + 20 * -complexLens.ElementSurfaces.Last().SurfaceNormalField.GetNormal(complexOutgoingRay.Origin)));
-
-                // draw normal
-                g.DrawLine(Pens.Purple, Vector3dToPoint(backLensPos), Vector3dToPoint(backLensPos + 20 * -complexLens.ElementSurfaces.First().SurfaceNormalField.GetNormal(backLensPos)));
+                Point intersectionPos = Vector3dToPoint(intersection.Position);
+                FillSquare(g, Brushes.Red, intersectionPos, 3);
+                //draw normal
+                if (normal != Vector3d.Zero)
+                {
+                    g.DrawLine(Pens.Purple, intersectionPos, Vector3dToPoint(intersection.Position + 20 * normal));
+                }
             }
         }
 
@@ -203,26 +190,46 @@
             Recompute();
         }
 
+        private void rayDirectionYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void rayDirectionZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void rayOriginXNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void rayOriginYNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void rayOriginZNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void SphereIntersectionForm_Resize(object sender, EventArgs e)
+        {
+            Recompute();
+        }
+
+        private void sphereRadiusNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            sphere.Radius = (double)sphereRadiusNumeric.Value;
+            Recompute();
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             Recompute();
         }
 
-        private void curvatureRadiusNumeric_ValueChanged(object sender, EventArgs e)
-        {
-            biconvexLens.CurvatureRadius = (double)curvatureRadiusNumeric.Value;
-            Recompute();
-        }
-
-        private void apertureRadiusNumeric_ValueChanged(object sender, EventArgs e)
-        {
-            biconvexLens.ApertureRadius = (double)apertureRadiusNumeric.Value;
-            Recompute();
-        }
-
-        private void BiconvexLensForm_Resize(object sender, EventArgs e)
-        {
-            Recompute();
-        }
     }
 }

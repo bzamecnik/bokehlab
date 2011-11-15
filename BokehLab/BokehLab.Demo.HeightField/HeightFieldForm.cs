@@ -1,4 +1,4 @@
-﻿namespace BokehLab.RayTracing.Test.GUI
+﻿namespace BokehLab.Demo.HeightField
 {
     using System;
     using System.Collections.Generic;
@@ -10,18 +10,19 @@
     using System.Windows.Forms;
     using BokehLab.FloatMap;
     using BokehLab.Math;
+    using BokehLab.RayTracing;
     using BokehLab.RayTracing.HeightField;
     using OpenTK;
 
-    public partial class HeighFieldForm : Form
+    public partial class HeightFieldForm : Form
     {
-        static readonly HeightField emptyHeightField = new HeightField(new FloatMapImage[] { }) { Width = 30, Height = 20 };
+        static readonly HeightField emptyHeightField = new HeightField(30, 20);
         HeightField heightField = emptyHeightField;
         List<FloatMapImage> layers = new List<FloatMapImage>();
         List<Bitmap> layerBitmaps = new List<Bitmap>();
 
         MyIntersector myHeightFieldIntersector = new MyIntersector(null);
-        BinarySearchIntersector binarySearchIntersector = new BinarySearchIntersector(null);
+        //BinarySearchIntersector binarySearchIntersector = new BinarySearchIntersector(null);
         LinearSearchIntersector linearSearchIntersector = new LinearSearchIntersector(null);
         AmanatidesIntersector amanatidesIntersector = new AmanatidesIntersector(null);
         AbstractIntersector selectedIntersector;
@@ -49,7 +50,7 @@
 
         Sampler sampler = new Sampler();
 
-        public HeighFieldForm()
+        public HeightFieldForm()
         {
             InitializeComponent();
 
