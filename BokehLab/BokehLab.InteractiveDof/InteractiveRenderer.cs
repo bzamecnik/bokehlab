@@ -57,7 +57,11 @@
         {
             CheckFboExtension();
 
-            scene = GenerateScene();
+            //scene = Scene.CreateRandomTriangles(10);
+            //scene = GenerateScene();
+            scene = new Scene();
+            scene.vbo.Initialize();
+            scene.vbo.Load();
 
             Keyboard.KeyUp += KeyUp;
             Keyboard.KeyRepeat = true;
@@ -79,6 +83,24 @@
             GL.ClearDepth(1.0f);
 
             //GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
+
+            GL.Light(LightName.Light0, LightParameter.Position, new float[] { 3.0f, 3.0f, 3.0f });
+            GL.Light(LightName.Light0, LightParameter.Ambient, new float[] { 0.3f, 0.3f, 0.3f, 1.0f });
+            GL.Light(LightName.Light0, LightParameter.Diffuse, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            GL.Light(LightName.Light0, LightParameter.Specular, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            GL.Light(LightName.Light0, LightParameter.SpotExponent, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            GL.LightModel(LightModelParameter.LightModelAmbient, new float[] { 0.2f, 0.2f, 0.2f, 1.0f });
+            GL.LightModel(LightModelParameter.LightModelTwoSide, 1);
+            GL.LightModel(LightModelParameter.LightModelLocalViewer, 1);
+            GL.Enable(EnableCap.Lighting);
+            GL.Enable(EnableCap.Light0);
+
+            GL.Material(MaterialFace.Front, MaterialParameter.Ambient, new float[] { 0.3f, 0.3f, 0.3f, 1.0f });
+            GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            GL.Material(MaterialFace.Front, MaterialParameter.Specular, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            GL.Material(MaterialFace.Front, MaterialParameter.Emission, new float[] { 0.0f, 0.0f, 0.0f, 1.0f });
+
+            //GL.ShadeModel(ShadingModel.Smooth);
 
             OnResize(new EventArgs());
         }
@@ -183,84 +205,84 @@
 
         private void KeyUp(object sender, KeyboardKeyEventArgs e)
         {
-            if (e.Key == Key.G)
+            //if (e.Key == Key.G)
+            //{
+            //    // recompute geometry and redraw layers
+            //    scene = GenerateScene();
+            //    navigation.IsViewDirty = true;
+            //}
+            //else
+            if (e.Key == Key.F11)
             {
-                // recompute geometry and redraw layers
-                scene = GenerateScene();
-                navigation.IsViewDirty = true;
+                bool isFullscreen = (WindowState == WindowState.Fullscreen);
+                WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
             }
-            else
-                if (e.Key == Key.F11)
+            else if (e.Key == Key.F2)
+            {
+                if (renderingMode != Mode.Pinhole)
                 {
-                    bool isFullscreen = (WindowState == WindowState.Fullscreen);
-                    WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
-                }
-                else if (e.Key == Key.F2)
-                {
-                    if (renderingMode != Mode.Pinhole)
+                    foreach (var module in modules)
                     {
-                        foreach (var module in modules)
-                        {
-                            module.Enabled = false;
-                        }
-                        renderingMode = Mode.Pinhole;
-                        navigation.IsViewDirty = true;
+                        module.Enabled = false;
                     }
+                    renderingMode = Mode.Pinhole;
+                    navigation.IsViewDirty = true;
                 }
-                else if (e.Key == Key.F3)
+            }
+            else if (e.Key == Key.F3)
+            {
+                if (renderingMode != Mode.MultiViewAccum)
                 {
-                    if (renderingMode != Mode.MultiViewAccum)
+                    foreach (var module in modules)
                     {
-                        foreach (var module in modules)
-                        {
-                            module.Enabled = false;
-                        }
-                        multiViewAccum.Enabled = true;
-                        renderingMode = Mode.MultiViewAccum;
-                        navigation.IsViewDirty = true;
+                        module.Enabled = false;
                     }
+                    multiViewAccum.Enabled = true;
+                    renderingMode = Mode.MultiViewAccum;
+                    navigation.IsViewDirty = true;
                 }
-                else if (e.Key == Key.F5)
+            }
+            else if (e.Key == Key.F5)
+            {
+                if (renderingMode != Mode.ImageBasedRayTracing)
                 {
-                    if (renderingMode != Mode.ImageBasedRayTracing)
+                    foreach (var module in modules)
                     {
-                        foreach (var module in modules)
-                        {
-                            module.Enabled = false;
-                        }
-                        depthPeeler.Enabled = true;
-                        ibrt.Enabled = true;
-                        renderingMode = Mode.ImageBasedRayTracing;
-                        navigation.IsViewDirty = true;
+                        module.Enabled = false;
                     }
+                    depthPeeler.Enabled = true;
+                    ibrt.Enabled = true;
+                    renderingMode = Mode.ImageBasedRayTracing;
+                    navigation.IsViewDirty = true;
                 }
-                else if (e.Key == Key.F6)
+            }
+            else if (e.Key == Key.F6)
+            {
+                if (renderingMode != Mode.IncrementalImageBasedRayTracing)
                 {
-                    if (renderingMode != Mode.IncrementalImageBasedRayTracing)
+                    foreach (var module in modules)
                     {
-                        foreach (var module in modules)
-                        {
-                            module.Enabled = false;
-                        }
-                        depthPeeler.Enabled = true;
-                        ibrt.Enabled = true;
-                        renderingMode = Mode.IncrementalImageBasedRayTracing;
-                        navigation.IsViewDirty = true;
+                        module.Enabled = false;
                     }
+                    depthPeeler.Enabled = true;
+                    ibrt.Enabled = true;
+                    renderingMode = Mode.IncrementalImageBasedRayTracing;
+                    navigation.IsViewDirty = true;
                 }
-                else if (e.Key == Key.F4)
+            }
+            else if (e.Key == Key.F4)
+            {
+                if (renderingMode != Mode.OrderIndependentTransparency)
                 {
-                    if (renderingMode != Mode.OrderIndependentTransparency)
+                    foreach (var module in modules)
                     {
-                        foreach (var module in modules)
-                        {
-                            module.Enabled = false;
-                        }
-                        depthPeeler.Enabled = true;
-                        renderingMode = Mode.OrderIndependentTransparency;
-                        navigation.IsViewDirty = true;
+                        module.Enabled = false;
                     }
+                    depthPeeler.Enabled = true;
+                    renderingMode = Mode.OrderIndependentTransparency;
+                    navigation.IsViewDirty = true;
                 }
+            }
         }
 
         private void MouseMove(object sender, MouseMoveEventArgs e)
@@ -293,10 +315,10 @@
             navigation.MouseWheelUpdateFocus(e.DeltaPrecise);
         }
 
-        private Scene GenerateScene()
-        {
-            return Scene.CreateRandomTriangles(10);
-        }
+        //private Scene GenerateScene()
+        //{
+        //    return Scene.CreateRandomTriangles(10);
+        //}
 
         #endregion
 
