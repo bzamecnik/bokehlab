@@ -30,6 +30,7 @@
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lensModelComboBox = new System.Windows.Forms.ComboBox();
             this.senzorWidthNumeric = new System.Windows.Forms.NumericUpDown();
             this.tonemapOutputCheckBox = new System.Windows.Forms.CheckBox();
             this.specificOutputSizeCheckBox = new System.Windows.Forms.CheckBox();
@@ -65,6 +66,10 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.renderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.renderPreviewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openLrtfFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.label9 = new System.Windows.Forms.Label();
+            this.lrtfSampleCountNumeric = new System.Windows.Forms.NumericUpDown();
+            this.label10 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.senzorWidthNumeric)).BeginInit();
@@ -82,6 +87,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.senzorTiltXNumeric)).BeginInit();
             this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lrtfSampleCountNumeric)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -100,6 +106,7 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
+            this.groupBox1.Controls.Add(this.lensModelComboBox);
             this.groupBox1.Controls.Add(this.senzorWidthNumeric);
             this.groupBox1.Controls.Add(this.tonemapOutputCheckBox);
             this.groupBox1.Controls.Add(this.specificOutputSizeCheckBox);
@@ -110,7 +117,10 @@
             this.groupBox1.Controls.Add(this.outputSizeYNumeric);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.outputSizeXNumeric);
+            this.groupBox1.Controls.Add(this.lrtfSampleCountNumeric);
             this.groupBox1.Controls.Add(this.sampleCountNumeric);
+            this.groupBox1.Controls.Add(this.label10);
+            this.groupBox1.Controls.Add(this.label9);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.layerZNumeric);
             this.groupBox1.Controls.Add(this.label2);
@@ -130,6 +140,25 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Settings";
             // 
+            // lensModelComboBox
+            // 
+            this.lensModelComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.lensModelComboBox.FormattingEnabled = true;
+            this.lensModelComboBox.Items.AddRange(new object[] {
+            "Thin lens",
+            "Double Gauss (complex lens)",
+            "Petzval (complex lens)",
+            "Biconvex (complex lens)",
+            "Double Gauss (LRTF)",
+            "Petzval (LRTF)",
+            "Biconvex (LRTF)",
+            "Pinhole"});
+            this.lensModelComboBox.Location = new System.Drawing.Point(9, 19);
+            this.lensModelComboBox.Name = "lensModelComboBox";
+            this.lensModelComboBox.Size = new System.Drawing.Size(160, 21);
+            this.lensModelComboBox.TabIndex = 16;
+            this.lensModelComboBox.SelectedIndexChanged += new System.EventHandler(this.lensModelComboBox_SelectedIndexChanged);
+            // 
             // senzorWidthNumeric
             // 
             this.senzorWidthNumeric.DecimalPlaces = 2;
@@ -138,7 +167,7 @@
             0,
             0,
             65536});
-            this.senzorWidthNumeric.Location = new System.Drawing.Point(106, 204);
+            this.senzorWidthNumeric.Location = new System.Drawing.Point(106, 256);
             this.senzorWidthNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -157,7 +186,7 @@
             // tonemapOutputCheckBox
             // 
             this.tonemapOutputCheckBox.AutoSize = true;
-            this.tonemapOutputCheckBox.Location = new System.Drawing.Point(9, 297);
+            this.tonemapOutputCheckBox.Location = new System.Drawing.Point(9, 349);
             this.tonemapOutputCheckBox.Name = "tonemapOutputCheckBox";
             this.tonemapOutputCheckBox.Size = new System.Drawing.Size(141, 17);
             this.tonemapOutputCheckBox.TabIndex = 15;
@@ -168,7 +197,7 @@
             // specificOutputSizeCheckBox
             // 
             this.specificOutputSizeCheckBox.AutoSize = true;
-            this.specificOutputSizeCheckBox.Location = new System.Drawing.Point(9, 248);
+            this.specificOutputSizeCheckBox.Location = new System.Drawing.Point(9, 300);
             this.specificOutputSizeCheckBox.Name = "specificOutputSizeCheckBox";
             this.specificOutputSizeCheckBox.Size = new System.Drawing.Size(121, 17);
             this.specificOutputSizeCheckBox.TabIndex = 12;
@@ -179,7 +208,7 @@
             // lensFocalLengthNumeric
             // 
             this.lensFocalLengthNumeric.DecimalPlaces = 3;
-            this.lensFocalLengthNumeric.Location = new System.Drawing.Point(109, 71);
+            this.lensFocalLengthNumeric.Location = new System.Drawing.Point(109, 123);
             this.lensFocalLengthNumeric.Name = "lensFocalLengthNumeric";
             this.lensFocalLengthNumeric.Size = new System.Drawing.Size(60, 20);
             this.lensFocalLengthNumeric.TabIndex = 3;
@@ -188,7 +217,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 73);
+            this.label5.Location = new System.Drawing.Point(6, 125);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(91, 13);
             this.label5.TabIndex = 0;
@@ -197,7 +226,7 @@
             // lensApertureNumeric
             // 
             this.lensApertureNumeric.DecimalPlaces = 2;
-            this.lensApertureNumeric.Location = new System.Drawing.Point(109, 45);
+            this.lensApertureNumeric.Location = new System.Drawing.Point(109, 97);
             this.lensApertureNumeric.Name = "lensApertureNumeric";
             this.lensApertureNumeric.Size = new System.Drawing.Size(60, 20);
             this.lensApertureNumeric.TabIndex = 2;
@@ -206,7 +235,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 47);
+            this.label4.Location = new System.Drawing.Point(6, 99);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(75, 13);
             this.label4.TabIndex = 0;
@@ -215,7 +244,7 @@
             // outputSizeYNumeric
             // 
             this.outputSizeYNumeric.Enabled = false;
-            this.outputSizeYNumeric.Location = new System.Drawing.Point(106, 271);
+            this.outputSizeYNumeric.Location = new System.Drawing.Point(106, 323);
             this.outputSizeYNumeric.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -238,7 +267,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(88, 273);
+            this.label7.Location = new System.Drawing.Point(88, 325);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(12, 13);
             this.label7.TabIndex = 0;
@@ -247,7 +276,7 @@
             // outputSizeXNumeric
             // 
             this.outputSizeXNumeric.Enabled = false;
-            this.outputSizeXNumeric.Location = new System.Drawing.Point(9, 271);
+            this.outputSizeXNumeric.Location = new System.Drawing.Point(9, 323);
             this.outputSizeXNumeric.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -269,7 +298,7 @@
             // 
             // sampleCountNumeric
             // 
-            this.sampleCountNumeric.Location = new System.Drawing.Point(109, 19);
+            this.sampleCountNumeric.Location = new System.Drawing.Point(109, 71);
             this.sampleCountNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -283,7 +312,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 21);
+            this.label3.Location = new System.Drawing.Point(6, 73);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(75, 13);
             this.label3.TabIndex = 0;
@@ -292,7 +321,7 @@
             // layerZNumeric
             // 
             this.layerZNumeric.DecimalPlaces = 3;
-            this.layerZNumeric.Location = new System.Drawing.Point(109, 97);
+            this.layerZNumeric.Location = new System.Drawing.Point(109, 149);
             this.layerZNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -311,7 +340,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 99);
+            this.label2.Location = new System.Drawing.Point(6, 151);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(91, 13);
             this.label2.TabIndex = 0;
@@ -325,7 +354,7 @@
             0,
             0,
             65536});
-            this.senzorShiftZNumeric.Location = new System.Drawing.Point(119, 178);
+            this.senzorShiftZNumeric.Location = new System.Drawing.Point(119, 230);
             this.senzorShiftZNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -349,7 +378,7 @@
             0,
             0,
             65536});
-            this.senzorShiftYNumeric.Location = new System.Drawing.Point(64, 178);
+            this.senzorShiftYNumeric.Location = new System.Drawing.Point(64, 230);
             this.senzorShiftYNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -373,7 +402,7 @@
             0,
             0,
             131072});
-            this.senzorTiltZNumeric.Location = new System.Drawing.Point(119, 139);
+            this.senzorTiltZNumeric.Location = new System.Drawing.Point(119, 191);
             this.senzorTiltZNumeric.Maximum = new decimal(new int[] {
             10,
             0,
@@ -397,7 +426,7 @@
             0,
             0,
             131072});
-            this.senzorTiltYNumeric.Location = new System.Drawing.Point(63, 139);
+            this.senzorTiltYNumeric.Location = new System.Drawing.Point(63, 191);
             this.senzorTiltYNumeric.Maximum = new decimal(new int[] {
             10,
             0,
@@ -421,7 +450,7 @@
             0,
             0,
             65536});
-            this.senzorShiftXNumeric.Location = new System.Drawing.Point(9, 178);
+            this.senzorShiftXNumeric.Location = new System.Drawing.Point(9, 230);
             this.senzorShiftXNumeric.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -440,7 +469,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 206);
+            this.label1.Location = new System.Drawing.Point(6, 258);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(71, 13);
             this.label1.TabIndex = 0;
@@ -449,7 +478,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(6, 162);
+            this.label8.Location = new System.Drawing.Point(6, 214);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(107, 13);
             this.label8.TabIndex = 0;
@@ -463,7 +492,7 @@
             0,
             0,
             131072});
-            this.senzorTiltXNumeric.Location = new System.Drawing.Point(9, 139);
+            this.senzorTiltXNumeric.Location = new System.Drawing.Point(9, 191);
             this.senzorTiltXNumeric.Maximum = new decimal(new int[] {
             10,
             0,
@@ -482,7 +511,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 123);
+            this.label6.Location = new System.Drawing.Point(6, 175);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(98, 13);
             this.label6.TabIndex = 0;
@@ -542,7 +571,7 @@
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
             this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.openToolStripMenuItem.Text = "&Open";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.openToolStripMenuItem_Click);
             // 
@@ -550,7 +579,7 @@
             // 
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(146, 22);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.saveToolStripMenuItem.Text = "&Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
@@ -567,7 +596,7 @@
             // 
             this.renderToolStripMenuItem.Name = "renderToolStripMenuItem";
             this.renderToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
-            this.renderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.renderToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.renderToolStripMenuItem.Text = "&Render";
             this.renderToolStripMenuItem.Click += new System.EventHandler(this.renderToolStripMenuItem_Click);
             // 
@@ -578,6 +607,42 @@
             this.renderPreviewToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
             this.renderPreviewToolStripMenuItem.Text = "Render preview";
             this.renderPreviewToolStripMenuItem.Click += new System.EventHandler(this.renderPreviewToolStripMenuItem_Click);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(7, 43);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(58, 13);
+            this.label9.TabIndex = 0;
+            this.label9.Text = "LRTF size:";
+            // 
+            // lrtfSampleCountNumeric
+            // 
+            this.lrtfSampleCountNumeric.Location = new System.Drawing.Point(71, 41);
+            this.lrtfSampleCountNumeric.Maximum = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+            this.lrtfSampleCountNumeric.Name = "lrtfSampleCountNumeric";
+            this.lrtfSampleCountNumeric.Size = new System.Drawing.Size(60, 20);
+            this.lrtfSampleCountNumeric.TabIndex = 1;
+            this.lrtfSampleCountNumeric.Value = new decimal(new int[] {
+            128,
+            0,
+            0,
+            0});
+            this.lrtfSampleCountNumeric.ValueChanged += new System.EventHandler(this.lrtfSampleCountNumeric_ValueChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(137, 43);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(19, 13);
+            this.label10.TabIndex = 0;
+            this.label10.Text = "^3";
             // 
             // IbrtForm
             // 
@@ -613,6 +678,7 @@
             this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lrtfSampleCountNumeric)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -657,6 +723,11 @@
         private System.Windows.Forms.NumericUpDown senzorWidthNumeric;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ToolStripMenuItem renderPreviewToolStripMenuItem;
+        private System.Windows.Forms.ComboBox lensModelComboBox;
+        private System.Windows.Forms.OpenFileDialog openLrtfFileDialog;
+        private System.Windows.Forms.NumericUpDown lrtfSampleCountNumeric;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label9;
     }
 }
 

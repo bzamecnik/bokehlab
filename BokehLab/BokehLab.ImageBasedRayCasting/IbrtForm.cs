@@ -13,14 +13,17 @@
     public partial class IbrtForm : Form
     {
         RayTracer rayTracer = new RayTracer();
-        ThinLens thinLens = new ThinLens();
-        BiconvexLens biconvexLens = new BiconvexLens()
-        {
-            ApertureRadius = 1.8,
-            CurvatureRadius = 10
-        };
+        ThinLens thinLens = new ThinLens() { FocalLength = 10 };
+        PinholeLens pinholeLens = new PinholeLens();
+        //BiconvexLens biconvexLens = new BiconvexLens()
+        //{
+        //    ApertureRadius = 1.8,
+        //    CurvatureRadius = 10
+        //};
 
-        ComplexLens complexLens;
+        ComplexLens complexLensBiconvex = ComplexLens.CreateBiconvexLens(10, 1, 0);
+        ComplexLens complexLensDoubleGauss = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
+        ComplexLens complexLensPetzval = ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 2.0);
 
         PrecomputedComplexLens precomputedComplexLens;
 
@@ -33,15 +36,6 @@
         {
             InitializeComponent();
 
-            //complexLens = ComplexLens.CreateBiconvexLens(10, 1, 0);
-            //complexLens = ComplexLens.CreateDoubleGaussLens(Materials.Fixed.AIR, 2.0);
-            complexLens = ComplexLens.CreatePetzvalLens(Materials.Fixed.AIR, 2.0);
-            //precomputedComplexLens = new PrecomputedComplexLens(complexLens,
-            //    @"..\..\..\lrtf_double_gauss_{0}.bin", 128);
-            //@"..\..\..\lrtf_petzval_{0}.bin", 128);
-
-            thinLens.FocalLength = 10;
-
             //Size outputImageSize = pictureBox1.Size;
             Size outputImageSize = new Size(450, 300);
 
@@ -50,13 +44,9 @@
             outputSizeYNumeric.Value = outputImageSize.Height;
             specificOutputSizeCheckBox.Checked = true;
 
-            //rayTracer.Camera.Lens = thinLens;
-            //rayTracer.Camera.Lens = new PinholeLens();
             //rayTracer.Camera.Lens = new LensWithTwoStops() { Lens = thinLens };
-            //rayTracer.Camera.Lens = biconvexLens;
             //rayTracer.Scene.Layer.Depth = -biconvexLens.FocalLength;
-            rayTracer.Camera.Lens = complexLens;
-            //rayTracer.Camera.Lens = precomputedComplexLens;
+            rayTracer.Camera.Lens = thinLens;
 
             //rayTracer.Camera.Sensor.Tilt = new Vector3d(0, -0.25, 0);
 
@@ -179,7 +169,7 @@
         {
             double aperture = (double)lensApertureNumeric.Value;
             thinLens.ApertureRadius = aperture;
-            biconvexLens.ApertureRadius = aperture;
+            //biconvexLens.ApertureRadius = aperture;
             RenderPreview();
         }
 
@@ -327,6 +317,57 @@
         private void renderPreviewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RenderPreview();
+        }
+
+        private void lensModelComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateLensModel();
+        }
+
+        private void UpdateLensModel()
+        {
+            switch (lensModelComboBox.SelectedItem.ToString())
+            {
+                case "Thin lens":
+                    rayTracer.Camera.Lens = thinLens;
+                    break;
+                case "Pinhole":
+                    rayTracer.Camera.Lens = pinholeLens;
+                    break;
+                case "Double Gauss (complex lens)":
+                    rayTracer.Camera.Lens = complexLensDoubleGauss;
+                    break;
+                case "Petzval (complex lens)":
+                    rayTracer.Camera.Lens = complexLensPetzval;
+                    break;
+                case "Biconvex (complex lens)":
+                    rayTracer.Camera.Lens = complexLensBiconvex;
+                    break;
+                case "Double Gauss (LRTF)":
+                    PrepareLrtfLens(complexLensDoubleGauss, "double_gauss");
+                    break;
+                case "Petzval (LRTF)":
+                    PrepareLrtfLens(complexLensPetzval, "petzval");
+                    break;
+                case "Biconvex (LRTF)":
+                    PrepareLrtfLens(complexLensBiconvex, "biconvex");
+                    break;
+                default: break;
+            }
+            RenderPreview();
+        }
+
+        public void PrepareLrtfLens(ComplexLens lens, string name)
+        {
+            int sampleCount = (int)lrtfSampleCountNumeric.Value;
+            precomputedComplexLens = new PrecomputedComplexLens(lens,
+                @"..\..\..\lrtf_" + name + @"_{0}.bin", sampleCount);
+            rayTracer.Camera.Lens = precomputedComplexLens;
+        }
+
+        private void lrtfSampleCountNumeric_ValueChanged(object sender, EventArgs e)
+        {
+            UpdateLensModel();
         }
     }
 }
