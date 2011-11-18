@@ -1,0 +1,41 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" ctype="Workspace" />
+  <MonoDevelop.Ide.DebuggingService>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService>
+  <MonoDevelop.Ide.Workbench ActiveDocument="Meshomatic/ObjLoader.cs" ctype="Workbench">
+    <Files>
+      <File FileName="Meshomatic/AssemblyInfo.cs" Line="13" Column="27" />
+      <File FileName="Meshomatic/ColladaLoader.cs" Line="26" Column="3" />
+      <File FileName="Meshomatic/COPYING.txt" Line="1" Column="1" />
+      <File FileName="Meshomatic/DirectXLoader.cs" Line="1" Column="1" />
+      <File FileName="Meshomatic/MeshData.cs" Line="118" Column="52" />
+      <File FileName="Meshomatic/ObjLoader.cs" Line="92" Column="15" />
+      <File FileName="Meshomatic/Ms3dLoader.cs" Line="176" Column="2" />
+      <File FileName="Meshomatic/README.txt" Line="42" Column="35" />
+      <File FileName="Meshomatic/MeshLoader.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="Meshomatic" expanded="True">
+            <Node name="References" expanded="True" />
+            <Node name="ObjLoader.cs" selected="True" />
+          </Node>
+          <Node name="Meshomatic.DisplayMesh" expanded="True">
+            <Node name="References" expanded="True" />
+          </Node>
+          <Node name="Meshomatic.DumpMesh" expanded="True" />
+          <Node name="Packages" expanded="True" />
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches ctype="PinnedWatchStore" />
+</Properties>
