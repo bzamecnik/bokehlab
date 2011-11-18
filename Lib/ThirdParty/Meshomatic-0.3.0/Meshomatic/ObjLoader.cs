@@ -117,12 +117,14 @@ Vector3[] p = points.ToArray();
 			vert = tex = norm = 0;
 			vert = int.Parse(parameters[0]) - 1;
 			// Texcoords and normals are optional in .obj files
-			if(parameters[1] != "") {
-				tex = int.Parse(parameters[1]) - 1;
-			}
-			if(parameters[2] != "") {
-				norm = int.Parse(parameters[2]) - 1;
-			}
+			if ((parameters.Length > 1) && (parameters[1] != ""))
+      {
+          tex = int.Parse(parameters[1]) - 1;
+      }
+      if ((parameters.Length > 2) && (parameters[2] != ""))
+      {
+          norm = int.Parse(parameters[2]) - 1;
+      }
 			return new Point(vert, norm, tex);
 		}
 	}
