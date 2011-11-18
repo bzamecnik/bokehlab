@@ -99,14 +99,14 @@ Vector3[] p = points.ToArray();
 				throw new Exception("Invalid shape!  Must have >2 points");
 			}
 			
-			Point lastButOne = ps[1];
-			Point lastButTwo = ps[0];
-			for(int i = 2; i < ps.Length; i++) {
-				Tri t = new Tri(lastButTwo, lastButOne, ps[i]);
-				lastButOne = ps[i];
-				lastButTwo = ps[i-1];
-				ts.Add(t);
-			}
+      Point first = ps[0];
+      Point previous = ps[1];
+      for (int i = 2; i < ps.Length; i++)
+      {
+          Tri t = new Tri(first, previous, ps[i]);
+          previous = ps[i];
+          ts.Add(t);
+      }
 			return ts.ToArray();
 		}
 		
