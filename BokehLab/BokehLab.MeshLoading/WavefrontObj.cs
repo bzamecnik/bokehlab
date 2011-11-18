@@ -21,16 +21,17 @@
             public Vector3 Position;
         }
 
-        public struct Triangle
+        struct Face
         {
-            public Vector3 Vertex0;
-            public Vector3 Vertex1;
-            public Vector3 Vertex2;
+            uint vertexIndex;
+            uint normalIndex;
+            uint textureCoordsIndex;
         }
 
+        List<uint> faces = new List<uint>();
         List<Vector3> vertices = new List<Vector3>();
-        List<Triangle> triangles = new List<Triangle>();
         List<Vector3> normals = new List<Vector3>();
+        List<Vector2> texCoords = new List<Vector2>();
 
         public static void Parse(string fileName)
         {
@@ -38,40 +39,79 @@
 
             using (StreamReader fs = new StreamReader(fileName))
             {
+                int lineNumber = 0;
                 while (!fs.EndOfStream)
                 {
+                    lineNumber++;
                     string line = fs.ReadLine();
-                    string[] parts;
-                    switch (line[0])
+                    if ((line.Length <= 0) || (line[0] == '#'))
                     {
-                        case 'v':
-                            parts = line.Split(new[] { ' ' }, 4);
-                            obj.vertices.Add(
-                                new Vector3(
-                                    float.Parse(parts[1], CultureInfo.InvariantCulture),
-                                    float.Parse(parts[2], CultureInfo.InvariantCulture),
-                                    float.Parse(parts[3], CultureInfo.InvariantCulture)
-                                ));
+                        continue;
+                    }
+                    string[] parts = line.Split(new[] { ' ' });
+                    switch (parts[0])
+                    {
+                        case "v":
+                            if (parts.Length != 4)
+                            {
+                                throw new ApplicationException(string.Format("Bad vertex vector size at line: {0}", lineNumber));
+                            }
+                            obj.vertices.Add(ParseVector3(parts[1], parts[2], parts[3]));
                             break;
-                        case 'f':
-                            parts = line.Split(new[] { ' ' }, 4);
-                            Triangle tri = new Triangle();
+                        case "vn":
+                            if (parts.Length != 4)
+                            {
+                                throw new ApplicationException(string.Format("Bad normal vector size at line: {0}", lineNumber));
+                            }
+                            Vector3 normal = ParseVector3(parts[1], parts[2], parts[3]);
+                            normal.Normalize();
+                            obj.normals.Add(normal);
+                            break;
+                        case "vt":
+                            if (parts.Length != 3)
+                            {
+                                throw new ApplicationException(string.Format("Bad texture coordinates vector size at line: {0}", lineNumber));
+                            }
+                            obj.texCoords.Add(ParseVector2(parts[1], parts[2]));
+                            break;
+                        case "f":
+                            if (parts.Length != 4)
+                            {
+                                throw new ApplicationException(string.Format("Face being not a triangle at line: {0}", lineNumber));
+                            }
                             int[] vertexIndices = new int[3];
                             for (int i = 0; i < 3; i++)
                             {
-                                vertexIndices[i] = int.Parse(parts[i + 1]) - 1;
+                                obj.faces.Add(uint.Parse(parts[i + 1]) - 1);
                             }
-                            tri.Vertex0 = obj.vertices[vertexIndices[0]];
-                            tri.Vertex1 = obj.vertices[vertexIndices[1]];
-                            tri.Vertex2 = obj.vertices[vertexIndices[2]];
-                            obj.triangles.Add(tri);
-                            obj.normals.Add(GetNormal(tri.Vertex0, tri.Vertex1, tri.Vertex2));
                             break;
                         default:
                             break;
                     }
                 }
             }
+        }
+
+        private static Vector3 ParseVector3(string x, string y, string z)
+        {
+            return new Vector3(
+                float.Parse(x, CultureInfo.InvariantCulture),
+                float.Parse(y, CultureInfo.InvariantCulture),
+                float.Parse(z, CultureInfo.InvariantCulture)
+            );
+        }
+
+        private static Vector2 ParseVector2(string x, string y)
+        {
+            return new Vector2(
+                float.Parse(x, CultureInfo.InvariantCulture),
+                float.Parse(y, CultureInfo.InvariantCulture)
+            );
+        }
+
+        private static float ParseFloat(string x)
+        {
+            return float.Parse(x, CultureInfo.InvariantCulture);
         }
 
         public static Vector3 GetNormal(Vector3 a, Vector3 b, Vector3 c)
