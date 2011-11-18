@@ -141,45 +141,45 @@ void main() {
             base.OnLoad(e);
 
             //MeshData m = new ColladaLoader().LoadFile("dice.dae");
-            //m = new ObjLoader().LoadFile("cube.obj");
+            //m = ObjLoader.LoadFile("cube.obj");
             //tex = LoadTex("cube.png");
 
-            //m = new ObjLoader().LoadFile("teapot.obj");
+            //m = ObjLoader.LoadFile("teapot.obj");
 
-            //m = new ObjLoader().LoadFile("house.obj");
+            //m = ObjLoader.LoadFile("house.obj");
             //tex = LoadTex("house_diffuse.png");
 
-            //m = new ObjLoader().LoadFile("happy_vrip_res4.obj");
-            //m = new ObjLoader().LoadFile("bun_zipper.obj");
+            //m = ObjLoader.LoadFile("happy_vrip_res4.obj");
+            //m = ObjLoader.LoadFile("bun_zipper.obj");
             //tex = LoadTex("bun_zipper_color.png");
 
-            //m = new ObjLoader().LoadFile("wateringcan.obj");
-            //m = new ObjLoader().LoadFile("toyplane.obj");
+            //m = ObjLoader.LoadFile("wateringcan.obj");
+            //m = ObjLoader.LoadFile("toyplane.obj");
 
-            //m = new ObjLoader().LoadFile("CrateNoParachuteOBJ.obj");
+            //m = ObjLoader.LoadFile("CrateNoParachuteOBJ.obj");
             //tex = LoadTex("CrateNoParachute.png");
 
-            //m = new ObjLoader().LoadFile("Armadillo.obj");
-            //m = new ObjLoader().LoadFile("dragon_vrip_res2.obj");
-            //m = new ObjLoader().LoadFile("DW-Ormesh-05.obj"); // [lee2008] - per-pixel splatting
-            //m = new ObjLoader().LoadFile("DW-Fungau.obj");
+            //m = ObjLoader.LoadFile("Armadillo.obj");
+            //m = ObjLoader.LoadFile("dragon_vrip_res2.obj");
+            //m = ObjLoader.LoadFile("DW-Ormesh-05.obj"); // [lee2008] - per-pixel splatting
+            //m = ObjLoader.LoadFile("DW-Fungau.obj");
 
-            m = new ObjLoader().LoadFile("medstreet.obj");
+            m = ObjLoader.LoadFile("medstreet.obj");
             tex = LoadTex("rue2.jpg");
 
-            //m = new ObjLoader().LoadFile("FontariolV3.obj"); // not ok
+            //m = ObjLoader.LoadFile("FontariolV3.obj"); // not ok
             //tex = LoadTex("fonatriolT.jpg");
 
 
             //tex = LoadTex("checker_large.gif");
             //tex = LoadTex("dirt_01.jpg");
 
-            //m = new ObjLoader().LoadFile("CrateNoParachuteOBJ.obj");
+            //m = ObjLoader.LoadFile("CrateNoParachuteOBJ.obj");
             //tex = LoadTex("CrateNoParachute.png");
 
 
             //m = new Ms3dLoader().LoadFile("test.ms3d");
-            //m = new ObjLoader().LoadFile("test.obj");
+            //m = ObjLoader.LoadFile("test.obj");
             //tex = LoadTex("test.png");
 
             // We do some heuristics to try to auto-zoom to a reasonable distance.  And it generally works!

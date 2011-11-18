@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.InteractiveDof", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.Math", "BokehLab.Math\BokehLab.Math.csproj", "{26E431BD-7267-4A7F-914E-229072AAC363}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BokehLab.MeshLoading", "BokehLab.MeshLoading\BokehLab.MeshLoading.csproj", "{A8E3791A-D35A-43D6-80C4-43F57E13E7C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meshomatic", "..\Lib\ThirdParty\Meshomatic-0.3.0\Meshomatic\Meshomatic.csproj", "{D52F55A8-08E5-488E-AD0F-BF49B1F29A5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +20,10 @@ Global
 		{26E431BD-7267-4A7F-914E-229072AAC363}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26E431BD-7267-4A7F-914E-229072AAC363}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26E431BD-7267-4A7F-914E-229072AAC363}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A8E3791A-D35A-43D6-80C4-43F57E13E7C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8E3791A-D35A-43D6-80C4-43F57E13E7C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8E3791A-D35A-43D6-80C4-43F57E13E7C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8E3791A-D35A-43D6-80C4-43F57E13E7C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D52F55A8-08E5-488E-AD0F-BF49B1F29A5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D52F55A8-08E5-488E-AD0F-BF49B1F29A5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D52F55A8-08E5-488E-AD0F-BF49B1F29A5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D52F55A8-08E5-488E-AD0F-BF49B1F29A5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

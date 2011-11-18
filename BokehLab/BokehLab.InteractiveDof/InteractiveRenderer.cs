@@ -60,8 +60,8 @@
             //scene = Scene.CreateRandomTriangles(10);
             //scene = GenerateScene();
             scene = new Scene();
-            scene.vbo.Initialize();
-            scene.vbo.Load();
+            //scene.Initialize();
+            //scene.Load();
 
             Keyboard.KeyUp += KeyUp;
             Keyboard.KeyRepeat = true;
@@ -84,23 +84,25 @@
 
             //GL.Hint(HintTarget.PolygonSmoothHint, HintMode.Nicest);
 
-            GL.Light(LightName.Light0, LightParameter.Position, new float[] { 3.0f, 3.0f, 3.0f });
-            GL.Light(LightName.Light0, LightParameter.Ambient, new float[] { 0.3f, 0.3f, 0.3f, 1.0f });
-            GL.Light(LightName.Light0, LightParameter.Diffuse, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
-            GL.Light(LightName.Light0, LightParameter.Specular, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
-            GL.Light(LightName.Light0, LightParameter.SpotExponent, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
-            GL.LightModel(LightModelParameter.LightModelAmbient, new float[] { 0.2f, 0.2f, 0.2f, 1.0f });
-            GL.LightModel(LightModelParameter.LightModelTwoSide, 1);
-            GL.LightModel(LightModelParameter.LightModelLocalViewer, 1);
-            GL.Enable(EnableCap.Lighting);
-            GL.Enable(EnableCap.Light0);
+            //GL.Light(LightName.Light0, LightParameter.Position, new float[] { 3.0f, 3.0f, 3.0f });
+            //GL.Light(LightName.Light0, LightParameter.Ambient, new float[] { 0.3f, 0.3f, 0.3f, 1.0f });
+            //GL.Light(LightName.Light0, LightParameter.Diffuse, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            //GL.Light(LightName.Light0, LightParameter.Specular, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            //GL.Light(LightName.Light0, LightParameter.SpotExponent, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            //GL.LightModel(LightModelParameter.LightModelAmbient, new float[] { 0.2f, 0.2f, 0.2f, 1.0f });
+            //GL.LightModel(LightModelParameter.LightModelTwoSide, 1);
+            //GL.LightModel(LightModelParameter.LightModelLocalViewer, 1);
+            //GL.Enable(EnableCap.Lighting);
+            //GL.Enable(EnableCap.Light0);
 
-            GL.Material(MaterialFace.Front, MaterialParameter.Ambient, new float[] { 0.3f, 0.3f, 0.3f, 1.0f });
-            GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
-            GL.Material(MaterialFace.Front, MaterialParameter.Specular, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
-            GL.Material(MaterialFace.Front, MaterialParameter.Emission, new float[] { 0.0f, 0.0f, 0.0f, 1.0f });
+            //GL.Material(MaterialFace.Front, MaterialParameter.Ambient, new float[] { 0.3f, 0.3f, 0.3f, 1.0f });
+            //GL.Material(MaterialFace.Front, MaterialParameter.Diffuse, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            //GL.Material(MaterialFace.Front, MaterialParameter.Specular, new float[] { 1.0f, 1.0f, 1.0f, 1.0f });
+            //GL.Material(MaterialFace.Front, MaterialParameter.Emission, new float[] { 0.0f, 0.0f, 0.0f, 1.0f });
 
             //GL.ShadeModel(ShadingModel.Smooth);
+
+            GL.Enable(EnableCap.Texture2D);
 
             OnResize(new EventArgs());
         }
@@ -131,6 +133,7 @@
 
             navigation.Camera.AspectRatio = Width / (float)Height;
             navigation.Camera.UpdatePerspective();
+            navigation.IsViewDirty = true;
 
             GL.MatrixMode(MatrixMode.Projection);
             Matrix4 perspective = navigation.Camera.Perspective;

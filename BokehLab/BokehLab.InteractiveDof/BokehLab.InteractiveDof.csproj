@@ -132,13 +132,13 @@
     <Compile Include="ThinLens.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Lib\ThirdParty\Meshomatic-0.3.0\Meshomatic\Meshomatic.csproj">
+      <Project>{D52F55A8-08E5-488E-AD0F-BF49B1F29A5F}</Project>
+      <Name>Meshomatic</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BokehLab.Math\BokehLab.Math.csproj">
       <Project>{26E431BD-7267-4A7F-914E-229072AAC363}</Project>
       <Name>BokehLab.Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\BokehLab.MeshLoading\BokehLab.MeshLoading.csproj">
-      <Project>{A8E3791A-D35A-43D6-80C4-43F57E13E7C6}</Project>
-      <Name>BokehLab.MeshLoading</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

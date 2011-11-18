@@ -8,7 +8,7 @@ namespace Meshomatic
 {
     public class ObjLoader
     {
-        public MeshData LoadStream(Stream stream)
+        public static MeshData LoadStream(Stream stream)
         {
             StreamReader reader = new StreamReader(stream);
             List<Vector3> points = new List<Vector3>();
@@ -81,9 +81,8 @@ namespace Meshomatic
             return new MeshData(p, n, tc, f);
         }
 
-        public MeshData LoadFile(string file)
+        public static MeshData LoadFile(string file)
         {
-            // Silly me, using() closes the file automatically.
             using (FileStream s = File.Open(file, FileMode.Open))
             {
                 return LoadStream(s);
