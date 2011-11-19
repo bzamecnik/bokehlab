@@ -80,6 +80,9 @@
             GL.Ext.FramebufferTexture2D(
                 FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt,
                 TextureTarget.Texture2D, 0, 0);
+            GL.Ext.FramebufferTexture2D(
+                FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+                TextureTarget.Texture2D, 0, 0);
 
             PackDepthImages();
 
