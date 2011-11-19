@@ -60,6 +60,12 @@
             // in parallel in the first level we must find the extrema even within
             // the vector components.
 
+            //for (int i = 0; i < LayerCount; i++)
+            //{
+            //    GL.BindTexture(TextureTarget.Texture2D, nBuffersTextures[i]);
+            //    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            //}
+
             GL.PushAttrib(AttribMask.ViewportBit);
 
             GL.Viewport(0, 0, nbuffersWidth, nbuffersHeight);
@@ -133,6 +139,14 @@
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
 
             GL.PopAttrib();
+
+            //for (int i = 0; i < LayerCount; i++)
+            //{
+            //    GL.BindTexture(TextureTarget.Texture2D, nBuffersTextures[i]);
+            //    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            //    GL.Ext.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            //}
+            //GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         /// <summary>
@@ -200,8 +214,10 @@
 
         protected override void Enable()
         {
-            nbuffersWidth = Width / 2;
-            nbuffersHeight = Height / 2;
+            nbuffersWidth = Width;
+            nbuffersHeight = Height;
+            //nbuffersWidth = Width / 2;
+            //nbuffersHeight = Height / 2;
 
             // for sinle-value queries this level is sufficient:
             LayerCount = (int)Math.Ceiling(Math.Log(Math.Max(nbuffersWidth, nbuffersHeight), 2));
