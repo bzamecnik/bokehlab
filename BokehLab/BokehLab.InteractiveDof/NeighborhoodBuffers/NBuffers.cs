@@ -60,6 +60,10 @@
             // in parallel in the first level we must find the extrema even within
             // the vector components.
 
+            GL.PushAttrib(AttribMask.ViewportBit);
+
+            GL.Viewport(0, 0, nbuffersWidth, nbuffersHeight);
+
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
 
             GL.DepthFunc(DepthFunction.Always);
@@ -80,44 +84,9 @@
 
             LayerHelper.DrawQuad();
 
-            //GL.Ext.FramebufferTexture2D(
-            //        FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
-            //        TextureTarget.Texture2D, 0, 0);
-
             // the following levels are constructed from the previous ones (with offsets)
 
-            //GL.UseProgram(0);
-
             GL.UseProgram(shaderProgram);
-
-
-            // ---- DEBUG ----
-            //GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
-
-            //Vector3 offset = new Vector3(1.0f / nbuffersWidth, 1.0f / nbuffersHeight, 0);
-
-            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMinTexture"), 0);
-            ////GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMaxTexture"), 1);
-
-            //GL.Uniform3(GL.GetUniformLocation(shaderProgram, "offset"), offset);
-            ////GL.Ext.FramebufferTexture2D(
-            ////    FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
-            ////    TextureTarget.Texture2D, nBuffersTextures[i], 0);
-
-            //// NOTE: binding one texture to multiple texture units to get a different border value
-            //// Hope this works.
-            //GL.ActiveTexture(TextureUnit.Texture0);
-            //GL.BindTexture(TextureTarget.Texture2D, nBuffersTextures[0]);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, 1.0f); // for min N-buffers
-
-            //GL.ActiveTexture(TextureUnit.Texture1);
-            //GL.BindTexture(TextureTarget.Texture2D, nBuffersTextures[0]);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, 0.0f); // for max N-buffers
-
-            //LayerHelper.DrawQuad();
-
-            // ---- DEBUG ----
-
 
             // (x, y, 0)
             // (1,1,0) converted from [width; height] to [0.0; 1.0]^2 texture coordinates
@@ -162,6 +131,8 @@
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+
+            GL.PopAttrib();
         }
 
         /// <summary>
@@ -191,13 +162,6 @@
         public override void Initialize(int width, int height)
         {
             base.Initialize(width, height);
-
-            nbuffersWidth = width;
-            nbuffersHeight = height;
-
-            // TODO:
-            //nbuffersWidth = width / 2;
-            //nbuffersHeight = height / 2;
 
             ShaderLoader.CreateShaderFromFiles(
                VertexShaderPath, Level0FragmentShaderPath,
@@ -236,6 +200,9 @@
 
         protected override void Enable()
         {
+            nbuffersWidth = Width / 2;
+            nbuffersHeight = Height / 2;
+
             // for sinle-value queries this level is sufficient:
             LayerCount = (int)Math.Ceiling(Math.Log(Math.Max(nbuffersWidth, nbuffersHeight), 2));
             // for four-value queries this level is sufficient:

@@ -13,7 +13,7 @@ float vecMax(vec4 vector) {
 
 void main() {
 	vec2 coords = gl_TexCoord[0].st;
-	
+
 	vec4 depth = texture2D(packedDepthTexture, coords);
 	float minValue = vecMin(depth);
 	float maxValue = vecMax(depth);
