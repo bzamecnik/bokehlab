@@ -108,10 +108,10 @@
         public Navigation()
         {
             Camera = new Camera();
-            Reset();
+            ResetNavigation();
         }
 
-        public void Reset()
+        public void ResetNavigation()
         {
             Position = new Vector3(0, 0, 4);
             View = -Vector3.UnitZ;
@@ -119,7 +119,10 @@
             Right = Vector3.UnitX;
 
             modelView = ComputeModelView();
+        }
 
+        public void ResetCamera()
+        {
             float aspectRatio = Camera.AspectRatio;
             Camera = new Camera();
             Camera.AspectRatio = aspectRatio;
@@ -191,7 +194,14 @@
 
             if (Keyboard[Key.R])
             {
-                Reset();
+                if (Keyboard[Key.ShiftLeft] || Keyboard[Key.ShiftRight])
+                {
+                    ResetNavigation();
+                }
+                else
+                {
+                    ResetCamera();
+                }
                 IsViewDirty = true;
                 perspectiveChanged = true;
             }
