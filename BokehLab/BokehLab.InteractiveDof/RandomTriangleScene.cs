@@ -14,6 +14,10 @@ namespace BokehLab.InteractiveDof
         Vector4[] colors;
         Vector3[] vertices;
 
+        private RandomTriangleScene()
+        {
+        }
+
         public static RandomTriangleScene CreateRandomTriangles(int triangleCount)
         {
             RandomTriangleScene scene = new RandomTriangleScene();

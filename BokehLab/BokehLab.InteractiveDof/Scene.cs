@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using Meshomatic;
-using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
-using System.IO;
-
-namespace BokehLab.InteractiveDof
+﻿namespace BokehLab.InteractiveDof
 {
+    using System;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.IO;
+    using Meshomatic;
+    using OpenTK.Graphics.OpenGL;
+
     class Scene
     {
         uint texture;
@@ -19,25 +14,31 @@ namespace BokehLab.InteractiveDof
 
         public string ResourcePath { get; set; }
 
+        //RandomTriangleScene triangles;
+
         public Scene()
         {
             ResourcePath = @"..\..\data";
-            //texture = LoadTex(Path.Combine(ResourcePath, "rue2.jpg"));
-            //mesh = new Mesh(Path.Combine(ResourcePath, "medstreet.obj"));
+            texture = LoadTex(Path.Combine(ResourcePath, "rue2.jpg"));
+            mesh = new Mesh(Path.Combine(ResourcePath, "medstreet.obj"));
 
-            texture = LoadTex(Path.Combine(ResourcePath, "CrateNoParachute.png"));
+            //texture = LoadTex(Path.Combine(ResourcePath, "CrateNoParachute.png"));
             //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Ormesh-05.obj"));
-            mesh = new Mesh(Path.Combine(ResourcePath, "CrateNoParachuteOBJ.obj"));
+            //mesh = new Mesh(Path.Combine(ResourcePath, "CrateNoParachuteOBJ.obj"));
+            //texture = LoadTex(Path.Combine(ResourcePath, "checker_large.gif"));
+            //mesh = new Mesh(Path.Combine(ResourcePath, "teapot.obj"));
 
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.EnableClientState(ArrayCap.NormalArray);
             GL.EnableClientState(ArrayCap.TextureCoordArray);
             mesh.LoadBuffers();
+
+            //triangles = RandomTriangleScene.CreateRandomTriangles(20);
         }
 
         public void Draw()
         {
-            GL.ClearColor(1f, 1f, 1f, 1f);
+            GL.ClearColor(0.8f, 0.8f, 0.8f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             GL.BindTexture(TextureTarget.Texture2D, texture);
@@ -45,6 +46,8 @@ namespace BokehLab.InteractiveDof
             mesh.Draw();
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            //triangles.Draw();
         }
 
         static uint LoadTex(string file)

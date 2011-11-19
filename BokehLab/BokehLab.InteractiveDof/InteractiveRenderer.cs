@@ -40,6 +40,8 @@
         MultiViewAccumulation multiViewAccum = new MultiViewAccumulation();
         DepthPeeler depthPeeler = new DepthPeeler();
         ImageBasedRayTracer ibrt = new ImageBasedRayTracer();
+        LayerVisualizer layerVisualizer = new LayerVisualizer();
+        OrderIndependentTransparency transparency = new OrderIndependentTransparency();
 
         List<IRendererModule> modules = new List<IRendererModule>();
 
@@ -57,11 +59,8 @@
         {
             CheckFboExtension();
 
-            //scene = Scene.CreateRandomTriangles(10);
-            //scene = GenerateScene();
+            // the scene can be create after the GL context is prepared
             scene = new Scene();
-            //scene.Initialize();
-            //scene.Load();
 
             Keyboard.KeyUp += KeyUp;
             Keyboard.KeyRepeat = true;
@@ -73,11 +72,16 @@
             modules.Add(multiViewAccum);
             modules.Add(depthPeeler);
             modules.Add(ibrt);
+            modules.Add(layerVisualizer);
+            modules.Add(transparency);
+            // also the modules can be initialized after the GL context is prepared
             foreach (var module in modules)
             {
                 module.Initialize(Width, Height);
             }
             ibrt.DepthPeeler = depthPeeler;
+            transparency.DepthPeeler = depthPeeler;
+            layerVisualizer.DepthPeeler = depthPeeler;
 
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0f);
@@ -178,10 +182,7 @@
                     multiViewAccum.AccumulateAndDraw(scene, navigation);
                     cumulativeMilliseconds = multiViewAccum.CumulativeMilliseconds;
                     break;
-                case Mode.OrderIndependentTransparency:
-                    depthPeeler.PeelLayers(scene);
-                    depthPeeler.DisplayLayers();
-                    break;
+
                 case Mode.ImageBasedRayTracing:
                     depthPeeler.PeelLayers(scene);
                     ibrt.DrawSingleFrame(scene, navigation);
@@ -191,6 +192,14 @@
                     depthPeeler.PeelLayers(scene);
                     ibrt.AccumulateAndDraw(scene, navigation);
                     cumulativeMilliseconds = ibrt.CumulativeMilliseconds;
+                    break;
+                case Mode.LayerVisualizer:
+                    depthPeeler.PeelLayers(scene);
+                    layerVisualizer.Draw();
+                    break;
+                case Mode.OrderIndependentTransparency:
+                    depthPeeler.PeelLayers(scene);
+                    transparency.Draw();
                     break;
                 default:
                     Debug.Assert(false, "Unknown rendering mode");
@@ -245,7 +254,7 @@
                     navigation.IsViewDirty = true;
                 }
             }
-            else if (e.Key == Key.F5)
+            else if (e.Key == Key.F4)
             {
                 if (renderingMode != Mode.ImageBasedRayTracing)
                 {
@@ -259,7 +268,7 @@
                     navigation.IsViewDirty = true;
                 }
             }
-            else if (e.Key == Key.F6)
+            else if (e.Key == Key.F5)
             {
                 if (renderingMode != Mode.IncrementalImageBasedRayTracing)
                 {
@@ -273,7 +282,21 @@
                     navigation.IsViewDirty = true;
                 }
             }
-            else if (e.Key == Key.F4)
+            else if (e.Key == Key.F6)
+            {
+                if (renderingMode != Mode.LayerVisualizer)
+                {
+                    foreach (var module in modules)
+                    {
+                        module.Enabled = false;
+                    }
+                    depthPeeler.Enabled = true;
+                    layerVisualizer.Enabled = true;
+                    renderingMode = Mode.LayerVisualizer;
+                    navigation.IsViewDirty = true;
+                }
+            }
+            else if (e.Key == Key.F7)
             {
                 if (renderingMode != Mode.OrderIndependentTransparency)
                 {
@@ -282,9 +305,15 @@
                         module.Enabled = false;
                     }
                     depthPeeler.Enabled = true;
+                    transparency.Enabled = true;
                     renderingMode = Mode.OrderIndependentTransparency;
                     navigation.IsViewDirty = true;
                 }
+            }
+
+            foreach (var module in modules)
+            {
+                module.OnKeyUp(sender, e);
             }
         }
 
@@ -331,6 +360,7 @@
             MultiViewAccum,
             ImageBasedRayTracing,
             IncrementalImageBasedRayTracing,
+            LayerVisualizer,
             OrderIndependentTransparency,
         }
     }

@@ -146,59 +146,6 @@
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        public void DisplayLayers()
-        {
-            // Simple application of depth peeling:
-            // Order-independent transparency [everitt2001].
-
-            GL.ClearColor(0f, 0f, 0f, 1f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            bool showTransparency = true;
-            bool showTwoColorLayers = false;
-            if (showTransparency)
-            {
-                // back-most layer must be fully opaque
-                GL.Disable(EnableCap.Blend);
-                GL.BindTexture(TextureTarget.Texture2D, colorTextures[LayerCount - 1]);
-                LayerHelper.DrawQuad();
-
-                GL.DepthFunc(DepthFunction.Lequal);
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusDstAlpha);
-                for (int i = LayerCount - 2; i >= 0; i--)
-                {
-                    GL.BindTexture(TextureTarget.Texture2D, colorTextures[i]);
-                    LayerHelper.DrawQuad();
-                }
-                GL.Disable(EnableCap.Blend);
-                GL.DepthFunc(DepthFunction.Less);
-            }
-            else if (showTwoColorLayers)
-            {
-                // show the second layer opaque and the first one transparent
-
-                GL.Disable(EnableCap.Blend);
-                GL.BindTexture(TextureTarget.Texture2D, colorTextures[1]);
-                LayerHelper.DrawQuad();
-
-                GL.DepthFunc(DepthFunction.Lequal);
-                GL.Enable(EnableCap.Blend);
-                GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusDstAlpha);
-                GL.BindTexture(TextureTarget.Texture2D, colorTextures[0]);
-                LayerHelper.DrawQuad();
-                GL.Disable(EnableCap.Blend);
-                GL.DepthFunc(DepthFunction.Less);
-            }
-            else
-            {
-                GL.BindTexture(TextureTarget.Texture2D, colorTextures[1]);
-                LayerHelper.DrawQuad();
-            }
-
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-        }
-
         #region IRendererModule Members
 
         public override void Initialize(int width, int height)

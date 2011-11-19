@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenTK.Input;
 
 namespace BokehLab.InteractiveDof
 {
@@ -68,6 +69,10 @@ namespace BokehLab.InteractiveDof
                 Disable();
                 Enable();
             }
+        }
+
+        public virtual void OnKeyUp(object sender, KeyboardKeyEventArgs e)
+        {
         }
 
         #endregion

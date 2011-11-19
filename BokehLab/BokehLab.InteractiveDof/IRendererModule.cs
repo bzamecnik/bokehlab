@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenTK.Input;
 
 namespace BokehLab.InteractiveDof
 {
@@ -13,5 +14,7 @@ namespace BokehLab.InteractiveDof
         void Dispose();
 
         void Resize(int width, int height);
+
+        void OnKeyUp(object sender, KeyboardKeyEventArgs e);
     }
 }

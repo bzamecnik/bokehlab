@@ -61,6 +61,8 @@
     <Compile Include="AbstractRendererModule.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="DepthPeeling\DepthPeeler.cs" />
+    <Compile Include="DepthPeeling\LayerVisualizer.cs" />
+    <Compile Include="DepthPeeling\OrderIndependentTransparency.cs" />
     <Compile Include="IRendererModule.cs" />
     <Compile Include="LayerHelper.cs" />
     <Compile Include="MultiViewAccum\BufferAccumulator.cs" />
