@@ -67,11 +67,18 @@
             for (int i = 1; i < LayerCount; i++)
             {
                 AttachLayerTextures(i);
-                // use the previous depth layer for manual depth comparisons
+
+                // Use an other texture unit than 0 as drawing the scene with
+                // fixed-function pipeline might use it by default.
+                GL.ActiveTexture(TextureUnit.Texture8);
+                // Use the previous depth layer for manual depth comparisons.
                 GL.BindTexture(TextureTarget.Texture2D, depthTextures[i - 1]);
-                GL.Uniform1(GL.GetUniformLocation(peelingShaderProgram, "depthTexture"), 0); // TextureUnit.Texture0
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.Uniform1(GL.GetUniformLocation(peelingShaderProgram, "depthTexture"), 8); // TextureUnit.Texture8
+                GL.Uniform1(GL.GetUniformLocation(peelingShaderProgram, "texture0"), 0);
                 GL.Uniform2(GL.GetUniformLocation(peelingShaderProgram, "depthTextureSizeInv"),
                     new Vector2(1.0f / Width, 1.0f / Height));
+
                 scene.Draw();
             }
             GL.UseProgram(0); // disable the peeling shader

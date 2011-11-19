@@ -40,7 +40,6 @@ namespace BokehLab.InteractiveDof
             GL.ClearColor(1f, 1f, 1f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.ClientActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, texture);
 
             mesh.Draw();
