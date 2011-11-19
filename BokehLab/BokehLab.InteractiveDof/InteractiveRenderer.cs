@@ -7,23 +7,26 @@
     using BokehLab.InteractiveDof.DepthPeeling;
     using BokehLab.InteractiveDof.MultiViewAccum;
     using BokehLab.InteractiveDof.RayTracing;
+    using BokehLab.InteractiveDof.NeighborhoodBuffers;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
 
     // TODO:
     // - accelerate height field intersection with N-buffers
-    //   - create N-buffers from the packed depth image(s) after depth peeling
+    //   *- create N-buffers from the packed depth image(s) after depth peeling
     //   - query N-buffers during HF intersection
     // - fix the counter for the whole multi-view accumulation
     // - make sample counts configurable at run-time
     // - create a configuration panel to switch the methods and control parameters
     // - umbra depth peeling, extended-umbra depth peeling
+    // - create some HDR parts of the scene for demonstrating nice bokeh
 
     public class InteractiveRenderer : GameWindow
     {
         public InteractiveRenderer()
-            : base(300, 200)
+            : base(512, 512)
+        //: base(300, 200)
         //: base(450, 300)
         {
         }
@@ -39,8 +42,10 @@
 
         MultiViewAccumulation multiViewAccum = new MultiViewAccumulation();
         DepthPeeler depthPeeler = new DepthPeeler();
+        NBuffers nBuffers = new NBuffers();
         ImageBasedRayTracer ibrt = new ImageBasedRayTracer();
         LayerVisualizer layerVisualizer = new LayerVisualizer();
+        NBuffersVisualizer nBuffersVisualizer = new NBuffersVisualizer();
         OrderIndependentTransparency transparency = new OrderIndependentTransparency();
 
         List<IRendererModule> modules = new List<IRendererModule>();
@@ -71,8 +76,10 @@
 
             modules.Add(multiViewAccum);
             modules.Add(depthPeeler);
+            modules.Add(nBuffers);
             modules.Add(ibrt);
             modules.Add(layerVisualizer);
+            modules.Add(nBuffersVisualizer);
             modules.Add(transparency);
             // also the modules can be initialized after the GL context is prepared
             foreach (var module in modules)
@@ -82,6 +89,7 @@
             ibrt.DepthPeeler = depthPeeler;
             transparency.DepthPeeler = depthPeeler;
             layerVisualizer.DepthPeeler = depthPeeler;
+            nBuffersVisualizer.NBuffers = nBuffers;
 
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0f);
@@ -197,6 +205,11 @@
                     depthPeeler.PeelLayers(scene);
                     layerVisualizer.Draw();
                     break;
+                case Mode.NBuffersVisualizer:
+                    depthPeeler.PeelLayers(scene);
+                    nBuffers.CreateNBuffers(depthPeeler);
+                    nBuffersVisualizer.Draw();
+                    break;
                 case Mode.OrderIndependentTransparency:
                     depthPeeler.PeelLayers(scene);
                     transparency.Draw();
@@ -298,6 +311,21 @@
             }
             else if (e.Key == Key.F7)
             {
+                if (renderingMode != Mode.NBuffersVisualizer)
+                {
+                    foreach (var module in modules)
+                    {
+                        module.Enabled = false;
+                    }
+                    depthPeeler.Enabled = true;
+                    nBuffers.Enabled = true;
+                    nBuffersVisualizer.Enabled = true;
+                    renderingMode = Mode.NBuffersVisualizer;
+                    navigation.IsViewDirty = true;
+                }
+            }
+            else if (e.Key == Key.F8)
+            {
                 if (renderingMode != Mode.OrderIndependentTransparency)
                 {
                     foreach (var module in modules)
@@ -361,6 +389,7 @@
             ImageBasedRayTracing,
             IncrementalImageBasedRayTracing,
             LayerVisualizer,
+            NBuffersVisualizer,
             OrderIndependentTransparency,
         }
     }

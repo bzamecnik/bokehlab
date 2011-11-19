@@ -167,6 +167,9 @@
 
         public override void Dispose()
         {
+            if (fboHandle != 0)
+                GL.Ext.DeleteFramebuffers(1, ref fboHandle);
+
             if (peelingShaderProgram != 0)
                 GL.DeleteProgram(peelingShaderProgram);
             if (peelingVertexShader != 0)
@@ -191,15 +194,12 @@
 
         protected override void Disable()
         {
-            if (fboHandle != 0)
-                GL.Ext.DeleteFramebuffers(1, ref fboHandle);
-
             if (colorTextures != null)
-                GL.DeleteTextures(1, colorTextures);
+                GL.DeleteTextures(colorTextures.Length, colorTextures);
             if (depthTextures != null)
-                GL.DeleteTextures(1, depthTextures);
+                GL.DeleteTextures(depthTextures.Length, depthTextures);
             if (packedDepthTextures != null)
-                GL.DeleteTextures(1, packedDepthTextures);
+                GL.DeleteTextures(packedDepthTextures.Length, packedDepthTextures);
         }
 
         #endregion

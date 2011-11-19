@@ -46,5 +46,22 @@
         {
             return (1 - ratio) * a + ratio * b;
         }
+
+        /// <summary>
+        /// Compute the modular division of a given number taking care even of
+        /// negative numbers.
+        /// </summary>
+        /// <remarks>
+        /// Converts a given number N from the Z group into the Z/M group
+        /// where M is the modulus.
+        /// </remarks>
+        /// <param name="number"></param>
+        /// <param name="modulus"></param>
+        /// <returns></returns>
+        public static int Mod(int number, int modulus)
+        {
+            int r = number % modulus;
+            return r >= 0 ? r : r + modulus;
+        }
     }
 }

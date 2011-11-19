@@ -19,14 +19,18 @@
         public Scene()
         {
             ResourcePath = @"..\..\data";
-            texture = LoadTex(Path.Combine(ResourcePath, "rue2.jpg"));
-            mesh = new Mesh(Path.Combine(ResourcePath, "medstreet.obj"));
+            //texture = LoadTex(Path.Combine(ResourcePath, "rue2.jpg"));
+            //mesh = new Mesh(Path.Combine(ResourcePath, "medstreet.obj"));
 
             //texture = LoadTex(Path.Combine(ResourcePath, "CrateNoParachute.png"));
-            //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Ormesh-05.obj"));
             //mesh = new Mesh(Path.Combine(ResourcePath, "CrateNoParachuteOBJ.obj"));
-            //texture = LoadTex(Path.Combine(ResourcePath, "checker_large.gif"));
+
+            //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Ormesh-05.obj"));
+            //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Fungau.obj"));
+            texture = LoadTex(Path.Combine(ResourcePath, "checker_large.gif"));
             //mesh = new Mesh(Path.Combine(ResourcePath, "teapot.obj"));
+
+            mesh = new Mesh(Path.Combine(ResourcePath, "dragon_vrip_res2.obj"));
 
             GL.EnableClientState(ArrayCap.VertexArray);
             GL.EnableClientState(ArrayCap.NormalArray);

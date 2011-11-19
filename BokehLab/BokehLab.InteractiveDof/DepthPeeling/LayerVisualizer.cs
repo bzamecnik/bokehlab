@@ -2,17 +2,36 @@
 {
     using System.Diagnostics;
     using BokehLab.InteractiveDof;
+    using BokehLab.Math;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
+    using System;
 
     class LayerVisualizer : AbstractRendererModule
     {
         public DepthPeeler DepthPeeler { get; set; }
 
         // layer index [0; DepthPeeler.LayerCount]
-        int selectedLayer = 0;
-        // show color or depth?
-        bool showColor = true;
+        private int selectedLayer = 0;
+        private int SelectedLayer
+        {
+            get { return selectedLayer; }
+            set
+            {
+                selectedLayer = MathHelper.Mod(value, DepthPeeler.LayerCount);
+            }
+        }
+        private int selectedPackedLayer = 0;
+        private int SelectedPackedLayer
+        {
+            get { return selectedPackedLayer; }
+            set
+            {
+                selectedPackedLayer = MathHelper.Mod(value, DepthPeeler.PackedLayerCount);
+            }
+        }
+
+        LayerType selectedLayerType = LayerType.ColorImage;
 
         public void Draw()
         {
@@ -21,45 +40,63 @@
             GL.ClearColor(0f, 0f, 0f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            uint texId = (showColor ? DepthPeeler.ColorTextures : DepthPeeler.DepthTextures)[selectedLayer];
+            uint texId = GetTexture();
             GL.BindTexture(TextureTarget.Texture2D, texId);
             LayerHelper.DrawQuad();
             GL.BindTexture(TextureTarget.Texture2D, 0);
+        }
+
+        private uint GetTexture()
+        {
+            switch (selectedLayerType)
+            {
+                case LayerType.ColorImage:
+                    return DepthPeeler.ColorTextures[selectedLayer];
+                case LayerType.DepthImage:
+                    return DepthPeeler.DepthTextures[selectedLayer];
+                case LayerType.PackedDepthImage:
+                    return DepthPeeler.PackedDepthTextures[selectedPackedLayer];
+                default:
+                    Debug.Assert(false);
+                    return 0;
+            }
         }
 
         public override void OnKeyUp(object sender, KeyboardKeyEventArgs e)
         {
             base.OnKeyUp(sender, e);
 
+            if (!Enabled)
+            {
+                return;
+            }
+
             if (e.Key == Key.P)
             {
-                selectedLayer = Mod(selectedLayer + 1, DepthPeeler.LayerCount);
+                SelectedLayer += 1;
+                SelectedPackedLayer += 1;
             }
             else if (e.Key == Key.O)
             {
-                selectedLayer = Mod(selectedLayer - 1, DepthPeeler.LayerCount);
+                SelectedLayer -= 1;
+                SelectedPackedLayer -= 1;
+            }
+            else if (e.Key == Key.U)
+            {
+                SelectedLayer = 0;
+                SelectedPackedLayer = 0;
             }
             else if (e.Key == Key.Tab)
             {
-                showColor = !showColor;
+                selectedLayerType = (LayerType)MathHelper.Mod(((int)selectedLayerType + 1), Enum.GetValues(typeof(LayerType)).Length);
             }
         }
 
-        /// <summary>
-        /// Compute the modular division of a given number taking care even of
-        /// negative numbers.
-        /// </summary>
-        /// <remarks>
-        /// Converts a given number N from the Z group into the Z/M group
-        /// where M is the modulus.
-        /// </remarks>
-        /// <param name="number"></param>
-        /// <param name="modulus"></param>
-        /// <returns></returns>
-        public static int Mod(int number, int modulus)
+        enum LayerType
         {
-            int r = number % modulus;
-            return r >= 0 ? r : r + modulus;
+            ColorImage = 0,
+            DepthImage,
+            PackedDepthImage
         }
     }
 }
