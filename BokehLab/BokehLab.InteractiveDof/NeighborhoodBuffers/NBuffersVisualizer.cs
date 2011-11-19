@@ -3,6 +3,7 @@
     using System.Diagnostics;
     using BokehLab.InteractiveDof;
     using BokehLab.Math;
+    using OpenTK;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
 
@@ -17,9 +18,28 @@
             get { return selectedLayer; }
             set
             {
-                selectedLayer = MathHelper.Mod(value, NBuffers.LayerCount);
+                selectedLayer = BokehLab.Math.MathHelper.Mod(value, NBuffers.LayerCount);
             }
         }
+
+        static readonly string VertexShaderPath = "NeighborhoodBuffers/NBuffersVS.glsl";
+        static readonly string FragmentShaderPath = "NeighborhoodBuffers/VisualizerFS.glsl";
+
+        int vertexShader;
+        int fragmentShader;
+        int shaderProgram;
+
+        private int selectedColorMask = 0;
+        private int SelectedColorMask
+        {
+            get { return selectedColorMask; }
+            set
+            {
+                selectedColorMask = BokehLab.Math.MathHelper.Mod(value, colorMasks.Length);
+            }
+        }
+
+        Vector2[] colorMasks = { new Vector2(1, 1), new Vector2(1, 0), new Vector2(0, 1) };
 
         public void Draw()
         {
@@ -28,10 +48,18 @@
             GL.ClearColor(0f, 0f, 0f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            uint texId = NBuffers.NBuffersTextures[selectedLayer];
-            GL.BindTexture(TextureTarget.Texture2D, texId);
+            GL.UseProgram(shaderProgram);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "nBufferLayerTexture"), 0);
+            GL.Uniform2(GL.GetUniformLocation(shaderProgram, "colorMask"), colorMasks[selectedColorMask]);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, NBuffers.NBuffersTextures[selectedLayer]);
+
             LayerHelper.DrawQuad();
+
             GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            GL.UseProgram(0);
         }
 
         public override void OnKeyUp(object sender, KeyboardKeyEventArgs e)
@@ -51,10 +79,36 @@
             {
                 SelectedLayer -= 1;
             }
+            if (e.Key == Key.Tab)
+            {
+                SelectedColorMask += 1;
+            }
             else if (e.Key == Key.U)
             {
                 SelectedLayer = 0;
+                SelectedColorMask = 0;
             }
+        }
+
+        public override void Initialize(int width, int height)
+        {
+            base.Initialize(width, height);
+
+            ShaderLoader.CreateShaderFromFiles(
+               VertexShaderPath, FragmentShaderPath,
+               out vertexShader, out fragmentShader, out shaderProgram);
+        }
+
+        public override void Dispose()
+        {
+            if (shaderProgram != 0)
+                GL.DeleteProgram(shaderProgram);
+            if (vertexShader != 0)
+                GL.DeleteShader(vertexShader);
+            if (fragmentShader != 0)
+                GL.DeleteShader(fragmentShader);
+
+            base.Dispose();
         }
     }
 }

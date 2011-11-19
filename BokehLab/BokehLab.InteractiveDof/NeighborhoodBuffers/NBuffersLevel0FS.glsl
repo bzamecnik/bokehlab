@@ -17,7 +17,7 @@ void main() {
 	vec4 depth = texture2D(packedDepthTexture, coords);
 	float minValue = vecMin(depth);
 	float maxValue = vecMax(depth);
-	//float minValue = depth.x;
+	//float minValue = depth.x; // visualize just the first layers
 	//float maxValue = depth.x;
 	
 	gl_FragColor = vec4(minValue, maxValue, 0, 0);
