@@ -289,10 +289,10 @@
 
             // N-buffer levels containing min and max value in (x, y) components -> RG
 
-            GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
-            GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rg16f, width, height, LayerCount, 0, PixelFormat.Rg, PixelType.HalfFloat, IntPtr.Zero);
             // min/max N-buffers
 
+            GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
+            GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rg32f, width, height, LayerCount, 0, PixelFormat.Rg, PixelType.Float, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
