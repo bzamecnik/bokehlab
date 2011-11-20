@@ -238,7 +238,7 @@
 
             // setup depth texture
             GL.BindTexture(TextureTarget.Texture2DArray, packedDepthTextures);
-            GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rgba32f, width, height, PackedLayerCount, 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+            GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rgba16f, width, height, PackedLayerCount, 0, PixelFormat.Rgba, PixelType.HalfFloat, IntPtr.Zero);
             //GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rgba, width, height, PackedLayerCount, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             //GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);

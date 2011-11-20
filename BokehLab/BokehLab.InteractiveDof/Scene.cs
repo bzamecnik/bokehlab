@@ -28,6 +28,7 @@
             //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Ormesh-05.obj"));
             //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Fungau.obj"));
             //texture = LoadTex(Path.Combine(ResourcePath, "checker_large.gif"));
+            //texture = LoadTex(Path.Combine(ResourcePath, "dirt_01.jpg"));
             //mesh = new Mesh(Path.Combine(ResourcePath, "teapot.obj"));
 
             //mesh = new Mesh(Path.Combine(ResourcePath, "dragon_vrip_res2.obj"));

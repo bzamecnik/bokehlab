@@ -396,7 +396,7 @@ vec3 intersectHeightField(vec3 lensPos, vec3 rayDirection) {
 	vec3 dir = end - start;
 	vec3 clippedStart = start;
 	vec3 clippedEnd = end;
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 1; i++) {
 		// corner position and size of bounding rectangle of the ray footprint
 		vec2 rectPosition = min(clippedStart.xy, clippedEnd.xy);
 		vec2 rectSize = abs(clippedEnd.xy - clippedStart.xy);
@@ -406,12 +406,15 @@ vec3 intersectHeightField(vec3 lensPos, vec3 rayDirection) {
 		
 		//return vec3(length(rectSizeInPixels) > 10, 0, 0);
 		
-		//if (dot(rectSizeInPixels,rectSizeInPixels) > 20) {
+		bool shouldClip = dot(rectSizeInPixels, rectSizeInPixels) > 10;
+		//if (dot(rectSizeInPixels, rectSizeInPixels) > 20) {
 		//if (length(rectSizeInPixels) > 10) {
-			vec2 minMaxDepth = queryMinMaxNBuffers(rectPosition, rectSize);
+		vec2 minMaxDepth = queryMinMaxNBuffers(rectPosition, rectSize);
 			//return vec3(minMaxDepth, 0);
+		if (shouldClip){
 			clippedStart = start + (minMaxDepth.r - 0.005) * dir;
 			clippedEnd = start + minMaxDepth.g * dir;
+		}
 		//}
 	}
 

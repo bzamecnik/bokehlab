@@ -25,7 +25,8 @@
         int pixelSamplesTexture;
 
         // number of samples rendered in a single rendering cycle
-        int lensSampleCount = 2 * 2;
+        //int lensSampleCount = 2 * 2;
+        int lensSampleCount = 3 * 3;
         int lensSampleTileSize = 128;
         int totalSampleCount;
         float totalSampleCountInv;

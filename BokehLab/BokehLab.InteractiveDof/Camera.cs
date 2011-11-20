@@ -144,7 +144,7 @@
             }
         }
 
-        private float far = 50f;
+        private float far = 100f;
         /// <summary>
         /// Unsigned far plane distance. The plane lies on -Far.
         /// </summary>
