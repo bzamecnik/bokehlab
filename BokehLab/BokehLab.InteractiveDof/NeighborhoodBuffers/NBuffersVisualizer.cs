@@ -51,9 +51,10 @@
             GL.UseProgram(shaderProgram);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "nBufferLayerTexture"), 0);
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "colorMask"), colorMasks[selectedColorMask]);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "layer"), selectedLayer);
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, NBuffers.NBuffersTextures[selectedLayer]);
+            GL.BindTexture(TextureTarget.Texture2DArray, NBuffers.NBuffersTextures);
 
             LayerHelper.DrawQuad();
 

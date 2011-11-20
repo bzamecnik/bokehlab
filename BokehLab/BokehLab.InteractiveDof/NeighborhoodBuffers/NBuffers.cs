@@ -15,8 +15,8 @@
         static readonly string FragmentShaderPath = "NeighborhoodBuffers/NBuffersFS.glsl";
         static readonly string Level0FragmentShaderPath = "NeighborhoodBuffers/NBuffersLevel0FS.glsl";
 
-        uint[] nBuffersTextures;
-        public uint[] NBuffersTextures { get { return nBuffersTextures; } }
+        uint nBuffersTextureArray;
+        public uint NBuffersTextures { get { return nBuffersTextureArray; } }
 
         // previous n-buffer texture which gets the border color for min calculation
         uint prevMinTexture;
@@ -48,7 +48,7 @@
             // NOTE: we are only considering the first 4 depth layers packed into 1 image
 
             // - create the level 0 N-buffer from the original packedDepthTexture
-            //   - TODO: at best copy it at 1/4 resolution using mip-mapping
+            //   - copy it at 1/4 resolution (using mip-mapping??)
             // - create the rest of N-buffer level from the previous levels
             //   - for each level i in [1; LevelCount]:
             //     - attach level i-1 as the source texture
@@ -67,7 +67,6 @@
             //}
 
             GL.PushAttrib(AttribMask.ViewportBit);
-
             GL.Viewport(0, 0, nbuffersWidth, nbuffersHeight);
 
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
@@ -84,11 +83,46 @@
 
             GL.Uniform1(GL.GetUniformLocation(level0shaderProgram, "packedDepthTexture"), 0);
 
-            GL.Ext.FramebufferTexture2D(
+            GL.Ext.FramebufferTextureLayer(
                     FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
-                    TextureTarget.Texture2D, nBuffersTextures[0], 0);
+                    nBuffersTextureArray, 0, 0); // layer 0
 
             LayerHelper.DrawQuad();
+
+            // -- DEBUG --
+
+            //GL.UseProgram(0);
+
+            //GL.ActiveTexture(TextureUnit.Texture0);
+            //GL.BindTexture(TextureTarget.Texture2D, prevMinTexture);
+            //// copy the source texture from the frame buffer to the destination texture
+            //GL.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, nbuffersWidth, nbuffersHeight);
+
+            //GL.UseProgram(shaderProgram);
+
+            ////GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+
+            //Vector3 offset = new Vector3(1.0f / nbuffersWidth, 1.0f / nbuffersHeight, 0);
+
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMinTexture"), 0);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMaxTexture"), 1);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevel"), 0);
+            //GL.Uniform3(GL.GetUniformLocation(shaderProgram, "offset"), offset);
+
+            //GL.ActiveTexture(TextureUnit.Texture1);
+            //GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
+
+            //GL.ActiveTexture(TextureUnit.Texture0);
+            //GL.BindTexture(TextureTarget.Texture2D, prevMinTexture);
+
+            //GL.Ext.FramebufferTextureLayer(
+            //    FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+            //    nBuffersTextureArray, 0, 1);
+
+            //LayerHelper.DrawQuad();
+
+            // -- DEBUG --
+
 
             // the following levels are constructed from the previous ones (with offsets)
 
@@ -100,9 +134,17 @@
 
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMinTexture"), 0);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMaxTexture"), 1);
+
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, prevMinTexture);
+
             for (int i = 1; i < LayerCount; i++)
             {
                 GL.Uniform3(GL.GetUniformLocation(shaderProgram, "offset"), offset);
+                GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevel"), i - 1);
 
                 // NOTE: Although it is not possible to bind a single texture
                 // to multiple texture units the border color is unique to the
@@ -110,17 +152,15 @@
                 // So it is needed to duplicate the previous texture to a texture
                 // with a different border color.
 
-                CopyTexture(nBuffersTextures[i - 1], prevMinTexture, nbuffersWidth, nbuffersHeight);
+                //CopyTextureFromArray(nBuffersTextureArray, i - 1, prevMinTexture, nbuffersWidth, nbuffersHeight);
 
-                GL.Ext.FramebufferTexture2D(
+                // copy the source texture from the frame buffer to the destination texture
+                // nBuffersTextureArray layer (i - 1) -> prevMinTexture
+                GL.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, nbuffersWidth, nbuffersHeight);
+
+                GL.Ext.FramebufferTextureLayer(
                     FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
-                    TextureTarget.Texture2D, nBuffersTextures[i], 0);
-
-                GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, prevMinTexture);
-
-                GL.ActiveTexture(TextureUnit.Texture1);
-                GL.BindTexture(TextureTarget.Texture2D, nBuffersTextures[i - 1]);
+                    nBuffersTextureArray, 0, i);
 
                 LayerHelper.DrawQuad();
 
@@ -138,7 +178,7 @@
 
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
 
-            GL.PopAttrib();
+            GL.PopAttrib(); // ViewportBit
 
             //for (int i = 0; i < LayerCount; i++)
             //{
@@ -149,27 +189,49 @@
             //GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        /// <summary>
-        /// Copy the source texture to the destination one.
-        /// </summary>
-        /// <remarks>
-        /// Assume that both textures are set up. Assume the FBO is bound.
-        /// </remarks>
-        /// <param name="source"></param>
-        /// <param name="dest"></param>
-        private void CopyTexture(uint source, uint dest, int width, int height)
-        {
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, dest);
-            GL.Ext.FramebufferTexture2D(
-                FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
-                TextureTarget.Texture2D, source, 0);
-            // copy the source texture from the frame buffer to the destination texture
-            GL.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, width, height);
-            GL.Ext.FramebufferTexture2D(
-                FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
-                TextureTarget.Texture2D, 0, 0);
-        }
+        ///// <summary>
+        ///// Copy the source texture to the destination one.
+        ///// </summary>
+        ///// <remarks>
+        ///// Assume that both textures are set up. Assume the FBO is bound.
+        ///// </remarks>
+        ///// <param name="source"></param>
+        ///// <param name="dest"></param>
+        //private void CopyTexture(uint source, uint dest, int width, int height)
+        //{
+        //    GL.ActiveTexture(TextureUnit.Texture0);
+        //    GL.BindTexture(TextureTarget.Texture2D, dest);
+        //    GL.Ext.FramebufferTexture2D(
+        //        FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+        //        TextureTarget.Texture2D, source, 0);
+        //    // copy the source texture from the frame buffer to the destination texture
+        //    GL.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, width, height);
+        //    GL.Ext.FramebufferTexture2D(
+        //        FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+        //        TextureTarget.Texture2D, 0, 0);
+        //}
+
+        ///// <summary>
+        ///// Copy the source texture to the destination one.
+        ///// </summary>
+        ///// <remarks>
+        ///// Assume that both textures are set up. Assume the FBO is bound.
+        ///// </remarks>
+        ///// <param name="source"></param>
+        ///// <param name="dest"></param>
+        //private void CopyTextureFromArray(uint source, int sourceLayer, uint dest, int width, int height)
+        //{
+        //    GL.ActiveTexture(TextureUnit.Texture0);
+        //    GL.BindTexture(TextureTarget.Texture2D, dest);
+        //    GL.Ext.FramebufferTextureLayer(
+        //        FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+        //        source, 0, sourceLayer);
+        //    // copy the source texture from the frame buffer to the destination texture
+        //    GL.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, width, height);
+        //    GL.Ext.FramebufferTextureLayer(
+        //        FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
+        //        0, 0, 0);
+        //}
 
         #region IRendererModule Members
 
@@ -214,10 +276,10 @@
 
         protected override void Enable()
         {
-            nbuffersWidth = Width;
-            nbuffersHeight = Height;
-            //nbuffersWidth = Width / 2;
-            //nbuffersHeight = Height / 2;
+            //nbuffersWidth = Width;
+            //nbuffersHeight = Height;
+            nbuffersWidth = Width / 2;
+            nbuffersHeight = Height / 2;
 
             // for sinle-value queries this level is sufficient:
             LayerCount = (int)Math.Ceiling(Math.Log(Math.Max(nbuffersWidth, nbuffersHeight), 2));
@@ -228,8 +290,10 @@
 
         protected override void Disable()
         {
-            if (nBuffersTextures != null)
-                GL.DeleteTextures(nBuffersTextures.Length, nBuffersTextures);
+            if (nBuffersTextureArray != 0)
+                GL.DeleteTexture(nBuffersTextureArray);
+            if (prevMinTexture != 0)
+                GL.DeleteTexture(prevMinTexture);
         }
 
         #endregion
@@ -241,31 +305,31 @@
                 throw new ArgumentException("At least one layer is needed.");
             }
 
-            nBuffersTextures = new uint[LayerCount];
-            GL.GenTextures(LayerCount, nBuffersTextures);
+            nBuffersTextureArray = (uint)GL.GenTexture();
             prevMinTexture = (uint)GL.GenTexture();
 
-            for (int i = 0; i < LayerCount; i++)
-            {
-                SetTextureParameters(nBuffersTextures[i], width, height);
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, new float[] { 0, 0, 0, 0 });  // for max N-buffers
-            }
+            // N-buffer levels containing min and max value in (x, y) components -> RG
 
-            SetTextureParameters(prevMinTexture, width, height);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, new float[] { 1, 1, 1, 1 });  // for min N-buffers
+            // for min/max N-buffers (computing maxiumum - border se to 0.0)
+            GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
+            GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rg16f, width, height, LayerCount, 0, PixelFormat.Rg, PixelType.HalfFloat, IntPtr.Zero);
+            SetTextureParameters(nBuffersTextureArray, TextureTarget.Texture2DArray, width, height, new float[] { 0, 0, 0, 0 });
+
+            // a special texture for computing minimum - border set to 1.0
+            GL.BindTexture(TextureTarget.Texture2D, prevMinTexture);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rg16f, width, height, 0, PixelFormat.Rg, PixelType.HalfFloat, IntPtr.Zero);
+            SetTextureParameters(prevMinTexture, TextureTarget.Texture2D, width, height, new float[] { 1, 1, 1, 1 });
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
-        private static void SetTextureParameters(uint textureId, int width, int height)
+        private static void SetTextureParameters(uint textureId, TextureTarget type, int width, int height, float[] borderColor)
         {
-            GL.BindTexture(TextureTarget.Texture2D, textureId);
-            // N-buffer levels containing min and max value in (x, y) components
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rg16f, width, height, 0, PixelFormat.Rg, PixelType.HalfFloat, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(type, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(type, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(type, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(type, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(type, TextureParameterName.TextureBorderColor, borderColor);
         }
     }
 }

@@ -21,6 +21,7 @@ void main() {
 	//float maxValue = depth.x;
 	
 	gl_FragColor = vec4(minValue, maxValue, 0, 0);
+	
 	//gl_FragColor = vec4(depth.rgb, 1);
 	//gl_FragColor = vec4(1, 1, 0, 1);
 }
