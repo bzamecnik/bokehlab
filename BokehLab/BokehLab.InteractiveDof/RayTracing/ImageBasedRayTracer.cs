@@ -198,7 +198,7 @@
             int textureSize = groupSize * tileSize * tileSize;
 
             Sampler sampler = new Sampler();
-            IntPtr texturePtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(float)) * textureSize);
+            IntPtr texturePtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Half)) * textureSize);
             unsafe
             {
                 int zStride = bands * tileSize * tileSize;
@@ -206,7 +206,7 @@
                 {
                     for (int x = 0; x < tileSize; x++)
                     {
-                        float* row = (float*)texturePtr + bands * (y * tileSize + x);
+                        Half* row = (Half*)texturePtr + bands * (y * tileSize + x);
                         int index = 0;
                         // Z dimension, totalSampleCount times
                         foreach (Vector2d sample in
@@ -214,8 +214,8 @@
                         {
                             Vector2d lensPos = Sampler.ConcentricSampleDisk(sample);
                             //2 * (sample - new Vector2d(0.5, 0.5));
-                            row[index] = (float)lensPos.X;
-                            row[index + 1] = (float)lensPos.Y;
+                            row[index] = (Half)lensPos.X;
+                            row[index + 1] = (Half)lensPos.Y;
                             index += zStride;
                         }
                     }
@@ -224,9 +224,9 @@
 
             // TODO: could be an half float or unsigned byte instead of a float
             // TODO: two sample pair could be stored in one 4-channel value
-            GL.TexImage3D(TextureTarget.Texture3D, 0, PixelInternalFormat.Rg32f,
+            GL.TexImage3D(TextureTarget.Texture3D, 0, PixelInternalFormat.Rg16f,
                 tileSize, tileSize, totalSampleCount, 0,
-                PixelFormat.Rg, PixelType.Float, texturePtr);
+                PixelFormat.Rg, PixelType.HalfFloat, texturePtr);
 
             // TODO: when to unallocate the buffer?
 
