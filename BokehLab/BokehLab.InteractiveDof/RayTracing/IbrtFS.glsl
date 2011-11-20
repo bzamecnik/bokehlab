@@ -373,6 +373,35 @@ vec3 intersectHeightFieldPerPixel(vec3 startPos, vec3 endPos) {
 	return color;
 }
 
+void clipRayByNBuffers(vec3 start, vec3 end, out vec3 clippedStart, out vec3 clippedEnd) {
+	// clip the footprint (iteratively) by using N-buffers
+	// - repeat several times:
+	//   - find min/max depth in rectangle (start, end - start)
+	//   - find new ray start and end points at depths min, max
+	
+	vec3 dir = end - start;
+	clippedStart = start;
+	clippedEnd = end;
+	for (int i = 0; i < 1; i++) {
+		// corner position and size of bounding rectangle of the ray footprint
+		vec2 rectPosition = min(clippedStart.xy, clippedEnd.xy);
+		vec2 rectSize = abs(clippedEnd.xy - clippedStart.xy);
+		vec2 rectSizeInPixels = rectSize * nBuffersSize;
+		
+		vec2 minMaxDepth = queryMinMaxNBuffers(rectPosition, rectSize);
+		// NOTE: Only accelerate when the footprint is not small.
+		// The down-sampled N-buffers edges look blocky.
+		// Also it seems that conditional texture lookups are bad for performance.
+		// length(rectSizeInPixels) > N <=> (length(rectSizeInPixels))^2 > N^2
+		if (dot(rectSizeInPixels, rectSizeInPixels) > 10) {
+			// move the start a bit back to prevent skipping the layers where
+			// the minimum occurs
+			clippedStart = start + (minMaxDepth.r - 0.005) * dir;
+			clippedEnd = start + minMaxDepth.g * dir;
+		}
+	}
+}
+
 // Intersect the height field with a ray starting at the
 // position 'lensPos' going to the 'rayDirection' direction.
 //
@@ -388,45 +417,14 @@ vec3 intersectHeightField(vec3 lensPos, vec3 rayDirection) {
     vec3 endCamera = lensPos + (-far) * rayDirection;
     vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
 
-	// TODO: clip the footprint (iteratively) by using N-buffers
-	// - repeat several times:
-	//   - find min/max depth in rectangle (start, end - start)
-	//   - find new ray start and end points at depths min, max
-	
-	vec3 dir = end - start;
-	vec3 clippedStart = start;
-	vec3 clippedEnd = end;
-	for (int i = 0; i < 1; i++) {
-		// corner position and size of bounding rectangle of the ray footprint
-		vec2 rectPosition = min(clippedStart.xy, clippedEnd.xy);
-		vec2 rectSize = abs(clippedEnd.xy - clippedStart.xy);
-		vec2 rectSizeInPixels = rectSize * nBuffersSize;
-		// only accelerate when the footprint is large
-		// length(rectSizeInPixels) > N <=> (length(rectSizeInPixels))^2 > N^2
-		
-		//return vec3(length(rectSizeInPixels) > 10, 0, 0);
-		
-		bool shouldClip = dot(rectSizeInPixels, rectSizeInPixels) > 10;
-		//if (dot(rectSizeInPixels, rectSizeInPixels) > 20) {
-		//if (length(rectSizeInPixels) > 10) {
-		vec2 minMaxDepth = queryMinMaxNBuffers(rectPosition, rectSize);
-			//return vec3(minMaxDepth, 0);
-		if (shouldClip){
-			clippedStart = start + (minMaxDepth.r - 0.005) * dir;
-			clippedEnd = start + minMaxDepth.g * dir;
-		}
-		//}
-	}
+	vec3 clippedStart;
+	vec3 clippedEnd;
+	clipRayByNBuffers(start, end, clippedStart, clippedEnd);
 
 	//return intersectHeightFieldLinear(start, end);
 	//return intersectHeightFieldLinearDiscontinuousThenBinary(start, end);
 	//return intersectHeightFieldPerPixel(start, end);
 	return intersectHeightFieldPerPixel(clippedStart, clippedEnd);
-	//return clippedStart;
-	//return clippedStart - start;
-	//return end - clippedEnd;
-	//return vec3(clippedEnd.xy - clippedStart.xy, 0);
-	//return vec3(end.xy - start.xy, 0);
 }
 
 //vec3 transformPoint(mat4 matrix, vec3 point) {
