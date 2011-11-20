@@ -18,9 +18,6 @@
         uint nBuffersTextureArray;
         public uint NBuffersTextures { get { return nBuffersTextureArray; } }
 
-        // previous n-buffer texture which gets the border color for min calculation
-        uint prevMinTexture;
-
         uint fboHandle;
         public uint FboHandle { get; set; }
 
@@ -34,6 +31,8 @@
 
         int nbuffersWidth;
         int nbuffersHeight;
+
+        public Vector2 Size { get { return new Vector2(nbuffersWidth, nbuffersHeight); } }
 
         /// <summary>
         /// The NBuffer level (number of layers to cover the least square into
@@ -131,31 +130,15 @@
             // (1,1,0) converted from [width; height] to [0.0; 1.0]^2 texture coordinates
             Vector3 offset = new Vector3(1.0f / nbuffersWidth, 1.0f / nbuffersHeight, 0);
 
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMinTexture"), 0);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelMaxTexture"), 1);
-
-            GL.ActiveTexture(TextureUnit.Texture1);
-            GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevelTexture"), 0);
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, prevMinTexture);
+            GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
 
             for (int i = 1; i < LayerCount; i++)
             {
                 GL.Uniform3(GL.GetUniformLocation(shaderProgram, "offset"), offset);
                 GL.Uniform1(GL.GetUniformLocation(shaderProgram, "prevLevel"), i - 1);
-
-                // NOTE: Although it is not possible to bind a single texture
-                // to multiple texture units the border color is unique to the
-                // texture itself, not the texture unit (it get overwritten).
-                // So it is needed to duplicate the previous texture to a texture
-                // with a different border color.
-
-                //CopyTextureFromArray(nBuffersTextureArray, i - 1, prevMinTexture, nbuffersWidth, nbuffersHeight);
-
-                // copy the source texture from the frame buffer to the destination texture
-                // nBuffersTextureArray layer (i - 1) -> prevMinTexture
-                GL.CopyTexSubImage2D(TextureTarget.Texture2D, 0, 0, 0, 0, 0, nbuffersWidth, nbuffersHeight);
 
                 GL.Ext.FramebufferTextureLayer(
                     FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
@@ -291,8 +274,6 @@
         {
             if (nBuffersTextureArray != 0)
                 GL.DeleteTexture(nBuffersTextureArray);
-            if (prevMinTexture != 0)
-                GL.DeleteTexture(prevMinTexture);
         }
 
         #endregion
@@ -305,30 +286,22 @@
             }
 
             nBuffersTextureArray = (uint)GL.GenTexture();
-            prevMinTexture = (uint)GL.GenTexture();
 
             // N-buffer levels containing min and max value in (x, y) components -> RG
 
-            // for min/max N-buffers (computing maxiumum - border se to 0.0)
             GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
             GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rg16f, width, height, LayerCount, 0, PixelFormat.Rg, PixelType.HalfFloat, IntPtr.Zero);
-            SetTextureParameters(nBuffersTextureArray, TextureTarget.Texture2DArray, width, height, new float[] { 0, 0, 0, 0 });
+            // min/max N-buffers
 
-            // a special texture for computing minimum - border set to 1.0
-            GL.BindTexture(TextureTarget.Texture2D, prevMinTexture);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rg16f, width, height, 0, PixelFormat.Rg, PixelType.HalfFloat, IntPtr.Zero);
-            SetTextureParameters(prevMinTexture, TextureTarget.Texture2D, width, height, new float[] { 1, 1, 1, 1 });
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+            // - minimum (R) - border set to 1.0
+            // - maxiumum (G) - border se to 0.0
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureBorderColor, new float[] { 1, 0, 0, 0 });
 
-            GL.BindTexture(TextureTarget.Texture2D, 0);
-        }
-
-        private static void SetTextureParameters(uint textureId, TextureTarget type, int width, int height, float[] borderColor)
-        {
-            GL.TexParameter(type, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(type, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(type, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
-            GL.TexParameter(type, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
-            GL.TexParameter(type, TextureParameterName.TextureBorderColor, borderColor);
+            GL.BindTexture(TextureTarget.Texture2DArray, 0);
         }
     }
 }

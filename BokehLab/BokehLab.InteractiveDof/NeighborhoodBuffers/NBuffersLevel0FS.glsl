@@ -7,20 +7,14 @@
 uniform sampler2DArray packedDepthTexture;
 uniform int layer;
 
-float vecMin(vec4 vector) {
-	return min(min(vector.x, vector.y), min(vector.z, vector.w));
-}
-
-float vecMax(vec4 vector) {
-	return max(max(vector.x, vector.y), max(vector.z, vector.w));
-}
-
 void main() {
 	vec2 coords = gl_TexCoord[0].st;
 
 	vec4 depth = texture2DArray(packedDepthTexture, vec3(coords, layer));
-	float minValue = vecMin(depth);
-	float maxValue = vecMax(depth);
+	//float minValue = vecMin(depth);
+	//float maxValue = vecMax(depth);
+	float minValue = min(min(depth.x, depth.y), min(depth.z, depth.w));
+	float maxValue = max(max(depth.x, depth.y), max(depth.z, depth.w));
 	//float minValue = depth.x; // visualize just the first layers
 	//float maxValue = depth.x;
 	
