@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Text;
@@ -10,6 +11,15 @@
 
     public class ShaderLoader
     {
+        /// <summary>
+        /// Create a shader program with a single vertex and and single
+        /// fragment shader given paths to shader source codes.
+        /// </summary>
+        /// <param name="vsPath"></param>
+        /// <param name="fsPath"></param>
+        /// <param name="vertexShaderObject"></param>
+        /// <param name="fragmentShaderObject"></param>
+        /// <param name="shaderProgram"></param>
         public static void CreateShaderFromFiles(
             string vsPath,
             string fsPath,
@@ -20,56 +30,90 @@
             using (StreamReader vs = new StreamReader(vsPath))
             using (StreamReader fs = new StreamReader(fsPath))
             {
-                CreateShaders(vs.ReadToEnd(), fs.ReadToEnd(),
-                    out vertexShaderObject, out fragmentShaderObject,
-                    out shaderProgram);
+                vertexShaderObject = CreateShader(vs.ReadToEnd(), ShaderType.VertexShader);
+                fragmentShaderObject = CreateShader(fs.ReadToEnd(), ShaderType.FragmentShader);
+                shaderProgram = CreateShaderProgram(new[] { vertexShaderObject }, new[] { fragmentShaderObject });
             }
         }
 
         /// <summary>
-        /// Create vertex and fragment shaders from source codes.
+        /// Craete a shader program 
         /// </summary>
-        /// <param name="vs">vertex shader source code</param>
-        /// <param name="fs">fragment shader source code</param>
-        /// <param name="vertexObject">vertex shader object id</param>
-        /// <param name="fragmentObject">fragment shader object id</param>
-        /// <param name="program">composite shader program id</param>
-        public static void CreateShaders(
-            string vs,
-            string fs,
-            out int vertexObject,
-            out int fragmentObject,
+        /// <param name="vsPaths"></param>
+        /// <param name="fsPaths"></param>
+        /// <param name="vertexShaderObjects"></param>
+        /// <param name="fragmentShaderObjects"></param>
+        /// <param name="shaderProgram"></param>
+        public static void CreateShadersFromFiles(
+            IEnumerable<string> vsPaths,
+            IEnumerable<string> fsPaths,
+            out IList<int> vertexShaderObjects,
+            out IList<int> fragmentShaderObjects,
             out int shaderProgram)
+        {
+            Debug.Assert((vsPaths != null) || (vsPaths.Count() > 0));
+            Debug.Assert((fsPaths != null) || (fsPaths.Count() > 0));
+
+            vertexShaderObjects = new List<int>(vsPaths.Count());
+            foreach (var path in vsPaths)
+            {
+                string source = File.ReadAllText(path);
+                int vsObject = CreateShader(source, ShaderType.VertexShader);
+                vertexShaderObjects.Add(vsObject);
+            }
+
+            fragmentShaderObjects = new List<int>(fsPaths.Count());
+            foreach (var path in fsPaths)
+            {
+                string source = File.ReadAllText(path);
+                int fsObject = CreateShader(source, ShaderType.FragmentShader);
+                fragmentShaderObjects.Add(fsObject);
+            }
+
+            shaderProgram = CreateShaderProgram(vertexShaderObjects, fragmentShaderObjects);
+        }
+
+        public static int CreateShaderProgram(IEnumerable<int> vertexObjects, IEnumerable<int> fragmentObjects)
+        {
+            int shaderProgram = GL.CreateProgram();
+
+            foreach (int fragmentObject in fragmentObjects)
+            {
+                GL.AttachShader(shaderProgram, fragmentObject);
+            }
+            foreach (int vertexObject in vertexObjects)
+            {
+                GL.AttachShader(shaderProgram, vertexObject);
+            }
+
+            GL.LinkProgram(shaderProgram);
+
+            return shaderProgram;
+        }
+
+        /// <summary>
+        /// Create a single shader from its source code.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static int CreateShader(string source, ShaderType type)
         {
             int statusCode;
             string info;
 
-            vertexObject = GL.CreateShader(ShaderType.VertexShader);
-            fragmentObject = GL.CreateShader(ShaderType.FragmentShader);
+            int shaderObject = GL.CreateShader(type);
 
-            // Compile vertex shader
-            GL.ShaderSource(vertexObject, vs);
-            GL.CompileShader(vertexObject);
-            GL.GetShaderInfoLog(vertexObject, out info);
-            GL.GetShader(vertexObject, ShaderParameter.CompileStatus, out statusCode);
+            GL.ShaderSource(shaderObject, source);
+            GL.CompileShader(shaderObject);
+            GL.GetShaderInfoLog(shaderObject, out info);
+            GL.GetShader(shaderObject, ShaderParameter.CompileStatus, out statusCode);
 
             if (statusCode != 1)
+            {
                 throw new ApplicationException(info);
+            }
 
-            // Compile vertex shader
-            GL.ShaderSource(fragmentObject, fs);
-            GL.CompileShader(fragmentObject);
-            GL.GetShaderInfoLog(fragmentObject, out info);
-            GL.GetShader(fragmentObject, ShaderParameter.CompileStatus, out statusCode);
-
-            if (statusCode != 1)
-                throw new ApplicationException(info);
-
-            shaderProgram = GL.CreateProgram();
-            GL.AttachShader(shaderProgram, fragmentObject);
-            GL.AttachShader(shaderProgram, vertexObject);
-
-            GL.LinkProgram(shaderProgram);
+            return shaderObject;
         }
     }
 }
