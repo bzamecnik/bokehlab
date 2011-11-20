@@ -4,7 +4,7 @@
 
 // TODO:
 // - N-buffer acceleration
-// - arrays of textures are possible
+// - use more than 4 layers
 
 // sensor size in camera space (width, height)
 uniform vec2 sensorSize;
@@ -41,6 +41,27 @@ uniform vec2 screenSize;
 uniform vec2 screenSizeInv;
 
 uniform vec2 cameraShift;
+
+
+uniform sampler2DArray nBuffersTexture;
+
+// N-buffers size in pixels (width, height)
+uniform vec2 nBuffersSize;
+
+// get min/max values in a rectangular window (pos, pos + size) in [0.0; 1.0]^2
+vec2 queryMinMaxNBuffers(vec2 position, vec2 size)
+{
+	vec2 rectSizeInPixels = size * nBuffersSize;
+	float maxSize = max(rectSizeInPixels.x, rectSizeInPixels.y);
+	int level = int(ceil(log2(maxSize)));
+	vec2 minmax = texture2DArray(nBuffersTexture, vec3(position, level)).rg;
+	return minmax;
+	////return vec2(level / float(ceil(log(max(nBuffersSize.x, nBuffersSize.y)) * ln2Inv)));
+	//return vec2(level / 8.0, 0);
+	//return size;
+	//return position;
+}
+
 
 // inverse frustum size (for a simplified frustum transform)
 // 1 / ((right - left), (top - bottom))
@@ -367,9 +388,42 @@ vec3 intersectHeightField(vec3 lensPos, vec3 rayDirection) {
     vec3 endCamera = lensPos + (-far) * rayDirection;
     vec3 end = vec3((endCamera.xy * nearOverFar - frustumBounds.yw) * frustumSizeInv, 1);
 
+	// TODO: clip the footprint (iteratively) by using N-buffers
+	// - repeat several times:
+	//   - find min/max depth in rectangle (start, end - start)
+	//   - find new ray start and end points at depths min, max
+	
+	vec3 dir = end - start;
+	vec3 clippedStart = start;
+	vec3 clippedEnd = end;
+	for (int i = 0; i < 3; i++) {
+		// corner position and size of bounding rectangle of the ray footprint
+		vec2 rectPosition = min(clippedStart.xy, clippedEnd.xy);
+		vec2 rectSize = abs(clippedEnd.xy - clippedStart.xy);
+		vec2 rectSizeInPixels = rectSize * nBuffersSize;
+		// only accelerate when the footprint is large
+		// length(rectSizeInPixels) > N <=> (length(rectSizeInPixels))^2 > N^2
+		
+		//return vec3(length(rectSizeInPixels) > 10, 0, 0);
+		
+		//if (dot(rectSizeInPixels,rectSizeInPixels) > 20) {
+		//if (length(rectSizeInPixels) > 10) {
+			vec2 minMaxDepth = queryMinMaxNBuffers(rectPosition, rectSize);
+			//return vec3(minMaxDepth, 0);
+			clippedStart = start + (minMaxDepth.r - 0.005) * dir;
+			clippedEnd = start + minMaxDepth.g * dir;
+		//}
+	}
+
 	//return intersectHeightFieldLinear(start, end);
 	//return intersectHeightFieldLinearDiscontinuousThenBinary(start, end);
-	return intersectHeightFieldPerPixel(start, end);
+	//return intersectHeightFieldPerPixel(start, end);
+	return intersectHeightFieldPerPixel(clippedStart, clippedEnd);
+	//return clippedStart;
+	//return clippedStart - start;
+	//return end - clippedEnd;
+	//return vec3(clippedEnd.xy - clippedStart.xy, 0);
+	//return vec3(end.xy - start.xy, 0);
 }
 
 //vec3 transformPoint(mat4 matrix, vec3 point) {

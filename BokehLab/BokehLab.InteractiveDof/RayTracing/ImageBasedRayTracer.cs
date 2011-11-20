@@ -1,11 +1,13 @@
 ﻿namespace BokehLab.InteractiveDof.RayTracing
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Runtime.InteropServices;
     using BokehLab.InteractiveDof;
     using BokehLab.InteractiveDof.DepthPeeling;
     using BokehLab.InteractiveDof.MultiViewAccum;
+    using BokehLab.InteractiveDof.NeighborhoodBuffers;
     using BokehLab.Math;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
@@ -13,10 +15,10 @@
     class ImageBasedRayTracer : IncrementalRenderer
     {
         static readonly string VertexShaderPath = "RayTracing/IbrtVS.glsl";
-        static readonly string FragmentShaderPath = "RayTracing/IbrtFS.glsl";
+        static readonly string IbrtFragmentShaderPath = "RayTracing/IbrtFS.glsl";
 
         int vertexShader;
-        int fragmentShader;
+        int ibrtFragmentShader;
         int shaderProgram;
 
         int[] lensSamplesTextures;
@@ -35,6 +37,7 @@
         float[] sensorTransform3x3;
 
         public DepthPeeler DepthPeeler { get; set; }
+        public NBuffers NBuffers { get; set; }
 
         public ImageBasedRayTracer()
             : base(SingleFrameIterations)
@@ -67,6 +70,8 @@
             GL.BindTexture(TextureTarget.Texture2DArray, DepthPeeler.PackedDepthTextures);
             GL.ActiveTexture(TextureUnit.Texture3);
             GL.BindTexture(TextureTarget.Texture2DArray, DepthPeeler.ColorTextures);
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2DArray, NBuffers.NBuffersTextures);
 
             // enable IBRT shader
             GL.UseProgram(shaderProgram);
@@ -76,6 +81,9 @@
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "pixelSamplesTexture"), 1);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "packedDepthTexture"), 2);
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "colorTexture"), 3);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "nBuffersTexture"), 4);
+
+            GL.Uniform2(GL.GetUniformLocation(shaderProgram, "nBuffersSize"), NBuffers.Size);
 
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "sensorSize"), camera.SensorSize);
             //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sensorZ"), camera.SensorZ);
@@ -104,6 +112,8 @@
             GL.UseProgram(0);
 
             // unbind textures
+            GL.ActiveTexture(TextureUnit.Texture4);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture3);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture2);
@@ -132,9 +142,8 @@
         {
             base.Initialize(width, height);
 
-            ShaderLoader.CreateShaderFromFiles(
-               VertexShaderPath, FragmentShaderPath,
-               out vertexShader, out fragmentShader, out shaderProgram);
+            ShaderLoader.CreateShaderFromFiles(VertexShaderPath, IbrtFragmentShaderPath,
+               out vertexShader, out ibrtFragmentShader, out shaderProgram);
 
             GL.Enable(EnableCap.Texture2D);
 
@@ -147,8 +156,8 @@
                 GL.DeleteProgram(shaderProgram);
             if (vertexShader != 0)
                 GL.DeleteShader(vertexShader);
-            if (fragmentShader != 0)
-                GL.DeleteShader(fragmentShader);
+            if (ibrtFragmentShader != 0)
+                GL.DeleteShader(ibrtFragmentShader);
 
             if (lensSamplesTextures != null)
                 GL.DeleteTextures(SingleFrameIterations, lensSamplesTextures);

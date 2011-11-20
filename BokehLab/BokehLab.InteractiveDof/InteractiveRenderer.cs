@@ -25,9 +25,9 @@
     public class InteractiveRenderer : GameWindow
     {
         public InteractiveRenderer()
-            : base(512, 512)
-        //: base(300, 200)
-        //: base(450, 300)
+            //: base(512, 512)
+            //: base(300, 200)
+            : base(450, 300)
         {
         }
 
@@ -90,6 +90,7 @@
             //transparency.DepthPeeler = depthPeeler;
             layerVisualizer.DepthPeeler = depthPeeler;
             nBuffersVisualizer.NBuffers = nBuffers;
+            ibrt.NBuffers = nBuffers;
 
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0f);
@@ -193,11 +194,13 @@
 
                 case Mode.ImageBasedRayTracing:
                     depthPeeler.PeelLayers(scene);
+                    nBuffers.CreateNBuffers(depthPeeler);
                     ibrt.DrawSingleFrame(scene, navigation);
                     //ImageBasedRayTracer.IbrtPlayground.TraceRay(navigation.Camera);
                     break;
                 case Mode.IncrementalImageBasedRayTracing:
                     depthPeeler.PeelLayers(scene);
+                    nBuffers.CreateNBuffers(depthPeeler);
                     ibrt.AccumulateAndDraw(scene, navigation);
                     cumulativeMilliseconds = ibrt.CumulativeMilliseconds;
                     break;
@@ -277,6 +280,7 @@
                     }
                     depthPeeler.Enabled = true;
                     ibrt.Enabled = true;
+                    nBuffers.Enabled = true;
                     renderingMode = Mode.ImageBasedRayTracing;
                     navigation.IsViewDirty = true;
                 }
@@ -291,6 +295,7 @@
                     }
                     depthPeeler.Enabled = true;
                     ibrt.Enabled = true;
+                    nBuffers.Enabled = true;
                     renderingMode = Mode.IncrementalImageBasedRayTracing;
                     navigation.IsViewDirty = true;
                 }
