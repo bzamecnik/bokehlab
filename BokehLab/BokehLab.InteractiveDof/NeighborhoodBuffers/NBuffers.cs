@@ -135,6 +135,8 @@
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
 
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureBorderColor, new float[] { 1, 0, 0, 0 });
+
             for (int i = 1; i < LayerCount; i++)
             {
                 GL.Uniform3(GL.GetUniformLocation(shaderProgram, "offset"), offset);
@@ -148,6 +150,8 @@
 
                 offset *= 2.0f;
             }
+
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureBorderColor, new float[] { 0, 1, 0, 0 });
 
             GL.DepthFunc(DepthFunction.Less);
 
@@ -293,8 +297,8 @@
 
             GL.BindTexture(TextureTarget.Texture2DArray, nBuffersTextureArray);
             GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rg32f, width, height, LayerCount, 0, PixelFormat.Rg, PixelType.Float, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
             // - minimum (R) - border set to 1.0
