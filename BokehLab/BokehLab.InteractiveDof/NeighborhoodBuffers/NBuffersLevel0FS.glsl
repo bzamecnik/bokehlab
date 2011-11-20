@@ -1,7 +1,11 @@
-﻿// produces the next min/max N-buffer level either from the original packed
+﻿#version 120
+#extension GL_EXT_texture_array : enable
+
+// produces the next min/max N-buffer level either from the original packed
 // depth texture taking the extreme value from each vector component
 
-uniform sampler2D packedDepthTexture;
+uniform sampler2DArray packedDepthTexture;
+uniform int layer;
 
 float vecMin(vec4 vector) {
 	return min(min(vector.x, vector.y), min(vector.z, vector.w));
@@ -14,7 +18,7 @@ float vecMax(vec4 vector) {
 void main() {
 	vec2 coords = gl_TexCoord[0].st;
 
-	vec4 depth = texture2D(packedDepthTexture, coords);
+	vec4 depth = texture2DArray(packedDepthTexture, vec3(coords, layer));
 	float minValue = vecMin(depth);
 	float maxValue = vecMax(depth);
 	//float minValue = depth.x; // visualize just the first layers

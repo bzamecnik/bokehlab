@@ -4,34 +4,36 @@
     using BokehLab.InteractiveDof;
     using OpenTK.Graphics.OpenGL;
 
-    class OrderIndependentTransparency : AbstractRendererModule
-    {
-        public DepthPeeler DepthPeeler { get; set; }
+    // TODO: make a shader for array textures
 
-        // Simple application of depth peeling:
-        // Order-independent transparency [everitt2001].
-        public void Draw()
-        {
-            Debug.Assert(DepthPeeler != null);
+    //class OrderIndependentTransparency : AbstractRendererModule
+    //{
+    //    public DepthPeeler DepthPeeler { get; set; }
 
-            GL.ClearColor(0f, 0f, 0f, 1f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+    //    // Simple application of depth peeling:
+    //    // Order-independent transparency [everitt2001].
+    //    public void Draw()
+    //    {
+    //        Debug.Assert(DepthPeeler != null);
 
-            // the back-most layer must be fully opaque
-            GL.Disable(EnableCap.Blend);
-            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[DepthPeeler.LayerCount - 1]);
-            LayerHelper.DrawQuad();
+    //        GL.ClearColor(0f, 0f, 0f, 1f);
+    //        GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            GL.DepthFunc(DepthFunction.Lequal);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusDstAlpha);
-            for (int i = DepthPeeler.LayerCount - 2; i >= 0; i--)
-            {
-                GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[i]);
-                LayerHelper.DrawQuad();
-            }
-            GL.Disable(EnableCap.Blend);
-            GL.DepthFunc(DepthFunction.Less);
-        }
-    }
+    //        // the back-most layer must be fully opaque
+    //        GL.Disable(EnableCap.Blend);
+    //        GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[DepthPeeler.LayerCount - 1]);
+    //        LayerHelper.DrawQuad();
+
+    //        GL.DepthFunc(DepthFunction.Lequal);
+    //        GL.Enable(EnableCap.Blend);
+    //        GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusDstAlpha);
+    //        for (int i = DepthPeeler.LayerCount - 2; i >= 0; i--)
+    //        {
+    //            GL.BindTexture(TextureTarget.Texture2D, DepthPeeler.ColorTextures[i]);
+    //            LayerHelper.DrawQuad();
+    //        }
+    //        GL.Disable(EnableCap.Blend);
+    //        GL.DepthFunc(DepthFunction.Less);
+    //    }
+    //}
 }

@@ -23,7 +23,7 @@
         }
 
         static readonly string VertexShaderPath = "NeighborhoodBuffers/NBuffersVS.glsl";
-        static readonly string FragmentShaderPath = "NeighborhoodBuffers/VisualizerFS.glsl";
+        static readonly string FragmentShaderPath = "NeighborhoodBuffers/NBuffersVisualizerFS.glsl";
 
         int vertexShader;
         int fragmentShader;

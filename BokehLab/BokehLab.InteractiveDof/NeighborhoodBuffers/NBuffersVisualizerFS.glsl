@@ -1,6 +1,5 @@
 ﻿#version 120
 #extension GL_EXT_texture_array : enable
-//#extension GL_EXT_gpu_shader4 : enable
 
 uniform sampler2DArray nBufferLayerTexture;
 uniform vec2 colorMask;

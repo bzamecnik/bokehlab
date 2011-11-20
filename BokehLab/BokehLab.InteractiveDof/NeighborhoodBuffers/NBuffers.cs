@@ -76,12 +76,11 @@
             // the first level is taken directly from the original packed depth texture (without offsets)
             GL.UseProgram(level0shaderProgram);
 
-            uint packedDepthTexture = peeler.PackedDepthTextures[0];
-
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, packedDepthTexture);
+            GL.BindTexture(TextureTarget.Texture2DArray, peeler.PackedDepthTextures);
 
             GL.Uniform1(GL.GetUniformLocation(level0shaderProgram, "packedDepthTexture"), 0);
+            GL.Uniform1(GL.GetUniformLocation(level0shaderProgram, "layer"), 0);
 
             GL.Ext.FramebufferTextureLayer(
                     FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,

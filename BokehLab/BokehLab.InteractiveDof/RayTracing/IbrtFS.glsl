@@ -1,4 +1,6 @@
-﻿#extension GL_EXT_gpu_shader4 : enable
+﻿#version 120
+#extension GL_EXT_texture_array : enable
+#extension GL_EXT_gpu_shader4 : enable
 
 // TODO:
 // - N-buffer acceleration
@@ -21,11 +23,8 @@ uniform mat3 sensorTransform;
 // left, right, bottom, top
 uniform vec4 frustumBounds;
 
-uniform sampler2D packedDepthTexture0;
-uniform sampler2D colorTexture0;
-uniform sampler2D colorTexture1;
-uniform sampler2D colorTexture2;
-uniform sampler2D colorTexture3;
+uniform sampler2DArray packedDepthTexture;
+uniform sampler2DArray colorTexture;
 
 // precomputed pseudo-random senzor and lens sample positions
 // - a 2D vector - lens position (x,y) in camera space (unit disk [-1;1])
@@ -75,16 +74,16 @@ vec3 intersectHeightFieldLinear(vec3 start, vec3 end) {
     vec3 color = vec3(0, 0, 0);
     for (int i = 0; i < steps; i++) {
         currentPos += rayStep;
-        float layerDepth = texture2D(packedDepthTexture0, currentPos.xy).r;
+        float layerDepth = texture2DArray(packedDepthTexture, vec3(currentPos.xy, 0)).r;
         //if (!isecFound && (currentPos.z >= layerDepth)) {
         if (currentPos.z >= layerDepth) {
             bestPos = currentPos;
             //isecFound = true;
-            return texture2D(colorTexture0, bestPos.xy).rgb;
+            return texture2DArray(colorTexture, vec3(bestPos.xy, 0)).rgb;
         }
 	}
 	//if (isecFound) {
-        //color = texture2D(colorTexture0, bestPos.xy).rgb;
+        //color = texture2DArray(colorTexture, vec3(bestPos.xy, 0)).rgb;
     //}
     return color;
 }
@@ -101,7 +100,7 @@ vec3 intersectHeightFieldBinary(vec3 start, vec3 end) {
     
     for (int i = 0; i < steps; i++) {
         middlePos = 0.5 * (startPos + endPos);
-        float layerDepth = texture2D(packedDepthTexture0, middlePos.xy).r;
+        float layerDepth = texture2DArray(packedDepthTexture, vec3(middlePos.xy, 0)).r;
         if (middlePos.z >= layerDepth) {
 			endPos = middlePos;
             bestPos = middlePos;
@@ -111,7 +110,7 @@ vec3 intersectHeightFieldBinary(vec3 start, vec3 end) {
         }
 	}
 	if (isecFound) {
-        color = texture2D(colorTexture0, bestPos.xy).rgb;
+        color = texture2DArray(colorTexture, vec3(bestPos.xy, 0)).rgb;
     }
     return color;
 }
@@ -132,7 +131,7 @@ vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
     //for (int i = 0; (i < linearSteps) && !isecFound; i++) {
     for (int i = 0; (i < linearSteps); i++) {
         currentPos += rayStep;
-        float layerDepth = texture2D(packedDepthTexture0, currentPos.xy).r;
+        float layerDepth = texture2DArray(packedDepthTexture, vec3(currentPos.xy, 0)).r;
         //if (currentPos.z >= layerDepth) {
         if (!isecFound && (currentPos.z >= layerDepth)) {
             bestPos = currentPos;
@@ -150,7 +149,7 @@ vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
     
     for (int i = 0; i < binarySteps; i++) {    
         middlePos = 0.5 * (startPos + endPos);
-        float layerDepth = texture2D(packedDepthTexture0, middlePos.xy).r;
+        float layerDepth = texture2DArray(packedDepthTexture, vec3(middlePos.xy, 0)).r;
         if (middlePos.z >= layerDepth) {
 			endPos = middlePos;
             bestPos = middlePos;
@@ -160,7 +159,7 @@ vec3 intersectHeightFieldLinearThenBinary(vec3 start, vec3 end) {
 	}
 	
 	if (isecFound) {
-        color = texture2D(colorTexture0, bestPos.xy).rgb;
+        color = texture2DArray(colorTexture, vec3(bestPos.xy, 0)).rgb;
     }
     return color;
 }
@@ -172,7 +171,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     vec3 rayStep = (endPos - startPos) / float(linearSteps);
     vec3 currentPos = startPos;
     vec3 bestPos = startPos;
-    float lastHfDepth = texture2D(packedDepthTexture0, startPos.xy).r;
+    float lastHfDepth = texture2DArray(packedDepthTexture, vec3(startPos.xy, 0)).r;
     bool insideHeightField = lastHfDepth < startPos.z;
     float depthDerivativeLimit = 5.0;
     float rayStepLen = length(rayStep.xy);
@@ -182,7 +181,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     
     for (int i = 0; !isecFound && (i < linearSteps); i++) {
         currentPos += rayStep;
-        float layerDepth = texture2D(packedDepthTexture0, currentPos.xy).r;
+        float layerDepth = texture2DArray(packedDepthTexture, vec3(currentPos.xy, 0)).r;
         // directional difference in the ray xy direction
         float hfDerivative = abs((layerDepth - lastHfDepth) * dxyLenInv);
 		// after stepping over a discontinuity check for the inside/outside position again.
@@ -207,7 +206,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
     
     for (int i = 0; i < binarySteps; i++) {    
         middlePos = 0.5 * (startPos + endPos);
-        float layerDepth = texture2D(packedDepthTexture0, middlePos.xy).r;
+        float layerDepth = texture2DArray(packedDepthTexture, vec3(middlePos.xy, 0)).r;
         if (middlePos.z >= layerDepth) {
 			endPos = middlePos;
             bestPos = middlePos;
@@ -218,7 +217,7 @@ vec3 intersectHeightFieldLinearDiscontinuousThenBinary(vec3 startPos, vec3 endPo
 	
 	vec3 color = vec3(0, 0, 0);
 	if (isecFound) {
-		color = texture2D(colorTexture0, bestPos.xy).rgb;
+		color = texture2DArray(colorTexture, vec3(bestPos.xy, 0)).rgb;
 	}
     return color;
 }
@@ -229,7 +228,7 @@ bool testIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color
     //vec2 colorPos = currentPixel * screenSizeInv;
     vec2 colorPos = depthTestPos;
     
-    vec4 layersZ = texture2D(packedDepthTexture0, depthTestPos);
+    vec4 layersZ = texture2DArray(packedDepthTexture, vec3(depthTestPos, 0));
     
     // this epsilon prevents artifact within objects arising from the
     // (virtual) nearest-neighbor interpolation of the depth layer
@@ -242,25 +241,25 @@ bool testIntersection(vec2 currentPixel, vec3 entry, vec3 exit, inout vec3 color
     if (comparison.x == 2)
     {
 		//color = vec3(1,1,1); // colors for a nice visualization of occlusion layers
-        color = texture2D(colorTexture0, colorPos).rgb;
+        color = texture2DArray(colorTexture, vec3(colorPos, 0)).rgb;
         return true;
     }
     else if (comparison.y == 2)
     {
 		//color = vec3(0,0,1);
-        color = texture2D(colorTexture1, colorPos).rgb;
+        color = texture2DArray(colorTexture, vec3(colorPos, 1)).rgb;
         return true;
     }
     else if (comparison.z == 2)
     {
 		//color = vec3(0,1,0);
-        color = texture2D(colorTexture2, colorPos).rgb;
+        color = texture2DArray(colorTexture, vec3(colorPos, 2)).rgb;
         return true;
     }
     else if (comparison.w == 2)
     {
 		//color = vec3(1,0,0);
-        color = texture2D(colorTexture3, colorPos).rgb;
+        color = texture2DArray(colorTexture, vec3(colorPos, 3)).rgb;
         return true;
     }
     return false;

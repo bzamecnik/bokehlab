@@ -113,7 +113,16 @@
     <Content Include="NeighborhoodBuffers\NBuffersLevel0FS.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="NeighborhoodBuffers\VisualizerFS.glsl">
+    <Content Include="NeighborhoodBuffers\NBuffersVisualizerFS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="NeighborhoodBuffers\NBuffersQuery.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DepthPeeling\VisualizerVS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DepthPeeling\VisualizerFS.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Properties\Settings.settings">

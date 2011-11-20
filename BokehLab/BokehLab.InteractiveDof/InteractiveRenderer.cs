@@ -46,7 +46,7 @@
         ImageBasedRayTracer ibrt = new ImageBasedRayTracer();
         LayerVisualizer layerVisualizer = new LayerVisualizer();
         NBuffersVisualizer nBuffersVisualizer = new NBuffersVisualizer();
-        OrderIndependentTransparency transparency = new OrderIndependentTransparency();
+        //OrderIndependentTransparency transparency = new OrderIndependentTransparency();
 
         List<IRendererModule> modules = new List<IRendererModule>();
 
@@ -80,14 +80,14 @@
             modules.Add(ibrt);
             modules.Add(layerVisualizer);
             modules.Add(nBuffersVisualizer);
-            modules.Add(transparency);
+            //modules.Add(transparency);
             // also the modules can be initialized after the GL context is prepared
             foreach (var module in modules)
             {
                 module.Initialize(Width, Height);
             }
             ibrt.DepthPeeler = depthPeeler;
-            transparency.DepthPeeler = depthPeeler;
+            //transparency.DepthPeeler = depthPeeler;
             layerVisualizer.DepthPeeler = depthPeeler;
             nBuffersVisualizer.NBuffers = nBuffers;
 
@@ -210,10 +210,10 @@
                     nBuffers.CreateNBuffers(depthPeeler);
                     nBuffersVisualizer.Draw();
                     break;
-                case Mode.OrderIndependentTransparency:
-                    depthPeeler.PeelLayers(scene);
-                    transparency.Draw();
-                    break;
+                //case Mode.OrderIndependentTransparency:
+                //    depthPeeler.PeelLayers(scene);
+                //    transparency.Draw();
+                //    break;
                 default:
                     Debug.Assert(false, "Unknown rendering mode");
                     break;
@@ -324,20 +324,20 @@
                     navigation.IsViewDirty = true;
                 }
             }
-            else if (e.Key == Key.F8)
-            {
-                if (renderingMode != Mode.OrderIndependentTransparency)
-                {
-                    foreach (var module in modules)
-                    {
-                        module.Enabled = false;
-                    }
-                    depthPeeler.Enabled = true;
-                    transparency.Enabled = true;
-                    renderingMode = Mode.OrderIndependentTransparency;
-                    navigation.IsViewDirty = true;
-                }
-            }
+            //else if (e.Key == Key.F8)
+            //{
+            //    if (renderingMode != Mode.OrderIndependentTransparency)
+            //    {
+            //        foreach (var module in modules)
+            //        {
+            //            module.Enabled = false;
+            //        }
+            //        depthPeeler.Enabled = true;
+            //        transparency.Enabled = true;
+            //        renderingMode = Mode.OrderIndependentTransparency;
+            //        navigation.IsViewDirty = true;
+            //    }
+            //}
 
             foreach (var module in modules)
             {
@@ -390,7 +390,7 @@
             IncrementalImageBasedRayTracing,
             LayerVisualizer,
             NBuffersVisualizer,
-            OrderIndependentTransparency,
+            //OrderIndependentTransparency,
         }
     }
 }
