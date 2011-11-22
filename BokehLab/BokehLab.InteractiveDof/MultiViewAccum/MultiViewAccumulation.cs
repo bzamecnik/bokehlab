@@ -33,11 +33,23 @@
         Vector2[] unitDiskSamples;
         Sampler sampler = new Sampler();
 
+        private bool accumulate;
+        public bool Accumulate
+        {
+            get { return accumulate; }
+            set
+            {
+                accumulate = value;
+                MaxIterations = (accumulate) ? unitDiskSamples.Length : ViewsPerFrame;
+            }
+        }
+
         public MultiViewAccumulation()
-            : base(sqrtSampleCount * sqrtSampleCount)
         {
             // TODO: support creating samples for a cropped aperture (hexagon etc.)
             unitDiskSamples = CreateLensSamples(sqrtSampleCount).ToArray();
+            Accumulate = true;
+            MaxIterations = unitDiskSamples.Length;
         }
 
         protected override void DrawSingleFrame(int iteration, Scene scene, Navigation navigation)
@@ -84,6 +96,17 @@
                 list[k] = list[n];
                 list[n] = value;
             }
+        }
+
+        public override void OnKeyUp(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
+        {
+            if (Enabled && (e.Key == OpenTK.Input.Key.Tab))
+            {
+                Accumulate = !Accumulate;
+                return;
+            }
+
+            base.OnKeyUp(sender, e);
         }
     }
 }

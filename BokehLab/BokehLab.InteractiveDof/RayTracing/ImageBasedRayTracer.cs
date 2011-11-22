@@ -27,12 +27,15 @@
         // number of samples rendered in a single rendering cycle
         //int lensSampleCount = 2 * 2;
         int lensSampleCount = 3 * 3;
+        //int lensSampleCount = 5 * 5;
         int lensSampleTileSize = 128;
         int totalSampleCount;
         float totalSampleCountInv;
 
+        int TotalTargetSamples = 256;
+
         // total number of rendering cycles to be incrementally accumulated
-        static readonly int SingleFrameIterations = 64;
+        public int SingleFrameIterations { get { return (int)Math.Ceiling(TotalTargetSamples / (float)lensSampleCount); } }
 
         Matrix4 sensorTransform;
         float[] sensorTransform3x3;
@@ -41,9 +44,9 @@
         public NBuffers NBuffers { get; set; }
 
         public ImageBasedRayTracer()
-            : base(SingleFrameIterations)
         {
             ViewsPerFrame = 1;
+            MaxIterations = SingleFrameIterations;
         }
 
         public void DrawSingleFrame(Scene scene, Navigation navigation)

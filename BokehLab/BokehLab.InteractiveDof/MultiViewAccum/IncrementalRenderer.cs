@@ -11,20 +11,21 @@
     abstract class IncrementalRenderer : AbstractRendererModule
     {
         // How many views should be accumulated during one frame rendering.
-        protected int ViewsPerFrame { get; set; }
+        // NOTE: navigation.IsViewDirty must be set to true
+        public int ViewsPerFrame { get; set; }
 
         int iteration = 0;
 
-        public int MaxIterations { get; private set; }
+        // NOTE: navigation.IsViewDirty must be set to true
+        public int MaxIterations { get; set; }
         IAccumulator accumulator;
 
         Stopwatch stopwatch = new Stopwatch();
         public long CumulativeMilliseconds { get; set; }
 
-        public IncrementalRenderer(int maxIterations)
+        public IncrementalRenderer()
         {
             ViewsPerFrame = 4; // 16 good for float16, 4 or 8 for float32
-            MaxIterations = maxIterations;
 
             // draw all views at once
             //viewsPerFrame = maxIterations;

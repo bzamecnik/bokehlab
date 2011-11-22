@@ -52,6 +52,7 @@
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
+            // NOTE: it needs DepthPeelerFS.glsl -> shadeFragment to output gl_FrontColor
             //triangles.Draw();
         }
 
