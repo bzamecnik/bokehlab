@@ -4,18 +4,18 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Windows.Forms;
     using BokehLab.InteractiveDof.DepthPeeling;
     using BokehLab.InteractiveDof.MultiViewAccum;
-    using BokehLab.InteractiveDof.RayTracing;
     using BokehLab.InteractiveDof.NeighborhoodBuffers;
+    using BokehLab.InteractiveDof.RayTracing;
     using OpenTK;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Input;
 
     // TODO:
-    // - accelerate height field intersection with N-buffers
-    //   *- create N-buffers from the packed depth image(s) after depth peeling
-    //   - query N-buffers during HF intersection
+    // - better acceleration of height field intersection with N-buffers
+    //   - take a bounding footpring for all lens rays and clip them together
     // - fix the counter for the whole multi-view accumulation
     // - make sample counts configurable at run-time
     // - create a configuration panel to switch the methods and control parameters
@@ -25,10 +25,10 @@
     public class InteractiveRenderer : GameWindow
     {
         public InteractiveRenderer()
-            : base(256, 256)
-        //: base(512, 512)
-        //: base(300, 200)
-        //: base(450, 300)
+            //: base(256, 256)
+            //: base(512, 512)
+            //: base(300, 200)
+            : base(450, 300)
         //: base(800, 600)
         {
         }
@@ -126,10 +126,10 @@
         {
             if (!GL.GetString(StringName.Extensions).Contains("EXT_framebuffer_object"))
             {
-                System.Windows.Forms.MessageBox.Show(
+                MessageBox.Show(
                      "Framebuffer Objects are not supported by the GPU.",
                      "FBOs not supported",
-                     System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 Exit();
             }
         }
@@ -246,6 +246,52 @@
             {
                 bool isFullscreen = (WindowState == WindowState.Fullscreen);
                 WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
+            }
+            else if (e.Key == Key.F1)
+            {
+                MessageBox.Show(
+@"===== Program help =====
+BokehLab - interactive depth-of-field renderer.
+Bohumír Zamečník, MFF UK, 2010-2011
+
+=== Rendering modes ===
+
+F1 - show this help dialog
+F2 - plain rasterization (pinhole view)
+F3 - (incremental) multi-view accumulation
+F4 - image-based ray tracing
+    Tab - toggle incremental rendering
+F5 - incremental image-based ray tracing
+F6 - visualization of layered depth images
+    Tab - select layer type: color/depth/packed-depth
+    O/P/U - select previous/next/first layer
+F7 - visualization of N-buffers
+    Tab - select channel mask: min/max, min, max
+    O/P/U - select previous/next/first layer
+F11 - toggle full screen
+
+=== Navigation ===
+
+W/S/A/D/Q/E - go forwards/backwards/left/right/down/up
+Up/down/right/left arrow - change orientation - look up/down/right/left
+Mouse left button + drag - change orientation
+Shift+[WSADQE] - move more precisely
+Shift+R - reset navigation
+
+=== Camera parameters ===
+
+Page up/Page down - increase/decrease focal plane distance (focus forth/back)
+Mouse right button + drag up/down - focus forth/back
+Mouse wheel up/down - focus forth/back
+Home/End - increase/decrease aperture radius
+Plus/Minus - increase/decrease focal length
+Delete/Insert - increase/decrease angle of view (zoom in/out)
+X/Z - increase/decrease sensor tilt around X axis
+V/C - increase/decrease sensor tilt around Y axis
+N/B - increase/decrease sensor shift in X axis
+,/M - increase/decrease sensor shift in Y axis
+R - reset camera",
+"BokehLab - interactive DoF rendering via image-based ray-tracing");
             }
             else if (e.Key == Key.F2)
             {
