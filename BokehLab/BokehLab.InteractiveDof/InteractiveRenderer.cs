@@ -182,7 +182,9 @@
             Matrix4 modelView = navigation.ModelView;
             GL.LoadMatrix(ref modelView);
 
-            double cumulativeMilliseconds = 1000 * e.Time;
+            float cumulativeMilliseconds = 0;
+            float averageFrameTime = 0;
+            bool accumulation = false;
 
             switch (renderingMode)
             {
@@ -192,8 +194,9 @@
                 case Mode.MultiViewAccum:
                     multiViewAccum.AccumulateAndDraw(scene, navigation);
                     cumulativeMilliseconds = multiViewAccum.CumulativeMilliseconds;
+                    averageFrameTime = multiViewAccum.AverageFrameTime;
+                    accumulation = true;
                     break;
-
                 case Mode.ImageBasedRayTracing:
                     depthPeeler.PeelLayers(scene);
                     nBuffers.CreateNBuffers(depthPeeler);
@@ -201,10 +204,15 @@
                     //ImageBasedRayTracer.IbrtPlayground.TraceRay(navigation.Camera);
                     break;
                 case Mode.IncrementalImageBasedRayTracing:
-                    depthPeeler.PeelLayers(scene);
-                    nBuffers.CreateNBuffers(depthPeeler);
+                    if (navigation.IsViewDirty)
+                    {
+                        depthPeeler.PeelLayers(scene);
+                        nBuffers.CreateNBuffers(depthPeeler);
+                    }
                     ibrt.AccumulateAndDraw(scene, navigation);
                     cumulativeMilliseconds = ibrt.CumulativeMilliseconds;
+                    averageFrameTime = ibrt.AverageFrameTime;
+                    accumulation = true;
                     break;
                 case Mode.LayerVisualizer:
                     depthPeeler.PeelLayers(scene);
@@ -224,7 +232,14 @@
                     break;
             }
 
-            this.Title = string.Format("BokehLab - FPS: {0:0.0}, frame: {1:0.0} ms, accum: {2} ms", (1f / e.Time), 1000 * e.Time, cumulativeMilliseconds);
+            string title = string.Format("BokehLab {0:0.0}FPS/{1:0.0}ms",
+                1f / e.Time, 1000 * e.Time);
+            if (accumulation && (averageFrameTime != 0))
+            {
+                title += string.Format(" acc {0:0.0}ms, avg {1:0.0}FPS/{2:0.0}ms",
+                    cumulativeMilliseconds, 1000f / averageFrameTime, averageFrameTime);
+            }
+            this.Title = title;
 
             this.SwapBuffers();
         }

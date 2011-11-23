@@ -22,10 +22,11 @@
 
         Stopwatch stopwatch = new Stopwatch();
         public long CumulativeMilliseconds { get; set; }
+        public float AverageFrameTime { get { return CumulativeMilliseconds / (float)iteration; } }
 
         public IncrementalRenderer()
         {
-            ViewsPerFrame = 4; // 16 good for float16, 4 or 8 for float32
+            ViewsPerFrame = 16; // 16 good for float16, 4 or 8 for float32
 
             // draw all views at once
             //viewsPerFrame = maxIterations;
@@ -70,11 +71,11 @@
                 accumulator.Clear();
                 navigation.IsViewDirty = false;
                 iteration = 0;
+                stopwatch.Start();
             }
 
             if (iteration < MaxIterations)
             {
-                stopwatch.Start();
                 accumulator.PreAccumulate();
 
                 for (int i = 0; (i < ViewsPerFrame) && (iteration < MaxIterations); i++)
@@ -87,12 +88,12 @@
                     iteration++;
                 }
                 accumulator.PostAccumulate();
+                CumulativeMilliseconds = stopwatch.ElapsedMilliseconds;
+            }
+            if (iteration == MaxIterations)
+            {
                 stopwatch.Stop();
             }
-            //if (iteration == maxIterations)
-            //{
-            CumulativeMilliseconds = stopwatch.ElapsedMilliseconds;
-            //}
 
             accumulator.Show();
         }
