@@ -20,6 +20,8 @@
         Mesh streetMesh;
         uint streetTexture;
 
+        Mesh dragonMesh;
+
         uint starsTexture;
         uint groundTexture;
 
@@ -51,7 +53,8 @@
 
             //mesh = new Mesh(Path.Combine(ResourcePath, "teapot.obj"));
 
-            //mesh = new Mesh(Path.Combine(ResourcePath, "dragon_vrip_res2.obj"));
+            dragonMesh = new Mesh(Path.Combine(ResourcePath, "dragon_vrip_res2.obj"));
+            dragonMesh.LoadBuffers();
 
             //mesh.LoadBuffers();
 
@@ -82,7 +85,7 @@
             DrawQuad(20);
             GL.PopMatrix();
 
-            // create
+            // crates
             GL.BindTexture(TextureTarget.Texture2D, crateTexture);
             GL.PushMatrix();
             GL.Translate(1, 0, 5);
@@ -105,9 +108,27 @@
             // medieval street
             GL.BindTexture(TextureTarget.Texture2D, streetTexture);
             GL.PushMatrix();
-            GL.Translate(10, 0, 10);
+            GL.Translate(10, 0, 15);
             GL.Rotate(-90.0, Vector3d.UnitY);
+            GL.Scale(0.5, 0.5, 0.5);
             streetMesh.Draw();
+            GL.PopMatrix();
+
+            // dragon
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.PushMatrix();
+            GL.Translate(-5, -1, 10);
+            GL.Rotate(-45.0, Vector3d.UnitY);
+            GL.Scale(20, 20, 20);
+            dragonMesh.Draw();
+            GL.PopMatrix();
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.PushMatrix();
+            GL.Translate(-7, -1, 15);
+            GL.Rotate(-45.0, Vector3d.UnitY);
+            GL.Scale(20, 20, 20);
+            dragonMesh.Draw();
             GL.PopMatrix();
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
