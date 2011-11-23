@@ -6,7 +6,17 @@
 
     public class Sampler
     {
-        private Random random = new Random();
+        private Random random;
+
+        public Sampler()
+        {
+            random = new Random();
+        }
+
+        public Sampler(int seed)
+        {
+            random = new Random(seed);
+        }
 
         /// <summary>
         /// Generates a point on a unit square [0; 1] x [0; 1].

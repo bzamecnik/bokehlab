@@ -113,7 +113,7 @@
 
         public void ResetNavigation()
         {
-            Position = new Vector3(0, 0, 4);
+            Position = new Vector3(0, -2, 0);
             View = -Vector3.UnitZ;
             Up = Vector3.UnitY;
             Right = Vector3.UnitX;

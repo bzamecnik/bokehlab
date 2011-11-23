@@ -26,13 +26,14 @@
 
         // number of samples rendered in a single rendering cycle
         //int lensSampleCount = 2 * 2;
-        int lensSampleCount = 3 * 3;
+        //int lensSampleCount = 3 * 3;
+        int lensSampleCount = 4 * 4;
         //int lensSampleCount = 5 * 5;
-        int lensSampleTileSize = 128;
+        int lensSampleTileSize = 64;
         int totalSampleCount;
         float totalSampleCountInv;
 
-        int TotalTargetSamples = 256;
+        int TotalTargetSamples = 1024;
 
         // total number of rendering cycles to be incrementally accumulated
         public int SingleFrameIterations { get { return (int)Math.Ceiling(TotalTargetSamples / (float)lensSampleCount); } }
@@ -230,6 +231,7 @@
             GL.TexImage3D(TextureTarget.Texture3D, 0, PixelInternalFormat.Rg16f,
                 tileSize, tileSize, totalSampleCount, 0,
                 PixelFormat.Rg, PixelType.HalfFloat, texturePtr);
+            Marshal.FreeHGlobal(texturePtr);
 
             // TODO: when to unallocate the buffer?
 
@@ -267,6 +269,7 @@
             GL.TexImage1D(TextureTarget.Texture1D, 0, PixelInternalFormat.Rg16f,
                 totalSampleCount, 0,
                 PixelFormat.Rg, PixelType.HalfFloat, texturePtr);
+            Marshal.FreeHGlobal(texturePtr);
 
             // TODO: when to unallocate the buffer?
 
