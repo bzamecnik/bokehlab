@@ -207,11 +207,11 @@
                 width, height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Rgb, PixelType.HalfFloat, texturePtr);
             Marshal.FreeHGlobal(texturePtr);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
-            GL.Ext.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            //GL.Ext.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
             return texture;
         }

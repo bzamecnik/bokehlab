@@ -100,8 +100,8 @@
                 FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext,
                 0, 0, 0);
 
-            GL.BindTexture(TextureTarget.Texture2DArray, colorTextures);
-            GL.Ext.GenerateMipmap(GenerateMipmapTarget.Texture2DArray);
+            //GL.BindTexture(TextureTarget.Texture2DArray, colorTextures);
+            //GL.Ext.GenerateMipmap(GenerateMipmapTarget.Texture2DArray);
 
             PackDepthImages();
         }
@@ -221,8 +221,8 @@
             GL.BindTexture(TextureTarget.Texture2DArray, colorTextures);
             GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rgba16f, width, height, LayerCount, 0, PixelFormat.Rgba, PixelType.HalfFloat, IntPtr.Zero);
             //GL.TexImage3D(TextureTarget.Texture2DArray, 0, PixelInternalFormat.Rgba8, width, height, LayerCount, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
-            //GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            //GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
