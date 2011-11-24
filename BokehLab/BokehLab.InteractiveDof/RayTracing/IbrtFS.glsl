@@ -36,6 +36,8 @@ uniform sampler1D pixelSamplesTexture;
 // number of samples - allowed values: [0; length(lensSamples)]
 uniform int sampleCount;
 uniform float sampleCountInv;
+uniform int sampleIndexOffset;
+uniform int totalSampleCount;
 
 uniform vec2 screenSize;
 uniform vec2 screenSizeInv;
@@ -471,9 +473,8 @@ vec3 estimateRadianceJittered(vec3 pixelPos) {
 	ivec3 lensJitterSize = textureSize3D(lensSamplesTexture, 0);
 	vec2 jitterCoords = gl_FragCoord.st;
 	jitterCoords.t = screenSize.y - jitterCoords.t;
-	vec3 samplesIndex = vec3(jitterCoords / vec2(lensJitterSize.st), 0.0);
-	// TODO: check dFdx(texcoord.x) out
-	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(sampleCount) - 1.0));
+	vec3 samplesIndexStep = vec3(0, 0, 1.0 / (float(totalSampleCount) - 1.0));
+	vec3 samplesIndex = vec3(jitterCoords / vec2(lensJitterSize.st), sampleIndexOffset * samplesIndexStep.z);
 	// [0;1]^2 pixel sample to camera space
 	//vec2 pixelSampleToCamera = sensorSize * screenSizeInv;
 	//float pixelSampleTexIndex = 0.0;

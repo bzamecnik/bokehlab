@@ -27,7 +27,11 @@
         Mesh teapotMesh;
 
         uint starsTexture;
+        uint colorStarsTexture;
         uint groundTexture;
+
+        public bool BigModelsEnabled { get; set; }
+        public bool ColorizeStars { get; set; }
 
         public string ResourcePath { get; set; }
 
@@ -38,6 +42,8 @@
         /// </summary>
         public Scene()
         {
+            BigModelsEnabled = true;
+
             ShaderManager = new MaterialShaderManager();
 
             LoadResources();
@@ -54,7 +60,7 @@
             GL.ActiveTexture(TextureUnit.Texture0);
 
             // stars
-            GL.BindTexture(TextureTarget.Texture2D, starsTexture);
+            GL.BindTexture(TextureTarget.Texture2D, ColorizeStars ? colorStarsTexture : starsTexture);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
             GL.Translate(0, 20, 40);
@@ -106,50 +112,53 @@
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "ambient"), 0.2f);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-            // dragon
-            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(0.75f, 0.75f, 1.0f));
-            GL.PushMatrix();
-            GL.Translate(-2, -1, 5);
-            GL.Rotate(-45.0, Vector3d.UnitY);
-            GL.Scale(20, 20, 20);
-            dragonMesh.Draw();
-            GL.PopMatrix();
+            if (BigModelsEnabled)
+            {
+                // dragon
+                GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(0.75f, 0.75f, 1.0f));
+                GL.PushMatrix();
+                GL.Translate(-2, -1, 5);
+                GL.Rotate(-45.0, Vector3d.UnitY);
+                GL.Scale(20, 20, 20);
+                dragonMesh.Draw();
+                GL.PopMatrix();
 
-            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(0.75f, 1.0f, 0.75f));
-            GL.PushMatrix();
-            GL.Translate(-3, -1, 10);
-            GL.Rotate(-45.0, Vector3d.UnitY);
-            GL.Scale(20, 20, 20);
-            dragonMesh.Draw();
-            GL.PopMatrix();
+                GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(0.75f, 1.0f, 0.75f));
+                GL.PushMatrix();
+                GL.Translate(-3, -1, 10);
+                GL.Rotate(-45.0, Vector3d.UnitY);
+                GL.Scale(20, 20, 20);
+                dragonMesh.Draw();
+                GL.PopMatrix();
 
-            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(1.0f, 0.75f, 0.75f));
-            GL.PushMatrix();
-            GL.Translate(-4, -1, 15);
-            GL.Rotate(-45.0, Vector3d.UnitY);
-            GL.Scale(20, 20, 20);
-            dragonMesh.Draw();
-            GL.PopMatrix();
+                GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(1.0f, 0.75f, 0.75f));
+                GL.PushMatrix();
+                GL.Translate(-4, -1, 15);
+                GL.Rotate(-45.0, Vector3d.UnitY);
+                GL.Scale(20, 20, 20);
+                dragonMesh.Draw();
+                GL.PopMatrix();
 
-            // teapot
-            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(1, 1, 1));
-            GL.PushMatrix();
-            GL.Translate(-7, 0, 5);
-            GL.Scale(0.25, 0.25, 0.25);
-            teapotMesh.Draw();
-            GL.PopMatrix();
+                // teapot
+                GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(1, 1, 1));
+                GL.PushMatrix();
+                GL.Translate(-7, 0, 5);
+                GL.Scale(0.25, 0.25, 0.25);
+                teapotMesh.Draw();
+                GL.PopMatrix();
 
-            GL.PushMatrix();
-            GL.Translate(-8, 0, 10);
-            GL.Scale(0.25, 0.25, 0.25);
-            teapotMesh.Draw();
-            GL.PopMatrix();
+                GL.PushMatrix();
+                GL.Translate(-8, 0, 10);
+                GL.Scale(0.25, 0.25, 0.25);
+                teapotMesh.Draw();
+                GL.PopMatrix();
 
-            GL.PushMatrix();
-            GL.Translate(-9, 0, 15);
-            GL.Scale(0.25, 0.25, 0.25);
-            teapotMesh.Draw();
-            GL.PopMatrix();
+                GL.PushMatrix();
+                GL.Translate(-9, 0, 15);
+                GL.Scale(0.25, 0.25, 0.25);
+                teapotMesh.Draw();
+                GL.PopMatrix();
+            }
 
             // NOTE: it needs DepthPeelerFS.glsl -> shadeFragment to output gl_FrontColor
             //shaderProgram = ShaderManager.UseMaterial("default");
@@ -198,7 +207,8 @@
         private void LoadResources()
         {
             ResourcePath = @"..\..\data";
-            starsTexture = GenerateHdrStarsTex(512, 512);
+            starsTexture = GenerateHdrStarsTex(512, 512, (int)(512 * 512 * 0.002), 1e2f, false, 1);
+            colorStarsTexture = GenerateHdrStarsTex(512, 512, (int)(512 * 512 * 0.002), 1e2f, true, 1);
             groundTexture = LoadTexture(Path.Combine(ResourcePath, "dirt_01.jpg"));
 
             GL.EnableClientState(ArrayCap.VertexArray);
@@ -257,7 +267,7 @@
             return texture;
         }
 
-        static uint GenerateHdrStarsTex(int width, int height)
+        static uint GenerateHdrStarsTex(int width, int height, int starCount, float intensity, bool colorize, int seed)
         {
             uint texture = (uint)GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, texture);
@@ -265,7 +275,7 @@
             int bands = 3;
             int textureSize = bands * width * height;
 
-            IList<Star> stars = Star.GenerateStars((int)(width * height * 0.002), 1e2f, false, 1);
+            IList<Star> stars = Star.GenerateStars(starCount, intensity, colorize, seed);
 
             IntPtr texturePtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(Half)) * textureSize);
             unsafe

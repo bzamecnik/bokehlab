@@ -18,7 +18,18 @@
 
         // Indicates that the scene or the parameters of the view changed.
         // If there is any incremental rendering it should be refreshed.
-        public bool IsViewDirty { get; set; }
+        private bool isViewDirty = false;
+        public bool IsViewDirty
+        {
+            get { return isViewDirty; }
+            set
+            {
+                WasViewDirtyInPrevFrame = isViewDirty;
+                isViewDirty = value;
+            }
+        }
+
+        public bool WasViewDirtyInPrevFrame { get; set; }
 
         static readonly float DeltaShift = 0.1f;
         static readonly float MaxSensorTiltAngle = OpenTK.MathHelper.PiOver2;

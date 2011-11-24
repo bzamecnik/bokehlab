@@ -69,9 +69,9 @@
                 stopwatch.Reset();
                 CumulativeMilliseconds = 0;
                 accumulator.Clear();
-                navigation.IsViewDirty = false;
                 iteration = 0;
                 stopwatch.Start();
+                navigation.IsViewDirty = false;
             }
 
             if (iteration < MaxIterations)

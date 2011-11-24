@@ -33,7 +33,7 @@
         {
         }
 
-        Navigation navigation = new Navigation() { Camera = new Camera() };
+        Navigation navigation = new Navigation();
 
         Scene scene;
 
@@ -209,7 +209,16 @@
                         depthPeeler.PeelLayers(scene);
                         nBuffers.CreateNBuffers(depthPeeler);
                     }
-                    ibrt.AccumulateAndDraw(scene, navigation);
+                    // disable incremental rendering during active navigation
+                    ibrt.IncrementalModeEnabled = !navigation.WasViewDirtyInPrevFrame;
+                    if (ibrt.IncrementalModeEnabled)
+                    {
+                        ibrt.AccumulateAndDraw(scene, navigation);
+                    }
+                    else
+                    {
+                        ibrt.DrawSingleFrame(scene, navigation);
+                    }
                     cumulativeMilliseconds = ibrt.CumulativeMilliseconds;
                     averageFrameTime = ibrt.AverageFrameTime;
                     accumulation = true;
@@ -231,6 +240,7 @@
                     Debug.Assert(false, "Unknown rendering mode");
                     break;
             }
+            navigation.WasViewDirtyInPrevFrame = false;
 
             string title = string.Format("BokehLab {0:0.0}FPS/{1:0.0}ms",
                 1f / e.Time, 1000 * e.Time);
@@ -257,12 +267,7 @@
             //    navigation.IsViewDirty = true;
             //}
             //else
-            if (e.Key == Key.F11)
-            {
-                bool isFullscreen = (WindowState == WindowState.Fullscreen);
-                WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
-            }
-            else if (e.Key == Key.F1)
+            if (e.Key == Key.F1)
             {
                 MessageBox.Show(
 @"===== Program help =====
@@ -270,7 +275,6 @@ BokehLab - interactive depth-of-field renderer.
 Bohumír Zamečník, MFF UK, 2010-2011
 
 === Rendering modes ===
-
 F1 - show this help dialog
 F2 - plain rasterization (pinhole view)
 F3 - (incremental) multi-view accumulation
@@ -285,8 +289,11 @@ F7 - visualization of N-buffers
     O/P/U - select previous/next/first layer
 F11 - toggle full screen
 
-=== Navigation ===
+=== Scene ===
+F9 - toggle showing more complex models (dragon, teapot, etc.)
+F10 - toggle showing white or colorized stars
 
+=== Navigation ===
 W/S/A/D/Q/E - go forwards/backwards/left/right/down/up
 Up/down/right/left arrow - change orientation - look up/down/right/left
 Mouse left button + drag - change orientation
@@ -294,7 +301,6 @@ Shift+[WSADQE] - move more precisely
 Shift+R - reset navigation
 
 === Camera parameters ===
-
 Page up/Page down - increase/decrease focal plane distance (focus forth/back)
 Mouse right button + drag up/down - focus forth/back
 Mouse wheel up/down - focus forth/back
@@ -343,6 +349,7 @@ R - reset camera",
                     }
                     depthPeeler.Enabled = true;
                     ibrt.Enabled = true;
+                    ibrt.IncrementalModeEnabled = false;
                     nBuffers.Enabled = true;
                     renderingMode = Mode.ImageBasedRayTracing;
                     navigation.IsViewDirty = true;
@@ -358,9 +365,11 @@ R - reset camera",
                     }
                     depthPeeler.Enabled = true;
                     ibrt.Enabled = true;
+                    ibrt.IncrementalModeEnabled = true;
                     nBuffers.Enabled = true;
                     renderingMode = Mode.IncrementalImageBasedRayTracing;
                     navigation.IsViewDirty = true;
+                    navigation.WasViewDirtyInPrevFrame = false;
                 }
             }
             else if (e.Key == Key.F6)
@@ -406,6 +415,22 @@ R - reset camera",
             //        navigation.IsViewDirty = true;
             //    }
             //}
+            else if (e.Key == Key.F9)
+            {
+
+                scene.BigModelsEnabled = !scene.BigModelsEnabled;
+                navigation.IsViewDirty = true;
+            }
+            else if (e.Key == Key.F10)
+            {
+                scene.ColorizeStars = !scene.ColorizeStars;
+                navigation.IsViewDirty = true;
+            }
+            else if (e.Key == Key.F11)
+            {
+                bool isFullscreen = (WindowState == WindowState.Fullscreen);
+                WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
+            }
 
             foreach (var module in modules)
             {

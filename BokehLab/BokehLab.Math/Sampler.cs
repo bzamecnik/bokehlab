@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using OpenTK;
 
     public class Sampler
@@ -128,6 +129,18 @@
                 r * Math.Cos(phi),
                 r * Math.Sin(phi));
             return diskSamples;
+        }
+
+        public static Vector2 ConcentricSampleDiskFloat(Vector2 randomNumbers)
+        {
+            Vector2d result = ConcentricSampleDisk(new Vector2d(randomNumbers.X, randomNumbers.Y));
+            return new Vector2((float)result.X, (float)result.Y);
+        }
+
+        public static Vector2h ConcentricSampleDiskFloat(Vector2h randomNumbers)
+        {
+            Vector2d result = ConcentricSampleDisk(new Vector2d(randomNumbers.X, randomNumbers.Y));
+            return new Vector2h((Half)result.X, (Half)result.Y);
         }
 
         /// <summary>
@@ -325,5 +338,54 @@
             }
         }
 
+        public IEnumerable<Vector2> GenerateJitteredSamplesFloat(int sampleCount)
+        {
+            int totalSampleCount = sampleCount * sampleCount;
+            double step = 1.0 / sampleCount;
+            double y = 0;
+            for (int j = 0; j < sampleCount; j++)
+            {
+                double x = 0;
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    Vector2 sample = new Vector2(
+                        (float)(x + random.NextDouble() * step),
+                        (float)(y + random.NextDouble() * step));
+                    yield return sample;
+                    x += step;
+                }
+                y += step;
+            }
+        }
+
+        /// <summary>
+        /// Generate a set of jittered uniform samples of a unit circle.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<Vector2> CreateShuffledLensSamplesFloat(int sqrtSampleCount)
+        {
+            var jitteredSamples = GenerateJitteredSamplesFloat(sqrtSampleCount);
+            var diskSamples = jitteredSamples.Select((sample) => Sampler.ConcentricSampleDiskFloat(sample));
+            var diskSamplesList = diskSamples.ToList();
+            // shuffle the samples to prevent temporal correlation
+            // in incremental rendering
+            //Shuffle<Vector2>(diskSamplesList);
+            return diskSamplesList;
+        }
+
+        //http://stackoverflow.com/questions/273313/randomize-a-listt-in-c-sharp
+        public static void Shuffle<T>(IList<T> list)
+        {
+            Random rng = new Random();
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
     }
 }

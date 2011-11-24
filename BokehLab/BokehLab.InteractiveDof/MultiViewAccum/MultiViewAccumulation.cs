@@ -46,9 +46,9 @@
 
         public MultiViewAccumulation()
         {
-            ViewsPerFrame = 4; // 16 good for float16, 4 or 8 for float32
+            ViewsPerFrame = 9; // 16 good for float16, 4 or 8 for float32
             // TODO: support creating samples for a cropped aperture (hexagon etc.)
-            unitDiskSamples = CreateLensSamples(sqrtSampleCount).ToArray();
+            unitDiskSamples = sampler.CreateShuffledLensSamplesFloat(sqrtSampleCount).ToArray();
             Accumulate = true;
             MaxIterations = unitDiskSamples.Length;
         }
@@ -67,36 +67,6 @@
             scene.Draw();
 
             GL.PopMatrix();
-        }
-
-        /// <summary>
-        /// Generate a set of jittered uniform samples of a unit circle.
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerable<Vector2> CreateLensSamples(int sampleCount)
-        {
-            var jitteredSamples = sampler.GenerateJitteredSamples(sampleCount);
-            var diskSamples = jitteredSamples.Select((sample) => (Vector2)Sampler.ConcentricSampleDisk(sample));
-            var diskSamplesList = diskSamples.ToList();
-            // shuffle the samples to prevent temporal correlation
-            // in incremental rendering
-            Shuffle<Vector2>(diskSamplesList);
-            return diskSamplesList;
-        }
-
-        //http://stackoverflow.com/questions/273313/randomize-a-listt-in-c-sharp
-        public static void Shuffle<T>(IList<T> list)
-        {
-            Random rng = new Random();
-            int n = list.Count;
-            while (n > 1)
-            {
-                n--;
-                int k = rng.Next(n + 1);
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
         }
 
         public override void OnKeyUp(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
