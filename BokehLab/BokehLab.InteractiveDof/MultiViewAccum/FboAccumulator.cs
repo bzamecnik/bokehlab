@@ -122,7 +122,7 @@
         {
             base.Initialize(width, height);
 
-            ShaderLoader.CreateShaderFromFiles(
+            ShaderLoader.CreateSimpleShaderProgram(
                 VertexShaderPath, FragmentShaderPath,
                 out accumVertexShader, out accumFragmentShader, out accumShaderProgram);
 

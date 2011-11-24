@@ -49,6 +49,8 @@
         int packingFragmentShader;
         int packingShaderProgram;
 
+        Vector2 depthTextureSizeInv;
+
         public void PeelLayers(Scene scene)
         {
             // put the results into color and depth textures via FBO
@@ -60,38 +62,31 @@
 
             // draw the first layer without the depth peeling shader
             // (there is no previous depth layer to compare)
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            scene.ShaderManager.DepthPeelingData.Enabled = false;
 
             scene.Draw();
 
             // draw the rest of layers with depth peeling
-            GL.UseProgram(peelingShaderProgram); // enable the peeling shader
+            scene.ShaderManager.DepthPeelingData.Enabled = true;
 
             // Use an other texture unit than 0 as drawing the scene with
             // fixed-function pipeline might use it by default.
             GL.ActiveTexture(TextureUnit.Texture8);
             // Use the previous depth layer for manual depth comparisons.
             GL.BindTexture(TextureTarget.Texture2DArray, depthTextures);
-            GL.Uniform1(GL.GetUniformLocation(peelingShaderProgram, "depthTexture"), 8); // TextureUnit.Texture8
-            GL.Uniform2(GL.GetUniformLocation(peelingShaderProgram, "depthTextureSizeInv"),
-                new Vector2(1.0f / Width, 1.0f / Height));
+            scene.ShaderManager.DepthPeelingData.DepthTexture = 8; // TextureUnit.Texture8
+            scene.ShaderManager.DepthPeelingData.DepthTextureSizeInv = depthTextureSizeInv;
 
             for (int i = 1; i < LayerCount; i++)
             {
                 AttachLayerTextures(i);
-                GL.Uniform1(GL.GetUniformLocation(peelingShaderProgram, "prevLayer"), i - 1);
-
-                // scene's texture
-                GL.Uniform1(GL.GetUniformLocation(peelingShaderProgram, "texture0"), 0);
-                GL.ActiveTexture(TextureUnit.Texture0);
+                scene.ShaderManager.DepthPeelingData.PreviousLayerIndex = i - 1;
 
                 scene.Draw();
             }
-            GL.UseProgram(0); // disable the peeling shader
             GL.ActiveTexture(TextureUnit.Texture8);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, 0);
 
             GL.Ext.FramebufferTextureLayer(
                 FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthAttachmentExt,
@@ -153,11 +148,11 @@
         {
             base.Initialize(width, height);
 
-            ShaderLoader.CreateShaderFromFiles(
+            ShaderLoader.CreateSimpleShaderProgram(
                PeelingVertexShaderPath, PeelingFragmentShaderPath,
                out peelingVertexShader, out peelingFragmentShader, out peelingShaderProgram);
 
-            ShaderLoader.CreateShaderFromFiles(
+            ShaderLoader.CreateSimpleShaderProgram(
                PackingVertexShaderPath, PackingFragmentShaderPath,
                out packingVertexShader, out packingFragmentShader, out packingShaderProgram);
 
@@ -191,6 +186,7 @@
         protected override void Enable()
         {
             CreateLayerTextures(Width, Height);
+            depthTextureSizeInv = new Vector2(1.0f / Width, 1.0f / Height);
         }
 
         protected override void Disable()

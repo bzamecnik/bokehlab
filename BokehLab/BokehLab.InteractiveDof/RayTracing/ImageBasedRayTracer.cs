@@ -147,7 +147,7 @@
         {
             base.Initialize(width, height);
 
-            ShaderLoader.CreateShaderFromFiles(VertexShaderPath, IbrtFragmentShaderPath,
+            ShaderLoader.CreateSimpleShaderProgram(VertexShaderPath, IbrtFragmentShaderPath,
                out vertexShader, out ibrtFragmentShader, out shaderProgram);
 
             GL.Enable(EnableCap.Texture2D);

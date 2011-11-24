@@ -20,7 +20,7 @@
         /// <param name="vertexShaderObject"></param>
         /// <param name="fragmentShaderObject"></param>
         /// <param name="shaderProgram"></param>
-        public static void CreateShaderFromFiles(
+        public static void CreateSimpleShaderProgram(
             string vsPath,
             string fsPath,
             out int vertexShaderObject,
@@ -30,8 +30,8 @@
             using (StreamReader vs = new StreamReader(vsPath))
             using (StreamReader fs = new StreamReader(fsPath))
             {
-                vertexShaderObject = CreateShader(vs.ReadToEnd(), ShaderType.VertexShader);
-                fragmentShaderObject = CreateShader(fs.ReadToEnd(), ShaderType.FragmentShader);
+                vertexShaderObject = CompileShader(vs.ReadToEnd(), ShaderType.VertexShader);
+                fragmentShaderObject = CompileShader(fs.ReadToEnd(), ShaderType.FragmentShader);
                 shaderProgram = CreateShaderProgram(new[] { vertexShaderObject }, new[] { fragmentShaderObject });
             }
         }
@@ -44,12 +44,22 @@
         /// <param name="vertexShaderObjects"></param>
         /// <param name="fragmentShaderObjects"></param>
         /// <param name="shaderProgram"></param>
-        public static void CreateShadersFromFiles(
+        public static void CreateComplexShaderProgram(
             IEnumerable<string> vsPaths,
             IEnumerable<string> fsPaths,
             out IList<int> vertexShaderObjects,
             out IList<int> fragmentShaderObjects,
             out int shaderProgram)
+        {
+            CompileShaders(vsPaths, fsPaths, out vertexShaderObjects, out fragmentShaderObjects);
+            shaderProgram = CreateShaderProgram(vertexShaderObjects, fragmentShaderObjects);
+        }
+
+        public static void CompileShaders(
+            IEnumerable<string> vsPaths,
+            IEnumerable<string> fsPaths,
+            out IList<int> vertexShaderObjects,
+            out IList<int> fragmentShaderObjects)
         {
             Debug.Assert((vsPaths != null) || (vsPaths.Count() > 0));
             Debug.Assert((fsPaths != null) || (fsPaths.Count() > 0));
@@ -57,20 +67,16 @@
             vertexShaderObjects = new List<int>(vsPaths.Count());
             foreach (var path in vsPaths)
             {
-                string source = File.ReadAllText(path);
-                int vsObject = CreateShader(source, ShaderType.VertexShader);
+                int vsObject = CompileShaderFromFile(path, ShaderType.VertexShader);
                 vertexShaderObjects.Add(vsObject);
             }
 
             fragmentShaderObjects = new List<int>(fsPaths.Count());
             foreach (var path in fsPaths)
             {
-                string source = File.ReadAllText(path);
-                int fsObject = CreateShader(source, ShaderType.FragmentShader);
+                int fsObject = CompileShaderFromFile(path, ShaderType.FragmentShader);
                 fragmentShaderObjects.Add(fsObject);
             }
-
-            shaderProgram = CreateShaderProgram(vertexShaderObjects, fragmentShaderObjects);
         }
 
         public static int CreateShaderProgram(IEnumerable<int> vertexObjects, IEnumerable<int> fragmentObjects)
@@ -91,12 +97,18 @@
             return shaderProgram;
         }
 
+        public static int CompileShaderFromFile(string path, ShaderType type)
+        {
+            string source = File.ReadAllText(path);
+            return CompileShader(source, type);
+        }
+
         /// <summary>
         /// Create a single shader from its source code.
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static int CreateShader(string source, ShaderType type)
+        public static int CompileShader(string source, ShaderType type)
         {
             int statusCode;
             string info;

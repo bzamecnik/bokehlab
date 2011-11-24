@@ -14,6 +14,8 @@
 
     class Scene
     {
+        public MaterialShaderManager ShaderManager { get; private set; }
+
         Mesh crateMesh;
         uint crateTexture;
 
@@ -22,6 +24,8 @@
 
         Mesh dragonMesh;
 
+        Mesh teapotMesh;
+
         uint starsTexture;
         uint groundTexture;
 
@@ -29,42 +33,25 @@
 
         //RandomTriangleScene triangles;
 
+        /// <summary>
+        /// Creates a new scene. This can be done after GL context has been created.
+        /// </summary>
         public Scene()
         {
-            ResourcePath = @"..\..\data";
-            starsTexture = GenerateHdrStarsTex(512, 512);
-            groundTexture = LoadTex(Path.Combine(ResourcePath, "dirt_01.jpg"));
+            ShaderManager = new MaterialShaderManager();
 
-            GL.EnableClientState(ArrayCap.VertexArray);
-            GL.EnableClientState(ArrayCap.NormalArray);
-            GL.EnableClientState(ArrayCap.TextureCoordArray);
-
-            crateTexture = LoadTex(Path.Combine(ResourcePath, "CrateNoParachute.png"));
-            crateMesh = new Mesh(Path.Combine(ResourcePath, "CrateNoParachuteOBJ.obj"));
-            crateMesh.LoadBuffers();
-
-            streetTexture = LoadTex(Path.Combine(ResourcePath, "rue2.jpg"));
-            streetMesh = new Mesh(Path.Combine(ResourcePath, "medstreet.obj"));
-            streetMesh.LoadBuffers();
-
-            //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Ormesh-05.obj"));
-            //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Fungau.obj"));
-            //texture = LoadTex(Path.Combine(ResourcePath, "checker_large.gif"));
-
-            //mesh = new Mesh(Path.Combine(ResourcePath, "teapot.obj"));
-
-            dragonMesh = new Mesh(Path.Combine(ResourcePath, "dragon_vrip_res2.obj"));
-            dragonMesh.LoadBuffers();
-
-            //mesh.LoadBuffers();
-
-            //triangles = RandomTriangleScene.CreateRandomTriangles(20);
+            LoadResources();
+            LoadMaterials();
         }
 
         public void Draw()
         {
             GL.ClearColor(0.8f, 0.8f, 0.8f, 1f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            int shaderProgram = ShaderManager.UseMaterial("singleTexture");
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "texture0"), 0); // texture unit 0
+            GL.ActiveTexture(TextureUnit.Texture0);
 
             // stars
             GL.BindTexture(TextureTarget.Texture2D, starsTexture);
@@ -85,56 +72,90 @@
             DrawQuad(20);
             GL.PopMatrix();
 
-            // crates
-            GL.BindTexture(TextureTarget.Texture2D, crateTexture);
-            GL.PushMatrix();
-            GL.Translate(1, 0, 5);
-            GL.Scale(0.5, 0.5, 0.5);
-            crateMesh.Draw();
-            GL.PopMatrix();
-
-            GL.PushMatrix();
-            GL.Translate(-1, 0, 10);
-            GL.Scale(0.5, 0.5, 0.5);
-            crateMesh.Draw();
-            GL.PopMatrix();
-
-            GL.PushMatrix();
-            GL.Translate(-3, 0, 15);
-            GL.Scale(0.5, 0.5, 0.5);
-            crateMesh.Draw();
-            GL.PopMatrix();
-
             // medieval street
             GL.BindTexture(TextureTarget.Texture2D, streetTexture);
             GL.PushMatrix();
             GL.Translate(10, 0, 15);
             GL.Rotate(-90.0, Vector3d.UnitY);
-            GL.Scale(0.5, 0.5, 0.5);
+            GL.Scale(0.75, 0.75, 0.75);
             streetMesh.Draw();
             GL.PopMatrix();
 
+            // crates
+            GL.BindTexture(TextureTarget.Texture2D, crateTexture);
+            GL.PushMatrix();
+            GL.Translate(3, 0, 5);
+            GL.Scale(0.5, 0.5, 0.5);
+            crateMesh.Draw();
+            GL.PopMatrix();
+
+            GL.PushMatrix();
+            GL.Translate(2, 0, 10);
+            GL.Scale(0.5, 0.5, 0.5);
+            crateMesh.Draw();
+            GL.PopMatrix();
+
+            GL.PushMatrix();
+            GL.Translate(1, 0, 15);
+            GL.Scale(0.5, 0.5, 0.5);
+            crateMesh.Draw();
+            GL.PopMatrix();
+
+            shaderProgram = ShaderManager.UseMaterial("diffuseLighting");
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "diffuseCoeff"), 0.7f);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "ambient"), 0.2f);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
             // dragon
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(0.75f, 0.75f, 1.0f));
             GL.PushMatrix();
-            GL.Translate(-5, -1, 10);
+            GL.Translate(-2, -1, 5);
             GL.Rotate(-45.0, Vector3d.UnitY);
             GL.Scale(20, 20, 20);
             dragonMesh.Draw();
             GL.PopMatrix();
 
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(0.75f, 1.0f, 0.75f));
             GL.PushMatrix();
-            GL.Translate(-7, -1, 15);
+            GL.Translate(-3, -1, 10);
             GL.Rotate(-45.0, Vector3d.UnitY);
             GL.Scale(20, 20, 20);
             dragonMesh.Draw();
             GL.PopMatrix();
 
-            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(1.0f, 0.75f, 0.75f));
+            GL.PushMatrix();
+            GL.Translate(-4, -1, 15);
+            GL.Rotate(-45.0, Vector3d.UnitY);
+            GL.Scale(20, 20, 20);
+            dragonMesh.Draw();
+            GL.PopMatrix();
+
+            // teapot
+            GL.Uniform3(GL.GetUniformLocation(shaderProgram, "baseColor"), new Vector3(1, 1, 1));
+            GL.PushMatrix();
+            GL.Translate(-7, 0, 5);
+            GL.Scale(0.25, 0.25, 0.25);
+            teapotMesh.Draw();
+            GL.PopMatrix();
+
+            GL.PushMatrix();
+            GL.Translate(-8, 0, 10);
+            GL.Scale(0.25, 0.25, 0.25);
+            teapotMesh.Draw();
+            GL.PopMatrix();
+
+            GL.PushMatrix();
+            GL.Translate(-9, 0, 15);
+            GL.Scale(0.25, 0.25, 0.25);
+            teapotMesh.Draw();
+            GL.PopMatrix();
 
             // NOTE: it needs DepthPeelerFS.glsl -> shadeFragment to output gl_FrontColor
+            //shaderProgram = ShaderManager.UseMaterial("default");
             //triangles.Draw();
+
+            GL.UseProgram(0);
         }
 
         private static void DrawQuad()
@@ -158,7 +179,60 @@
             GL.End();
         }
 
-        static uint LoadTex(string file)
+        private void LoadMaterials()
+        {
+            ShaderManager.AddMaterial(
+                "default",
+                new[] { "Materials/DefaultVS.glsl" },
+                new[] { "Materials/SingleColorFS.glsl" });
+            ShaderManager.AddMaterial(
+                "singleTexture",
+                new[] { "Materials/DefaultVS.glsl" },
+                new[] { "Materials/SingleTextureFS.glsl" });
+            ShaderManager.AddMaterial(
+                "diffuseLighting",
+                new[] { "Materials/LightingVS.glsl" },
+                new[] { "Materials/LightingFS.glsl" });
+        }
+
+        private void LoadResources()
+        {
+            ResourcePath = @"..\..\data";
+            starsTexture = GenerateHdrStarsTex(512, 512);
+            groundTexture = LoadTexture(Path.Combine(ResourcePath, "dirt_01.jpg"));
+
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.EnableClientState(ArrayCap.NormalArray);
+            GL.EnableClientState(ArrayCap.TextureCoordArray);
+
+            GL.ShadeModel(ShadingModel.Flat);
+
+            crateTexture = LoadTexture(Path.Combine(ResourcePath, "CrateNoParachute.png"));
+            crateMesh = new Mesh(Path.Combine(ResourcePath, "CrateNoParachuteOBJ.obj"));
+            crateMesh.LoadBuffers();
+
+            streetTexture = LoadTexture(Path.Combine(ResourcePath, "rue2.jpg"));
+            streetMesh = new Mesh(Path.Combine(ResourcePath, "medstreet.obj"));
+            streetMesh.LoadBuffers();
+
+            GL.ShadeModel(ShadingModel.Smooth);
+
+            dragonMesh = new Mesh(Path.Combine(ResourcePath, "dragon_vrip_res2.obj"));
+            dragonMesh.LoadBuffers();
+
+            teapotMesh = new Mesh(Path.Combine(ResourcePath, "teapot.obj"));
+            teapotMesh.LoadBuffers();
+
+            //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Ormesh-05.obj"));
+            //mesh = new Mesh(Path.Combine(ResourcePath, "DW-Fungau.obj"));
+            //texture = LoadTexture(Path.Combine(ResourcePath, "checker_large.gif"));
+
+            //mesh.LoadBuffers();
+
+            //triangles = RandomTriangleScene.CreateRandomTriangles(20);
+        }
+
+        static uint LoadTexture(string file)
         {
             Bitmap bitmap = new Bitmap(file);
 

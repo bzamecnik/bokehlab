@@ -26,7 +26,7 @@
 
         public IncrementalRenderer()
         {
-            ViewsPerFrame = 16; // 16 good for float16, 4 or 8 for float32
+            ViewsPerFrame = 1;
 
             // draw all views at once
             //viewsPerFrame = maxIterations;

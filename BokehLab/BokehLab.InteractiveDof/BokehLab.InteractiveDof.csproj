@@ -62,6 +62,7 @@
     <Compile Include="Camera.cs" />
     <Compile Include="DepthPeeling\DepthPeeler.cs" />
     <Compile Include="DepthPeeling\LayerVisualizer.cs" />
+    <Compile Include="MaterialShaderManager.cs" />
     <Compile Include="DepthPeeling\OrderIndependentTransparency.cs" />
     <Compile Include="IRendererModule.cs" />
     <Compile Include="LayerHelper.cs" />
@@ -120,6 +121,24 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DepthPeeling\VisualizerFS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Materials\LightingFS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Materials\LightingVS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Materials\DefaultVS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Materials\SingleTextureFS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Materials\SingleColorFS.glsl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Materials\DefaultFS.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Properties\Settings.settings">
