@@ -46,9 +46,9 @@
 
         public MultiViewAccumulation()
         {
-            ViewsPerFrame = 9; // 16 good for float16, 4 or 8 for float32
+            ViewsPerFrame = 16;
             // TODO: support creating samples for a cropped aperture (hexagon etc.)
-            unitDiskSamples = sampler.CreateShuffledLensSamplesFloat(sqrtSampleCount).ToArray();
+            unitDiskSamples = sampler.CreateLensSamplesFloat(sqrtSampleCount, true).ToArray();
             Accumulate = true;
             MaxIterations = unitDiskSamples.Length;
         }

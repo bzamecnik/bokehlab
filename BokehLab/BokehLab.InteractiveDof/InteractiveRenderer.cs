@@ -290,7 +290,8 @@ F7 - visualization of N-buffers
 F11 - toggle full screen
 
 === Scene ===
-F9 - toggle showing more complex models (dragon, teapot, etc.)
+F8 - toggle showing more complex models (dragon, teapot, etc.)
+F9 - change the number of shown complex models
 F10 - toggle showing white or colorized stars
 
 === Navigation ===
@@ -415,10 +416,14 @@ R - reset camera",
             //        navigation.IsViewDirty = true;
             //    }
             //}
+            else if (e.Key == Key.F8)
+            {
+                scene.BigModelsEnabled = !scene.BigModelsEnabled;
+                navigation.IsViewDirty = true;
+            }
             else if (e.Key == Key.F9)
             {
-
-                scene.BigModelsEnabled = !scene.BigModelsEnabled;
+                scene.BigModelsEnabledCount += 1;
                 navigation.IsViewDirty = true;
             }
             else if (e.Key == Key.F10)

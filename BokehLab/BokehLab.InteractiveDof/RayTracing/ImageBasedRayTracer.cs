@@ -28,20 +28,24 @@
         int incrementalLensSampleTexture;
         //int pixelSampleTexture;
 
-        int SqrtSampleCount { get; set; }
+        int SqrtPreviewSampleCount { get; set; }
+        int PreviewSampleCount { get { return SqrtPreviewSampleCount * SqrtPreviewSampleCount; } }
 
         /// <summary>
         /// Number of samples per frame (a single rendering cycle).
         /// </summary>
-        int SampleCount { get { return SqrtSampleCount * SqrtSampleCount; } }
-        float SampleCountInv { get { return 1.0f / SampleCount; } }
+        int SampleCount { get; set; }
 
-        int lensSampleTileSize = 64;
+        int lensSampleTileSize = 32;
+
+        int SqrtTotalSampleCount = 32;
+
+        bool ShuffleLensSamples = true;
 
         /// <summary>
         /// Number of sample per the whole incremental rendering.
         /// </summary>
-        int TotalSampleCount = 1024;
+        int TotalSampleCount { get { return SqrtTotalSampleCount * SqrtTotalSampleCount; } }
 
         // total number of rendering cycles to be incrementally accumulated
         public int SingleFrameIterations { get { return (int)Math.Ceiling(TotalSampleCount / (float)SampleCount); } }
@@ -54,10 +58,11 @@
 
         public ImageBasedRayTracer()
         {
-            SqrtSampleCount = 3;
+            SqrtPreviewSampleCount = 3;
+            SampleCount = 16;
             ViewsPerFrame = 1;
             MaxIterations = SingleFrameIterations;
-            IncrementalModeEnabled = false;
+            IncrementalModeEnabled = true;
         }
 
         public void DrawSingleFrame(Scene scene, Navigation navigation)
@@ -117,10 +122,14 @@
             // jittering
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "screenSize"), new Vector2(Width, Height));
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "screenSizeInv"), new Vector2(1.0f / Width, 1.0f / Height));
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), SampleCount);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), SampleCountInv);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), (IncrementalModeEnabled ? SampleCount : PreviewSampleCount));
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), 1.0f / (IncrementalModeEnabled ? SampleCount : PreviewSampleCount));
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleIndexOffset"), IncrementalModeEnabled ? SampleCount * iteration : 0);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "totalSampleCount"), IncrementalModeEnabled ? TotalSampleCount : SampleCount);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "totalSampleCount"), IncrementalModeEnabled ? TotalSampleCount : PreviewSampleCount);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), SampleCount);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), 1.0f / SampleCount);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleIndexOffset"), SampleCount * iteration);
+            //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "totalSampleCount"), TotalSampleCount);
 
             GL.Uniform2(GL.GetUniformLocation(shaderProgram, "cameraShift"), camera.LensShift);
             GL.UniformMatrix3(GL.GetUniformLocation(shaderProgram, "sensorTransform"), 1, false, sensorTransform3x3);
@@ -207,7 +216,7 @@
             //}
 
             GenerateLensSamplesTextures(incrementalLensSampleTexture, TotalSampleCount, tileSize);
-            GenerateLensSamplesTextures(previewLensSampleTexture, SampleCount, tileSize);
+            GenerateLensSamplesTextures(previewLensSampleTexture, PreviewSampleCount, tileSize);
             //GeneratePixelSamplesTexture(pixelSampleTexture, sqrtSampleCount, SampleCount);
         }
 
@@ -227,7 +236,7 @@
             {
                 for (int x = 0; x < tileSize; x++)
                 {
-                    IEnumerable<Vector2> pixelSamples = sampler.CreateShuffledLensSamplesFloat(sqrtTotalSampleCount);
+                    IEnumerable<Vector2> pixelSamples = sampler.CreateLensSamplesFloat(sqrtTotalSampleCount, ShuffleLensSamples);
                     int z = 0;
                     foreach (Vector2 sample in pixelSamples)
                     {

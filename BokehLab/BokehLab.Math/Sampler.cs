@@ -362,14 +362,23 @@
         /// Generate a set of jittered uniform samples of a unit circle.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Vector2> CreateShuffledLensSamplesFloat(int sqrtSampleCount)
+        public IEnumerable<Vector2> CreateLensSamplesFloat(int sqrtSampleCount, bool shuffle)
         {
             var jitteredSamples = GenerateJitteredSamplesFloat(sqrtSampleCount);
             var diskSamples = jitteredSamples.Select((sample) => Sampler.ConcentricSampleDiskFloat(sample));
             var diskSamplesList = diskSamples.ToList();
+
+            //var jitteredSamples = GenerateJitteredSamples(sqrtSampleCount);
+            //var diskSamples = jitteredSamples.Select((sample) => Sampler.ConcentricSampleDisk(sample));
+            //var diskSamplesFloat = diskSamples.Select((sample) => (Vector2)sample);
+            //var diskSamplesList = diskSamplesFloat.ToList();
+
             // shuffle the samples to prevent temporal correlation
             // in incremental rendering
-            //Shuffle<Vector2>(diskSamplesList);
+            if (shuffle)
+            {
+                Shuffle<Vector2>(diskSamplesList);
+            }
             return diskSamplesList;
         }
 

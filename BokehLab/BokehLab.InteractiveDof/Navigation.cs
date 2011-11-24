@@ -31,7 +31,7 @@
 
         public bool WasViewDirtyInPrevFrame { get; set; }
 
-        static readonly float DeltaShift = 0.1f;
+        static readonly float DeltaShift = 0.5f;
         static readonly float MaxSensorTiltAngle = OpenTK.MathHelper.PiOver2;
 
         #region Camera position
