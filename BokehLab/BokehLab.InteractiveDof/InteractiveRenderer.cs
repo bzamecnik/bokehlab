@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
+    using System.Text;
     using System.Windows.Forms;
     using BokehLab.InteractiveDof.DepthPeeling;
     using BokehLab.InteractiveDof.MultiViewAccum;
@@ -41,6 +42,8 @@
         bool mouseButtonRightPressed = false;
 
         Mode renderingMode = Mode.Pinhole;
+
+        RenderingInfo renderingInfo = new RenderingInfo();
 
         MultiViewAccumulation multiViewAccum = new MultiViewAccumulation();
         DepthPeeler depthPeeler = new DepthPeeler();
@@ -242,12 +245,18 @@
             }
             navigation.WasViewDirtyInPrevFrame = false;
 
+            renderingInfo.CurrentFps = (float)(1.0 / e.Time);
+            renderingInfo.CurrentMilliseconds = (float)(1000 * e.Time);
+            renderingInfo.AccumulationMilliseconds = cumulativeMilliseconds;
+            renderingInfo.AverageFps = (averageFrameTime != 0) ? 1000f / averageFrameTime : 0;
+            renderingInfo.AverageMilliseconds = averageFrameTime;
+
             string title = string.Format("BokehLab {0:0.0}FPS/{1:0.0}ms",
-                1f / e.Time, 1000 * e.Time);
+                renderingInfo.CurrentFps, renderingInfo.CurrentMilliseconds);
             if (accumulation && (averageFrameTime != 0))
             {
                 title += string.Format(" acc {0:0.0}ms, avg {1:0.0}FPS/{2:0.0}ms",
-                    cumulativeMilliseconds, 1000f / averageFrameTime, averageFrameTime);
+                    renderingInfo.AccumulationMilliseconds, renderingInfo.AverageFps, renderingInfo.AverageMilliseconds);
             }
             this.Title = title;
 
@@ -288,6 +297,7 @@ F7 - visualization of N-buffers
     Tab - select channel mask: min/max, min, max
     O/P/U - select previous/next/first layer
 F11 - toggle full screen
+F12 - show information
 
 === Scene ===
 F8 - toggle showing more complex models (dragon, teapot, etc.)
@@ -436,6 +446,10 @@ R - reset camera",
                 bool isFullscreen = (WindowState == WindowState.Fullscreen);
                 WindowState = isFullscreen ? WindowState.Normal : WindowState.Fullscreen;
             }
+            else if (e.Key == Key.F12)
+            {
+                MessageBox.Show(renderingInfo.ToString() + navigation.ToString(), "Camera and navigation info");
+            }
 
             foreach (var module in modules)
             {
@@ -489,6 +503,33 @@ R - reset camera",
             LayerVisualizer,
             NBuffersVisualizer,
             //OrderIndependentTransparency,
+        }
+
+        class RenderingInfo
+        {
+            public float CurrentFps;
+            public float CurrentMilliseconds;
+            public float AccumulationMilliseconds;
+            public float AverageFps;
+            public float AverageMilliseconds;
+
+            public override string ToString()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("RenderingInfo {");
+                sb.AppendFormat("  Current frame FPS: {0},", CurrentFps);
+                sb.AppendLine();
+                sb.AppendFormat("  Current frame time: {0} ms,", CurrentMilliseconds);
+                sb.AppendLine();
+                sb.AppendFormat("  Accumulation time: {0} ms,", AccumulationMilliseconds);
+                sb.AppendLine();
+                sb.AppendFormat("  Average FPS: {0},", AverageFps);
+                sb.AppendLine();
+                sb.AppendFormat("  Average frame time: {0} ms", AverageMilliseconds);
+                sb.AppendLine();
+                sb.AppendLine("}");
+                return sb.ToString();
+            }
         }
     }
 }

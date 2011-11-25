@@ -226,5 +226,30 @@
 
             return Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, near, far);
         }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Camera {");
+            sb.AppendLine(Lens.ToString());
+            sb.AppendFormat("  Focal plane Z: {0},", FocalZ);
+            sb.AppendLine();
+            sb.AppendFormat("  Sensor center Z: {0},", SensorZ);
+            sb.AppendLine();
+            sb.AppendFormat("  Sensor tilt: {0},", SensorRotation);
+            sb.AppendLine();
+            sb.AppendFormat("  Sensor shift: {0},", SensorShift2);
+            sb.AppendLine();
+            sb.AppendFormat("  Sensor size: {0},", SensorSize);
+            sb.AppendLine();
+            sb.AppendFormat("  Near: {0}, Far: {1},", Near, Far);
+            sb.AppendLine();
+            sb.AppendFormat("  Field of view: {0},", FieldOfView);
+            sb.AppendLine();
+            sb.AppendFormat("  Aspect ratio: {0}", AspectRatio);
+            sb.AppendLine();
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
     }
 }

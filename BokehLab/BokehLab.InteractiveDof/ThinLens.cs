@@ -32,5 +32,19 @@
                 return point;
             }
         }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("ThinLens {");
+            sb.AppendFormat("  Focal length: {0},", FocalLength);
+            sb.AppendLine();
+            sb.AppendFormat("  Aperture number: {0},", ApertureNumber);
+            sb.AppendLine();
+            sb.AppendFormat("  Aperture radius: {0}", ApertureRadius);
+            sb.AppendLine();
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
     }
 }

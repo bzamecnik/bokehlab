@@ -392,5 +392,22 @@
                 IsViewDirty = true;
             }
         }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Navigation {");
+            sb.AppendLine(Camera.ToString());
+            sb.AppendFormat("  Position: {0},", Position);
+            sb.AppendLine();
+            sb.AppendFormat("  View: {0},", View);
+            sb.AppendLine();
+            sb.AppendFormat("  Up: {0},", Up);
+            sb.AppendLine();
+            sb.AppendFormat("  Right: {0}", Right);
+            sb.AppendLine();
+            sb.AppendLine("}");
+            return sb.ToString();
+        }
     }
 }
