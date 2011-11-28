@@ -4,6 +4,8 @@
     using OpenTK.Graphics.OpenGL;
     using BokehLab.InteractiveDof;
 
+    // TODO: fix on NVidia GeForce 9400GT and the like!!!
+
     /// <summary>
     /// FrameBuffer accumulator, a float buffer.
     /// </summary>

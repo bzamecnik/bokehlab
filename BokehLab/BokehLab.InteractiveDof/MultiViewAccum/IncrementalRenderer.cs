@@ -31,7 +31,7 @@
             // draw all views at once
             //viewsPerFrame = maxIterations;
 
-            //accumulator = new BufferAccumulator() { TotalIterations = maxIterations };
+            //accumulator = new BufferAccumulator();
             accumulator = new FboAccumulator();
         }
 

@@ -17,20 +17,20 @@
     /// </remarks>
     class Camera
     {
-        private float focalZ;
+        private float focusZ;
         /// <summary>
-        /// Depth (signed Z coordinate) of the focal plane (sensor center
+        /// Depth (signed Z coordinate) of the focus plane (sensor center
         /// image) in the camera space.
         /// </summary>
         /// <remarks>
         /// It should lie in the -z half-space.
         /// </remarks>
-        public float FocalZ
+        public float FocusZ
         {
-            get { return focalZ; }
+            get { return focusZ; }
             set
             {
-                focalZ = value;
+                focusZ = value;
                 sensorZ = Lens.Transform(new Vector3(0, 0, value)).Z;
             }
         }
@@ -48,7 +48,7 @@
             set
             {
                 sensorZ = value;
-                focalZ = Lens.Transform(new Vector3(0, 0, value)).Z;
+                focusZ = Lens.Transform(new Vector3(0, 0, value)).Z;
             }
         }
 
@@ -175,8 +175,8 @@
         public Camera()
         {
             Lens = new ThinLens() { ApertureNumber = 2.8f, FocalLength = 0.05f };
-            //FocalZ = -(20 * Lens.FocalLength);
-            FocalZ = -4f;
+            //FocusZ = -(20 * Lens.FocalLength);
+            FocusZ = -4f;
             UpdatePerspective();
         }
 
@@ -202,7 +202,7 @@
 
         public Matrix4 GetMultiViewPerspective(Vector2 pinholePos)
         {
-            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, pinholePos, FocalZ);
+            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, pinholePos, FocusZ);
         }
 
         private Matrix4 CreatePerspectiveFieldOfViewOffCenter(
@@ -211,14 +211,14 @@
             float near,
             float far,
             Vector2 lensShift,
-            float zFocal)
+            float zFocus)
         {
             float yMax = near * (float)System.Math.Tan(0.5f * fovy);
             float yMin = -yMax;
             float xMin = yMin * aspect;
             float xMax = yMax * aspect;
 
-            float mag = -((-near) / zFocal);
+            float mag = -((-near) / zFocus);
             float right = xMax + lensShift.X * mag;
             float left = xMin + lensShift.X * mag;
             float top = yMax + lensShift.Y * mag;
@@ -232,7 +232,7 @@
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("Camera {");
             sb.AppendLine(Lens.ToString());
-            sb.AppendFormat("  Focal plane Z: {0},", FocalZ);
+            sb.AppendFormat("  Focus plane Z: {0},", FocusZ);
             sb.AppendLine();
             sb.AppendFormat("  Sensor center Z: {0},", SensorZ);
             sb.AppendLine();

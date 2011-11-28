@@ -21,7 +21,6 @@
     // - make sample counts configurable at run-time
     // - create a configuration panel to switch the methods and control parameters
     // - umbra depth peeling, extended-umbra depth peeling
-    // - create some HDR parts of the scene for demonstrating nice bokeh
 
     public class InteractiveRenderer : GameWindow
     {
@@ -312,7 +311,7 @@ Shift+[WSADQE] - move more precisely
 Shift+R - reset navigation
 
 === Camera parameters ===
-Page up/Page down - increase/decrease focal plane distance (focus forth/back)
+Page up/Page down - increase/decrease focus plane distance (focus forth/back)
 Mouse right button + drag up/down - focus forth/back
 Mouse wheel up/down - focus forth/back
 Home/End - increase/decrease aperture radius

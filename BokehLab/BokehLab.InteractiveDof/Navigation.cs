@@ -247,12 +247,12 @@
             }
             if (Keyboard[Key.PageUp])
             {
-                Camera.FocalZ = Camera.FocalZ * 1.05f;
+                Camera.FocusZ = Camera.FocusZ * 1.05f;
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.PageDown])
             {
-                Camera.FocalZ = Camera.FocalZ / 1.05f;
+                Camera.FocusZ = Camera.FocusZ / 1.05f;
                 perspectiveChanged = true;
             }
 
@@ -379,7 +379,7 @@
         {
             if (delta.Y != 0)
             {
-                Camera.FocalZ += delta.Y * Camera.FocalZ;
+                Camera.FocusZ += delta.Y * Camera.FocusZ;
                 IsViewDirty = true;
             }
         }
@@ -388,7 +388,7 @@
         {
             if (delta != 0)
             {
-                Camera.FocalZ *= (float)Math.Pow(1.1, delta);
+                Camera.FocusZ *= (float)Math.Pow(1.1, delta);
                 IsViewDirty = true;
             }
         }
