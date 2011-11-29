@@ -4,24 +4,18 @@
     using OpenTK.Graphics.OpenGL;
     using BokehLab.InteractiveDof;
 
-    // TODO: fix on NVidia GeForce 9400GT and the like!!!
-
     /// <summary>
     /// FrameBuffer accumulator, a float buffer.
     /// </summary>
     /// <remarks>
     /// It seems that float32 is needed for high sample counts, eg. 1024.
-    /// However, it is considerably slower tahn float16.
+    /// Float32 is only a bit slower than float16.
     /// </remarks>
     class FboAccumulator : AbstractRendererModule, IAccumulator
     {
         static readonly string VertexShaderPath = "MultiViewAccum/AccumVS.glsl";
         static readonly string FragmentShaderPath = "MultiViewAccum/AccumFS.glsl";
 
-        // indices:
-        // 0 - current frame
-        // 1, 2 - average, updated average (these two will be swapped together)
-        uint[] textures = new uint[3];
         uint currentFrameTexture;
         uint currentFrameDepthTexture;
         uint averageTexture;
@@ -39,6 +33,9 @@
         public void PreAccumulate()
         {
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
+            GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.DepthAttachmentExt, TextureTarget.Texture2D,
+                currentFrameDepthTexture, 0);
         }
 
         public void PostAccumulate()
@@ -52,20 +49,18 @@
             GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
                 FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D,
                 currentFrameTexture, 0);
-            GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
-                FramebufferAttachment.DepthAttachmentExt, TextureTarget.Texture2D,
-                currentFrameDepthTexture, 0);
+
+            //LayerHelper.CheckFbo();
         }
 
         public void PostDraw()
         {
-            //DEBUG
-            //GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
-
             // target texture
             GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
                 FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D,
                 updatedAverageTexture, 0);
+
+            //LayerHelper.CheckFbo();
 
             GL.ClearColor(0, 0, 0, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -91,12 +86,12 @@
 
             GL.UseProgram(0);
 
-            //GL.ActiveTexture(TextureUnit.Texture1);
+            GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
-            // swap the two average textures
+            //swap the two average textures
             uint tmp = updatedAverageTexture;
             updatedAverageTexture = averageTexture;
             averageTexture = tmp;
@@ -109,6 +104,7 @@
             GL.ClearColor(0, 0, 0, 1);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, averageTexture);
 
             LayerHelper.DrawQuad();
@@ -118,6 +114,29 @@
         public void Clear()
         {
             iteration = 0;
+
+            // zero out both average textures before accumulation
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fboHandle);
+            GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.DepthAttachmentExt, TextureTarget.Texture2D,
+                currentFrameDepthTexture, 0);
+            GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D,
+                averageTexture, 0);
+
+            LayerHelper.CheckFbo();
+
+            GL.ClearColor(0, 0, 0, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            GL.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
+                FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D,
+                updatedAverageTexture, 0);
+
+            GL.ClearColor(0, 0, 0, 1);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            LayerHelper.CheckFbo();
         }
 
         public override void Initialize(int width, int height)
@@ -133,13 +152,11 @@
 
         protected override void Enable()
         {
-            // Create color texture
-            GL.GenTextures(3, textures);
-            currentFrameTexture = textures[0];
-            averageTexture = textures[1];
-            updatedAverageTexture = textures[2];
+            currentFrameTexture = (uint)GL.GenTexture();
+            averageTexture = (uint)GL.GenTexture();
+            updatedAverageTexture = (uint)GL.GenTexture();
 
-            foreach (var texId in textures)
+            foreach (var texId in new[] { currentFrameTexture, averageTexture, updatedAverageTexture })
             {
                 GL.BindTexture(TextureTarget.Texture2D, texId);
                 GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb32f, Width, Height, 0, PixelFormat.Rgb, PixelType.Float, IntPtr.Zero);
@@ -151,8 +168,7 @@
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
             }
 
-
-            GL.GenTextures(1, out currentFrameDepthTexture);
+            currentFrameDepthTexture = (uint)GL.GenTexture();
 
             GL.BindTexture(TextureTarget.Texture2D, currentFrameDepthTexture);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent32f, Width, Height, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
@@ -175,8 +191,14 @@
             if (fboHandle != 0)
                 GL.Ext.DeleteFramebuffers(1, ref fboHandle);
 
-            if (textures != null)
-                GL.DeleteTextures(textures.Length, textures);
+            if (currentFrameTexture != 0)
+                GL.DeleteTexture(currentFrameTexture);
+            if (averageTexture != 0)
+                GL.DeleteTexture(averageTexture);
+            if (updatedAverageTexture != 0)
+                GL.DeleteTexture(updatedAverageTexture);
+            if (currentFrameDepthTexture != 0)
+                GL.DeleteTexture(currentFrameDepthTexture);
         }
 
         public override void Dispose()

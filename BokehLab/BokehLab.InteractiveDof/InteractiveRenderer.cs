@@ -289,8 +289,10 @@ Bohumír Zamečník, MFF UK, 2010-2011
 F1 - show this help dialog
 F2 - plain rasterization (pinhole view)
 F3 - (incremental) multi-view accumulation
-F4 - image-based ray tracing
     Tab - toggle incremental rendering
+    [/] - decrease/increase the total number of samples
+F4 - image-based ray tracing
+    [/] - decrease/increase the total number of samples
 F5 - incremental image-based ray tracing
 F6 - visualization of layered depth images
     Tab - select layer type: color/depth/packed-depth

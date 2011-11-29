@@ -36,5 +36,14 @@
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PopMatrix();
         }
+
+        public static void CheckFbo()
+        {
+            var result = GL.Ext.CheckFramebufferStatus(FramebufferTarget.FramebufferExt);
+            if (result != FramebufferErrorCode.FramebufferCompleteExt)
+            {
+                throw new ApplicationException(string.Format("Bad FBO: {0}", result));
+            }
+        }
     }
 }
