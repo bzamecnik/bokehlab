@@ -31,24 +31,7 @@
         int SqrtPreviewSampleCount { get; set; }
         int PreviewSampleCount { get { return SqrtPreviewSampleCount * SqrtPreviewSampleCount; } }
 
-        /// <summary>
-        /// Number of samples per frame (a single rendering cycle).
-        /// </summary>
-        int SampleCount { get; set; }
-
         int lensSampleTileSize = 32;
-
-        int SqrtTotalSampleCount = 32;
-
-        bool ShuffleLensSamples = true;
-
-        /// <summary>
-        /// Number of sample per the whole incremental rendering.
-        /// </summary>
-        int TotalSampleCount { get { return SqrtTotalSampleCount * SqrtTotalSampleCount; } }
-
-        // total number of rendering cycles to be incrementally accumulated
-        public int SingleFrameIterations { get { return (int)Math.Ceiling(TotalSampleCount / (float)SampleCount); } }
 
         Matrix4 sensorTransform;
         float[] sensorTransform3x3;
@@ -59,9 +42,8 @@
         public ImageBasedRayTracer()
         {
             SqrtPreviewSampleCount = 3;
-            SampleCount = 16;
             ViewsPerFrame = 1;
-            MaxIterations = SingleFrameIterations;
+            //MaxIterations = SingleFrameIterations;
             IncrementalModeEnabled = true;
         }
 
@@ -125,7 +107,7 @@
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), (IncrementalModeEnabled ? SampleCount : PreviewSampleCount));
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), 1.0f / (IncrementalModeEnabled ? SampleCount : PreviewSampleCount));
             GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleIndexOffset"), IncrementalModeEnabled ? SampleCount * iteration : 0);
-            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "totalSampleCount"), IncrementalModeEnabled ? TotalSampleCount : PreviewSampleCount);
+            GL.Uniform1(GL.GetUniformLocation(shaderProgram, "totalSampleCount"), IncrementalModeEnabled ? MaxTotalSampleCount : PreviewSampleCount);
             //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCount"), SampleCount);
             //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleCountInv"), 1.0f / SampleCount);
             //GL.Uniform1(GL.GetUniformLocation(shaderProgram, "sampleIndexOffset"), SampleCount * iteration);
@@ -215,7 +197,7 @@
             //    pixelSampleTexture = GL.GenTexture();
             //}
 
-            GenerateLensSamplesTextures(incrementalLensSampleTexture, TotalSampleCount, tileSize);
+            GenerateLensSamplesTextures(incrementalLensSampleTexture, MaxTotalSampleCount, tileSize);
             GenerateLensSamplesTextures(previewLensSampleTexture, PreviewSampleCount, tileSize);
             //GeneratePixelSamplesTexture(pixelSampleTexture, sqrtSampleCount, SampleCount);
         }
@@ -226,7 +208,7 @@
             int bands = 2;
             int textureSize = bands * totalSampleCount * tileSize * tileSize;
 
-            //IEnumerable<Vector2d> samples = GenerateLensSamples(tileSize, (int)Math.Sqrt(TotalSampleCount)).GetEnumerator();
+            //IEnumerable<Vector2d> samples = GenerateLensSamples(tileSize, (int)Math.Sqrt(MaxTotalSampleCount)).GetEnumerator();
 
             int sqrtTotalSampleCount = (int)Math.Sqrt(totalSampleCount);
             Vector2[, ,] samples = new Vector2[tileSize, tileSize, totalSampleCount];
@@ -293,9 +275,9 @@
         //    Sampler sampler = new Sampler();
         //    for (int i = 0; i < pixelCount; i++)
         //    {
-        //        jitteredSamplers[i] = sampler.GenerateJitteredSamples(TotalSampleCount).GetEnumerator();
+        //        jitteredSamplers[i] = sampler.GenerateJitteredSamples(MaxTotalSampleCount).GetEnumerator();
         //    }
-        //    for (int sample = 0; sample < TotalSampleCount; sample++)
+        //    for (int sample = 0; sample < MaxTotalSampleCount; sample++)
         //    {
         //        for (int i = 0; i < pixelCount; i++)
         //        {

@@ -28,8 +28,6 @@
     /// </remarks>
     class MultiViewAccumulation : IncrementalRenderer
     {
-        static readonly int sqrtSampleCount = 32;
-
         Vector2[] unitDiskSamples;
         Sampler sampler = new Sampler();
 
@@ -46,11 +44,12 @@
 
         public MultiViewAccumulation()
         {
-            ViewsPerFrame = 16;
+            ViewsPerFrame = SampleCount;
+            SampleCount = 1;
+            MaxIterations = TotalSampleCount;
             // TODO: support creating samples for a cropped aperture (hexagon etc.)
-            unitDiskSamples = sampler.CreateLensSamplesFloat(sqrtSampleCount, true).ToArray();
+            unitDiskSamples = sampler.CreateLensSamplesFloat(SqrtMaxTotalSampleCount, true).ToArray();
             Accumulate = true;
-            MaxIterations = unitDiskSamples.Length;
         }
 
         protected override void DrawSingleFrame(int iteration, Scene scene, Navigation navigation)

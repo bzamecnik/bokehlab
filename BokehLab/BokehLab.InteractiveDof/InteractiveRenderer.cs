@@ -95,6 +95,8 @@
             layerVisualizer.DepthPeeler = depthPeeler;
             nBuffersVisualizer.NBuffers = nBuffers;
             ibrt.NBuffers = nBuffers;
+            ibrt.Navigation = navigation;
+            multiViewAccum.Navigation = navigation;
 
             GL.Enable(EnableCap.DepthTest);
             GL.ClearDepth(1.0f);
@@ -216,14 +218,15 @@
                     if (ibrt.IncrementalModeEnabled)
                     {
                         ibrt.AccumulateAndDraw(scene, navigation);
+                        accumulation = true;
                     }
                     else
                     {
                         ibrt.DrawSingleFrame(scene, navigation);
+                        accumulation = false;
                     }
                     cumulativeMilliseconds = ibrt.CumulativeMilliseconds;
                     averageFrameTime = ibrt.AverageFrameTime;
-                    accumulation = true;
                     break;
                 case Mode.LayerVisualizer:
                     depthPeeler.PeelLayers(scene);
@@ -447,7 +450,18 @@ R - reset camera",
             }
             else if (e.Key == Key.F12)
             {
-                MessageBox.Show(renderingInfo.ToString() + navigation.ToString(), "Camera and navigation info");
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine(renderingInfo.ToString());
+                sb.AppendLine(navigation.ToString());
+                if (ibrt.Enabled)
+                {
+                    sb.AppendLine(ibrt.ToString());
+                }
+                else if (multiViewAccum.Enabled)
+                {
+                    sb.AppendLine(multiViewAccum.ToString());
+                }
+                MessageBox.Show(sb.ToString(), "Camera and navigation info");
             }
 
             foreach (var module in modules)
