@@ -502,7 +502,10 @@ void main() {
     //vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorZ);
 	//vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, sensorShift.z);
 	vec3 pixelPos = vec3((0.5 - texCoord) * sensorSize, 0);
-	pixelPos = sensorShift + sensorTransform * pixelPos;
+	
+	//pixelPos = sensorShift + sensorTransform * pixelPos;
+	// the input layers are already shifted
+	pixelPos = vec3(0, 0, sensorShift.z) + sensorTransform * pixelPos;
 
 	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
 	gl_FragColor = vec4(estimateRadianceJittered(pixelPos), 1.0);

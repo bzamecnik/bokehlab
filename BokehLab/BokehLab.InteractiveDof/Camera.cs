@@ -31,7 +31,7 @@
             set
             {
                 focusZ = value;
-                sensorZ = Lens.Transform(new Vector3(0, 0, value)).Z;
+                sensorZ = Math.Max(Lens.Transform(new Vector3(0, 0, value)).Z, float.Epsilon);
             }
         }
 
@@ -192,7 +192,8 @@
 
         private Matrix4 GetPerspective()
         {
-            return Matrix4.CreatePerspectiveFieldOfView(FieldOfView, AspectRatio, near, far);
+            //return Matrix4.CreatePerspectiveFieldOfView(FieldOfView, AspectRatio, near, far);
+            return GetSensorShiftPerspective();
         }
 
         public Vector2 GetPinholePos(Vector2 lensSample)
@@ -202,7 +203,18 @@
 
         public Matrix4 GetMultiViewPerspective(Vector2 pinholePos)
         {
-            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, pinholePos, FocusZ);
+            //float mag = near / FocusZ; // == -((-near) / FocusZ)
+            //Vector2 nearShift = mag * pinholePos;
+
+            Vector2 nearShift = near * (pinholePos / FocusZ + SensorShift2 / -SensorZ);
+            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, nearShift, FocusZ);
+        }
+
+        public Matrix4 GetSensorShiftPerspective()
+        {
+            float mag = near / -SensorZ; // == -((-near) / -SenzorZ)
+            Vector2 nearShift = mag * SensorShift2;
+            return CreatePerspectiveFieldOfViewOffCenter(FieldOfView, AspectRatio, near, far, nearShift, FocusZ);
         }
 
         private Matrix4 CreatePerspectiveFieldOfViewOffCenter(
@@ -210,7 +222,7 @@
             float aspect,
             float near,
             float far,
-            Vector2 lensShift,
+            Vector2 nearShift,
             float zFocus)
         {
             float yMax = near * (float)System.Math.Tan(0.5f * fovy);
@@ -218,11 +230,11 @@
             float xMin = yMin * aspect;
             float xMax = yMax * aspect;
 
-            float mag = -((-near) / zFocus);
-            float right = xMax + lensShift.X * mag;
-            float left = xMin + lensShift.X * mag;
-            float top = yMax + lensShift.Y * mag;
-            float bottom = yMin + lensShift.Y * mag;
+
+            float right = xMax + nearShift.X;
+            float left = xMin + nearShift.X;
+            float top = yMax + nearShift.Y;
+            float bottom = yMin + nearShift.Y;
 
             return Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, near, far);
         }
