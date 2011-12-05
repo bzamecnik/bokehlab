@@ -11,7 +11,7 @@ namespace BokehLab.Spreading.GUI
 
     public partial class SpreadingForm : Form
     {
-        private static readonly int MAX_GENERATED_PSF_RADIUS = 50;
+        private static readonly int MAX_GENERATED_PSF_RADIUS = 100;
 
         protected Bitmap inputLdrImage = null;
         protected Bitmap outputLdrImage = null;
@@ -233,7 +233,8 @@ namespace BokehLab.Spreading.GUI
         private AbstractSpreadingFilter GetSpreadingFilter()
         {
             string filterName = filterTypeComboBox.SelectedItem.ToString();
-            if (filterName == "rectangle") {
+            if (filterName == "rectangle")
+            {
                 return RectangleFilter;
             }
             else if (filterName == "perimeter")

@@ -247,12 +247,12 @@
             }
             if (Keyboard[Key.PageUp])
             {
-                Camera.FocusZ = Camera.FocusZ * 1.05f;
+                Camera.FocusZ = Math.Min(Camera.FocusZ * 1.05f, -float.Epsilon);
                 perspectiveChanged = true;
             }
             else if (Keyboard[Key.PageDown])
             {
-                Camera.FocusZ = Camera.FocusZ / 1.05f;
+                Camera.FocusZ = Math.Min(Camera.FocusZ / 1.05f, -float.Epsilon);
                 perspectiveChanged = true;
             }
 

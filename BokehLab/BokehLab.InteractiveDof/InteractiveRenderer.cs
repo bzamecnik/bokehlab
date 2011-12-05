@@ -454,6 +454,8 @@ R - reset camera",
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine(renderingInfo.ToString());
+                sb.AppendLine(string.Format("Image resolution: {0}x{1}", Width, Height));
+                sb.AppendLine();
                 sb.AppendLine(navigation.ToString());
                 if (ibrt.Enabled)
                 {

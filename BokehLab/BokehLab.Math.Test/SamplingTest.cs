@@ -11,7 +11,7 @@
 
     class SamplingTest
     {
-        private static readonly int SAMPLE_COUNT = 64 * 1024;
+        private static readonly int SAMPLE_COUNT = 4 * 1024;
 
         [Fact]
         public void UniformSample()
@@ -69,7 +69,7 @@
             string samplerDescription,
             string mappingDescription)
         {
-            int width = 400;
+            int width = 256;
             Bitmap image = new Bitmap(width, width);
 
             using (Graphics g = Graphics.FromImage(image))
