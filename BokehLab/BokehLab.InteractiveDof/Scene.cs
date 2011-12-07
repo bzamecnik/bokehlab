@@ -263,7 +263,7 @@
 
         private void LoadResources()
         {
-            ResourcePath = @"..\..\data";
+            ResourcePath = @"data";
             starsTexture = GenerateHdrStarsTex(512, 512, (int)(512 * 512 * 0.002), 1e2f, false, 1);
             colorStarsTexture = GenerateHdrStarsTex(512, 512, (int)(512 * 512 * 0.002), 1e2f, true, 1);
             groundTexture = LoadTexture(Path.Combine(ResourcePath, "dirt_01.jpg"));

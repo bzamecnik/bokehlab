@@ -3,7 +3,7 @@
 #extension GL_EXT_gpu_shader4 : enable
 
 // TODO:
-// - N-buffer acceleration
+// - better N-buffer acceleration
 // - use more than 4 layers
 
 // sensor size in camera space (width, height)
@@ -505,6 +505,7 @@ void main() {
 	
 	//pixelPos = sensorShift + sensorTransform * pixelPos;
 	// the input layers are already shifted
+	// this is probably not entirely physical...
 	pixelPos = vec3(0, 0, sensorShift.z) + sensorTransform * pixelPos;
 
 	//gl_FragColor = vec4(estimateRadianceNonJittered(pixelPos), 1.0);
