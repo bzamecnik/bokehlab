@@ -35,3 +35,5 @@ Ogre.log
 
 *.ipch
 *.bin
+BokehLab/BokehLab.InteractiveDof/data/*.jpg
+BokehLab/BokehLab.InteractiveDof/data/*.gif
