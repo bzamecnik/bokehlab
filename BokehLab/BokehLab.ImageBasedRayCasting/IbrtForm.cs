@@ -361,7 +361,7 @@
         {
             int sampleCount = (int)lrtfSampleCountNumeric.Value;
             precomputedComplexLens = new PrecomputedComplexLens(lens,
-                @"..\..\..\lrtf_" + name + @"_{0}.bin", sampleCount);
+                @"data\lrtf_" + name + @"_{0}.bin", sampleCount);
             rayTracer.Camera.Lens = precomputedComplexLens;
         }
 

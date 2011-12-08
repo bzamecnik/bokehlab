@@ -45,7 +45,7 @@
 
             Console.WriteLine("Size: {0}x{0}x{0}, elapsed time: {1} ms", sampleCount, stopwatch.ElapsedMilliseconds);
 
-            string filename = string.Format(@"..\..\..\lrtf_{0}_{1}.bin", lensName, sampleCount);
+            string filename = string.Format(@"data\lrtf_{0}_{1}.bin", lensName, sampleCount);
 
             stopwatch.Reset();
             stopwatch.Start();

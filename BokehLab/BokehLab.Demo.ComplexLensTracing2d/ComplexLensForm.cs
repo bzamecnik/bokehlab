@@ -53,7 +53,7 @@
         {
             lrtf = new LensRayTransferFunction(lens);
             // load precomputed LRTF from a file or compute it and save to file
-            string filename = string.Format(@"..\..\..\lrtf_double_gauss_{0}.bin", sampleCount);
+            string filename = string.Format(@"data\lrtf_double_gauss_{0}.bin", sampleCount);
             lrtfTable = lrtf.SampleLrtf3DCached(sampleCount, filename);
         }
 

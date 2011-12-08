@@ -209,7 +209,7 @@
             LensRayTransferFunction lrtf = new LensRayTransferFunction(lens);
 
             int sampleCount = 128;
-            string filename = string.Format(@"..\..\..\lrtf_double_gauss_{0}.bin", sampleCount);
+            string filename = string.Format(@"data\lrtf_double_gauss_{0}.bin", sampleCount);
             var table = lrtf.SampleLrtf3DCached(sampleCount, filename);
 
             Random random = new Random();
@@ -233,7 +233,7 @@
 
             int sampleCount = 128;
             Console.WriteLine("LRTF table size: {0}x{0}x{0}", sampleCount);
-            string filename = string.Format(@"..\..\..\lrtf_double_gauss_{0}.bin", sampleCount);
+            string filename = string.Format(@"data\lrtf_double_gauss_{0}.bin", sampleCount);
             var table = lrtf.SampleLrtf3DCached(sampleCount, filename);
 
             int valueCount = 1000000;

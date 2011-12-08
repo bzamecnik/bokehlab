@@ -516,6 +516,7 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.splitContainer2.Enabled = false;
             this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer2.Location = new System.Drawing.Point(3, 3);
             this.splitContainer2.Name = "splitContainer2";
@@ -536,6 +537,7 @@
             this.splitContainer2.Size = new System.Drawing.Size(766, 486);
             this.splitContainer2.SplitterDistance = 200;
             this.splitContainer2.TabIndex = 1;
+            this.splitContainer2.Visible = false;
             // 
             // lightSourceLayerNumeric
             // 
@@ -604,7 +606,7 @@
             this.openFileDialog.Filter = "PNG files|*.png|All files|*.*";
             this.openFileDialog.Multiselect = true;
             // 
-            // HeighFieldForm
+            // HeightFieldForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -612,7 +614,7 @@
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "HeighFieldForm";
+            this.Name = "HeightFieldForm";
             this.Text = "BokehLab - ray height-field intersection";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
