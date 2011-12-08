@@ -1,0 +1,69 @@
+thresholding a 3D float cube 512^3 (= 128 Mpx), (Release, Run without debugger):
+- using rectangular arrays ([,,])
+
+inline: 2311 ms
+function: 4617 ms
+lambda: 19527 ms
+compare (inline == function): True
+compare (inline == lambda): True
+
+inline: 2066 ms
+function: 2193 ms
+lambda: 2343 ms
+
+inline: 2080 ms
+function: 2201 ms
+lambda: 2319 ms
+
+
+thresholding a 2D image 8096^2 = (64 MPx) 
+
+inline: 892 ms
+function: 945 ms
+lambda: 1024 ms
+
+(16*1024)^2 = 256 MPx
+
+inline: 3607 ms
+function: 14137 ms
+lambda: 5172 ms
+
+inline: 3558 ms
+function: 3913 ms
+lambda: 4180 ms
+
+inline: 3490 ms
+function: 3740 ms
+lambda: 4139 ms
+
+Conclusion:
+- inline computation is faster than function calling which is faster than
+  lambda function calling
+- the differences are very small
+- lambda functions are about 10-20% slower than inline computation
+- thus lambda function may be used for making the code more generic and
+  maintainable without any strong performance penalty
+
+Future work:
+- compare ordinary lambda functions with compiled lambda functions
+
+
+DelegateBenchmark:
+
+- delegate
+
+Interface: 3465
+Delegate: 3412
+
+Interface: 3488
+Delegate: 3250
+
+Interface: 3435
+Delegate: 3199
+
+- lambda:
+Interface: 3444
+Delegate: 4172
+
+Interface: 3409
+Delegate: 4113

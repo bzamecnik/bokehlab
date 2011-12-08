@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <ItemType>PackagingProject</ItemType>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2D85B5B2-ACC3-4472-9254-EDFC1AD25359}</ProjectGuid>
+    <Packages>
+      <Packages>
+        <Package name="Mono Makefile Sources">
+          <Builder targetFile="Meshomatic-.tar.gz" format="MonoDevelop.Projects.FileFormat" ctype="SourcesZipPackageBuilder">
+            <ChildEntries>
+              <SolutionItemReference path="Meshomatic\Meshomatic.csproj" />
+            </ChildEntries>
+            <RootEntry path="Meshomatic.sln" id=":root:" />
+          </Builder>
+        </Package>
+        <Package name="Tarball">
+          <Builder TargetDirectory="Meshomatic" DefaultConfiguration="Debug" ctype="TarballDeployTarget">
+            <ChildEntries>
+              <SolutionItemReference path="Meshomatic\Meshomatic.csproj" />
+            </ChildEntries>
+            <RootEntry path="Meshomatic.sln" id=":root:" />
+          </Builder>
+        </Package>
+      </Packages>
+    </Packages>
+  </PropertyGroup>
+</Project>
