@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="cs_CZ">
+  <head>
+    <meta charset="utf-8">
+    <title>On Rendering with Complex Camera Models | CESCG 2012</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="On Rendering with Complex Camera Models">
+    <meta name="author" content="Bohumír Zámečník">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 1em;
+        padding-bottom: 1em;
+      }
+    </style>
+    <link rel="stylesheet" type="text/css" href="css/jquery.lightbox-0.5.css" media="screen" />
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+    
+      <div style="text-align: center">
+        <h1>On Rendering with Complex Camera Models</h1>
+      
+        <div class="row" style="margin: 1em 0">
+          <div class="span4 offset4">
+            <p>
+              <a href="http://zamecnik.me">Bohumír Zámečník</a>
+              <address>
+                Faculty of Mathematics and Physics<br>
+                Charles University<br>
+                Prague / Czech Republic
+              </address>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hero-unit">
+        <h2>Abstract</h2>
+        <p>
+One of the areas of realistic image synthesis is in modeling cameras. The goal 
+is to provide a visual cue with depth of field and to achieve a photographic 
+look with bokeh (out-of-focus highlights), tilt-shift and optical aberrations 
+of real-world lenses. We provide a comparison of existing methods and 
+fundamental approaches for depth-of-field rendering, including the recent 
+methods, such as the image-based ray tracing. We propose a novel 
+representation of ray transfer within complex lenses suitable for optimizing 
+the ray generation. The open problems in this research area are presented 
+along with sketches of possible solutions.
+        </p>
+        
+        <div class="row">
+          <div class="span6">
+            <p><strong>Published at the <a href="http://www.cescg.org/CESCG-2012/">CESCG 2012</a> conference in April 2012.</strong></p>
+          </div>
+          <div class="span3 offset7">
+          <a href="http://www.cescg.org/CESCG-2012/papers/Zamecnik-On_Rendering_with_Complex_Camera_Models.pdf" class="btn btn-primary btn-large">
+            <i class="icon-file icon-white"></i> View the article in PDF
+          </a>
+          </div>
+        </div>
+      </div>
+      
+      <h2>Images</h2>
+      
+      <div class="row">
+        <div class="span4">
+          <h3>Image-based ray tracing</h3>
+
+<p>
+In image-based ray tracing (IBRT) the scene is for each frame first 
+rendered via GPU rasterization to a set of image layers. Those are then 
+treated as a heightfield. This simplified sample-based scene representation is 
+then used in the ray-tracing phase which can use an arbitrary lens model. 
+Heightfield intersection has the cost dependent on the image resolution, not 
+the scene complexity. Ray tracing with high sample count then can be fast even
+for large scenes.
+</p>
+          
+          <p>The main parts of the rendering process (including the ray tracing)
+          were implemented in GLSL shaders within OpenGL and the plumbing in C#.</p>
+          
+          <ul class="thumbnails">
+            <li class="span4">
+              <a href="img/ibrt_thin-lens_tilt-shift_1024-samples.png" class="thumbnail lightbox">
+                <img src="img/ibrt_thin-lens_tilt-shift_1024-samples.png">
+              </a>
+              <p>IBRT with the thin-lens model and tilt-shift sensor at 1024 samples/px
+              rendering as scene with about 800k triangles.</p>
+            </li>
+              <li class="span4">
+              <a href="img/ibrt_thin-lens_partial-occlusion_1024-samples.png" class="thumbnail lightbox">
+                <img src="img/ibrt_thin-lens_partial-occlusion_1024-samples.png">
+              </a>
+              <p>Correct handling of partial occlusion of bokeh and out-of-focus foreground.
+              IBRT with the thin-lens at 1024 samples/px.</p>
+            </li>
+          </ul>
+        </div>
+        <div class="span4">
+          <h3>Sequential lens ray tracing</h3>
+<p>
+Sequential ray tracing of the full complex lens systems were implemented within
+a simple CPU ray tracer in plain C#. Complex lenses can produce the effects
+like optical aberrations intrinsicly without faking.
+</p>
+          
+          <ul class="thumbnails">
+            <li class="span4">
+              <a href="img/srt_biconvex.jpg" class="thumbnail lightbox">
+                <img src="img/srt_biconvex.jpg">
+              </a>
+              <p>
+              Sequential ray tracing of a simple planar image-based scene with
+              a biconvex lens. The various optical aberrations are clearly
+              present - curvature of field, spherical aberration and many others.
+              </p>
+            </li>
+            <li class="span4">
+              <a href="img/srt_petzval_256-samples.png" class="thumbnail lightbox">
+                <img src="img/srt_petzval_256-samples.png">
+              </a>
+              <p>
+              Sequential ray tracing of a simple planar image-based scene
+              out-of-focus with a
+              <a href="http://en.wikipedia.org/wiki/Petzval_lens">Petzval lens</a>.
+              Vignetting affects the bokeh shape in lateral areas (producing the
+              so called swirly bokeh).
+              </p>
+            </li>
+          </ul>
+        </div>
+        <div class="span4">
+          <h3>Multi-view accumulation</h3>
+          <p>Accumulation of many rasterized perspective projection to 
+          approximate the thin-lens model. Implemented in C# and OpenGL.</p>
+          <a href="img/mva_thin-lens.png" class="thumbnail lightbox">
+            <img src="img/mva_thin-lens.png">
+          </a>
+          <p>Around 1024 samples/px.</p>
+          
+          <h3>IBRT vs. MVA</h3>
+          <p>A comparison of scaling of image-based ray tracing vs. multi-view
+          accumulation. We can see that at higher sample/px rates the IBRT
+          scales predominantly with image resolution, not the scene size, in
+          contrast to MVA.</p>
+          <a href="img/ibrt-vs-mva-comparison.png" class="thumbnail lightbox">
+            <img src="img/ibrt-vs-mva-comparison.png">
+          </a>
+          <p>Measured on NVIDIA 9400 GT with 450x300 px, 1024 samples/px, scene
+          size cca 1000 to 800 000 tris, incremental FBO accumulation. The scene
+          complexity is the number of large model instance sets (dragon and
+          teapots).</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span4">
+          <h3>Spreading filters</h3>
+          <p>A comparison of spreading filter performance. Implemented in C#.</p>
+          <a href="img/spreading-filters-comparison.jpg" class="thumbnail lightbox">
+            <img src="img/spreading-filters-comparison.jpg">
+          </a>
+          <p>Perimeter spreading, rectangle spreading and a hybrid of both
+          driven by a local contrast criterion.
+          </p>
+        </div>
+        <div class="span4">
+          <h3>Lens tracing</h3>
+          <p>A result of an interactive visualization of the sequential ray
+          tracing within a complex lens. Shown is the
+          <a href="http://en.wikipedia.org/wiki/Double-Gauss_lens">Double
+          Gauss lens.</a></p>
+          <p>Surfaces of the lens elements are blue, the diaphragm is pink, Z and Y
+          axes are black, the incident ray is green, its intersection with the
+          back surface is the red square and the refracted rays are dark red.
+          The object half-space is towards left, while the half-image space is
+          on the right side.</p>
+          <a href="img/double-gauss_lens.png" class="thumbnail lightbox">
+            <img src="img/double-gauss_lens.png">
+          </a>
+        </div>
+        <div class="span4">
+          <h3>Lens ray transfer function</h3>
+          <p>An example of the sampled lens ray transfer function (LRTF) of a
+          thin lens with aperture radius 2.0 and focal length 2.5 units.
+          The table is three-dimensional since the 4D LRTF is symmetric in the
+          direction phi parameter. The table is sampled with resolution 64^3
+          samples and displayed without interpolation. The plot axes are
+          direction sx and sy, while the position r is fixed at value 1.0. Each
+          of the four plots show a single output vector component. The false
+          colors represent values scaled to the [0.0; 1.0] interval. The model
+          was implemented in the Mathematica software.</p>
+          <div class="row">
+            <div class="span2">
+              <a href="img/lrtf_thin-lens_64x64x64_z-64_01_position-r.png" class="thumbnail lightbox">
+                <img src="img/lrtf_thin-lens_64x64x64_z-64_01_position-r.png">
+              </a>
+              <p>Position r</p>
+            </div>
+            <div class="span2">
+              <a href="img/lrtf_thin-lens_64x64x64_z-64_02_position-phi.png" class="thumbnail lightbox">
+                <img src="img/lrtf_thin-lens_64x64x64_z-64_02_position-phi.png">
+              </a>
+              <p>Position phi</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="span2">
+              <a href="img/lrtf_thin-lens_64x64x64_z-64_03_direction-sx.png" class="thumbnail lightbox">
+                <img src="img/lrtf_thin-lens_64x64x64_z-64_03_direction-sx.png">
+              </a>
+              <p>Direction sx</p>
+            </div>
+            <div class="span2">
+              <a href="img/lrtf_thin-lens_64x64x64_z-64_04_direction-sy.png" class="thumbnail lightbox">
+                <img src="img/lrtf_thin-lens_64x64x64_z-64_04_direction-sy.png">
+              </a>
+              <p>Direction sy</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2>Project</h2>
+
+      <p>
+This paper summarizes the results of the master thesis Bohumír Zámečník: <a href="https://www.dropbox.com/sh/6rkoubtpoc1fsje/bZJdaelwjz/mff-uk/interactive-preview-renderer-for-complex-camera-models_zamecnik_thesis_2011.pdf">Interactive Preview
+Renderer for Complex Camera Models</a>, 2011 and adds some new parts. The results are summarized in <a href="https://www.dropbox.com/sh/6rkoubtpoc1fsje/7UGduv0iBO/mff-uk/bokehlab_defence_slides_2011.pdf">slides</a>.
+Also the software in which the images were rendered is available on GitHub.
+      </p>
+
+      <a href="https://github.com/bzamecnik/bokehlab" class="btn btn-primary btn-large">
+        <i class="icon-cog icon-white"></i> Visit the project site
+      </a>
+
+      <hr>
+  
+      <footer>
+      &copy; <a href="http://zamecnik.me/">Bohumír Zámečník</a> 2012. Conference: <a href="http://www.cescg.org/CESCG-2012/">CESCG 2012</a>.
+      </footer>
+
+    </div>
+    
+    <div class="modal hide" id="pdfNotYetAvailableModal">
+      <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3>The full article is not available yet.</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please wait for the article to be published in the
+        <a href="http://www.cescg.org/CESCG-2012/">CESCG 2012</a> conference.</p>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+      </div>
+    </div>
+
+<script src="js/jquery-1.7.2.min.js"></script>
+<script src="js/bootstrap-modal.js"></script>
+<script type="text/javascript" src="js/jquery.lightbox-0.5.pack.js"></script>
+<script type="text/javascript">
+$(function() {
+	$('a.lightbox').lightBox();
+});
+</script>
+
+  </body>
+</html>
